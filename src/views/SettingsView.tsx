@@ -1,3 +1,4 @@
+import type { WriteResult } from '@/lib/safeStorage'
 import { useState, useSyncExternalStore, type ReactNode } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
 import { Footer } from '@/components/Footer'
@@ -76,9 +77,17 @@ export function SettingsView({
   }
 
   // — خطتي: إعادة توليد —
-  const regenerateFromProfile = () => {
+  /**
+   * [COMMISSIONING] يعيد **نتيجة الكتابة** لا `void`.
+   *
+   * كانت الشاشة تعلن النجاح بلا فحص: `applyCustomization` تُرجِع `WriteResult`
+   * منذ كُتبت، والمستدعي يرميها ثم يعرض «تمّ». فمن امتلأ تخزينه أو حُجب عنه
+   * يُقال له إن خطّته تجدّدت — ويجد القديمة كما هي (الميثاق §5: لا شاشة نجاح
+   * قبل تأكيد الكتابة).
+   */
+  const regenerateFromProfile = (): WriteResult => {
     const g = generatePlan(customization.profile)
-    applyCustomization({
+    const result = applyCustomization({
       ...customization,
       targets: g.targets,
       workoutPlan: g.workoutPlan,
@@ -87,21 +96,23 @@ export function SettingsView({
       commitmentPlan: g.commitmentPlan,
       measurementPlan: g.measurementPlan,
     })
-    markPendingSync()
+    // المزامنة **بعد** نجاح القرص لا قبله: طابورٌ يحمل ما لم يُحفظ يشحن وهمًا.
+    if (result === 'ok') markPendingSync()
+    return result
   }
 
   const onRegenerate = () => {
     if (!window.confirm(t.settings.regenerateConfirm)) return
-    regenerateFromProfile()
-    window.alert(t.settings.regenerateSuccess)
+    const result = regenerateFromProfile()
+    window.alert(result === 'ok' ? t.settings.regenerateSuccess : t.settings.regenerateFailed)
   }
 
   // — خطتي: التحويل لنسخة الأجهزة (P12) — اختياري: يعيد توليد الخطة التلقائية عبر المولّد
   // (أجهزة الكتالوج فقط في النادي). لا يمسّ الجدول المخصّص المحفوظ ولا سجلّ التمارين.
   const onSwitchToMachines = () => {
     if (!window.confirm(t.settings.switchMachinesConfirm)) return
-    regenerateFromProfile()
-    window.alert(t.settings.switchMachinesSuccess)
+    const result = regenerateFromProfile()
+    window.alert(result === 'ok' ? t.settings.switchMachinesSuccess : t.settings.regenerateFailed)
   }
 
   // — الحساب: حالة + خروج —

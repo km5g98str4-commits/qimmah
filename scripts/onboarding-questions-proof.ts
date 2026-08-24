@@ -15,13 +15,16 @@ import {
 } from '@/lib/onboardingV2Flow'
 import { toAnswersFromV2, type V2OnboardingChoices } from '@/lib/onboardingV2Adapter'
 import type { Equipment } from '@/types/profile'
+// [COMMISSIONING §1] السلطة الواحدة للنيّة. كان هنا `@/lib/entryIntent` —
+// مخزنٌ ثانٍ لا يقرؤه إلا لافتة يدوية، بينما `trialIntent` موصولٌ بالاستئناف
+// التلقائي وبلا كاتب. وُحّدت الكتابة وحُذف الثاني، فهاجر هذا الطقم معها.
 import {
-  PENDING_TRIAL_KEY,
-  PENDING_TRIAL_TTL_MS,
-  clearPendingTrialIntent,
-  hasPendingTrialIntent,
-  markPendingTrialIntent,
-} from '@/lib/entryIntent'
+  TRIAL_INTENT_KEY,
+  TRIAL_INTENT_TTL_MS,
+  clearTrialIntent,
+  hasTrialIntent,
+  recordTrialIntent,
+} from '@/lib/access/trialIntent'
 import { buildOnboardingProfile } from '@/lib/planBuilderAnswers'
 import {
   ONBOARDING_PROFILE_KEY,
@@ -512,28 +515,35 @@ check('مراحل التجهيز تتبع العمل ولا تخترعه', readF
 console.log('\n═══ 8ز) نيّة التجربة تنجو من تفكيك شاشتها ═══')
 // العطب: الزرّ يعيش على شاشة مشروطة بمزلاج داخل `SetupView`، والطريق الذي
 // يعرضه (إنشاء الحساب) **يفكّ تلك الشاشة** فيموت المزلاج ومعه المدخل.
-realStore.removeItem(PENDING_TRIAL_KEY)
-check('لا نيّة افتراضيًا', !hasPendingTrialIntent())
-check('الكتابة تُرجع نتيجة مفحوصة', markPendingTrialIntent() === 'ok')
-check('والنيّة تُقرأ بعدها', hasPendingTrialIntent())
-check('نيّة أقدم من مدّة الصلاحية تُعامَل كغائبة', !hasPendingTrialIntent(Date.now() + PENDING_TRIAL_TTL_MS + 1000))
-check('والمنتهية تُنظَّف فلا تتكرّر القراءة الفاشلة', realStore.getItem(PENDING_TRIAL_KEY) === null)
-markPendingTrialIntent()
-clearPendingTrialIntent()
-check('الاستهلاك يُسقطها', !hasPendingTrialIntent() && realStore.getItem(PENDING_TRIAL_KEY) === null)
-realStore.setItem(PENDING_TRIAL_KEY, '{"v":99,"at":"soon"}')
-check('بايتات معطوبة لا تُصدَّق', !hasPendingTrialIntent())
-check('وتُنظَّف فورًا', realStore.getItem(PENDING_TRIAL_KEY) === null)
+realStore.removeItem(TRIAL_INTENT_KEY)
+check('لا نيّة افتراضيًا', !hasTrialIntent())
+check('الكتابة تُرجع نتيجة مفحوصة', recordTrialIntent('reveal') === 'ok')
+check('والنيّة تُقرأ بعدها', hasTrialIntent())
+// المدّة تُقاس بساعة الجهاز داخل الوحدة، فتُزوَّر اللحظة بالكتابة لا بالمعامل.
+realStore.setItem(TRIAL_INTENT_KEY, JSON.stringify({ recordedAt: Date.now() - TRIAL_INTENT_TTL_MS - 1000, origin: 'reveal' }))
+check('نيّة أقدم من مدّة الصلاحية تُعامَل كغائبة', !hasTrialIntent())
+check('والمنتهية تُنظَّف فلا تتكرّر القراءة الفاشلة', realStore.getItem(TRIAL_INTENT_KEY) === null)
+// وساعةٌ رجعت إلى الوراء لا تمدّد النيّة — تُلغى لا تُمنح.
+realStore.setItem(TRIAL_INTENT_KEY, JSON.stringify({ recordedAt: Date.now() + 60_000, origin: 'reveal' }))
+check('وساعة الجهاز الراجعة تُلغي النيّة ولا تمدّدها', !hasTrialIntent())
+recordTrialIntent('reveal')
+clearTrialIntent()
+check('الاستهلاك يُسقطها', !hasTrialIntent() && realStore.getItem(TRIAL_INTENT_KEY) === null)
+realStore.setItem(TRIAL_INTENT_KEY, '{"v":99,"at":"soon"}')
+check('بايتات معطوبة لا تُصدَّق', !hasTrialIntent())
+check('وتُنظَّف فورًا', realStore.getItem(TRIAL_INTENT_KEY) === null)
 const blockedIntent = quotaBlockedStore()
 swapStore(blockedIntent)
-const intentBlocked = markPendingTrialIntent()
+const intentBlocked = recordTrialIntent('reveal')
 swapStore(realStore)
 check('تخزين محجوب يُبلَّغ لا يُبتلع', intentBlocked === 'quota')
 check('زرّ إنشاء الحساب مشروط بنجاح حفظ النيّة', viewSource.includes("trialState === 'not_authenticated' && !signedIn && trialIntentStored && onCreateAccount"))
-check('النيّة تُكتب قبل عرض الطريق لا بعده', viewSource.indexOf('markPendingTrialIntent()') < viewSource.indexOf('reveal-create-account-cta'))
+check('النيّة تُكتب قبل عرض الطريق لا بعده', viewSource.indexOf("recordTrialIntent('reveal')") < viewSource.indexOf('reveal-create-account-cta'))
 const resumeSource = readFileSync(resolve(process.cwd(), 'src/views/reveal/PendingTrialResume.tsx'), 'utf8')
 check('سطح الاستئناف يظهر فقط بنيّة سارية وحساب فعليّ', resumeSource.includes('if (!pending || !signedIn) return null'))
-check('والاستئناف يستهلك النيّة مرّة واحدة', resumeSource.includes('clearPendingTrialIntent()') && resumeSource.includes("outcome !== 'offline'"))
+check('والاستئناف يستهلك النيّة مرّة واحدة', resumeSource.includes('clearTrialIntent()') && resumeSource.includes("outcome !== 'offline'"))
+// والمسار الأوّل تلقائيّ: نتيجةٌ تصل من المزوّد تُخفي اللافتة بدل أن تكرّر الطلب.
+check('ونتيجة الاستئناف التلقائي تُخفي اللافتة', resumeSource.includes('acknowledgeTrialResume()'))
 check('وانقطاع الشبكة لا يُسقط النيّة (لا عقاب على عطل ليس منه)', resumeSource.includes("if (outcome !== 'offline') {"))
 check('نصّ الاستئناف بلغتين وبلا ضغط', revealStrings.ar.cta.resumeTrialTitle.length > 0 && revealStrings.en.cta.resumeTrialTitle.length > 0 && !/!/.test(revealStrings.ar.cta.resumeTrialTitle))
 

@@ -112,6 +112,11 @@ jobs:
       - name: Progress & measurements write-path (entitled) — live browser
         run: node scripts/e2e/progress-reliability.mjs
 
+      # اتّصال الجلسة: الشريط في كل شاشة، والتمرير يعود لأعلى عند كل تمرين،
+      # ووعد البطاقة = ما يُسلَّم فعلًا. يحتاج بناء تقليد كبقيّة رحلات المتصفّح.
+      - name: Workout session continuity — live browser
+        run: npm run test:e2e:workout-continuity
+
       # رحلة مراجعة المؤسس على **نفس أرتيفكت المعاينة المنشور** — لا على بناء
       # تقليد. فحص المؤسس الحيّ أسقط ادّعاءً أخضر مصدره أن الرحلات كانت تعمل
       # على بناء آخر لا يفتحه المؤسس أبدًا.

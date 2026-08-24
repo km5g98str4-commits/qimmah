@@ -22,8 +22,13 @@
  */
 import { foldArabic } from '@/lib/text/foodNormalize'
 
-/** أقصى عدد صيغ لاستعلام واحد — سقف معلَن يمنع انفجار البحث. */
-export const MAX_QUERY_VARIANTS = 3
+/**
+ * أقصى عدد صيغ لاستعلام واحد — سقف معلَن يمنع انفجار البحث.
+ *
+ * رُفع من ٣ إلى ٤ لاستيعاب صيغة «بلا ال» أدناه. والرفع **لا يكلّف** الاستعلام
+ * الخالي من «ال» شيئًا: الصيغ فريدة، فما لم تختلف الصيغة لم تُضَف أصلًا.
+ */
+export const MAX_QUERY_VARIANTS = 4
 
 /**
  * أدنى طول كلمة لاتينية تُجرَّب صيغة مفردها.
@@ -82,21 +87,95 @@ export function singularizePhrase(text: string): string {
 }
 
 /**
- * صيغ الاستعلام المرتّبة من الأقرب إلى الأصل: الخام ← المطويّ عربيًا ← المفرد.
+ * أدنى طول كلمة تُجرَّب صيغتها بلا «ال» — **نفس شرط `withAlDefinite`** في
+ * `src/lib/text/foodNormalize.ts` (§٣٫٤). الشرطان يجب أن يتطابقا: الفهرس يولّد
+ * الرمز بلا «ال» لكلمات أطول من أربعة محارف، فتجريب الاستعلام بحدٍّ آخر يصنع
+ * طرفين لا يلتقيان.
+ */
+const MIN_AL_STRIP_LENGTH = 5
+
+/**
+ * §٣٫٤ على جانب الاستعلام — **إضافة صيغة لا حذف حرف**.
+ *
+ * ═══ الفجوة ═══
+ * الفهرس يحمل الشكلين (بـ«ال» وبلاها) عبر `withAlDefinite`، لكن `searchFoodScored`
+ * يطابق نصوص الصنف حرفيًا لا رموزه. فمن كتب «الدجاج» أو «الكبسة» أو «التمر» كان
+ * يقيس استعلامه على نصّ مكتوب «دجاج» و«كبسة» و«تمر» — ولا يلتقيان.
+ *
+ * ═══ لماذا إضافة لا استبدال ═══
+ * الحذف المدمّر يخلط «العلم» بـ«علم» و«البيك» بـ«بيك». وبإضافة صيغة تبقى
+ * الصيغة الأصلية **أولى في الترتيب**، فتُقاس المطابقة على ما كتبه المستخدم أولًا
+ * ولا تزيحها الصيغة المشتقّة.
+ */
+function stripAlDefinite(text: string): string {
+  return text
+    .split(' ')
+    .map((w) => (w.length >= MIN_AL_STRIP_LENGTH && w.startsWith('ال') ? w.slice(2) : w))
+    .join(' ')
+}
+
+/**
+ * صيغ الاستعلام المرتّبة من الأقرب إلى الأصل:
+ * الخام ← المطويّ عربيًا ← المفرد الإنجليزي ← بلا «ال».
  * فريدة وغير فارغة، وبحدٍّ أعلى `MAX_QUERY_VARIANTS`.
  *
  * الترتيب مقصود: من يبحث يستحق أن تُقاس مطابقته على **ما كتبه** أولًا، وتبقى
  * الصيغ المطوية احتياطًا يوسّع الاستدعاء ولا يزيح الأدقّ.
  */
-export function queryVariants(raw: string): string[] {
+export interface QueryVariant {
+  value: string
+  /**
+   * هل هذه الصيغة **تخمين بنيوي** لا كتابةَ المستخدم ولا مجرّد تطبيع؟
+   *
+   * ═══ لماذا يُميَّز ═══
+   * `الخام` و`المطويّ` نفس الكلمة بإملاء موحَّد — لا معنى جديد فيهما. أما ردّ
+   * المفرد وحذف «ال» فيقصّان حروفًا **على أمل** أن الباقي هو الجذر، وهذا أمل قد
+   * يخيب: `nuts ⇒ nut` صحيحة، لكن بادئة `nut` تلتقط **`nutella`**.
+   *
+   * والأثر مقيس: بحث `nuts` كان يُرجع «nutella — Ferrero» و«Nutella» **قبل**
+   * «لوز» و«كاجو» المنسَّقين، لأن بادئة اسمٍ معبّأ (٤) تسبق كلمةً مفتاحية
+   * منسَّقة (٧) على السلّم الموحَّد. فالتخمين كان يعلو على التنسيق البشري.
+   *
+   * الحلّ ليس إلغاء التخمين — فهو يكسب استدعاءً حقيقيًا — بل **وسمه**، كي تقرّر
+   * طبقة الترتيب أن مطابقةً وُلدت من تخمين لا تسبق مطابقةً وُلدت من قصد.
+   */
+  derived: boolean
+}
+
+/**
+ * صيغ الاستعلام **موسومة**: أيُّها كتابة المستخدم/تطبيعها، وأيُّها تخمين بنيوي.
+ * الترتيب من الأقرب إلى الأصل، وفريدة وغير فارغة، وبحدٍّ أعلى `MAX_QUERY_VARIANTS`.
+ */
+export function queryVariantsDetailed(raw: string): QueryVariant[] {
   const base = raw.trim()
   if (!base) return []
   const folded = foldArabic(base)
-  const out: string[] = []
-  for (const candidate of [base, folded, singularizePhrase(folded)]) {
-    const v = candidate.trim()
-    if (v && !out.includes(v)) out.push(v)
+  const singular = singularizePhrase(folded)
+  const candidates: readonly QueryVariant[] = [
+    { value: base, derived: false },
+    { value: folded, derived: false },
+    { value: singular, derived: true },
+    { value: stripAlDefinite(singular), derived: true },
+  ]
+  const out: QueryVariant[] = []
+  const seen = new Set<string>()
+  for (const c of candidates) {
+    const v = c.value.trim()
+    if (!v || seen.has(v)) continue
+    seen.add(v)
+    out.push({ value: v, derived: c.derived })
     if (out.length >= MAX_QUERY_VARIANTS) break
   }
   return out
+}
+
+/**
+ * صيغ الاستعلام المرتّبة من الأقرب إلى الأصل: الخام ← المطويّ عربيًا ← المفرد
+ * الإنجليزي ← بلا «ال». فريدة وغير فارغة، وبحدٍّ أعلى `MAX_QUERY_VARIANTS`.
+ *
+ * الترتيب مقصود: من يبحث يستحق أن تُقاس مطابقته على **ما كتبه** أولًا، وتبقى
+ * الصيغ المطوية احتياطًا يوسّع الاستدعاء ولا يزيح الأدقّ.
+ */
+export function queryVariants(raw: string): string[] {
+  return queryVariantsDetailed(raw).map((v) => v.value)
 }

@@ -434,8 +434,12 @@ security definer
 set search_path = ''
 as $$
 declare
-  lim  int := greatest(1, least(coalesce(p_page_size, 25), 100));
-  off  int := greatest(0, coalesce(p_page, 0)) * lim;
+  -- ⚠️ **الترقيم واحد لا صفر** — كما في `20260822120002` حرفيًّا.
+  -- الصيغة الأولى هنا حسبت `off = page * lim` (صفريّة)، فصارت الصفحة الأولى
+  -- التي يطلبها العميل (`1`) تُزيح خمسين صفًّا وتعود فارغة. كسرٌ صامت: لا خطأ
+  -- يُرفع، ولا نصّ يتغيّر — قائمةٌ تبدو «لا أكواد» وفيها أكواد.
+  size int  := least(greatest(coalesce(p_page_size, 25), 1), 200);
+  pg   int  := greatest(coalesce(p_page, 1), 1);
   term text := nullif(btrim(coalesce(p_search, '')), '');
 begin
   perform private.require_admin();
@@ -451,12 +455,18 @@ begin
     select f.id,
            f.label,
            -- الحالة مشتقّة لا مخزَّنة: مخزَّنةً كانت ستشيخ بصمت عند الانتهاء.
+           --
+           -- ⚠️ **المفردات هي مفردات `20260822120002` حرفًا بحرف** ولا تُجدَّد.
+           -- الصيغة الأولى هنا سمّتها `active/exhausted/scheduled` — أوصاف أدقّ
+           -- بالإنجليزية، وكارثة عمليًّا: `CodeStatus` في العميل و`codeStatus`
+           -- في القاموسين يعرفون أربع قيم فقط (`issued`/`redeemed`/`expired`/
+           -- `disabled`)، فكل صفٍّ كان سيصل الشاشة بحالةٍ **لا ترجمة لها**.
+           -- توسيع مفردات عقدٍ قائم ليس تحسينًا بل كسرٌ صامت لطرفه الآخر.
            case
-             when not f.enabled                                   then 'disabled'
+             when not f.enabled                                      then 'disabled'
              when f.expires_at is not null and f.expires_at <= now() then 'expired'
-             when f.redemption_count >= f.max_redemptions         then 'exhausted'
-             when f.starts_at > now()                             then 'scheduled'
-             else 'active'
+             when f.redemption_count >= f.max_redemptions            then 'redeemed'
+             else 'issued'
            end,
            f.duration_days,
            f.max_redemptions,
@@ -472,7 +482,7 @@ begin
            (select count(*) from filtered)
       from filtered f
      order by f.created_at desc
-     limit lim offset off;
+     limit size offset (pg - 1) * size;
 end;
 $$;
 

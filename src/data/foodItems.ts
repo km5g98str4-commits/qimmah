@@ -327,6 +327,9 @@ export const foodItems: FoodItem[] = [
     carbs: 56,
     fat: 1,
     fiber: 1,
+    // «بسمتي» و«مزة» أنواع حبّة لا أصناف بقيم أخرى — القيم هنا للرز الأبيض المطبوخ
+    // عمومًا، فلا يُخترع صنف «بسمتي» بأرقام لا مصدر لها.
+    keywords: ['بسمتي', 'basmati', 'رز مسلوق', 'plain rice', 'ارز ابيض'],
   },
   {
     id: 'kabsa-rice',
@@ -432,6 +435,7 @@ export const foodItems: FoodItem[] = [
     carbs: 44,
     fat: 2,
     fiber: 2,
+    keywords: ['خبز', 'pita', 'khubz', 'صامولي', 'bread'],
   },
   {
     id: 'tameez-bread',
@@ -576,6 +580,7 @@ export const foodItems: FoodItem[] = [
     carbs: 6,
     fat: 15,
     fiber: 4,
+    keywords: ['مكسرات', 'nuts', 'لوز', 'almond'],
   },
   {
     id: 'walnuts',
@@ -589,6 +594,7 @@ export const foodItems: FoodItem[] = [
     carbs: 4,
     fat: 20,
     fiber: 2,
+    keywords: ['مكسرات', 'nuts', 'جوز', 'walnut', 'عين جمل'],
   },
   {
     id: 'cashews',
@@ -602,6 +608,7 @@ export const foodItems: FoodItem[] = [
     carbs: 9,
     fat: 13,
     fiber: 1,
+    keywords: ['مكسرات', 'nuts', 'كاجو', 'cashew'],
   },
   {
     id: 'peanut-butter',
@@ -628,6 +635,7 @@ export const foodItems: FoodItem[] = [
     carbs: 5,
     fat: 14,
     fiber: 2,
+    keywords: ['مكسرات', 'nuts', 'فول سوداني', 'peanut'],
   },
   {
     id: 'pistachio',
@@ -641,6 +649,7 @@ export const foodItems: FoodItem[] = [
     carbs: 8,
     fat: 13,
     fiber: 3,
+    keywords: ['مكسرات', 'nuts', 'فستق', 'pistachio'],
   },
   {
     id: 'tahini',
@@ -1436,6 +1445,8 @@ export const foodItems: FoodItem[] = [
     protein: 32,
     carbs: 24,
     fat: 35,
+    // «دجاج مقلي» و«fried chicken» ليسا صنفًا آخر — هما ما يسمّيه الناس بروستًا.
+    keywords: ['دجاج مقلي', 'fried chicken', 'broast', 'بروست', 'دجاج مقرمش'],
   },
   {
     id: 'beef-burger',
@@ -1878,6 +1889,7 @@ export const foodItems: FoodItem[] = [
     protein: 0,
     carbs: 0,
     fat: 0,
+    keywords: ['مياه', 'ماي', 'water', 'مويه'],
   },
   {
     id: 'vimto',
@@ -1929,6 +1941,7 @@ export const foodItems: FoodItem[] = [
     carbs: 21,
     fat: 0,
     fiber: 2,
+    keywords: ['بلح', 'رطب', 'dates', 'تمور'],
   },
   {
     id: 'banana',
@@ -5698,6 +5711,16 @@ export const LOANWORD_SPELLINGS: readonly (readonly string[])[] = [
   ['ساندويتش', 'سندويتش', 'ساندوتش', 'سندوتش', 'سندويش'],
   // broccoli — البيانات «بروكلي»، و«بروكولي» شائعة.
   ['بروكلي', 'بروكولي'],
+  // Maestro Pizza — البيانات «ماسترو بيتزا»، والناس يكتبونها «مايسترو» بالياء.
+  // قياس قبل الإضافة: «مايسترو» ⇒ **صفر**، و«ماسترو» ⇒ ٤ أصناف.
+  // الشرط ٣ محفوظ: «ماسترو» ليست كلمة عربية أصيلة أخرى.
+  ['ماسترو', 'مايسترو'],
+  // Dunkin' — البيانات «دانكن»، والكتابة الشائعة الأخرى «دنكن»/«دنكين».
+  // قياس قبل الإضافة: «دنكن» ⇒ **صفر**، و«دانكن» ⇒ ٤ أصناف.
+  ['دانكن', 'دنكن', 'دنكين'],
+  // margherita — البيانات «مارغريتا»، و«مارجريتا» شائعة بالقدر نفسه.
+  // قياس قبل الإضافة: «بيتزا مارجريتا» ⇒ **صفر**.
+  ['مارغريتا', 'مارجريتا'],
 ]
 
 /**
@@ -5742,6 +5765,9 @@ export const SCRIPT_TRANSLITERATIONS: readonly (readonly string[])[] = [
   ['شكشوكة', 'shakshuka', 'shakshoka'],
   ['تمر', 'tamr', 'tamer'],
   ['مرقوق', 'margoog', 'margoug', 'marqoog'],
+  // madghout — «مضغوط» في القاعدة، و`madghout` كتابةٌ شائعة بالحرف اللاتيني.
+  // قياس قبل الإضافة: `madghout` ⇒ **صفر**، و«مضغوط» ⇒ صنفان.
+  ['مضغوط', 'madghout', 'madhghout'],
   // ── عربي ⇒ عربي: أصناف إنجليزية الأصل يكتبها الناس بالحرف العربي ──
   // «والعكس للأصناف الإنجليزية»: القاعدة تحمل الاسم العربي الفصيح، والمستخدم
   // يكتب النقل الصوتي الدارج — فلا يلتقيان بلا هذه المجموعات.
@@ -5805,46 +5831,120 @@ function canonicalizeForSearch(text: string): string {
 export interface ScoredFoodItem {
   item: FoodItem
   /**
-   * ٠ تطابق عربي · ١ بادئة عربية · ٢ تضمين عربي · ٣ بادئة إنجليزية ·
-   * ٤ تضمين إنجليزي · ٥ كلمة مفتاحية بادئة · ٦ كلمة مفتاحية متضمَّنة.
+   * ٠ تطابق اسم · ١ بادئة اسم · ٢ تضمين اسم · ٣ كلمة مفتاحية بادئة ·
+   * ٤ كلمة مفتاحية متضمَّنة · ٥ كل رموز الاستعلام حاضرة (مطابقة رموز).
+   *
+   * ═══ لماذا اندمج العربي والإنجليزي في رتبة واحدة ═══
+   * كان السلّم يفصلهما (عربي ٠–٢ · إنجليزي ٣–٤)، فكان **الخطّ** يحدّد القوّة لا
+   * جودة المطابقة. والأثر مقيس: في الواجهة الإنجليزية كانت بادئة الاسم الإنجليزي
+   * تُسقَط إلى قوّة ٧ على السلّم الموحَّد — **دون** بادئة اسم معبّأ (٤). فبحث
+   * `milk` كان يُرجع «Milk — TOPS» و«milka» قبل «حليب كامل الدسم» المنسَّق،
+   * و`pizza` يُرجع «Protein Puffs Pizza» قبل «شريحة بيتزا».
+   *
+   * والخطّ نفسه هو ما يمنع الخلط: استعلام عربي لا يطابق نصًّا لاتينيًا وبالعكس،
+   * إلا بعد التطبيع والنقل الصوتي — وهو التقاءٌ مقصود لا مصادفة.
    */
   score: number
 }
 
 /** درجة «بلا استعلام» — أضعف من كل مطابقة حقيقية، فلا تُخلط بها في أي ترتيب. */
-export const NO_QUERY_SCORE = 7
+export const NO_QUERY_SCORE = 6
 
 /**
- * بحث في قاعدة الأطعمة **مع إعادة قوّة المطابقة** — عربي أولًا، يتحمّل الأخطاء
- * الإملائية الشائعة والمرادفات (عبر التطبيع + مقابلات الكلمات الدخيلة + الكلمات
- * المفتاحية اللاتينية). النتائج مرتّبة: تطابق تام → بادئة → تضمين، مع أولوية
- * الاسم العربي ثم الإنجليزي ثم الكلمات المفتاحية.
+ * أدنى طول رمز يدخل مطابقة الرموز — دونه يطابق الرمز كل شيء تقريبًا فيصير ضجيجًا.
+ * حرفان لأن العربية تحمل كلمات دالّة بحرفين («رز» · «بر»).
+ */
+const MIN_AND_TOKEN_LENGTH = 2
+
+/** أدنى عدد رموز يشعل مطابقة الرموز — الاستعلام المفرد مغطّى بالتضمين أصلًا. */
+const MIN_AND_TOKENS = 2
+
+/** يقسّم نصًّا مطبَّعًا إلى رموز حروف/أرقام. لا يعتمد على المسافة وحدها. */
+function searchTokens(normalized: string): string[] {
+  return normalized.split(/[^\p{L}\p{N}]+/u).filter((t) => t.length > 0)
+}
+
+/**
+ * فهرس نصوص الأصناف المطبَّعة — يُبنى **مرّة واحدة كسولًا** عند أول بحث.
  *
- * ═══ لماذا تُعاد الدرجة ═══
- * طبقة اتحاد البحث (`src/lib/food/unifiedSearch.ts`) تحتاج أن تقارن **قوّة** مطابقة
- * الصنف المنسَّق بقوّة مطابقة سجل معبّأ لترتّبهما في قائمة واحدة. كانت هذه الدرجة
- * تُحسب هنا ثم **تُسقَط**، فاضطرّ كل مستهلك إلى إعادة حسابها — وأي إعادة حساب
- * تتباعد عن أصلها بعد موجتين. فالمصدر واحد: تُحسب مرّة وتُعاد.
+ * بلا هذا الفهرس كان كل استعلام يعيد تطبيع ثلاثة نصوص لكل صنف من ٩٥٩ صنفًا،
+ * ومطابقة الرموز تضيف فوقها تقسيمًا. البناء مرّة يجعل الكلفة ثابتة، ويبقى
+ * التطبيع **نفسه** المستعمل في المطابقة — مصدر واحد لا مرآة.
+ */
+interface ItemSearchText { names: string[]; kws: string[]; tokens: string[] }
+let SEARCH_TEXT: ItemSearchText[] | null = null
+
+/**
+ * صيغ نصّ الصنف — **القانوني والخام معًا، إضافةً لا استبدالًا**.
+ *
+ * ═══ عطل مقيس أصلحه هذا السطر ═══
+ * `canonicalizeForSearch` تُبدّل داخل نصّ الصنف كما تُبدّل داخل الاستعلام. ومجموعة
+ * النقل الصوتي `['بان كيك', 'بانكيك', 'pancake']` كانت تحوّل اسم الصنف الإنجليزي
+ * `Pancake` إلى «بان كيك» — أي **تمحو الكلمة الإنجليزية من نصّه المفهرَس**. فبحث
+ * `cake` كان يُرجع صفرًا من المنسَّق رغم أن `Pancake` تحتويها حرفيًا.
+ *
+ * التوحيد وسيلة للالتقاء لا مقصلة: نحتفظ بالصيغتين ونطابق أيًّا منهما. وهذا
+ * **لا يضيف مطابقة كاذبة**، لأنه لا يوسّع المعنى بل يمنع فقدان الأصل.
+ */
+function nameForms(text: string): string[] {
+  const canonical = canonicalizeForSearch(text)
+  const raw = normalizeSearch(text)
+  return canonical === raw ? [canonical] : [canonical, raw]
+}
+
+function searchText(): ItemSearchText[] {
+  if (SEARCH_TEXT) return SEARCH_TEXT
+  SEARCH_TEXT = foodItems.map((f) => {
+    const names = [...new Set([...nameForms(f.nameAr), ...nameForms(f.nameEn)])]
+    const kws = [...new Set((f.keywords ?? []).flatMap((k) => nameForms(k)))]
+    return { names, kws, tokens: searchTokens(`${names.join(' ')} ${kws.join(' ')}`) }
+  })
+  return SEARCH_TEXT
+}
+
+/** للاختبار فقط: يبطل الفهرس المبنيّ كي يُعاد بناؤه بالبيانات الحالية. */
+export function __resetFoodSearchIndex(): void {
+  SEARCH_TEXT = null
+}
+
+/**
+ * بحث في قاعدة الأطعمة **مع إعادة قوّة المطابقة** — يتحمّل الأخطاء الإملائية
+ * الشائعة والمرادفات (عبر التطبيع + مقابلات الكلمات الدخيلة + النقل الصوتي +
+ * الكلمات المفتاحية). النتائج مرتّبة: تطابق تام → بادئة → تضمين → كلمة مفتاحية
+ * → مطابقة رموز.
+ *
+ * ═══ مطابقة الرموز (الرتبة ٥) — لماذا وُجدت ═══
+ * كان الشرط **تضمين الاستعلام كاملًا** كسلسلة واحدة، فأي ترتيب كلمات مخالف
+ * لترتيب البيانات يُرجع صفرًا. القياس على الجذع قبل هذه الموجة:
+ *   • «بروتين واي» ⇒ **صفر**، والصنف في القاعدة اسمه «سكوب واي بروتين».
+ *   • «دجاج مقلي» ⇒ **صفر** · «رز بسمتي» ⇒ **صفر** · `fried chicken` ⇒ **صفر**.
+ * فترتيب الكلمات في رأس المستخدم ليس ترتيبها في الصفّ، والبحث لا يملي عليه.
+ *
+ * ⚠️ **وهي أضعف رتبة عمدًا**: تُجرَّب بعد فشل كل ما سبق، فلا تزيح تطابقًا أدقّ.
+ * وكل رمز يُطابَق **بادئةَ كلمة** لا تضمينًا حرًّا — «رز» يطابق «رز» و«رزة»
+ * ولا يطابق «برز» داخل كلمة أخرى.
  */
 export function searchFoodScored(query: string): ScoredFoodItem[] {
   const q = canonicalizeForSearch(query)
   // بلا استعلام: القائمة كاملة بترتيبها الأصلي — سلوك `searchFood` القائم حرفيًا.
   if (!q) return foodItems.map((item) => ({ item, score: NO_QUERY_SCORE }))
 
+  const qTokens = searchTokens(q).filter((t) => t.length >= MIN_AND_TOKEN_LENGTH)
+  const useTokens = qTokens.length >= MIN_AND_TOKENS
+  const texts = searchText()
+
   const scored: { item: FoodItem; score: number }[] = []
-  for (const f of foodItems) {
-    const ar = canonicalizeForSearch(f.nameAr)
-    const en = canonicalizeForSearch(f.nameEn)
-    const kws = (f.keywords ?? []).map((k) => canonicalizeForSearch(k))
+  for (let i = 0; i < foodItems.length; i++) {
+    const f = foodItems[i]
+    const { names, kws, tokens } = texts[i]
 
     let score = Infinity
-    if (ar === q) score = 0
-    else if (ar.startsWith(q)) score = 1
-    else if (ar.includes(q)) score = 2
-    else if (en.startsWith(q)) score = 3
-    else if (en.includes(q)) score = 4
-    else if (kws.some((k) => k === q || k.startsWith(q))) score = 5
-    else if (kws.some((k) => k.includes(q))) score = 6
+    if (names.some((n) => n === q)) score = 0
+    else if (names.some((n) => n.startsWith(q))) score = 1
+    else if (names.some((n) => n.includes(q))) score = 2
+    else if (kws.some((k) => k === q || k.startsWith(q))) score = 3
+    else if (kws.some((k) => k.includes(q))) score = 4
+    else if (useTokens && qTokens.every((qt) => tokens.some((t) => t.startsWith(qt)))) score = 5
 
     if (score !== Infinity) scored.push({ item: f, score })
   }

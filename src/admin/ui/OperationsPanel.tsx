@@ -178,7 +178,7 @@ export function OperationsPanel({ lang, decision }: Props) {
                   {email.health.dead.map((d) => (
                     <li key={d.idempotencyKey} className="rounded-lg border border-line bg-page p-2 text-xs">
                       <span className="font-bold">{d.templateId}</span>
-                      <span className="ms-2 text-ink-500">{t.emailDead} · {d.attempts} {t.emailAttempts}</span>
+                      <span className="ms-2 text-ink-500">{t.emailDead} · {d.attempts === null ? "—" : d.attempts} {t.emailAttempts}</span>
                       {d.lastReason ? <div className="mt-1 font-mono text-[11px] text-danger">{d.lastReason}</div> : null}
                     </li>
                   ))}

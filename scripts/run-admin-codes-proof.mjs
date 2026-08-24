@@ -124,10 +124,50 @@ for (const fn of NEW_FNS.filter((f) => f.startsWith('founder_'))) {
 }
 // المولّد داخلي بحت — لا يناديه عميل بأي دور.
 check('المولّد ليس لأي دور عميل', !grantOf('generate_access_code').includes('authenticated') && !grantOf('generate_access_code').includes('anon'))
-// وكل دالة `founder_*` تحمل البوّابة في جسمها.
+/**
+ * وكل دالة `founder_*` تحمل البوّابة في **جسمها** لا في المنح وحده.
+ *
+ * ═══ [COMMISSIONING §4] القاعدة صارت أدقّ لا أرخى ═══
+ * كانت جملةً واحدة: «كلٌّ تحمل `require_founder`». وهي تكفي حين يكون الدور
+ * واحدًا — ولمّا أُضيف `support` (يقرأ ولا يغيّر) صارت الجملة الواحدة **تخفي
+ * السؤال المهمّ**: أيّ دالّة يجوز للدعم أن يبلغها؟
+ *
+ * فصارت قائمتين مسمّاتين. والقائمة البيضاء هي الدفاع: دالّة `founder_*` جديدة
+ * لا تُذكر في أيّهما **تُسقط الفحص** — فلا تُضاف قدرةٌ بلا قرار عن دورها.
+ */
 const bodies = await db.query(`select proname, prosrc from pg_proc where proname like 'founder\\_%'`)
-const ungated = bodies.rows.filter((r) => !r.prosrc.includes('require_founder'))
-check(`كل دالة founder_* تحمل require_founder في جسمها (${bodies.rows.length})`, ungated.length === 0, ungated.map((r) => r.proname).join(' '))
+/** قراءات: يبلغها المؤسس **والدعم**. */
+const ADMIN_READS = [
+  'founder_executive_snapshot', 'founder_user_page', 'founder_user_detail', 'founder_code_page',
+  'founder_failed_orders', 'founder_code_redemptions', 'founder_email_health',
+  'founder_grants_by_source', 'founder_food_submissions',
+]
+/** أفعال لا رجعة فيها: للمؤسس وحده. */
+const FOUNDER_WRITES = [
+  'founder_issue_access_code', 'founder_set_code_enabled', 'founder_revoke_access',
+  'founder_review_food_submission',
+]
+const known = new Set([...ADMIN_READS, ...FOUNDER_WRITES])
+const unclassified = bodies.rows.filter((r) => !known.has(r.proname)).map((r) => r.proname)
+check(`كل دالة founder_* مصنَّفة قراءةً أو فعلًا (${bodies.rows.length})`,
+  unclassified.length === 0, unclassified.join(' '))
+
+const bodyOf = (fn) => bodies.rows.find((r) => r.proname === fn)?.prosrc ?? ''
+const readsUngated = ADMIN_READS.filter((fn) => !bodyOf(fn).includes('require_admin'))
+check(`والقراءات تحمل require_admin في أجسامها (${ADMIN_READS.length})`,
+  readsUngated.length === 0, readsUngated.join(' '))
+// ⚠️ الأهمّ: **لا فعل يقبل الدعم**. لو تسلّل `require_admin` إلى فعلٍ لصار
+// المفوَّض يُصدر أكوادًا ويسحب وصولًا — وهو بالضبط ما وُجد الدوران لمنعه.
+const writesLoose = FOUNDER_WRITES.filter((fn) => !bodyOf(fn).includes('require_founder') || bodyOf(fn).includes('require_admin'))
+check(`ولا فعل يقبل الدعم — كلّها require_founder وحدها (${FOUNDER_WRITES.length})`,
+  writesLoose.length === 0, writesLoose.join(' '))
+
+// ⚔️ محاكاة الالتفاف: ترخية حارس فعلٍ إلى `require_admin` يجب أن تسقط باسمها.
+{
+  const tampered = FOUNDER_WRITES.map((fn) => bodyOf(fn).replace('require_founder', 'require_admin'))
+  check('⚔️ ترخية حارس فعلٍ إلى require_admin تُسقط الفحص',
+    tampered.every((b) => b.includes('require_admin') && !b.includes('require_founder')))
+}
 
 // ═══════════════ ٢) بيانات واقعية ═══════════════
 await asRole(db, null)
@@ -288,7 +328,7 @@ await ungatedDb.exec(`
 // ⚠️ النزع يشمل **كل** هجرة تحمل البوّابة لا هجرتين مسمّاتين: حصرُه بملفّين
 // يجعل التأكيد يشيخ في أوّل هجرة تالية تعيد تعريف دالة بالبوّابة — وقد حدث
 // ذلك فعلًا في `test:admin-db` وسقط باسمه.
-const GATE_RE = /\n\s*perform private\.require_founder\(\);/g
+const GATE_RE = /\n\s*perform private\.require_(?:founder|admin)\(\);/g
 const gatedFiles = migrationFiles().filter((f) => GATE_RE.test(readMigration(f)) && (GATE_RE.lastIndex = 0) === 0)
 let stripped = 0
 for (const f of migrationFiles()) {

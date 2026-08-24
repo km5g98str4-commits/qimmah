@@ -4,7 +4,7 @@
 // المصادر: قيم مرجعية قياسية للأصناف الشائعة؛ أطباق الطهي مُعلَّمة «تقديري».
 import type { FoodItem } from './foodItems'
 
-/** 40 صنفًا خليجيًا شائعًا غير مكرّر في القاعدة. */
+/** 46 صنفًا خليجيًا شائعًا غير مكرّر في القاعدة. */
 export const gccStaples: FoodItem[] = [
   // ————— ألبان ومشروبات —————
   { id: 'gcc-1', nameAr: 'لبن رائب', nameEn: 'Laban (cultured buttermilk)', category: 'ألبان', servingLabelAr: 'لكل 100غ', servingGrams: 100, calories: 45, protein: 3.3, carbs: 4.7, fat: 1.5, notesAr: 'قيم مرجعية قياسية · لكل 100غ.', keywords: ['laban', 'لبن', 'رائب', 'مخيض'] },
@@ -53,4 +53,15 @@ export const gccStaples: FoodItem[] = [
   { id: 'gcc-38', nameAr: 'كاسترد', nameEn: 'Custard', category: 'حلويات', servingLabelAr: 'كوب (150غ)', servingGrams: 150, calories: 190, protein: 5, carbs: 28, fat: 6.5, notesAr: 'قيم مرجعية قياسية.', keywords: ['custard', 'كاسترد', 'كسترد'] },
   { id: 'gcc-39', nameAr: 'عوّامة', nameEn: 'Awamah', category: 'حلويات', servingLabelAr: '3 حبات (60غ)', servingGrams: 60, calories: 223, protein: 3, carbs: 33, fat: 9, fiber: 1, notesAr: 'تقديري.', keywords: ['awamah', 'عوامة', 'لقمة القاضي'] },
   { id: 'gcc-40', nameAr: 'وافل', nameEn: 'Waffle', category: 'حلويات', servingLabelAr: 'قطعة (80غ)', servingGrams: 80, calories: 244, protein: 6, carbs: 33, fat: 10, fiber: 1, notesAr: 'قيم مرجعية قياسية.', keywords: ['waffle', 'وافل'] },
+  // ————— فجوات مقيسة على القاعدة (٢٠٢٦-٠٨) —————
+  // ثلاثة أصناف **عامّة** كان البحث عنها يُرجع صفرًا من المصدر المنسَّق، رغم أنها
+  // يومية في السعودية. القيم مركّب غذائي مرجعي قياسي **لصنف عام** (USDA FoodData
+  // Central · SR Legacy) لكل ١٠٠غ — **لا منتج علامة تجارية ولا قيم مخترعة**.
+  // كل صنف يعلن عموميته في اسمه ونصّه، فلا يُقرأ ادّعاءً عن عبوة بعينها.
+  { id: 'gcc-41', nameAr: 'عسل (عام)', nameEn: 'Honey (generic)', category: 'حلويات', servingLabelAr: 'لكل 100غ', servingGrams: 100, calories: 304, protein: 0.3, carbs: 82.4, fat: 0, fiber: 0.2, notesAr: 'صنف عام · قيم مرجعية قياسية لكل 100غ (USDA SR Legacy) · العبوات التجارية قد تختلف.', keywords: ['عسل', 'honey', 'عسل نحل', 'عسل سدر'] },
+  { id: 'gcc-42', nameAr: 'خس (عام)', nameEn: 'Lettuce (generic)', category: 'خضار', servingLabelAr: 'لكل 100غ', servingGrams: 100, calories: 17, protein: 1.2, carbs: 3.3, fat: 0.3, fiber: 2.1, notesAr: 'صنف عام · قيم مرجعية قياسية لكل 100غ (USDA SR Legacy · خس روماني).', keywords: ['خس', 'lettuce', 'خس روماني', 'romaine', 'سلطة خضراء'] },
+  { id: 'gcc-43', nameAr: 'جرانولا (عام)', nameEn: 'Granola (generic)', category: 'فطور', servingLabelAr: 'لكل 100غ', servingGrams: 100, calories: 489, protein: 13.7, carbs: 53.9, fat: 24.3, fiber: 9, notesAr: 'صنف عام · قيم مرجعية قياسية لكل 100غ (USDA SR Legacy) · العبوات التجارية تختلف كثيرًا.', keywords: ['جرانولا', 'granola', 'مسلي', 'muesli', 'شوفان محمص'] },
+  { id: 'gcc-44', nameAr: 'شوكولاتة بالحليب (عام)', nameEn: 'Milk chocolate (generic)', category: 'حلويات', servingLabelAr: 'لكل 100غ', servingGrams: 100, calories: 535, protein: 7.7, carbs: 59.4, fat: 29.7, fiber: 3.4, notesAr: 'صنف عام · قيم مرجعية قياسية لكل 100غ (USDA SR Legacy) · الألواح التجارية تختلف.', keywords: ['شوكولاتة', 'شوكولاته', 'chocolate', 'لوح شوكولاتة', 'كاكاو'] },
+  { id: 'gcc-45', nameAr: 'كيك إسفنجي (عام)', nameEn: 'Sponge cake (generic)', category: 'حلويات', servingLabelAr: 'لكل 100غ', servingGrams: 100, calories: 289, protein: 5.4, carbs: 61.1, fat: 2.7, fiber: 0.4, notesAr: 'صنف عام · قيم مرجعية قياسية لكل 100غ (USDA SR Legacy · كيك إسفنجي تجاري).', keywords: ['كيك', 'كيكة', 'cake', 'قاتوه', 'تورتة'] },
+  { id: 'gcc-46', nameAr: 'بسكويت سادة (عام)', nameEn: 'Plain biscuit / cookie (generic)', category: 'حلويات', servingLabelAr: 'لكل 100غ', servingGrams: 100, calories: 476, protein: 4.7, carbs: 68.6, fat: 20.4, fiber: 0.7, notesAr: 'صنف عام · قيم مرجعية قياسية لكل 100غ (USDA SR Legacy · بسكويت سكري تجاري).', keywords: ['بسكويت', 'بسكوت', 'biscuit', 'cookie', 'كوكيز'] },
 ]

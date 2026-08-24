@@ -17,7 +17,7 @@
 
 import { spawn } from 'node:child_process'
 import { chromium } from './lib/engine.mjs'
-import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
+import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-driver.mjs'
 
 const PORT = 5321
 const EXTERNAL = process.env.PREVIEW_URL || ''
@@ -81,14 +81,56 @@ async function driveToHandoff(page, ar) {
   const next = () => page.locator('footer button').last().click({ force: true })
   await next(); await page.waitForSelector('#onb-title-intent', { timeout: 20000 })
   const rows = page.locator('button[aria-pressed]')
-  await rows.nth(1).click({ force: true }); await rows.nth(3).click({ force: true })
+  // [COMMISSIONING] النيّة تُختار **بالاسم** لا بالفهرس، وتُمرَّر للسائق.
+  // كان `rows.nth(1)` ينقر «meals» ثم يُخبر السائق «plan» (افتراضه)، فيبلّغ
+  // حارسُ «نمط الأكل» عن سؤالٍ بلا أثر — **عيبٌ لا وجود له** — وتموت الرحلة
+  // قبل أول فحص. القيمة واحدة الآن في الموضعين.
+  const chosenIntent = await selectIntent(page, 'meals')
+  await rows.nth(3).click({ force: true })
   await answerHistory(page, next)
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await finishInputSteps(page, next); await settle(page, 1600)
+  await finishInputSteps(page, next, { intent: chosenIntent }); await settle(page, 1600)
+
+  /**
+   * ═══ [COMMISSIONING §10] لحظة التجهيز — تُقاس بالساعة لا بقراءة مصدر ═══
+   *
+   * `SynthesisScreen` مبنيّة منذ `[OVERNIGHT-4]` بخمس مراحل ومسارِ «قلّل
+   * الحركة» وعقدٍ اسمه `done`، **ولم تُستعمل قط**: التوليد ينتهي في نحو عشرين
+   * ميلي ثانية فتُركَّب وتُفكَّك قبل أن تُقرأ كلمة، و`done` كانت `false` حرفيًّا
+   * فمنطق «انتهى العمل فقف» لا يعمل أبدًا.
+   *
+   * ووجودُ المكوّن كان أخضر طوال الوقت — ولهذا **لا يُقاس هذا بقراءة مصدر**.
+   *
+   * والحدّان معًا: أرضيةٌ تكفي ليُقرأ سطران، **وسقفٌ** يمنع أن تتحوّل اللحظة
+   * إلى انتظار نصنعه (التكليف: «لا تُبطئ التطبيق ثوانٍ لأجل حركة»).
+   */
+  const t0 = Date.now()
   await tap(page, ar ? /الدخول للوحة/ : /Enter|Open/i)
+  let seenSynthesis = false
+  let stagesSeen = 0
+  let dwell = 0
+  for (let i = 0; i < 150; i += 1) {
+    const visible = await page.locator('[data-testid="reveal-synthesis"]').isVisible().catch(() => false)
+    if (visible) {
+      seenSynthesis = true
+      dwell = Date.now() - t0
+      // المعيار: **مراحل منجَزة تتراكم** — أي أن القصّة تحرّكت فعلًا.
+      // (القيمة `active` لا `current` — قُرئت من المكوّن لا خُمّنت.)
+      const n = await page.locator('[data-stage-state="done"]').count().catch(() => 0)
+      if (n > stagesSeen) stagesSeen = n
+    } else if (seenSynthesis) break
+    await page.waitForTimeout(40)
+  }
+  synthesis = { seen: seenSynthesis, dwell, stages: stagesSeen }
+
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25000 })
   await settle(page, 900)
 }
+
+/** يُملأ من أول تشغيل — اللحظة لا تتغيّر بالعرض، فتُقاس مرّة. */
+let synthesis = null
+const SYNTH_FLOOR_MS = 800
+const SYNTH_CEILING_MS = 2500
 
 const preview = startPreview()
 let browser
@@ -211,6 +253,18 @@ try {
     await settle(page, 2200)
     const back = await page.evaluate(() => ({ hash: location.hash, blank: document.body.innerText.trim().length < 40 }))
     check('الرجوع بعد التسليم يبقى داخل التطبيق', !back.blank, JSON.stringify(back))
+
+    // ── لحظة التجهيز (تُقاس مرّة، من أول تشغيل) ────────────────────────────
+    if (synthesis) {
+      check('لحظة التجهيز ظهرت فعلًا — لا وميض غير مقروء', synthesis.seen, JSON.stringify(synthesis))
+      check(`ومكثت ما يكفي لتُقرأ (${synthesis.dwell}م.ث ≥ ${SYNTH_FLOOR_MS})`,
+        synthesis.dwell >= SYNTH_FLOOR_MS, `${synthesis.dwell}م.ث`)
+      check(`ولم تتحوّل إلى انتظار مصطنع (${synthesis.dwell}م.ث ≤ ${SYNTH_CEILING_MS})`,
+        synthesis.dwell <= SYNTH_CEILING_MS, `${synthesis.dwell}م.ث`)
+      check(`وتقدّمت القصّة فعلًا — مرحلتان منجَزتان على الأقلّ (${synthesis.stages})`,
+        synthesis.stages >= 2, `${synthesis.stages} منجَزة`)
+      synthesis = null
+    }
     await ctx.close()
   }
 } finally {

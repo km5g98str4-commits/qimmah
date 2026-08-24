@@ -100,8 +100,15 @@ const MUTANTS = [
       ),
   },
   {
+    // [COMMISSIONING §4] القائمة صارت **قيمتين** (`founder`/`support`)، فبطل
+    // نصّ الطفرة القديم (`appClaim !== ACCEPTED_ROLE`). والطقم أسقط نفسه
+    // بصوتٍ عالٍ بدل أن يمرّ على طفرةٍ لم تعد تُطبَّق — وهذا هو المطلوب منه.
+    // الطفرة الآن تُبطل المطابقة نفسها: أيّ ادّعاء يصير دورًا مقبولًا.
     name: 'يسقط القائمة البيضاء فيقبل أي قيمة دور',
-    apply: (s) => s.replace("if (appClaim !== ACCEPTED_ROLE) {", "if (false) {"),
+    apply: (s) => s.replace(
+      'const matched = ACCEPTED_ROLES.find((r) => appClaim === r)',
+      "const matched = 'founder'",
+    ),
   },
   {
     name: 'يمنح عند التعمّق بلا دور (canRead متساهل)',

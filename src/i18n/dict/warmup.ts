@@ -17,6 +17,18 @@ export interface WarmupStrings {
   /** «≈ دقيقتان» — الرقم من الخطة المبنيّة لا مكتوبًا بيد. */
   estimate: (minutes: number) => string
   stepLabel: Record<WarmupStepLabel, string>
+  /**
+   * تعليمة كل نوع خطوة — [WORKOUT-CONTINUITY-001] الإصلاح ٤.
+   *
+   * الإحماء كان اسمًا ورقمًا بلا كلمة واحدة عن **الغرض**. وقياس المستودع:
+   * ١١٢ من ١٨١ تمرينًا لها إطار معروف الحقوق، و٦٩ بلا صورة إطلاقًا — ومنها
+   * أجهزة الخطط المولّدة نفسها. فالنصّ هنا ليس بديلًا مؤقّتًا عن صورة، بل هو
+   * التعليمة الوحيدة الممكنة الصادقة لأكثر من ثلث الكتالوج. صورةٌ خاطئة أسوأ
+   * من لا صورة (§5)، والوسائط المُعلَّمة لا تعود (§8 قرار مقفل ٨).
+   */
+  stepCue: Record<WarmupStepLabel, string>
+  /** ما ينتظر خلف الإحماء — الإحماء مرحلة لا نهاية. */
+  afterWarmup: (exercises: number) => string
   /** «٦٠ كجم × ٥» */
   loadLine: (kg: number, reps: number) => string
   /** «مجموعة خفيفة × ١٠» — بلا وزن مقترح؛ الخفّة يقدّرها صاحبها. */
@@ -45,6 +57,15 @@ const AR: WarmupStrings = {
     pct80: '٨٠٪',
     light: 'خفيفة',
   },
+  stepCue: {
+    bar: 'بالبار فاضي: امشِ الحركة كاملة ببطء وحسّ بمسارها وتوازنك قبل ما تضيف أي وزن.',
+    pct40: 'وزن خفيف جدًّا — الهدف تسخين المفصل، مو التعب. نزول متحكّم وطلوع مرتاح.',
+    pct60: 'هنا تثبّت مسار الحركة وسرعتها — نفس التكنيك اللي بتشتغل فيه بالثقيل بالضبط.',
+    pct80: 'قريب من وزن شغلك — تكرارات قليلة وتوقّف وأنت قوي، خلّ الشدّة للمجموعات الجاية.',
+    light: 'وزن تقدر عليه براحة — مدى حركة كامل، نزول بطيء، وحسّ بالعضلة تصحى.',
+  },
+  afterWarmup: (exercises) =>
+    `بعده على طول: ${formatNumber(exercises, 'ar')} تمارين اليوم، وبعدها الإنهاء.`,
   loadLine: (kg, reps) => `${formatNumber(kg, 'ar')} كجم × ${formatNumber(reps, 'ar')}`,
   lightLine: (reps) => `مجموعة خفيفة × ${formatNumber(reps, 'ar')}`,
   startCta: 'خلّصت الإحماء · ابدأ التمرين',
@@ -69,6 +90,15 @@ const EN: WarmupStrings = {
     pct80: '80%',
     light: 'Light',
   },
+  stepCue: {
+    bar: 'Empty bar: walk the full movement slowly and feel the path and your balance before you add any weight.',
+    pct40: 'Very light — this is to warm the joint, not to tire you. Controlled down, easy up.',
+    pct60: 'This is where you lock in the path and the tempo — exactly the technique you will use when it gets heavy.',
+    pct80: 'Close to your working weight — few reps, stop while you are still strong, save the effort for the working sets.',
+    light: 'A weight you can handle comfortably — full range, slow on the way down, feel the muscle wake up.',
+  },
+  afterWarmup: (exercises) =>
+    `Straight after: today’s ${formatNumber(exercises, 'en')} exercises, then you finish.`,
   loadLine: (kg, reps) => `${formatNumber(kg, 'en')} kg × ${formatNumber(reps, 'en')}`,
   lightLine: (reps) => `Light set × ${formatNumber(reps, 'en')}`,
   startCta: 'Warm-up done · start the workout',

@@ -745,7 +745,9 @@ export async function loadEmailHealth(
           return {
             idempotencyKey: txt(row.idempotency_key),
             templateId: txt(row.template_id),
-            attempts: numOrNull(row.attempts) ?? 0,
+            // **لا `?? 0`**: «لم يصل عدد المحاولات» ليس «صفر محاولات».
+            // الفرق تشغيليّ حقيقي — صفرٌ يقول «لم نحاول»، والغياب يقول «لا نعرف».
+            attempts: numOrNull(row.attempts),
             lastReason: txtOrNull(row.last_reason),
             deadAt: txtOrNull(row.dead_at),
           }

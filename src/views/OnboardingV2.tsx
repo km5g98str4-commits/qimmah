@@ -75,6 +75,15 @@ import { isExistingPlanEdit } from '@/lib/customization'
 import { PaidActionDenied } from '@/lib/access/guard'
 import type { TrialOutcome } from '@/lib/access/entitlementBackend'
 import { SynthesisScreen } from '@/views/reveal/SynthesisScreen'
+
+/**
+ * [COMMISSIONING §10] أقلّ مكوث للحظة التجهيز.
+ *
+ * ‏١١٠٠م.ث = مرحلتان بحدّ `MIN_STAGE_MS` (٤٢٠) وزيادة صغيرة. الرقم مختار
+ * ليُقرأ سطران لا لِيُملأ وقت: التوليد ينتهي في ~٢٠م.ث، فبلا أرضيةٍ ما تُقرأ
+ * كلمة واحدة. وأطول من ذلك يصير الانتظار مصطنعًا — والتكليف يمنعه صراحةً.
+ */
+const SYNTHESIS_FLOOR_MS = 1100
 import { RevealJourney } from '@/views/reveal/RevealJourney'
 import { RevealValue } from '@/views/reveal/RevealValue'
 import { revealStrings } from '@/i18n/dict/reveal'
@@ -86,6 +95,12 @@ interface OnboardingV2Props {
   lang: Lang
   /** Preview-complete: enters the app via the existing safe local completion path. */
   onComplete: () => void
+  /**
+   * [COMMISSIONING §10] يُنادى **عند بدء** الإنهاء لا عند نهايته.
+   * الأب يقفل سطحه على الإعداد حتى يكتمل، فلا يستبدله بمحرّرٍ لأن
+   * `markCompleted()` كتبت في المنتصف (انظر التعليل في `SetupView`).
+   */
+  onFinalizeStart?: () => void
   /** Exit from the first step (back to Start). */
   onExit: () => void
   /** يسلّم مخرجات التوليد المحفوظة لشاشة التسليم (حزمة ٣). */
@@ -151,7 +166,7 @@ const toAr = (n: number, lang: Lang) => (lang === 'en' ? String(n) : String(n).r
  * labelled fieldset. Choices map to the existing `Answers` model
  * (onboardingV2Adapter) and run the SAME local generation pipeline v1 uses.
  */
-export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: OnboardingV2Props) {
+export function OnboardingV2({ lang, onComplete, onExit, onPlanReady, onFinalizeStart }: OnboardingV2Props) {
   const t = V2_ONBOARDING[lang] ?? V2_ONBOARDING.ar
   const { customization, applyCustomization } = useCustomization()
   const auth = useAuth()
@@ -168,6 +183,8 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   // 0 الأساسيات · 1 النية · 2 التاريخ · 3 الهدف · 4 الجدول · 5 السياق · 6 القيود · 7 جاهز.
   const [step, setStep] = useState(initialDraft.step)
   const [status, setStatus] = useState<FinalizeStatus>('idle')
+  /** لحظة الضغط — الأرضية تُقاس منها لا من نهاية التوليد. */
+  const buildStartedAt = useRef(0)
   // [CTO-009/WP-2] الترحيب يسبق أول سؤال — **لمن يبدأ من الصفر فقط**. من يعود
   // إلى مسودّة محفوظة يُستأنف من حيث وقف، فلا يُعاد ترحيبه كأنه زائر جديد.
   const [showWelcome, setShowWelcome] = useState(initialDraft.step === 0)
@@ -360,6 +377,10 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
   // retry and DO NOT enter the app. On success we clear the draft and enter.
   const finalize = () => {
     if (status === 'building') return
+    // [COMMISSIONING §10] لحظة التجهيز — البداية تُختم بالوقت لا بعدّاد وهمي.
+    buildStartedAt.current = Date.now()
+    // يُعلِم الأب أن الإنهاء بدأ، فيقفل سطحه على الإعداد حتى يكتمل.
+    onFinalizeStart?.()
     setStatus((s) => finalizeReduce(s, 'start'))
     void (async () => {
       try {
@@ -438,8 +459,6 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           setStatus((st) => finalizeReduce(st, 'storageFail'))
           return
         }
-        // نفس التوليد الذي حُفظ يُسلَّم للتسليم — لا توليد ثانٍ للعرض.
-        onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale, profile: artifacts.profile })
         // [CTO-68] الحدث ٣ — إكمال الإعداد. **بعد** بناء الخطة وحفظها ووسمها مكتملة،
         // لا عند ضغط الزر: الفشل يرمي قبل هذا السطر فلا يُسجَّل إكمال لم يحدث.
         trackLocal('setup_completed', {})
@@ -447,8 +466,40 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
         // only when signed in. persistOnboardingToProfile never throws.
         if (userId) void persistOnboardingToProfile(userId, op)
         clearDraftV2(userId) // discard the resumable draft — setup is complete
-        setStatus((s) => finalizeReduce(s, 'ok'))
-        onComplete()
+
+        /**
+         * ═══ [COMMISSIONING §10] لحظة تجهيز يراها المستخدم ═══
+         *
+         * `SynthesisScreen` مبنيّة بالكامل منذ `[OVERNIGHT-4]`: خمس مراحل
+         * بنصّيها، ومسار «قلّل الحركة»، وعقدٌ صريح اسمه `done`. **ولم تُستعمل
+         * قط**: التوليد ينتهي في نحو عشرين ميلي ثانية، فتُركَّب الشاشة وتُفكَّك
+         * قبل أن تُقرأ مرحلتها الأولى — و`done` كانت ممرَّرة `false` حرفيًّا،
+         * فمنطقُ «انتهى العمل، أنهِ المرحلة الجارية وقف» لا يعمل أبدًا.
+         *
+         * وما يُضاف هنا **ليس انتظارًا مزيّفًا**: العمل الحقيقي انتهى فعلًا،
+         * وما تصفه المراحل **حدث**: بُني الملف، ووُلّدت الخطة، وحُسبت الأهداف،
+         * وحُفظ كلّه. فهي سردٌ لخطوات وقعت لا شريط تقدّم يدّعي قياس شيء جارٍ.
+         * ما يبقى أرضيةٌ قصيرة تكفي ليُقرأ سطران — والتكليف يقول حرفيًّا: «لا
+         * تُبطئ التطبيق ثوانٍ لأجل حركة؛ وإن كان التوليد فوريًّا فانتقالٌ قصير
+         * مصقول». والحدّ محروس من الطرفين: إثبات المتصفّح يُسقط أي مكوث فوق
+         * ٢٥٠٠م.ث كما يُسقط أي وميض تحت ٨٠٠.
+         *
+         * والأرضية **من لحظة الضغط لا من هنا**: لو تأخّر التوليد فعلًا فقد
+         * انقضت أصلًا، فلا يُضاف إليها شيء.
+         */
+        const elapsed = Date.now() - buildStartedAt.current
+        const remaining = Math.max(0, SYNTHESIS_FLOOR_MS - elapsed)
+        window.setTimeout(() => {
+          // ⚠️ **`onPlanReady` يؤجَّل معها بقصد.** كان يُستدعى فور انتهاء العمل،
+          // فيبدّل الأبُ الشاشة **فورًا** — وتُفكَّك لحظةُ التجهيز مهما طالت
+          // حالتُها الداخلية. مقيس في المتصفّح: مكثت ١١م.ث وتقدّمت ٠ مراحل.
+          // فالتأجيل ليس تجميلًا بل هو ما يجعل اللحظة موجودة أصلًا.
+          //
+          // ونفس التوليد الذي حُفظ يُسلَّم للتسليم — لا توليد ثانٍ للعرض.
+          onPlanReady?.({ plan: artifacts.generated, goalType: artifacts.profile.goalType, rationale: artifacts.rationale, profile: artifacts.profile })
+          setStatus((s) => finalizeReduce(s, 'ok'))
+          onComplete()
+        }, remaining)
       } catch (error) {
         // المنع ليس عطلًا. لو أفلت فعل مدفوع من الفحص أعلاه — لأن كاتبًا جديدًا
         // أضاف حارسًا لا تعرفه الواجهة — فالمخرج بوّابة Premium لا شاشة الخطأ:
@@ -489,8 +540,24 @@ export function OnboardingV2({ lang, onComplete, onExit, onPlanReady }: Onboardi
           busy={status === 'building'}
           onEnter={finalize}
         />
-        {/* [OVERNIGHT-4] القصّة تتبع العمل ولا تقوده — `done` تأتي من الحالة
-            الحقيقية، فلا يمشي عدّاد بلا عمل خلفه (§6.1). */}
+        {/*
+          [OVERNIGHT-4] القصّة تتبع العمل ولا تقوده (§6.1).
+
+          ═══ [COMMISSIONING §10] ولماذا `done` تبقى `false` هنا ═══
+          `done` تعني «**قف الآن**»: وُضعت ليمتنع العدّاد عن المشي بعد أن ينتهي
+          العمل. وجرّبتُ تمرير الحالة الحقيقية فيها، فكانت النتيجة المقيسة:
+          التوليد ينتهي في ~٢٢م.ث، فتتجمّد القصّة عند سطرها الأول وتبقى ساكنة
+          طوال اللحظة. أي أن العقد الحرفيّ يعطي **شاشة جامدة** لا قصّة.
+
+          والأرضية غيّرت المعنى: الشاشة تُفكَّك في اللحظة التي تنقضي فيها، فلا
+          يمكن أن يمشي عدّاد بعد انتهاء العمل أصلًا — وهو الخطر الذي وُجدت
+          `done` لأجله. وما تصفه المراحل **حدث فعلًا**: بُني الملف، ووُلّدت
+          الخطة، وحُسبت الأهداف، وحُفظ كلّه. فهي سردٌ لخطوات وقعت، لا شريط
+          تقدّم يدّعي أنه يقيس شيئًا جاريًا.
+
+          والحدّ محفوظ في الطرفين: أرضيةٌ لا تتجاوز ١١٠٠م.ث، وإثباتُ متصفّح
+          يُسقط أي مكوث فوق ٢٥٠٠م.ث — «لا تُبطئ التطبيق ثوانٍ لأجل حركة».
+        */}
         {status === 'building' && <SynthesisScreen lang={lang} done={false} />}
         {status === 'error' && <ErrorScreen lang={lang} t={t} onRetry={finalize} onDismiss={() => setStatus('idle')} />}
         {status === 'storage' && <StorageBlockedScreen lang={lang} t={t} onRetry={finalize} onDismiss={() => setStatus('idle')} />}

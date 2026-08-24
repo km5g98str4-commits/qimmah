@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { WorkoutMode } from '@/components/WorkoutMode'
 import { WorkoutSummary } from '@/components/WorkoutSummary'
@@ -40,6 +40,12 @@ import { weeklyAdherenceStreak } from '@/lib/streaks'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import type { PlanDay } from '@/types/workout'
 import { useAccess } from '@/lib/access/useAccess'
+
+/** ما اقتُطع من جلسة اليوم ولماذا — يسافر من موضع الاقتطاع إلى موضع الإخبار. */
+interface TrimmedInfo {
+  fullCount: number
+  reason: 'firstWeek' | 'easy'
+}
 
 interface FinishSummary {
   session: WorkoutSession
@@ -99,6 +105,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const [resumeFrom, setResumeFrom] = useState<ActiveWorkout | undefined>(undefined)
 
   const [activeDay, setActiveDay] = useState<PlanDay | null>(null)
+  /** اقتطاع الجلسة الجارية — تعرضه `WorkoutMode` صراحةً (الإصلاح ١). */
+  const [trimmed, setTrimmed] = useState<TrimmedInfo | null>(null)
   const [summary, setSummary] = useState<FinishSummary | null>(null)
   /** فشل كتابة الجلسة — يُعرض بصدق ولا يُبتلع ([CTO-71] البند ٢). */
   const [saveError, setSaveError] = useState<WriteResult | null>(null)
@@ -111,21 +119,55 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
    * جلسته الحقيقية. والاقتطاع في الذاكرة فقط: `plan` المحفوظة لا تُمَس إطلاقًا،
    * والعلم مختوم باليوم فينتهي وحده — لا تعديل خطة ولا كتابة دائمة.
    */
-  const applyEasyIfActive = (day: PlanDay): PlanDay => {
+  /**
+   * [WORKOUT-CONTINUITY-001] الإصلاح ١ — الاقتطاع صار **يُبلَّغ** لا يقع صامتًا.
+   *
+   * ═══ ما قِيس ═══
+   * حساب جديد، خطة اليوم أربعة تمارين، مدّة معروضة ٤٥ دقيقة. سقف الأسبوع الأول
+   * ١٥ دقيقة ⇒ `easyExerciseCount(4, 45, 15)` = `round(4 × 15 / 45)` = **١**.
+   * فالزرّ يَعِد «٤ تمارين» والجلسة تفتح على «١ من ١» ثم تنتهي. لا الشاشة ولا
+   * الجلسة تذكر السبب — والقراءة الوحيدة المتاحة للمستخدم أن التطبيق **نسي**
+   * بقية تمرينه. وهو بلاغ المؤسس حرفيًّا.
+   *
+   * القرار (سقف الأسبوع الأول · [CTO-70] البند ٤) قرار مؤسس ولا يُعاد فتحه هنا،
+   * ولا تُمَسّ الخطة المحفوظة. الذي يتغيّر أن الدالّة صارت تُرجِع **ما اقتُطع
+   * ولماذا** بدل يومٍ مبتور بلا سيرة، فيحمله الزرّ والجلسة معًا.
+   */
+  const applyEasyIfActive = (day: PlanDay): { day: PlanDay; trimmed?: TrimmedInfo } => {
     const fullMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : 0
-    if (fullMin <= 0 || day.exercises.length === 0) return day
+    if (fullMin <= 0 || day.exercises.length === 0) return { day }
 
     // [CTO-70] البند ٤ — سقف الأسبوع الأول (≤١٥ دقيقة)، ثم البند ٣ — التخفيف
     // اليدوي. الأصغر منهما يفوز: من ضغط «ابدأ بنسخة أخفّ» في أسبوعه الأول
     // يحصل على الأخفّ فعلًا لا على السقف وحده.
+    const easy = isEasyToday(userId)
     const capMin = cappedSessionMinutes(fullMin, journeyDayIndex())
-    const targetMin = isEasyToday(userId) ? Math.min(capMin, easyMinutesFor(fullMin)) : capMin
-    if (targetMin >= fullMin) return day
+    const targetMin = easy ? Math.min(capMin, easyMinutesFor(fullMin)) : capMin
+    if (targetMin >= fullMin) return { day }
 
     const keep = easyExerciseCount(day.exercises.length, fullMin, targetMin)
-    if (keep <= 0 || keep >= day.exercises.length) return day
-    return { ...day, exercises: day.exercises.slice(0, keep) }
+    if (keep <= 0 || keep >= day.exercises.length) return { day }
+    return {
+      day: { ...day, exercises: day.exercises.slice(0, keep) },
+      // السبب يتبع الأصغر فعلًا: من اختار التخفيف يُقال له «باختيارك»، ومن
+      // اقتطعه السقف وحده يُقال له «أسبوعك الأول». نسبة السبب لغير صاحبه كذبة صغيرة.
+      trimmed: {
+        fullCount: day.exercises.length,
+        reason: easy && easyMinutesFor(fullMin) <= capMin ? 'easy' : 'firstWeek',
+      },
+    }
   }
+
+  /**
+   * ما سيُسلَّم فعلًا لو ضُغط «ابدأ تمرين اليوم» الآن — يقرؤه الزرّ ليَعِد به.
+   * `useMemo` لأن `isEasyToday`/`journeyDayIndex` تقرآن التخزين في كل استدعاء.
+   */
+  const todayDelivery = useMemo(
+    () => (planDay ? applyEasyIfActive(planDay) : null),
+    // يتبع يوم الخطة وعدد تمارينه ومدّة الملف — وكلّها ما يدخل في الاقتطاع.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [planDay?.id, planDay?.exercises.length, customization.profile.workoutDuration, userId],
+  )
 
   /**
    * [SOVEREIGN-TODAY-001] المهمّة ١ — الإحماء مرحلة قبل أول مجموعة عمل.
@@ -136,14 +178,15 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
    * «إحماء ← تمارين ← إنهاء»، والانتصار الأول يُسجَّل عند **إتمام** الإحماء لا
    * عند نيّة البدء — ومن تخطّاه لا يُحتسب له (النصّ في الشاشة يقولها صراحةً).
    */
-  const [pendingWarmup, setPendingWarmup] = useState<{ day: PlanDay; plan: WarmupPlan } | null>(null)
+  const [pendingWarmup, setPendingWarmup] = useState<{ day: PlanDay; plan: WarmupPlan; trimmed?: TrimmedInfo } | null>(null)
 
   /** الدخول الفعلي لوضع الجلسة — نقطة واحدة يمرّ بها الإحماء والتخطّي معًا. */
-  const beginSession = (day: PlanDay) => {
+  const beginSession = (day: PlanDay, trimmed?: TrimmedInfo) => {
     setPendingWarmup(null)
     setResumeFrom(undefined)
     // [CTO-68] الحدث ١٠ — بدء تمرين، لحظة دخول وضع الجلسة.
     trackLocal('workout_session_started', { exercises: day.exercises.length })
+    setTrimmed(trimmed ?? null)
     setActiveDay(day)
   }
 
@@ -151,15 +194,15 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   // بدل استثناء. الطبقة الثانية (`assertPaid` داخل `saveActiveWorkout`) هي التي
   // تصمد أمام الالتفاف؛ هذه تجعل الرفض مفهومًا لا مخيفًا.
   const startDay = guardPaid('workout.start', (rawDay: PlanDay) => {
-    const day = applyEasyIfActive(rawDay)
+    const { day, trimmed: cut } = applyEasyIfActive(rawDay)
     const warmup = buildWarmupPlan(day)
     // بلا خطوات إحماء (يوم بلا تمارين) أو بتعطيل صريح من المستخدم ⇒ لا شاشة
     // فارغة تُعترض الطريق. والوعد في «اليوم» يختفي بنفس الشرط — مصدر واحد.
     if (warmup.steps.length === 0 || !loadWarmupPref(userId).show) {
-      beginSession(day)
+      beginSession(day, cut)
       return
     }
-    setPendingWarmup({ day, plan: warmup })
+    setPendingWarmup({ day, plan: warmup, trimmed: cut })
   })
 
   /**
@@ -186,6 +229,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const resumeWorkout = () => {
     if (!pendingResume || !resumeDay) return
     setResumeFrom(pendingResume)
+    // الجلسة المستأنفة لا تحمل سيرة اقتطاعها، ولا يُخمَّن سبب لم يُسجَّل (§5).
+    setTrimmed(null)
     setActiveDay(resumeDay)
     setPendingResume(undefined)
   }
@@ -360,7 +405,14 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
                 </span>
                 <span className="min-w-0">
                   <span className="block text-sm font-black">{d.startTodayWorkout}</span>
-                  <span dir="auto" className="block truncate text-xs text-white/85">{formatNumeralsIn(lang === 'en' ? planDay.nameEn : planDay.nameAr, lang)} · {formatNumber(planDay.exercises.length, lang)} {d.exercisesUnit}</span>
+                  {/* [WORKOUT-CONTINUITY-001] الإصلاح ١ — الزرّ يَعِد بما يُسلَّم.
+                      كان يعرض عدد تمارين الخطة (٤) ثم تفتح جلسة «١ من ١». */}
+                  <span dir="auto" className="block truncate text-xs text-white/85">
+                    {formatNumeralsIn(lang === 'en' ? planDay.nameEn : planDay.nameAr, lang)} ·{' '}
+                    {todayDelivery?.trimmed
+                      ? d.startTrimmedCount(todayDelivery.day.exercises.length, todayDelivery.trimmed.fullCount, lang)
+                      : `${formatNumber(planDay.exercises.length, lang)} ${d.exercisesUnit}`}
+                  </span>
                 </span>
               </button>
             )}
@@ -593,15 +645,16 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             plan={pendingWarmup.plan}
             dayNameAr={pendingWarmup.day.nameAr}
             dayNameEn={pendingWarmup.day.nameEn}
+            exerciseCount={pendingWarmup.day.exercises.length}
             onStart={() => {
               // [CTO-70] البند ١ — الآن فقط: الإحماء وقع فعلًا، فيُسجَّل.
               completeFirstWin('warmup')
-              beginSession(pendingWarmup.day)
+              beginSession(pendingWarmup.day, pendingWarmup.trimmed)
             }}
-            onSkip={() => beginSession(pendingWarmup.day)}
+            onSkip={() => beginSession(pendingWarmup.day, pendingWarmup.trimmed)}
             onDisable={() => {
               saveWarmupPref(userId, { show: false })
-              beginSession(pendingWarmup.day)
+              beginSession(pendingWarmup.day, pendingWarmup.trimmed)
             }}
           />
         </div>
@@ -610,7 +663,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
       {/* وضع التمرين — فوق الشريط السفلي */}
       {activeDay && (
         <div className="fixed inset-0 z-[60]">
-          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} onClose={requestClose} onFinish={finish} onSaveError={setSaveError} />
+          <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} trimmed={trimmed ?? undefined} onClose={requestClose} onFinish={finish} onSaveError={setSaveError} />
           {/* [CTO-71] البند ٢ — فشل الحفظ يُقال صراحةً فوق الجلسة القائمة.
               لا شاشة ملخّص ولا «أحسنت»: العمل لم يُحفَظ، والجلسة باقية للمحاولة. */}
           {saveError && (

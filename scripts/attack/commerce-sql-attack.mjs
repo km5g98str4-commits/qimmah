@@ -180,12 +180,30 @@ await refused('كود خارج نافذته الزمنية ⇒ مرفوض', () =
 // ── السباق: الحدّ محروس بنيويًا لا بالقفل وحده ───────────────────────────
 {
   await asRole(db, null)
-  const def = (await q(`select pg_get_functiondef(p.oid) d from pg_proc p
-                        join pg_namespace n on n.oid=p.pronamespace
-                        where n.nspname='public' and p.proname='redeem_access_code'`)).rows[0].d
-  check('الدالة **المنشورة** تقفل صفّ الكود بـfor update', /for\s+update/i.test(def))
+  /**
+   * ═══ [COMMISSIONING §5] القفل انتقل إلى النواة، فالفحص يتبعه ═══
+   * صار للاستهلاك مدخلان عامّان (`redeem_access_code` و`_v2`) فوق **نواة
+   * واحدة** (`private.redeem_core`) — وهناك يعيش قفل الصفّ. فقراءة جسم الغلاف
+   * تجده بلا `for update` وتُبلّغ عن ثغرة لا وجود لها.
+   *
+   * والفحص لا يُوجَّه إلى اسمٍ ثابت جديد (فيشيخ في أوّل نقلة تالية): يُبحث عن
+   * **مالك القفل الفعلي** بين دوالّ الاستهلاك، ثم يُشترط أن كل مدخل عامّ
+   * يمرّ به. فلا مدخل يلتفّ على النواة مهما أُضيف.
+   */
+  const redeemFns = (await q(`select p.proname, n.nspname, pg_get_functiondef(p.oid) d
+                              from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+                              where p.proname like '%redeem%' and n.nspname in ('public','private')`)).rows
+  const locker = redeemFns.find((r) => /for\s+update/i.test(r.d))
+  check('نواةٌ واحدة تقفل صفّ الكود بـfor update', Boolean(locker),
+    redeemFns.map((r) => `${r.nspname}.${r.proname}`).join(' · '))
+  const def = locker?.d ?? ''
   check('والقراءة بعد القفل — الفحوص تلي select ... for update',
     def.indexOf('for update') < def.indexOf('redemption_count >= c.max_redemptions'))
+  // ولا مدخل عامّ يلتفّ على النواة: كلٌّ إمّا يحمل القفل أو يستدعي حاملَه.
+  const publicEntries = redeemFns.filter((r) => r.nspname === 'public')
+  const bypassing = publicEntries.filter((r) => !/for\s+update/i.test(r.d) && !r.d.includes(`${locker?.nspname}.${locker?.proname}`))
+  check(`وكل مدخل عامّ يمرّ بها (${publicEntries.length})`, bypassing.length === 0,
+    bypassing.map((r) => r.proname).join(' · '))
   await refused('شبكة الأمان البنيوية: تجاوز الحدّ مرفوض حتى بكتابة مباشرة من المالك',
     () => q(`update public.access_codes set redemption_count = max_redemptions + 1
              where code_hash = private.hash_identity('SNGLEUSE23',1)`),

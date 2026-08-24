@@ -432,7 +432,7 @@ export interface EmailHealth {
   readonly dead: readonly {
     readonly idempotencyKey: string
     readonly templateId: string
-    readonly attempts: number
+    readonly attempts: number | null
     readonly lastReason: string | null
     readonly deadAt: string | null
   }[]

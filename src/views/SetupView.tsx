@@ -40,6 +40,20 @@ export function SetupView({ onClose, onEnterFromHandoff, onCreateAccount, initia
   // `mode` حتى لا يسحب المحرّرُ المتقدّم البساطَ من تحت التسليم.
   const [finished, setFinished] = useState(false)
   /**
+   * ═══ [COMMISSIONING §10] قفلٌ على لحظة الإنهاء ═══
+   *
+   * `mode` يُشتقّ في الأب من «هل اكتمل الإعداد؟». و`markCompleted()` تُكتب في
+   * منتصف الإنهاء **قبل** التسليم بقصد (فإغلاق المتصفّح عندها لا يفقد شيئًا).
+   * والنتيجة المقيسة: `mode` ينقلب `onboarding → advanced` بعد ٣٩م.ث من
+   * الضغط، فتُستبدل شاشة الإعداد بـ**محرّر الخطة المتقدّم** للحظة، ثم يظهر
+   * التسليم. وميضٌ لمحرّرٍ لم يطلبه أحد.
+   *
+   * كان الوميض غير مرئيّ لأن التسليم يليه فورًا. ولمّا صارت للتجهيز لحظةٌ
+   * تُقرأ ظهر العطل على حقيقته — فأُصلح لا أُخفي: من دخل ليُنهي إعداده يبقى
+   * في الإعداد حتى ينتهي، مهما تغيّر ما يُشتقّ في الأب تحته.
+   */
+  const [completing, setCompleting] = useState(false)
+  /**
    * [QIM-WEB-FOUNDER-UX-004/حزمة ٣] مخرجات التوليد تعيش هنا لا في `OnboardingV2`:
    * المزلاج نفسه ولنفس السبب — `markCompleted` يفكّ تركيب المعالج، فأي حالة فيه
    * تموت قبل أن تُرسَم. وغيابها يعني تسليمًا بلا أرقام، لا تسليمًا بأرقام مخترعة.
@@ -74,13 +88,14 @@ export function SetupView({ onClose, onEnterFromHandoff, onCreateAccount, initia
 
   // الإعداد الأولي = باني الخطة الجوال الكامل. خطأ العرض يعاد عبر الحاجز الموحد
   // من دون تحويله إلى إكمال كاذب أو مسح المسودة المحفوظة.
-  if (mode !== 'advanced') {
+  if (completing || mode !== 'advanced') {
     return (
       <RouteErrorBoundary>
         {/* الخطة تُحفظ ويُوسَم الإعداد مكتملًا **قبل** هذا النداء، فالتسليم عرضٌ
             لا تعليق لعقد الإكمال: إغلاق المتصفّح عنده لا يفقد شيئًا. */}
         <OnboardingV2
           lang={getLanguage()}
+          onFinalizeStart={() => setCompleting(true)}
           onComplete={() => setFinished(true)}
           onExit={() => onClose(false)}
           onPlanReady={setArtifacts}

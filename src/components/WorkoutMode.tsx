@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from './Icon'
 import { ExerciseMedia } from './ExerciseMedia'
+import { SessionStageRail } from './workout/SessionStageRail'
 import { ExerciseName } from './ExerciseName'
 import { MachineAltCards } from './machine/MachineAltCards'
 import { MachineHowTo } from './machine/MachineHowTo'
@@ -35,6 +36,14 @@ interface WorkoutModeProps {
   resume?: ActiveWorkout
   /** فشل/تعافي كتابة اللقطة الجارية — تعرضه الشاشة المالكة فوق وضع الجلسة. */
   onSaveError?: (result: WriteResult | null) => void
+  /**
+   * اقتطاع الجلسة — [WORKOUT-CONTINUITY-001] الإصلاح ١.
+   *
+   * حين تُسلَّم الجلسة **أقصر من يوم الخطة**، تصل هنا الحقيقة كاملة: كم تمرينًا
+   * في اليوم أصلًا، ولماذا قُصّرت. غيابها هو العطل نفسه — الجلسة تُسلّم تمرينًا
+   * واحدًا من أربعة بلا كلمة، فتبدو وكأنها «نسيت بقية التمرين».
+   */
+  trimmed?: { fullCount: number; reason: 'firstWeek' | 'easy' }
 }
 
 interface ExState {
@@ -101,7 +110,7 @@ function repsInvalid(v: string): boolean {
 }
 
 /** وضع التمرين النشط — شاشة كاملة، تمرين واحد في كل خطوة، تسجيل سريع. */
-export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, userId = null, resume, onSaveError }: WorkoutModeProps) {
+export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, userId = null, resume, onSaveError, trimmed }: WorkoutModeProps) {
   const t = getStrings(lang).workout
   const d = workoutScreenStrings[lang]
   // (P10.1) أسهم التنقّل تتبع اتجاه اللغة: «التالي» مع اتجاه القراءة و«السابق/الرجوع» عكسه.
@@ -127,6 +136,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   const [savedFlash, setSavedFlash] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const flashTimer = useRef<number | null>(null)
+  /** حاوية المحتوى — تُعاد لأعلاها عند كل انتقال تمرين (الإصلاح ٣). */
+  const mainRef = useRef<HTMLElement>(null)
   /** لا نعلن «حُفظت الجولة» إلا بعد نتيجة التخزين الفعلية للّقطة الجديدة. */
   const flashAfterPersist = useRef(false)
 
@@ -249,6 +260,21 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
     // [CTO-73] الشاشة ١ — طيّة المرجع تتبع القاعدة نفسها: مرجعٌ فُتح لتمرين
     // لا يبقى مفتوحًا للتمرين التالي.
     setOpenRef(false)
+    /**
+     * [WORKOUT-CONTINUITY-001] الإصلاح ٣ — موضع التمرير يُعاد لأعلى التمرين الجديد.
+     *
+     * ═══ العطل المقيس ═══
+     * زرّ «التمرين التالي» في الشريط السفلي، فالمستخدم يضغطه وهو في **أسفل**
+     * الصفحة بعد تسجيل جولاته. و`current` كان يتبدّل بلا لمس التمرير: قياس على
+     * جلسة أربعة تمارين أعطى `scrollTop` بعد الانتقال = ٦٠٢ · ٦٠٢ · ٦٢٤ بكسل
+     * من أصل ١٢١٧ وارتفاع نافذة ٦١٧. أي أن التمرين التالي **يُفتح من منتصفه**:
+     * لا اسمه ولا هدفه ولا سجلّه في مجال الرؤية — حقل رقم وحده.
+     * وهذا هو حرفيًّا «فتح تمرينًا عشوائيًّا»: الشاشة صحيحة والموضع كاذب.
+     *
+     * فوري لا `smooth`: الانتقال بين تمرينين قطعٌ مقصود، والانزلاق الطويل يضيف
+     * حركةً تُقرأ تلعثمًا بدل أن تُقرأ اتصالًا.
+     */
+    mainRef.current?.scrollTo({ top: 0 })
   }, [current])
 
   // حارس: يوم بلا تمارين (مثل «تمرين فارغ») — لا نلمس مرجعًا غير موجود؛ نعرض حالة آمنة.
@@ -448,18 +474,45 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
           </button>
           <div className="min-w-0 text-center">
             <p dir="auto" className="truncate text-base font-black text-ink-900">{formatNumeralsIn(lang === 'en' ? day.nameEn || day.nameAr : day.nameAr || day.nameEn, lang)}</p>
-            <p className="text-sm text-ink-500">{formatNumber(current + 1, lang)} {t.of} {formatNumber(total, lang)}</p>
+            {/* وسم للاختبار لا للعرض: التنويه أسفل الشاشة صار يحمل «من» ورقمين
+                أيضًا، فقراءة العدّاد بمطابقة نصّ الصفحة صارت تلتقط الاثنين. */}
+            <p data-session-counter className="text-sm text-ink-500">{formatNumber(current + 1, lang)} {t.of} {formatNumber(total, lang)}</p>
           </div>
           <div className="h-11 w-11" />
         </div>
-        <div className="container-page pb-3">
+        {/* [WORKOUT-CONTINUITY-001] الإصلاح ٢ — نفس مؤشّر شاشة الإحماء، مثبَّتًا
+            في ترويسة لاصقة. فالمسار «إحماء ← التمارين ← الإنهاء» يبقى مرئيًّا من
+            أول ثانية إلى نافذة الإنهاء، بدل أن ينقطع عند أول ضغطة. وفتح نافذة
+            الإنهاء يقدّم المؤشّر للمرحلة الثالثة — الجلسة تُقرأ مسارًا لا شاشات. */}
+        <div className="container-page space-y-2 pb-3">
+          <SessionStageRail lang={lang} stage={confirmOpen ? 'finish' : 'exercises'} />
           <div className="h-2 w-full overflow-hidden rounded-full bg-line">
             <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${total ? (doneCount / total) * 100 : 0}%` }} />
           </div>
         </div>
       </header>
 
-      <main className="container-page flex-1 space-y-4 overflow-y-auto py-5 pb-40">
+      <main ref={mainRef} className="container-page flex-1 space-y-4 overflow-y-auto py-5 pb-40">
+        {/* ═══ [WORKOUT-CONTINUITY-001] الإصلاح ١ — «وين راحت بقية التمارين؟» ═══
+            قياس على حساب جديد: خطة اليوم **أربعة** تمارين، والجلسة تُسلّم
+            **واحدًا** («١ من ١») بلا كلمة واحدة عن السبب — لأن سقف الأسبوع الأول
+            (١٥ دقيقة من ٤٥) يقتطعها في `WorkoutView.applyEasyIfActive`. القرار
+            نفسه قرار مؤسس مقفل ولا يُعاد فتحه؛ **الصمت** هو العطل: المستخدم يرى
+            تطبيقًا نسي تمرينه. الآن يُقال صراحةً: كم سُلّم، من كم، ولماذا، ومتى
+            يرجع الباقي — والخطة المحفوظة لم تُمَس أصلًا. (§6-٤ الصدق قبل الطمأنينة.) */}
+        {trimmed && trimmed.fullCount > total && (
+          <p data-session-trimmed={trimmed.reason} className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
+            <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+            <span>
+              <span className="block font-black">{trimmed.reason === 'easy' ? d.trimmedEasyTitle : d.trimmedFirstWeekTitle}</span>
+              <span className="mt-0.5 block">
+                {trimmed.reason === 'easy'
+                  ? d.trimmedEasyBody(total, trimmed.fullCount, lang)
+                  : d.trimmedFirstWeekBody(total, trimmed.fullCount, lang)}
+              </span>
+            </span>
+          </p>
+        )}
         {/* ═══ [CTO-73] الشاشة ١ — «وش أسوي الحين؟» ═══
             كان فوق الطية ١٩ عنصرًا متنافسًا، والمجموعة — وهي **الفعل** — تحت
             التمرير: رسمٌ بارتفاع ١٩٢px، ثم الاسم مكرّرًا (داخل الرسم وتحته)،

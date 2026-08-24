@@ -165,6 +165,12 @@ export interface ShellStrings {
     importRecoveryBlocked: string
     importInvalidFile: string
     regenerateSuccess: string
+    /**
+     * [COMMISSIONING] فشل الحفظ يُقال ولا يُبتلع (الميثاق §5).
+     * كانت الشاشة تعلن النجاح **قبل فحص نتيجة الكتابة** — فمن امتلأ تخزينه
+     * يُقال له «تمّ» ثم يجد خطّته القديمة كما هي.
+     */
+    regenerateFailed: string
     groupDev: string
     devReviewProducts: string
     devReviewHint: string
@@ -633,6 +639,7 @@ const ar: ShellStrings = {
     importRecoveryBlocked: 'ما تقدر تستورد وأنت في وضع استعادة كلمة المرور.',
     importInvalidFile: 'الملف مو صالح.',
     regenerateSuccess: 'تم — سوّينا لك خطة جديدة من بياناتك الحالية.',
+    regenerateFailed: 'ما قدرنا نحفظ الخطة الجديدة — خطتك القديمة باقية كما هي. فضّي شوي مساحة وجرّب مرة ثانية.',
     groupDev: 'أدوات داخلية',
     devReviewProducts: 'مراجعة المنتجات',
     devReviewHint: 'مراجعة منتجات ممسوحة/مُضافة بانتظار الاعتماد قبل ظهورها للمستخدمين.',
@@ -1111,6 +1118,7 @@ const en: ShellStrings = {
     importRecoveryBlocked: 'Import is disabled during password recovery.',
     importInvalidFile: 'Invalid file.',
     regenerateSuccess: 'Your plan was regenerated from your current data.',
+    regenerateFailed: "We couldn't save the new plan — your old one is untouched. Free up a little space and try again.",
     groupDev: 'Internal tools',
     devReviewProducts: 'Product review',
     devReviewHint: 'Review scanned or submitted products awaiting approval before they reach users.',

@@ -14,6 +14,8 @@
 import { Catalog } from './catalog'
 import type { CatalogProduct } from './types'
 import type { FoodItem } from '@/data/foodItems'
+import { retailGtin } from '../gtin'
+import { foodSearchStrings } from '@/i18n/dict/foodSearch'
 
 /** بادئة معرّف السجلات المشتقّة من OFF — عليها يتوقّف إظهار النسب. */
 export const OFF_ID_PREFIX = 'off:'
@@ -83,6 +85,27 @@ export function __resetAppCatalog(): void {
 const pick = (ar: string | null, en: string | null, fallback: string): string => ar || en || fallback
 
 /**
+ * اسم معروض لسجل معبّأ — **ولا معرّف داخلي في موضع الاسم** (البند ٣).
+ *
+ * ═══ ما كان يحدث ═══
+ * كان السطر `p.name_ar || p.name_en || p.gtin`. والحقل `gtin` عندنا **GTIN-14
+ * بأصفار بادئة** — مفتاح فهرسة داخلي لا الرقم المطبوع على العبوة. فسجلٌ بلا اسم
+ * (والمخطّط يعترف بإمكانه: `no_arabic_name` · `no_english_name`) كان يظهر في
+ * قائمة النتائج باسمٍ هو `00000017919678`، ويقرؤه المستخدم باركودًا — وليس هو.
+ *
+ * ═══ ما يحدث الآن ═══
+ * اسم صريح من القاموس، والباركود بجانبه **بشكله التجاري وموسومًا بأنه باركود**.
+ * فلا يبقى رقم يتظاهر بأنه اسم، ولا مفتاح داخلي يتظاهر بأنه GTIN.
+ * ويبقى مميِّزًا لكل سجل، فلا ينهار إسقاط التكرار على «منتج بلا اسم» واحد.
+ */
+function displayName(p: CatalogProduct, key: 'name_ar' | 'name_en', lang: 'ar' | 'en'): string {
+  const primary = p[key] || p[key === 'name_ar' ? 'name_en' : 'name_ar']
+  if (primary) return primary
+  const s = foodSearchStrings[lang]
+  return `${s.unnamedPackaged} · ${s.barcodeLabel} ${retailGtin(p.gtin)}`
+}
+
+/**
  * يحوّل سجل كتالوج إلى `FoodItem`.
  *
  * الأساس `per_100g` في خطّ الإنتاج. إن أعلن السجل حصّة حقيقية تُحسب القيم عليها
@@ -94,11 +117,13 @@ export function catalogProductToFoodItem(p: CatalogProduct, lang: 'ar' | 'en'): 
   const factor = grams / 100
   const per = (v: number | null): number => (typeof v === 'number' ? Math.round(v * factor) : 0)
   const brand = pick(p.brand_ar, p.brand_en, '')
-  const name = pick(p.name_ar, p.name_en, p.gtin)
+  // الكلمات المفتاحية تحمل الاسم **المسجَّل** فقط. حشو الباركود فيها كان يجعل
+  // مفتاحنا الداخلي مادة بحث، فيطابقه المستخدم ويظنّه رقم العبوة.
+  const name = pick(p.name_ar, p.name_en, '')
   return {
     id: `${OFF_ID_PREFIX}${p.gtin}`,
-    nameAr: `${p.name_ar || p.name_en || p.gtin}${brand ? ` — ${brand}` : ''}`,
-    nameEn: `${p.name_en || p.name_ar || p.gtin}${brand ? ` — ${brand}` : ''}`,
+    nameAr: `${displayName(p, 'name_ar', lang)}${brand ? ` — ${brand}` : ''}`,
+    nameEn: `${displayName(p, 'name_en', lang)}${brand ? ` — ${brand}` : ''}`,
     // تصنيف قائم أصلًا لمنتجات الباركود — لا مفردة جديدة في القاموس.
     category: 'منتج ممسوح بالباركود',
     servingLabelAr: lang === 'ar' ? `${grams} غ` : `${grams} g`,
