@@ -3,7 +3,7 @@
 > **Canonical owner of one fact only: where execution stands right now.**
 > A zero-context session reads `README.md` → `00-GROUND.md` → this file, and can continue.
 
-**Last updated:** 2026-08-18 · **by:** GOV-003 (freeze + composition)
+**Last updated:** 2026-08-24 · **by:** Codex staging commissioning
 
 ---
 
@@ -74,3 +74,30 @@ shown a *purchase* button. Two defensible answers, both preserving server author
 3. **Repair `scripts/e2e/journeys/*` selectors** (`data-testid`, not text), which unblocks STITCH-02, the contact sheet, and the journey matrix in one move.
 
 Everything else on the board is either closed above, environment-blocked, or founder-owned.
+
+---
+
+## 6. Staging commissioning — current operational state
+
+- **Branch:** `codex/qimmah-final-sovereign-convergence-001`.
+- **Staging project:** `qimmah-staging` · ref `odpkvswfiihrkglgfghd` · region
+  `ap-south-1` · status `ACTIVE_HEALTHY`.
+- **Completed:** §1 and staging SQL bundles 01–06. The branch was fast-forwarded to `aa54bafa`;
+  all six bundles were then applied in filename order through the Management API to staging ref
+  `odpkvswfiihrkglgfghd`, each returning HTTP 201. `supabase-shim.sql` was not run.
+- **Database verification:** `tables=27`, `with_rls=27`, `policies=71`, `anon_writes=0`,
+  `pepper=1`, `client_rpcs=6`, `legacy_open=0`, `migrations=33`.
+- **Behavioral smoke:** preflight found `total_users=0`; the unmodified `staging-smoke.sql` then
+  returned HTTP 201 and cleanup row `leftover_users=0`, `leftover_codes=0`, `total_users=0`.
+  The Management API response and Postgres logs do not expose the nine `RAISE NOTICE` messages,
+  so their exact text is not yet captured; the SQL Editor requires an authenticated dashboard
+  session. No `✗` was visible in the API response, but success of all nine checks is not inferred
+  from the cleanup row alone.
+- **Auth:** `GET /config/auth` returned HTTP 403 because the supplied PAT is scoped to Database +
+  Project; `Confirm email = ON` is therefore not yet independently verified. The public legacy
+  anon key was retrieved through the publishable-keys endpoint; no secret key was requested or
+  reported.
+- **Not started:** §§4–11. No preview deployment, Edge Function deployment, Salla purchase, or
+  production operation has run.
+- **Security:** no database password, `service_role` key, Salla secret, or gateway secret was
+  written to the repository or reported. Production ref `ledlypcyrtnzvjvhykwz` remains untouched.
