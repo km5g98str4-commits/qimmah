@@ -103,19 +103,32 @@ create unique index if not exists food_submissions_open_barcode_idx
 
 alter table public.food_submissions enable row level security;
 
--- صاحب البلاغ يقرأ بلاغه ويُنشئه. **ولا `update` ولا `delete`**: الدليل لا يُحرَّر.
-drop policy if exists food_submissions_insert_own on public.food_submissions;
-create policy food_submissions_insert_own on public.food_submissions
-  for insert to authenticated
-  with check (submitted_by = auth.uid() and status = 'pending' and reviewed_at is null);
+-- ═══ الصلاحيات قبل السياسات — وإلا كانت السياسات زينةً لا حراسة ═══
+--
+-- `20260806120003` ينزع الامتيازات الافتراضية عن `public` بالكامل
+-- (`alter default privileges … revoke all on tables`). فجدولٌ يُنشأ بعده لا
+-- يملك عليه `authenticated` شيئًا، **وسياسة RLS على جدولٍ بلا صلاحية لا
+-- تُستدعى أصلًا**. أي أن كتابة السياسة وحدها كانت ستُقرأ حراسةً وهي لا شيء.
+--
+-- والمنح **انتقائي بقصد**:
+--   `select`  ⇒ نعم: المستخدم يرى بلاغاته (والسياسة تحصره في صفوفه).
+--   `insert`  ⇒ **لا**: الإدراج يمرّ بـ`submit_missing_food` وحدها، وفيها
+--               الحدّ اليومي والتحقّق من خانة الباركود. منحُ الإدراج المباشر
+--               يفتح بابًا يلتفّ على الاثنين معًا.
+--   `update`/`delete` ⇒ لا: الدليل لا يُحرَّر بعد إرساله.
+revoke all on public.food_submissions from anon, authenticated;
+grant select on public.food_submissions to authenticated;
 
+-- صاحب البلاغ يقرأ بلاغه — والسياسة تحصر ما يراه في صفوفه.
 drop policy if exists food_submissions_select_own on public.food_submissions;
 create policy food_submissions_select_own on public.food_submissions
   for select to authenticated
   using (submitted_by = auth.uid());
 
-revoke update, delete on public.food_submissions from anon, authenticated;
-revoke all on public.food_submissions from anon;
+-- ⚠️ **ولا سياسة إدراج هنا بقصد.** كانت في الصيغة الأولى، وهي **لا تُستدعى
+-- أبدًا** لأن `insert` غير ممنوح — سياسةٌ ميتة تصف حراسةً لا وجود لها،
+-- وتُقرأ بعد شهر على أنها المسار المدعوم. المسار الوحيد للإدراج هو الدالّة.
+drop policy if exists food_submissions_insert_own on public.food_submissions;
 
 comment on table public.food_submissions is
   'بلاغات الطعام الناقص. حقول evidence_* دليلُ مستخدم لا حقيقة كتالوج.';

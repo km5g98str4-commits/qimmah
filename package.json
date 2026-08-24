@@ -67,6 +67,7 @@
     "test:offline-entitlement": "node scripts/run-offline-entitlement-proof.mjs",
     "test:trial-resume": "node scripts/run-trial-resume-proof.mjs",
     "test:admin-codes": "node scripts/run-admin-codes-proof.mjs",
+    "test:commissioning": "node scripts/db/commissioning-journeys.mjs",
     "test:migration-order": "node scripts/db/run-migration-order-proof.mjs",
     "test:admin-chunk": "node scripts/run-admin-chunk-proof.mjs",
     "test:today-a11y": "node scripts/run-today-a11y-proof.mjs",

@@ -21,56 +21,309 @@
 -- ============================================================================
 
 -- ── ١) القراءات القائمة تُفتح للدعم — بلا مسّ لأي فعل ──────────────────────
--- `require_founder` ⇐ `require_admin` في القراءات الأربع وحدها. أفعال
+--
+-- ثلاث قراءات تُعاد كتابتها هنا بالكامل، وفيها **سطرٌ واحد اختلف**:
+-- `private.require_founder()` ⇐ `private.require_admin()`. وأفعال
 -- `founder_issue_access_code` · `founder_set_code_enabled` · `founder_revoke_access`
--- **لا تُمسّ**: تبقى للمؤسس وحده.
-do $$
-declare
-  fn text;
-  src text;
-begin
-  foreach fn in array array['founder_executive_snapshot', 'founder_user_page',
-                            'founder_user_detail', 'founder_code_page']
-  loop
-    select p.prosrc into src
-      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-     where n.nspname = 'public' and p.proname = fn
-     limit 1;
-    if src is null then
-      raise exception 'expected function public.% to exist before widening its gate', fn;
-    end if;
-    -- الاستبدال نصّي على الجسم القائم: لا نعيد كتابة القراءات (وهي طويلة
-    -- وتتغيّر بهجرات لاحقة)، بل نبدّل **الحارس وحده**. فأي تعديل مستقبلي على
-    -- جسم الدالّة يبقى محفوظًا، ولا ينشأ تنفيذان يتباعدان.
-    if position('private.require_founder()' in src) = 0 then
-      raise exception 'function public.% no longer calls require_founder — refusing to guess', fn;
-    end if;
-  end loop;
-end $$;
+-- **لا تُمسّ**: تبقى للمؤسس وحده. (و`founder_code_page` أدناه تُعاد كتابتها
+-- كذلك لأن شكل إرجاعها نفسه يتغيّر.)
+--
+-- ⚠️ **ولماذا تُنسخ الأجسام كاملةً بدل تعديل الحارس في مكانه؟**
+-- الصيغة الأولى هنا استبدلت النصّ داخل `pg_proc` عبر `do $$ … execute format`
+-- — أقصر بكثير وبلا تكرار. لكنّها **تكسر عقد المستودع**: `test:migration-order`
+-- يشترط أن يطابق جسمُ كل دالّة حيّة **آخر ملفٍ يعرّفها نصًّا**، وإعادة الكتابة
+-- الديناميكية تجعل الحيّ لا يطابق أي ملف. وأسوأ من ذلك أنّ سلوك هذه الهجرة
+-- كان سيصير رهينةَ نصِّ ملفٍ آخر: تحريرُ `20260822120003` غدًا يغيّر ما تنتجه
+-- هذه الهجرة بلا أن يلمسها أحد.
+--
+-- فالتكرار هنا **ليس ازدواج سلطة**: تاريخُ الهجرات ملفّاتٌ لا تُعدَّل، والنسخة
+-- النهائية واحدة — وهي هذه. وهو نفس ما تفعله تسع دوالّ أخرى في هذا المستودع.
 
--- التبديل الفعلي (مفصول عن الفحص أعلاه ليُقرأ كلٌّ على حدة).
-do $$
+-- ⇐ منقولة حرفيًّا من `20260822120003_founder_snapshot_commerce_detail.sql`، بحارسها وحده مبدَّلًا.
+create or replace function public.founder_executive_snapshot()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
 declare
-  fn text;
-  rec record;
-  newsrc text;
+  out_json     jsonb;
+  riyadh_start timestamptz;
+  total_users  bigint;
 begin
-  foreach fn in array array['founder_executive_snapshot', 'founder_user_page',
-                            'founder_user_detail', 'founder_code_page']
-  loop
-    for rec in
-      select p.oid, p.prosrc, pg_get_function_identity_arguments(p.oid) as args,
-             pg_get_function_result(p.oid) as result
-        from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-       where n.nspname = 'public' and p.proname = fn
-    loop
-      newsrc := replace(rec.prosrc, 'private.require_founder()', 'private.require_admin()');
-      execute format(
-        'create or replace function public.%I(%s) returns %s language plpgsql stable security definer set search_path = %L as %L',
-        fn, rec.args, rec.result, '', newsrc);
-    end loop;
-  end loop;
-end $$;
+  perform private.require_admin();
+
+  -- منتصف ليل الرياض: الحسابات «اليوم» تُقاس بيوم المستخدم لا بـUTC.
+  riyadh_start := date_trunc('day', now() at time zone 'Asia/Riyadh') at time zone 'Asia/Riyadh';
+
+  select count(*) into total_users from public.profiles;
+
+  select jsonb_build_object(
+    'as_of', to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+
+    -- ── الحسابات: المقام كامل بحكم مُشغّل handle_new_user ──
+    'users', jsonb_build_object(
+      'total',    total_users,
+      'newToday', (select count(*) from public.profiles p where p.created_at >= riyadh_start),
+      'new7d',    (select count(*) from public.profiles p where p.created_at >= now() - interval '7 days'),
+      'new30d',   (select count(*) from public.profiles p where p.created_at >= now() - interval '30 days'),
+      'verified', (select count(*) from auth.users u where u.email_confirmed_at is not null),
+      'growthSeries', coalesce((
+        select jsonb_agg(jsonb_build_object('date', d.day, 'value', d.n) order by d.day)
+          from (
+            select to_char(date_trunc('day', p.created_at at time zone 'Asia/Riyadh'), 'YYYY-MM-DD') as day,
+                   count(*) as n
+              from public.profiles p
+             where p.created_at >= now() - interval '90 days'
+             group by 1
+          ) d
+      ), '[]'::jsonb)
+    ),
+
+    -- ── الدخول: من جدول المصادقة. «سجّلوا دخول» لا «نشطون» (الجلسة تُجدَّد) ──
+    'activity', jsonb_build_object(
+      'signedIn7d',  (select count(*) from auth.users u where u.last_sign_in_at >= now() - interval '7 days'),
+      'signedIn30d', (select count(*) from auth.users u where u.last_sign_in_at >= now() - interval '30 days'),
+      'dormant30d',  (select count(*) from auth.users u
+                       where u.last_sign_in_at is null or u.last_sign_in_at < now() - interval '30 days')
+    ),
+
+    -- ── الاستحقاق: الحالة تُشتقّ بوقت القاعدة، ولا تُقرأ من عمود مخزَّن ──
+    'entitlement', jsonb_build_object(
+      'premiumActive', (select count(*) from public.entitlements e
+                         where private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                               = 'premiumActive'),
+      'trialActive',   (select count(*) from public.entitlements e
+                         where private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                               = 'trialActive'),
+      'trialExpired',  (select count(*) from public.entitlements e
+                         where private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                               = 'trialExpired'),
+      -- المعاينة = حساب بلا أي استحقاق فعّال. يُشتقّ من المقام الكامل.
+      'previewOnly',   greatest(total_users - (
+                         select count(*) from public.entitlements e
+                          where private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                                in ('premiumActive','trialActive','specialAccessActive')), 0),
+      'revokedActive', (select count(*) from public.revocation_ledger r where r.lifted_at is null)
+    ),
+
+    -- ── التجارة: أوامر سلة والأكواد ──
+    'commerce', jsonb_build_object(
+      'ordersSeen',   (select count(distinct s.provider_order_id) from public.salla_webhook_events s
+                        where s.provider_order_id is not null),
+      'ordersPaid',   (select count(*) from public.purchase_ledger l),
+      'ordersFailed', (select count(*) from public.salla_webhook_events s
+                        where s.classification in ('failed','rejected')),
+      'codesIssued',  (select count(*) from public.access_codes c),
+      'codesRedeemed',(select count(*) from public.code_redemption_ledger g),
+      'codesUnused',  (select count(*) from public.access_codes c
+                        where c.enabled and c.redemption_count = 0
+                          and (c.expires_at is null or c.expires_at > now())),
+      -- ── [ADMIN-R4] حالة الـwebhook والمنح اليدوية ──
+      'webhookProcessed', (select count(*) from public.salla_webhook_events s
+                            where s.classification = 'processed'),
+      'webhookPending',   (select count(*) from public.salla_webhook_events s
+                            where s.classification in ('received','verified')),
+      'grantsManual',     (select count(*) from public.entitlements e where e.source = 'manual')
+      -- ⚠️ **`webhookRetried` غير موجود هنا عمدًا**: لا عمود محاولات في الجدول.
+      --    الحدث المُعاد يصل ببصمة مطابقة فيُصنَّف `duplicate` — وذلك ليس
+      --    «إعادة محاولة». إخراج عدد التكرارات باسم «أُعيدت محاولتها» كذبٌ
+      --    بالتسمية، والواجهة تُبقيه «غير مقيس» ولا تراه صفرًا.
+    )
+  ) into out_json;
+
+  return out_json;
+end;
+$$;
+
+-- ⇐ منقولة حرفيًّا من `20260816120003_founder_dashboard_reads.sql`، بحارسها وحده مبدَّلًا.
+create or replace function public.founder_user_page(p_search text, p_page int, p_page_size int)
+returns table (
+  user_id         uuid,
+  display_name    text,
+  email_masked    text,
+  created_at      timestamptz,
+  last_sign_in_at timestamptz,
+  entitlement     text,
+  onboarding      text,
+  total_rows      bigint
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  q      text := lower(btrim(coalesce(p_search, '')));
+  size   int  := least(greatest(coalesce(p_page_size, 25), 1), 200);
+  pg     int  := greatest(coalesce(p_page, 1), 1);
+begin
+  perform private.require_admin();
+
+  return query
+  with base as (
+    select u.id,
+           p.display_name as name,
+           u.email        as mail,
+           coalesce(p.created_at, u.created_at) as made_at,
+           u.last_sign_in_at as seen_at,
+           coalesce(
+             (select private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                from public.entitlements e where e.user_id = u.id),
+             'noAccess') as ent_state,
+           (p.data #>> '{_meta,completed}') as done_flag
+      from auth.users u
+      left join public.profiles p on p.user_id = u.id
+  ), filtered as (
+    select * from base
+     where q = ''
+        or lower(coalesce(name, '')) like '%' || q || '%'
+        or lower(coalesce(mail, '')) like '%' || q || '%'
+        or id::text like '%' || q || '%'
+  ), counted as (
+    select f.*, count(*) over () as n from filtered f
+  )
+  select c.id,
+         c.name,
+         case
+           when c.mail is null or position('@' in c.mail) = 0 then null
+           else left(c.mail, 1) || '••••@' || split_part(c.mail, '@', 2)
+         end,
+         c.made_at,
+         c.seen_at,
+         case c.ent_state
+           when 'premiumActive'       then 'premium'
+           when 'trialActive'         then 'trial'
+           when 'specialAccessActive' then 'code'
+           when 'noAccess'            then 'preview'
+           when 'trialExpired'        then 'preview'
+           else 'unknown'
+         end,
+         case when c.done_flag is not null then 'complete' else 'unknown' end,
+         c.n
+    from counted c
+   order by c.made_at desc nulls last, c.id
+   offset (pg - 1) * size
+   limit size;
+end;
+$$;
+
+-- ⇐ منقولة حرفيًّا من `20260822120001_founder_user_detail.sql`، بحارسها وحده مبدَّلًا.
+create or replace function public.founder_user_detail(p_user_id uuid)
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  out_json jsonb;
+  acct     record;
+  ent      record;
+  redeemed bigint;
+  bought   bigint;
+  last_ord record;
+  banned   boolean;
+begin
+  perform private.require_admin();
+
+  if p_user_id is null then
+    raise exception 'founder_user_detail: user id required' using errcode = '22023';
+  end if;
+
+  select u.id,
+         u.email                                  as mail,
+         u.email_confirmed_at is not null          as verified,
+         u.last_sign_in_at                         as seen_at,
+         coalesce(p.created_at, u.created_at)      as made_at,
+         p.display_name                            as name,
+         (p.data #>> '{_meta,completed}')          as done_flag
+    into acct
+    from auth.users u
+    left join public.profiles p on p.user_id = u.id
+   where u.id = p_user_id;
+
+  if not found then
+    raise exception 'founder_user_detail: no such account' using errcode = 'P0002';
+  end if;
+
+  select e.entitlement_type, e.source, e.activated_at, e.expires_at,
+         e.no_expiry, e.revoked_at, e.revoked_reason
+    into ent
+    from public.entitlements e
+   where e.user_id = p_user_id;
+
+  -- سجلّات التجارة مفتاحها بصمة الهوية لا المعرّف — لا `user_id` فيها عمدًا.
+  select count(*) into redeemed
+    from public.code_redemption_ledger l
+   where acct.mail is not null
+     and l.email_hash in (select ih.email_hash from private.identity_hashes(acct.mail) ih);
+
+  select count(*) into bought
+    from public.purchase_ledger pl
+   where acct.mail is not null
+     and pl.email_hash in (select ih.email_hash from private.identity_hashes(acct.mail) ih);
+
+  select pl.provider_order_id, pl.granted_at
+    into last_ord
+    from public.purchase_ledger pl
+   where acct.mail is not null
+     and pl.email_hash in (select ih.email_hash from private.identity_hashes(acct.mail) ih)
+   order by pl.granted_at desc
+   limit 1;
+
+  select exists (
+    select 1 from public.revocation_ledger r
+     where acct.mail is not null
+       and r.lifted_at is null
+       and r.email_hash in (select ih.email_hash from private.identity_hashes(acct.mail) ih)
+  ) into banned;
+
+  out_json := jsonb_build_object(
+    'as_of', to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+
+    'account', jsonb_build_object(
+      'user_id',         acct.id,
+      'display_name',    acct.name,
+      -- التقنيع في SQL: القيمة الكاملة لا تدخل حمولة الشبكة أصلًا.
+      'email_masked',    case
+                           when acct.mail is null or position('@' in acct.mail) = 0 then null
+                           else left(acct.mail, 1) || '••••@' || split_part(acct.mail, '@', 2)
+                         end,
+      'email_verified',  acct.verified,
+      'created_at',      acct.made_at,
+      'last_sign_in_at', acct.seen_at
+    ),
+
+    'entitlement', jsonb_build_object(
+      -- الحالة تُشتقّ بوقت القاعدة، ولا تُقرأ من عمود مخزَّن قد يشيخ.
+      'state',          coalesce(
+                          private.derive_state(ent.entitlement_type, ent.no_expiry,
+                                               ent.expires_at, ent.revoked_at),
+                          'noAccess'),
+      'source',         ent.source,
+      'activated_at',   ent.activated_at,
+      'expires_at',     ent.expires_at,
+      'revoked_at',     ent.revoked_at,
+      'revoked_reason', ent.revoked_reason
+    ),
+
+    -- الجهل ليس نفيًا: بلا علامة إكمال الجواب `unknown` لا `incomplete`.
+    'onboarding', case when acct.done_flag is not null then 'complete' else 'unknown' end,
+
+    'commerce', jsonb_build_object(
+      'codesRedeemed',  redeemed,
+      'purchases',      bought,
+      'lastOrderId',    last_ord.provider_order_id,
+      'lastPurchaseAt', last_ord.granted_at,
+      'accessRevoked',  banned
+    )
+  );
+
+  return out_json;
+end;
+$$;
 
 -- ── ٢) طابور الطلبات الفاشلة — الرقم يصير أسماءً ───────────────────────────
 /**

@@ -61,6 +61,29 @@ jobs:
       - name: Full deterministic test gate
         run: npm run test:gate
 
+      # ── رحلات التكليف على Postgres **حقيقي** ────────────────────────────
+      # خارج `test:gate` المحلّي عمدًا وبنفس منطق خطوات المتصفّح (§4.0): الطقم
+      # يحتاج عنقودًا حيًّا، وإلزام كل مطوّر بتشغيله قبل كل بوابة كلفةٌ أعلى من
+      # عائدها. **والمقابل الملزم أنه يعمل هنا** — لا استثناء صامت.
+      #
+      # ولماذا لا يكفي صندوق PGlite الموجود: هو **اتصال واحد**، فلا يُختبَر فيه
+      # تسابقٌ ولا قفلُ صفّ. وفحص «كودٌ بحصّة واحدة من متصفّحين معًا» يمرّ فيه
+      # مجّانًا — يبدو أخضر وهو غير مُختبَر (§4.2).
+      - name: Start PostgreSQL 16 for commissioning journeys
+        run: |
+          set -euo pipefail
+          PGBIN=$(ls -d /usr/lib/postgresql/*/bin | tail -1)
+          sudo mkdir -p /var/lib/postgresql/qimmah-ci
+          sudo chown -R postgres:postgres /var/lib/postgresql
+          sudo chmod 700 /var/lib/postgresql/qimmah-ci
+          sudo -u postgres "$PGBIN/initdb" -D /var/lib/postgresql/qimmah-ci -U postgres --auth=trust -E UTF8
+          sudo -u postgres "$PGBIN/pg_ctl" -D /var/lib/postgresql/qimmah-ci \
+            -o "-p 55432 -k /tmp -c listen_addresses=127.0.0.1" -l /tmp/pg-ci.log start
+          "$PGBIN/pg_isready" -h 127.0.0.1 -p 55432
+
+      - name: Commissioning journeys (real Postgres, all migrations)
+        run: npm run test:commissioning
+
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 

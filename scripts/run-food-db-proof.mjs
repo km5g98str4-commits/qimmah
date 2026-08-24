@@ -24,7 +24,10 @@ const checks = [
   ...ERROR_CODES.map((code) => [`لا ${code}`, c(code) === 0, `${c(code)}`]),
   ['إجمالي الأصناف ≥ 581', r.total >= 581, `total=${r.total}`],
   ['الأطباق السعودية = 130', r.saudi === 130, `saudi=${r.saudi}`],
-  ['أصناف خليجية مضافة = 40 (Cycle 4)', r.gcc === 40, `gcc=${r.gcc}`],
+  // ٤٠ (Cycle 4) + ٦ أصناف **عامّة** أضافتها حارة الطعام لسدّ فجوات بحث مقيسة
+  // (عسل · خس · جرانولا · شوكولاتة · كيك · بسكويت) — `src/data/gccStaples.ts`.
+  // العدد ثابتٌ عمدًا: إضافةٌ صامتة إلى القاعدة يجب أن تُسقط هذا الفحص وتُعلن نفسها.
+  ['أصناف خليجية مضافة = 46 (Cycle 4 + فجوات ٢٠٢٦-٠٨)', r.gcc === 46, `gcc=${r.gcc}`],
   ['Food R2 = 60 صنف مطاعم', r.r2 === 60, `r2=${r.r2}`],
   ['كل Food R2 معلّم «تقديري»', r.r2Estimated === 60, `estimated=${r.r2Estimated}`],
   ['Food R2 يغطي مطاعم/أطباق/مشروبات/فطور/حلويات', Array.isArray(r.r2Categories) && r.r2Categories.length >= 5, `categories=${r.r2Categories?.length ?? 0}`],

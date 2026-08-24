@@ -95,7 +95,11 @@ const STRUCTURAL = [
     id: 'بدء الجلسة (`beginSession`) خالٍ من أي تبليغ إحماء',
     run: (f) => {
       const code = stripComments(f.workout)
-      const i = code.indexOf('const beginSession = (day: PlanDay)')
+      // المرساة على **اسم الدالّة ونوع أول وسيطها**، لا على قوس إغلاق التوقيع:
+      // [WORKOUT-CONTINUITY-001] أضاف وسيطًا ثانيًا (`trimmed`) فسقط الفحص على
+      // مرساته لا على مقصده — و«سقوط بغير الفحص المسمّى ليس إثباتًا» (§4.2).
+      // المقصد نفسه (لا `completeFirstWin` داخل الجسم) لم يُمسّ.
+      const i = code.indexOf('const beginSession = (day: PlanDay')
       if (i < 0) return false
       const body = code.slice(i, code.indexOf('\n  }', i))
       return !/completeFirstWin/.test(body)

@@ -1,8 +1,16 @@
 # الهجرات المنتظرة — الترتيب والأوامر والتحقّق
 
-> **حالة الحقيقة اليوم:** خمس عشرة هجرة مكتوبة في المستودع و**لم تُطبَّق على أي
-> قاعدة قط** — لا إنتاج ولا تجربة. الاثنتا عشرة الأولى من موجات سابقة، والثلاث
-> الأخيرة من موجة `[ADMIN-R4]`.
+> **حالة الحقيقة اليوم:** ثماني عشرة هجرة مكتوبة في المستودع و**لم تُطبَّق على أي
+> قاعدة إنتاج أو تجربة**. الاثنتا عشرة الأولى من موجات سابقة، والثلاث بعدها من
+> موجة `[ADMIN-R4]`، والثلاث الأخيرة من `[COMMISSIONING]`.
+>
+> **وقد طُبّقت الثماني عشرة كاملةً من قاعدة نظيفة على عنقود PostgreSQL 16
+> حقيقي** — صفر فشل — ويحرس ذلك `test:commissioning` في سير CI. فما ينقص هو
+> **تفويض التطبيق على قاعدة المؤسس**، لا صحّة الهجرات.
+>
+> ⚠️ **وهي هجرات تُطبَّق مرّة واحدة، لا تُعاد.** إعادة تشغيل الحزمة على قاعدة
+> طُبّقت عليها ترفع أخطاء (سياسات وقيود موجودة أصلًا). فخطأُ إعادةٍ **ليس**
+> دليلًا على فساد القاعدة — وهذا مسجَّل هنا كي لا يُقرأ يومًا على أنه كذلك.
 >
 > ⛔ **لا يُطبَّق شيء من هذا الملف آليًا.** التطبيق فعل مؤسس، ويحتاج تفويضًا
 > مسمّىً في كل مرّة (الميثاق §1). ما هنا **قائمة وأوامر ومتحقّقات**، لا سكربت.
@@ -45,6 +53,9 @@
 | ١٣ | `20260822120001_founder_user_detail.sql` | `founder_user_detail(uuid)` — صفحة الحساب الواحد | ١٠ · ١١ |
 | ١٤ | `20260822120002_founder_code_management.sql` | `generate_access_code` · `founder_issue_access_code` · `founder_set_code_enabled` · `founder_revoke_access` · `founder_code_page` | ١٠ · ٧ · ٤ |
 | ١٥ | `20260822120003_founder_snapshot_commerce_detail.sql` | **تعيد تعريف** `founder_executive_snapshot()` بحقول الـwebhook والمنح اليدوية | **١١ إلزامًا** · ٨ |
+| ١٦ | `20260824120001_roles_and_redeem_rate_limit.sql` | دور `support` · `private.is_admin`/`require_admin` · دفتر محاولات الاستهلاك · `private.redeem_core` · `redeem_access_code_v2` | ٢ · ١٠ |
+| ١٧ | `20260824120002_founder_operations_reads.sql` | **تعيد تعريف** القراءات الأربع بحارس `require_admin` · `founder_failed_orders` · `founder_code_redemptions` · `founder_email_health` · `founder_grants_by_source` · وتوسّع `founder_code_page` | **١٥ و١٦ إلزامًا** |
+| ١٨ | `20260824120003_food_submissions.sql` | `food_submissions` + `submit_missing_food` + طابور المراجعة وقراره | ١٦ · ١٧ |
 
 > ⛔ **الخطوة ١٥ بعد ١١ قطعًا.** عكسهما هو المثال المُثبَت أعلاه: تعود النسخة
 > القديمة بلا خطأ، فتظهر اللوحة صادقة وهي عمياء عن حالة الـwebhook.
@@ -118,7 +129,10 @@ supabase db push
 | ١٢ | `select count(*) from information_schema.tables where table_schema='public' and table_name='email_outbox';` | `1` |
 | ١٣ | `select to_regprocedure('public.founder_user_detail(uuid)') is not null;` | `true` |
 | ١٤ | `select to_regprocedure('private.generate_access_code(integer)') is not null and to_regprocedure('public.founder_code_page(text,integer,integer)') is not null;` | `true` |
-| ١٥ | `select prosrc like '%webhookProcessed%' from pg_proc where proname='founder_executive_snapshot';` | **`true` — وهذا هو الفحص الذي يكشف الترتيب المعكوس** |
+| ١٥ | `select prosrc like '%webhookProcessed%' from pg_proc where proname='founder_executive_snapshot';` | `true` |
+| ١٦ | `select to_regprocedure('public.redeem_access_code_v2(text)') is not null and to_regprocedure('private.redeem_core(text)') is not null;` | `true` |
+| ١٧ | `select prosrc like '%require_admin%' from pg_proc where proname='founder_executive_snapshot';` | **`true` — وهذا هو الفحص الذي يكشف الترتيب المعكوس**: تطبيق ١٧ قبل ١٥ يُعيد الحارس القديم بلا خطأ واحد |
+| ١٨ | `select to_regprocedure('public.submit_missing_food(text,text,text,text,numeric,numeric,numeric,numeric,text,text)') is not null and (select count(*) from information_schema.role_table_grants where table_name='food_submissions' and grantee='authenticated' and privilege_type='SELECT') = 1;` | `true` · `1` |
 
 **وفحص شامل أخير — البوّابة في جسم كل دالة مؤسس:**
 

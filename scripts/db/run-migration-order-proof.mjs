@@ -81,7 +81,15 @@ for (const [name, fs] of redefined) {
   // يعبر إلى الدالة التالية ويلتقط كلماتها — فحصٌ يمرّ ويسقط بلا علاقة بمقصده.
   // و`prosrc` في Postgres هو **نصّ الجسم بين `$$` و`$$` حرفيًا**، فالمقارنة به
   // مباشرة أدقّ وأرخص معًا.
-  const bodyStart = lastSql.indexOf(`create or replace function ${name}`)
+  // ⚠️ **المطابقة بحدّ كلمة لا ببادئة.**
+  // `indexOf('… public.redeem_access_code')` يلتقط **`redeem_access_code_v2`**
+  // حين يعرّف ملفٌ واحد الاثنين — والـ`_v2` تسبق الأصل في `20260824120001`.
+  // فيُستخرج جسم الدالّة الخطأ، ويُبلَّغ عن تباعدٍ لا وجود له. البادئة تكفي
+  // ما لم يوجد اسمٌ يمتدّ فوق اسمٍ آخر — ووجودُه مسألة وقت لا احتمال.
+  const nameAt = new RegExp(`create or replace function ${name.replace(/[.]/g, '\\.')}\\s*\\(`)
+  const m = nameAt.exec(lastSql)
+  if (!m) continue
+  const bodyStart = m.index
   const dollarStart = lastSql.indexOf('as $$', bodyStart)
   const dollarEnd = lastSql.indexOf('$$;', dollarStart + 5)
   if (dollarStart < 0 || dollarEnd < 0) continue
@@ -92,6 +100,17 @@ for (const [name, fs] of redefined) {
 }
 check('كل دالة حيّة تطابق آخر هجرة تعرّفها', mismatched.length === 0, mismatched.join(' | '))
 
+// ⚔️ محاكاة الالتفاف (§4.2): المطابقة بالبادئة وحدها تلتقط الاسم **الأطول**.
+// يُنفَّذ على نصّ حقيقي، فلو رجع الفحص إلى `indexOf` سقط هذا باسمه.
+{
+  const sample = 'create or replace function public.redeem_access_code_v2(p_code text)\n'
+               + 'create or replace function public.redeem_access_code(p_code text)\n'
+  const naive = sample.indexOf('create or replace function public.redeem_access_code')
+  const bounded = new RegExp('create or replace function public\\.redeem_access_code\\s*\\(').exec(sample).index
+  check('⚔️ المطابقة بالبادئة تلتقط الاسم الأطول — وبحدّ الكلمة لا تلتقطه',
+    naive === 0 && bounded > 0, `بادئة=${naive} · بحدّ=${bounded}`)
+}
+
 // اللقطة التنفيذية تحديدًا: الحقول التي أضافتها آخر هجرة موجودة في الجسم الحيّ.
 const snapSrc = await db.query(`select prosrc from pg_proc where proname = 'founder_executive_snapshot'`)
 check('اللقطة الحيّة تحمل حقول آخر هجرة (webhookProcessed)', snapSrc.rows.some((r) => r.prosrc.includes('webhookProcessed')))
@@ -99,9 +118,34 @@ await db.close()
 
 // ═══════════════ ④ التأكيد المضادّ — الترتيب المعكوس ينقص بصمت ═══════════════
 console.log('\nالتأكيد المضادّ — ترتيبٌ معكوس ينتج قاعدة ناقصة بلا خطأ واحد')
-const LATE = files.find((f) => f.includes('founder_snapshot_commerce_detail'))
-const EARLY = files.find((f) => f.includes('founder_dashboard_reads'))
+// ⚠️ **الزوج يُشتقّ ولا يُسمَّى.**
+// كانت الأسماء مثبَّتة (`…commerce_detail` قبل `…dashboard_reads`)، فلمّا أضافت
+// هجرةٌ جديدة تعريفًا ثالثًا للّقطة بقيت المحاكاة تقلب زوجًا **متجاوَزًا**:
+// الملفّ الأحدث يظلّ آخر المطبَّقين فيُعيد الحقل، وتمرّ المحاكاة بلا أن تكشف
+// شيئًا. تأكيدٌ مضادّ يشيخ صامتًا أخطر من غيابه (§4.2).
+// فالزوج الآن **آخر تعريفين فعليّين** أيًّا كان ملفّهما، والعلامة المميِّزة
+// تُستخرَج من الجسمين لا تُكتب بيدنا.
+const SNAPSHOT_DEFS = definitionsOf.get('public.founder_executive_snapshot') ?? []
+const LATE = SNAPSHOT_DEFS[SNAPSHOT_DEFS.length - 1]
+const EARLY = SNAPSHOT_DEFS[SNAPSHOT_DEFS.length - 2]
 check('الملفّان المتعاقبان موجودان', Boolean(LATE) && Boolean(EARLY), `${EARLY} → ${LATE}`)
+
+/** أوّل رمزٍ يميّز الجسم الأخير عن سابقه — علامةٌ تختفي إن قُلب الترتيب. */
+const MARKER = (() => {
+  const bodyOf = (file) => {
+    const sql = readMigration(file)
+    const m = /create or replace function public\.founder_executive_snapshot\s*\(/.exec(sql)
+    if (!m) return ''
+    const a = sql.indexOf('as $$', m.index)
+    const b = sql.indexOf('$$;', a + 5)
+    return a < 0 || b < 0 ? '' : sql.slice(a, b)
+  }
+  const late = bodyOf(LATE)
+  const early = bodyOf(EARLY)
+  const tokens = [...new Set(late.match(/[A-Za-z_][A-Za-z0-9_]{5,}/g) ?? [])]
+  return tokens.find((t) => !early.includes(t)) ?? null
+})()
+check('عُثر على علامة تميّز الجسم الأخير عن سابقه', MARKER !== null, String(MARKER))
 
 const swapped = files.filter((f) => f !== LATE)
 const idx = swapped.indexOf(EARLY)
@@ -131,8 +175,8 @@ for (const f of swapped) {
 check('الترتيب المعكوس لا يرفع خطأً واحدًا — الفشل صامت', !sawError)
 const badSnap = await badDb.query(`select prosrc from pg_proc where proname = 'founder_executive_snapshot'`)
 check(
-  'وبالترتيب المعكوس تختفي حقول الهجرة الأخيرة — قاعدة ناقصة تبدو سليمة',
-  badSnap.rows.length > 0 && !badSnap.rows.some((r) => r.prosrc.includes('webhookProcessed')),
+  `وبالترتيب المعكوس تختفي علامة الهجرة الأخيرة (${MARKER}) — قاعدة ناقصة تبدو سليمة`,
+  badSnap.rows.length > 0 && MARKER !== null && !badSnap.rows.some((r) => r.prosrc.includes(MARKER)),
 )
 await badDb.close()
 
@@ -142,7 +186,7 @@ await badDb.close()
 // عشرة ملفات كُتبت قبل أن يوجد الوسم. وفرضُ تعديلٍ على عشرة ملفات ليست ملك
 // هذه الحارة ليس إصلاحًا بل توسيع نطاق. والعقد الحقيقي أصلًا ليس الوسم:
 // **الوثيقة التي يقرأها المؤسس قبل أن يطبّق**. فالرباط عليها.
-const PENDING_PREFIXES = ['20260806', '20260809', '20260812', '20260816', '20260822']
+const PENDING_PREFIXES = ['20260806', '20260809', '20260812', '20260816', '20260822', '20260824']
 const pending = files.filter((f) => PENDING_PREFIXES.some((p) => f.startsWith(p)))
 const APPLY_DOC = 'docs/execution/qimmah-sovereign-closure/MIGRATIONS-APPLY-PENDING.md'
 const { readFileSync, existsSync } = await import('node:fs')
