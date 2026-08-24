@@ -1,9 +1,9 @@
 {
   "contract": "QIMMAH-SOVEREIGN-PHASE-II-001",
   "agent": "AGENT-A",
-  "head": "3709d0d26f61aa74743cf8c54b0b474d6f1b0871",
-  "headSubject": "feat(staging): [STAGING-COMMISSIONING] الحملة اسمٌ لا سرّ · حدُّ الشبكة · تشغيلٌ بأمر واحد",
-  "ranAt": "2026-08-24T15:40:36.710Z",
+  "head": "e360ea16af6c23274ccc27ff5b14634b21569aff",
+  "headSubject": "fix(codes): [STAGING-COMMISSIONING §8] سببٌ كتبتُه ثم هاجمتُه فسقط",
+  "ranAt": "2026-08-24T16:03:28.410Z",
   "provisional": true,
   "provisionalReason": "validation downgraded: VALIDATION_DOWNGRADE = WEBKIT_UNAVAILABLE",
   "artifactsReused": false,
@@ -12,19 +12,19 @@
       "mode": "prod",
       "outDir": "dist-release/prod",
       "absDir": "/home/user/qimmah-conv/dist-release/prod",
-      "ms": 9580,
-      "head": "3709d0d26f61aa74743cf8c54b0b474d6f1b0871",
-      "builtAt": "2026-08-24T15:23:19.982Z",
-      "sourceFingerprint": 1787584805635
+      "ms": 9055,
+      "head": "e360ea16af6c23274ccc27ff5b14634b21569aff",
+      "builtAt": "2026-08-24T15:46:14.069Z",
+      "sourceFingerprint": 1787586215007
     },
     "mock": {
       "mode": "mock",
       "outDir": "dist-release/mock",
       "absDir": "/home/user/qimmah-conv/dist-release/mock",
-      "ms": 9952,
-      "head": "3709d0d26f61aa74743cf8c54b0b474d6f1b0871",
-      "builtAt": "2026-08-24T15:23:29.948Z",
-      "sourceFingerprint": 1787584805635
+      "ms": 9013,
+      "head": "e360ea16af6c23274ccc27ff5b14634b21569aff",
+      "builtAt": "2026-08-24T15:46:23.091Z",
+      "sourceFingerprint": 1787586215007
     }
   },
   "engines": [
@@ -194,7 +194,7 @@
           "section": "shipped shell integrity",
           "label": "index.html carries a verifiable build identity",
           "ok": true,
-          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·3709d0d2\"> <meta name=\"qimmah-commit\" content=\"3709d0d2\"> <meta name=\"qimmah-build-time\" content=\"2026-08-24T15:23:10.915Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-3709d0d2\"> <meta name=\"qimmah-env\" content=\"production\">"
+          "evidence": "<meta name=\"qimmah-build\" content=\"v1.0.0·e360ea16\"> <meta name=\"qimmah-commit\" content=\"e360ea16\"> <meta name=\"qimmah-build-time\" content=\"2026-08-24T15:46:05.460Z\"> <meta name=\"qimmah-sw-version\" content=\"qimmah-e360ea16\"> <meta name=\"qimmah-env\" content=\"production\">"
         },
         {
           "section": "shipped shell integrity",
@@ -1470,7 +1470,7 @@
           "section": "primitive-where-object-expected — a scalar in a structured slot must be rejected at the boundary",
           "label": "primitive-where-object-expected: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T15:27:09.158Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T15:50:01.369Z\"}"
         },
         {
           "section": "primitive-where-object-expected — a scalar in a structured slot must be rejected at the boundary",
@@ -1506,7 +1506,7 @@
           "section": "stale-active-workout — a foreign/stale session payload must not be resumed as if it were the user’s",
           "label": "stale-active-workout: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T15:27:09.158Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T15:50:01.369Z\"}"
         },
         {
           "section": "stale-active-workout — a foreign/stale session payload must not be resumed as if it were the user’s",
@@ -1542,7 +1542,7 @@
           "section": "empty-string-values — empty values are a real disk outcome and must read as absent, not as data",
           "label": "empty-string-values: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T15:27:09.158Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T15:50:01.369Z\"}"
         },
         {
           "section": "empty-string-values — empty values are a real disk outcome and must read as absent, not as data",
@@ -1578,7 +1578,7 @@
           "section": "prototype-pollution-payload — untrusted stored JSON must not be able to reach Object.prototype",
           "label": "prototype-pollution-payload: unrelated user data (qimmah:onboarding:v1) was NOT destroyed",
           "ok": true,
-          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T15:27:09.158Z\"}"
+          "evidence": "value={\"completed\":true,\"completedAt\":\"2026-08-24T15:50:01.369Z\"}"
         },
         {
           "section": "prototype-pollution-payload — untrusted stored JSON must not be able to reach Object.prototype",
@@ -2039,13 +2039,13 @@
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "the user is told something failed rather than shown a blank screen",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT7E9G2N-863B9D\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT7F2URS-CF33FE\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "the failure surface exposes no stack trace or raw message",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT7E9G2N-863B9D\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT7F2URS-CF33FE\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
@@ -2057,7 +2057,7 @@
           "section": "a lazy route chunk that never arrives must not blank the app",
           "label": "a support reference id is offered for correlation (BUG-005 contract)",
           "ok": true,
-          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT7E9G2N-863B9D\n\nجرّب مرة ثانية\nراسل الدعم"
+          "evidence": "تخطَّ إلى المحتوى الرئيسي\nصار خطأ غير متوقّع\n\nما قدرنا نحمّل هذي الشاشة. جرّب مرة ثانية — بياناتك محفوظة على جهازك.\n\nمرجع الخطأ: QW-MT7F2URS-CF33FE\n\nجرّب مرة ثانية\nراسل الدعم"
         },
         {
           "section": "a lazy route chunk that never arrives must not blank the app",
