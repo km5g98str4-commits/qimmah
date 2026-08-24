@@ -18,7 +18,7 @@
  * للتحقّق بأن يفشل البناء أصلًا أو ألّا يحمل الأرتيفكت شيئًا.
  */
 import { execFileSync } from 'node:child_process'
-import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from 'node:fs'
+import { mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -76,7 +76,15 @@ function buildWith(env) {
     } catch {
       envMeta = ''
     }
-    return { prodHostFiles: prodHostFiles.length, envMeta, fileCount: files.length }
+    const stagingHostFiles = files.filter((f) => {
+      try { return readFileSync(f, 'utf8').includes('qimmahstaging1234') } catch { return false }
+    })
+    return {
+      prodHostFiles: prodHostFiles.length,
+      stagingHostFiles: stagingHostFiles.length,
+      envMeta,
+      fileCount: files.length,
+    }
   } finally {
     rmSync(outDir, { recursive: true, force: true })
   }
@@ -108,6 +116,55 @@ check(
   'الاشتقاق لا يتجاوز تعيينًا صريحًا لـVITE_APP_ENV',
   /!process\.env\.VITE_APP_ENV\s*&&/.test(viteConfig),
 )
+
+console.log('\n⑤ بناء staging — يشير إلى مشروع غير إنتاجي ولا يحمل اعتماد الإنتاج')
+/**
+ * ═══ لماذا هذا الفحص موجود ═══
+ * التكليف يطلب «تطبيقًا يصل staging وحده» و«معاينة بلا اعتماد إنتاج». وكان
+ * بناءُ staging **يحمل عنوان الإنتاج فعلًا** — مقيسًا في الأرتيفكت لا مستنتَجًا:
+ * `VITE_SUPABASE_URL?.trim()` يمنع المُصغِّر من طيّ الاختيار (لا يطوي `.trim()`
+ * على نصّ حرفي)، فيبقى الاحتياط محمولًا. صار التشذيب **بعد** الاختيار.
+ *
+ * ⚠️ ولاحظ ما لا يفعله هذا البناء: `VITE_APP_ENV` **ليست** `founder_preview`،
+ * وإلا لقُصِرت الاستحقاقات على مخزن التقليد ولما لمست staging أبدًا — أي أن
+ * «نسخة تجريبية» كانت ستُثبت التطبيق ولا تُثبت الخادم إطلاقًا.
+ */
+const STAGING_HOST = 'qimmahstaging1234'
+const staging = buildWith({
+  VITE_SUPABASE_URL: `https://${STAGING_HOST}.supabase.co`,
+  VITE_SUPABASE_ANON_KEY: 'staging.anon.key',
+})
+check('بناء staging أنتج أرتيفكتًا فعليًا', staging.fileCount > 5, `files=${staging.fileCount}`)
+check('⚔️ ولا ملف واحد فيه يحمل عنوان مشروع الإنتاج',
+  staging.prodHostFiles === 0, `files=${staging.prodHostFiles}`)
+check('  ويشير فعلًا إلى المشروع التجريبي — الفحص ليس فارغًا',
+  staging.stagingHostFiles > 0, `files=${staging.stagingHostFiles}`)
+check('  ووسم البيئة يبقى إنتاجًا — فالاستحقاق يُسأل من الخادم لا من مخزن تقليد',
+  staging.envMeta === 'production', `qimmah-env=${staging.envMeta || '(غائب)'}`)
+
+// ⟲ محاكاة الالتفاف: إعادة التشذيب قبل الاختيار تُسقط الفحص **باسمه**.
+const clientPath = resolve(root, 'src/lib/supabaseClient.ts')
+const clientSrc = readFileSync(clientPath, 'utf8')
+const regressed = clientSrc
+  .replace("const explicitUrl = import.meta.env.VITE_SUPABASE_URL || ''",
+           "const explicitUrl = import.meta.env.VITE_SUPABASE_URL?.trim() || ''")
+  .replace("const url = (explicitUrl || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_URL)).trim()",
+           "const url = explicitUrl || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_URL)")
+check('⟲ نسخة الانحدار اختلفت فعلًا عن المصدر', regressed !== clientSrc)
+let regressedProdFiles = -1
+try {
+  writeFileSync(clientPath, regressed)
+  regressedProdFiles = buildWith({
+    VITE_SUPABASE_URL: `https://${STAGING_HOST}.supabase.co`,
+    VITE_SUPABASE_ANON_KEY: 'staging.anon.key',
+  }).prodHostFiles
+} finally {
+  writeFileSync(clientPath, clientSrc)
+}
+check('⟲ وبها يعود اعتماد الإنتاج إلى أرتيفكت staging — فالفحص قادر على الرسوب',
+  regressedProdFiles > 0, `files=${regressedProdFiles}`)
+check('⟲ والمصدر أُعيد كما كان بعد المحاكاة',
+  readFileSync(clientPath, 'utf8') === clientSrc)
 
 console.log(`\n${fails.length === 0 ? '✅' : '❌'} أمان نشرات الفروع — نجح ${pass} · فشل ${fails.length}`)
 if (fails.length) {

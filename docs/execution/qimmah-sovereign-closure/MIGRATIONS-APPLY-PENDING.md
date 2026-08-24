@@ -57,6 +57,17 @@
 | ١٧ | `20260824120002_founder_operations_reads.sql` | **تعيد تعريف** القراءات الأربع بحارس `require_admin` · `founder_failed_orders` · `founder_code_redemptions` · `founder_email_health` · `founder_grants_by_source` · وتوسّع `founder_code_page` | **١٥ و١٦ إلزامًا** |
 | ١٨ | `20260824120003_food_submissions.sql` | `food_submissions` + `submit_missing_food` + طابور المراجعة وقراره | ١٦ · ١٧ |
 | ١٩ | `20260824120004_activation_hardening.sql` | نزع الغلاف القديم عن العميل (تجاوز حدّ المعدّل) · `private.canonical_identity` + عمود بصمة ثانٍ على `trial_ledger` · فحص تأكيد البريد داخل `redeem_core` · طول الكود المُصدَر ٨٠ بتًا | **١٤ و١٦ إلزامًا** |
+| ٢٠ | `20260824120005_campaign_is_not_a_credential.sql` | `private.issue_code_core` (موضع الإصدار الوحيد) · أرضية الإنتروبيا ترفض الكود الحرفي · `founder_issue_code_batch` · سقف القوّة يتوقّف عن ادّعاء رقم للكود اليدوي · أرضية المولّد ١٦ | **١٤ و١٩ إلزامًا** |
+| ٢١ | `20260824120006_gateway_network_limit.sql` | `private.gate_attempts` + `public.gate_admit` — حدٌّ لكل **عنوان شبكة**، تناديه طرفية البوّابة بمفتاح الخدمة وحدها | ٢ (الملح) |
+
+> ⛔ **والخطوة ٢٠ بعد ١٤ و١٩ قطعًا.** تعيد تعريف `founder_issue_access_code`
+> (من ١٤، ثم ١٩) و`admin_create_access_code` و`private.generate_access_code`.
+> تطبيقها قبلهما يجعل الأقدم يكتب فوق الأحدث بلا خطأ.
+>
+> ⚠️ **وأثرٌ يُقال قبل التطبيق:** بعدها **لا يستطيع أحد إصدار كود يكتبه بيده**
+> على المسار المتاح للمتصفّح. اسم الحملة يبقى في `p_label` كما كان دائمًا،
+> والأكواد تُولَّد. من كان يخطّط لكود حملة مقروء يعرف ذلك **قبل** التطبيق لا
+> بعده.
 
 > ⛔ **والخطوة ١٩ بعد ١٤ و١٦ قطعًا.** هي تعيد تعريف `founder_issue_access_code`
 > (من ١٤) و`private.redeem_core` (من ١٦)، وتنزع منحة `redeem_access_code`

@@ -515,7 +515,7 @@ export async function loadLiveCodePage(
  */
 export async function issueAccessCode(
   decision: AdminRoleDecision,
-  input: { reason: string; label?: string; durationDays: number; maxRedemptions: number; code?: string },
+  input: { reason: string; label?: string; durationDays: number; maxRedemptions: number },
 ): Promise<WriteOutcome<IssuedCode>> {
   if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
   const client = await getSupabase()
@@ -527,7 +527,9 @@ export async function issueAccessCode(
       p_duration_days: input.durationDays,
       p_max_redemptions: input.maxRedemptions,
       p_expires_at: null,
-      p_code: input.code ?? null,
+      // [STAGING-COMMISSIONING §8] **دائمًا `null`.** التوقيع يبقى سداسيًّا
+      // (نزع الوسيط يُنشئ حِملًا زائدًا لا استبدالًا)، والخادم يرفض أي قيمة.
+      p_code: null,
     })
     if (error) return { ok: false, live: classify(error) }
     const rec = (data ?? {}) as Record<string, unknown>

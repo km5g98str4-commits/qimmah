@@ -25,8 +25,26 @@ testers must never land in a shared/default project.
 
 ## 1. Apply the migrations
 
-The migrations live in `supabase/migrations/` and are **idempotent** (safe to
-re-run over any prior install; no user-data table is ever dropped).
+The migrations live in `supabase/migrations/`. **No user-data table is ever
+dropped.**
+
+> ⚠️ **Correction — they are NOT idempotent as a set.** This guide previously
+> claimed they were safe to re-run over any prior install. Measured: re-running
+> the full set against an already-migrated database fails at
+> `20260822120002_founder_code_management.sql` with
+> `cannot change return type of existing function` — because `20260824120002`
+> drops and rebuilds `founder_code_page` with extra columns, so the older
+> `create or replace` then collides with the newer signature.
+>
+> This matters operationally, not theoretically: re-running after a partial
+> failure is the first thing a human does, and it would die mid-way and leave
+> the database half-applied.
+>
+> **Use `npm run db:commission` instead of applying by hand.** It records each
+> applied migration in `supabase_migrations.schema_migrations` — the same table
+> the Supabase CLI uses — and applies each migration inside a transaction
+> together with its ledger row, so a migration is never "applied but
+> unrecorded". Re-running is then safe and a no-op.
 
 ### Option A — Supabase CLI (preferred)
 
@@ -151,7 +169,7 @@ Also run **Database → Advisors** (Security + Performance) and confirm no RLS g
 
 ## 5. Rollback notes
 
-- Migrations are additive and idempotent; re-applying fixes drift.
+- Migrations are additive. Re-apply **via `npm run db:commission`** (ledger-backed); re-running the raw set by hand is not safe — see the correction in §1.
 - To reset **RLS policies** only: re-run `..._rls_enable_and_policies.sql` — it
   drops all existing policies per table and recreates the canonical four.
 - **Never** `drop table` a user-data table as a rollback step. Dropping user

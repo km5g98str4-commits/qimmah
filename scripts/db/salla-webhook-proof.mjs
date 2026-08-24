@@ -927,6 +927,38 @@ const flipped = stripped.replace(/verifyAuthenticity/g, 'ZZZ').replace(/salla_in
 check('فحص الترتيب يسقط على ترتيب مقلوب مزروع',
   !(flipped.indexOf('verifyAuthenticity') > 0 && flipped.indexOf('ZZZ') > flipped.indexOf('verifyAuthenticity')))
 
+// ── بوّابة المنصّة: الإعلان الذي بدونه لا يصل التسليم أصلًا ────────────────
+/**
+ * ⚠️ **أخطر ما في هذا الملف كلّه ليس منطقًا بل إعلانًا.**
+ * طرفيات Supabase تتحقّق من JWT افتراضًا، وسلة لا ترسل JWT. فبلا
+ * `verify_jwt = false` تردّ بوّابة المنصّة كل تسليم بـ401 **قبل أن يعمل سطر
+ * واحد ممّا يفحصه هذا الطقم** — فتمرّ الـ157 فحصًا خضراء بينما لا يصل شراءٌ
+ * واحد. عطلٌ يعيش في الفجوة بين ما نختبره وما يُنشَر، فيُحرَس هنا.
+ */
+{
+  const cfgPath = resolve(root, 'supabase/config.toml')
+  let cfg = ''
+  try { cfg = readFileSync(cfgPath, 'utf8') } catch { cfg = '' }
+  const strip = (t) => t.replace(/^\s*#.*$/gm, '')
+  const clean = strip(cfg)
+  const sectionOf = (name) => {
+    const i = clean.indexOf(`[functions.${name}]`)
+    if (i < 0) return ''
+    const rest = clean.slice(i + `[functions.${name}]`.length)
+    const j = rest.indexOf('[')
+    return j < 0 ? rest : rest.slice(0, j)
+  }
+  check('supabase/config.toml موجود — بدونه لا إعلان أصلًا', cfg.trim() !== '')
+  check('⚔️ وطرفية سلة معلَنة `verify_jwt = false` — وإلا رُدّ كل تسليم ٤٠١ قبل كودنا',
+    /verify_jwt\s*=\s*false/.test(sectionOf('salla-webhook')))
+  // ⟲ التأكيد المضادّ: الفحص يقرأ **قسم الطرفية** لا الملف كلّه. لو قرأ الملف
+  // كلّه لأرضاه `verify_jwt = false` في قسم طرفية أخرى تمامًا.
+  check('⟲ والفحص يقرأ قسم الطرفية لا الملف — قسمٌ آخر لا يُرضيه',
+    !/verify_jwt\s*=\s*false/.test(sectionOf('qimmah-gateway')))
+  check('⟲ والبوّابة التجارية تُبقيه `true` — متصفّح مصادَق لا webhook',
+    /verify_jwt\s*=\s*true/.test(sectionOf('qimmah-gateway')))
+}
+
 // ── الخلاصة ────────────────────────────────────────────────────────────────
 await db.close()
 const passed = results.filter((r) => r.pass).length

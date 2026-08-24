@@ -357,6 +357,25 @@ export type RedeemServerOutcome =
  * الشبكة فعلًا. **الافتراض المجهول عطلٌ عندنا لا عند المستخدم**: من يُلام على
  * شبكته لا يبلّغنا، ومن يُقال له «الخلل عندنا» يبلّغ.
  */
+/**
+ * ═══ [STAGING-COMMISSIONING §16] جلسةٌ رفضها الخادم ═══
+ *
+ * `PGRST301` وأخواتها تعني: **الرمز نفسه مرفوض** — انتهى أو فسد توقيعه. وهذه
+ * ليست عطلًا عندنا ولا شبكةً عند المستخدم، ولها **خطوة تالية واحدة معروفة**:
+ * سجّل دخولك ثانية.
+ *
+ * وكانت تسقط في `service_error`، فيُقال لمن انتهت جلسته «صار خلل عندنا، جرّب
+ * بعد شوي» — وهو نصٌّ **يخفي الخطوة التي تحلّ المشكلة** ويرسل بلاغًا كاذبًا
+ * إلى الدعم عن عطلٍ لا وجود له. الصدق قبل الطمأنينة (§6/٤).
+ *
+ * ولا خطر التباس: لا خطأ عملٍ في هذا العقد يحمل كلمة `jwt`.
+ */
+function looksLikeRejectedSession(text: string, code: string): boolean {
+  if (/^pgrst30[0-9]$/.test(code.toLowerCase())) return true
+  const t = text.toLowerCase()
+  return t.includes('jwt') && (t.includes('expired') || t.includes('invalid') || t.includes('malformed'))
+}
+
 export function classifyRedeemError(message: string, code: string): RedeemServerOutcome {
   const text = `${message} ${code}`.toLowerCase()
   if (text.includes('code_already_redeemed') || code === '23505') return 'already_used'
@@ -365,6 +384,8 @@ export function classifyRedeemError(message: string, code: string): RedeemServer
   // يترجمه «لست مسجّل الدخول» — وهو مسجّل الدخول فعلًا، فيُرسَل إلى شاشة لا
   // تحلّ شيئًا. والفصل بالاسم لا بالرمز.
   if (text.includes('email_not_verified')) return 'email_not_verified'
+  // جلسةٌ رفضها الخادم ⇒ نفس رسالة «سجّل دخولك»: الخطوة التالية واحدة.
+  if (looksLikeRejectedSession(message, code)) return 'not_authenticated'
   if (text.includes('not authenticated') || code === '28000') return 'not_authenticated'
   if (text.includes('invalid_code') || code === '22023') return 'invalid'
   if (looksLikeNetworkFailure(text)) return 'offline'
@@ -437,6 +458,7 @@ export type TrialOutcome =
 export function classifyTrialError(message: string, code: string): TrialOutcome {
   const text = `${message} ${code}`.toLowerCase()
   if (text.includes('email_not_verified')) return 'email_not_verified'
+  if (looksLikeRejectedSession(message, code)) return 'not_authenticated'
   if (text.includes('access_revoked')) return 'revoked'
   if (text.includes('trial_already') || text.includes('already')) return 'already_claimed'
   if (text.includes('not authenticated')) return 'not_authenticated'
@@ -460,18 +482,33 @@ export async function startTrialOnServer(): Promise<TrialOutcome> {
 }
 
 /**
- * مِنَح تنتظر الحساب — الشراء يسبق التسجيل أحيانًا. تُستدعى بعد تسجيل الدخول
- * مباشرةً، وفشلها لا يُظهر خطأً: لا شيء ينتظر في الحالة الغالبة.
+ * ═══ [STAGING-COMMISSIONING §16] نتيجة مسمّاة — والسبب تجاريّ لا أسلوبيّ ═══
+ *
+ * كانت هذه الدالّة تعيد `boolean`، وهو يخلط **ثلاث حالات مختلفة تمامًا**:
+ *   ① مُنحت منحة                        → `granted`
+ *   ② الخادم ردّ: لا شيء ينتظر (الغالب)  → `nothing_pending`
+ *   ③ **لم نبلغ الخادم أصلًا**            → `unreachable`
+ *
+ * والفرق بين ② و③ هو الفرق بين «لا شيء لك» و«ما عرفنا». ومن يخلطهما يخسر
+ * مشتريًا: العائد من سلة يُطفئ نيّة المطالبة قبل أن تُنفَّذ، فإن تعثّرت
+ * المطالبة لحظتَها لم تُعَد أبدًا — ويقف من دفع ١٩٫٩٩ أمام تطبيق مقفل بلا
+ * طريق للاسترجاع سوى مراسلة الدعم.
  */
-export async function claimPendingGrantsOnServer(): Promise<boolean> {
-  if (!isSupabaseConfigured()) return false
+export type ClaimOutcome = 'granted' | 'nothing_pending' | 'unreachable'
+
+export async function claimPendingGrantsOnServer(): Promise<ClaimOutcome> {
+  if (!isSupabaseConfigured()) return 'unreachable'
   const supabase = await getSupabase()
-  if (!supabase) return false
+  if (!supabase) return 'unreachable'
   const sessionResult = await withDeadline(supabase.auth.getSession())
-  if (sessionResult === TIMED_OUT || !sessionResult?.data?.session) return false
+  if (sessionResult === TIMED_OUT) return 'unreachable'
+  // بلا جلسة لا مطالبة **ولا إعادة محاولة**: الغياب هنا ليس عطلًا عابرًا.
+  if (!sessionResult?.data?.session) return 'nothing_pending'
   const rpcResult = await withDeadline(supabase.rpc('claim_pending_grants'))
-  if (rpcResult === TIMED_OUT) return false
+  if (rpcResult === TIMED_OUT) return 'unreachable'
   const { data, error } = rpcResult
-  if (error) return false
+  // ⚠️ **الخطأ ليس «لا شيء ينتظر»**: قد تكون المنحة موجودة ولم نبلغها.
+  if (error) return 'unreachable'
   return typeof data === 'string' && statusForServerState(data) === 'active'
+    ? 'granted' : 'nothing_pending'
 }

@@ -361,17 +361,44 @@ for (const { file, code: body } of migrations) {
     !/create\s+trigger/i.test(body) || /drop\s+trigger\s+if\s+exists/i.test(body),
   )
   check(`${file}: no DROP TABLE / TRUNCATE`, !/drop\s+table/i.test(body) && !/truncate/i.test(body))
-  // The only legitimate DELETE in this folder is inside delete_own_account(),
-  // and it must always be scoped to the caller's own rows.
+  // The rule is "no UNSCOPED delete". A bare `delete from t where <time>` in a
+  // migration is how user rows get erased by a line nobody reviews closely.
+  //
+  // `ip_hash` joins `user_id`/`id` as an accepted scope key: `private.gate_attempts`
+  // (the per-network rate ledger) carries no user_id at all, and its purge is
+  // confined to the single key being checked. The counter-assertion below proves
+  // this widening did NOT turn the guard off.
   check(
-    `${file}: every DELETE is scoped to the caller's own user_id`,
-    [...body.matchAll(/delete\s+from\s+[^;]*/gi)].every((d) => /where\s+(user_id|id)\s*=/i.test(d[0])),
+    `${file}: every DELETE is scoped to a key, never bare`,
+    [...body.matchAll(/delete\s+from\s+[^;]*/gi)].every((d) => /where\s+(user_id|id|ip_hash)\s*=/i.test(d[0])),
   )
   check(`${file}: columns added only with IF NOT EXISTS`, !/add\s+column\s+(?!if\s+not\s+exists)/i.test(body))
   check(`${file}: never drops a column`, !/drop\s+column/i.test(body))
   check(
     `${file}: every ADD CONSTRAINT is guarded by an existence check`,
     !/add\s+constraint/i.test(body) || /from pg_constraint/i.test(body),
+  )
+}
+
+// ⟲ counter-assertion for the `ip_hash` widening above (§4.2): the guard must
+// still catch a BARE delete. Widening an exception without attacking it is how
+// an exception quietly becomes the rule.
+{
+  const scoped = /where\s+(user_id|id|ip_hash)\s*=/i
+  const BARE = "delete from private.gate_attempts where attempted_at < now() - interval '24 hours';"
+  const SCOPED = "delete from private.gate_attempts where ip_hash = h and attempted_at < now();"
+  check(
+    '⟲ the DELETE guard still rejects an unscoped purge',
+    [...BARE.matchAll(/delete\s+from\s+[^;]*/gi)].every((d) => scoped.test(d[0])) === false,
+  )
+  check(
+    '⟲ and still rejects one scoped by a non-key column',
+    [...'delete from t where action = $1;'.matchAll(/delete\s+from\s+[^;]*/gi)]
+      .every((d) => scoped.test(d[0])) === false,
+  )
+  check(
+    '⟲ while accepting the key-scoped form actually shipped',
+    [...SCOPED.matchAll(/delete\s+from\s+[^;]*/gi)].every((d) => scoped.test(d[0])),
   )
 }
 

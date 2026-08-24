@@ -47,7 +47,25 @@ function countingConnect(rows = [{ env: 'staging' }]) {
 console.log('— ١) التهيئة المُسلَّمة (قائمتان فارغتان)')
 const shipped = loadConfig()
 check('قائمة السماح المُسلَّمة فارغة (فشل مغلق)', shipped.stagingAllowedRefs.length === 0)
-check('قائمة الإنتاج المُسلَّمة فارغة (تُملأ بيد المؤسس)', shipped.productionRefs.length === 0)
+// ⚠️ **قائمة المنع ليست ثنائيّة القيمة مع قائمة السماح.**
+// فراغُ قائمة السماح خاصيّةُ أمان (فشلٌ مغلق: لا هدف مسموح). أمّا فراغُ قائمة
+// المنع فـ**ضعف**: يُرفض الإنتاج حينها بالصدفة — لغيابه من السماح — لا بالقصد،
+// وأوّلُ من يضيف مرجعًا تجريبيًّا يُطفئ الحماية الوحيدة القائمة دون أن يدري.
+// وتعليق الملف نفسه يأمر بملئها أوّلًا. فمُلئت، ويُقاس الأثر لا الشكل:
+check('قائمة السماح تبقى فارغة — والفشل مغلق', shipped.stagingAllowedRefs.length === 0)
+check('وقائمة المنع تحمل مرجع الإنتاج — فيُرفض **باسمه** لا بغيابه',
+  shipped.productionRefs.includes('ledlypcyrtnzvjvhykwz'), JSON.stringify(shipped.productionRefs))
+{
+  // ⟲ والأثر يُقاس على التهيئة المشحونة نفسها لا على تهيئة اصطناعية.
+  const denied = preflightOffline({ targetRef: 'ledlypcyrtnzvjvhykwz', env: { QIMMAH_ENV: 'staging' }, config: shipped })
+  check('⟲ ومرجع الإنتاج يُرفض بسببٍ مسمّى قبل أي اتصال',
+    denied.ok === false && denied.code === 'production_ref_denied', JSON.stringify(denied))
+  // ⟲ ولو أضاف أحدٌ مرجع الإنتاج إلى قائمة السماح خطأً، **المنع يفوز**.
+  const both = { ...shipped, stagingAllowedRefs: ['ledlypcyrtnzvjvhykwz'] }
+  const stillDenied = preflightOffline({ targetRef: 'ledlypcyrtnzvjvhykwz', env: { QIMMAH_ENV: 'staging' }, config: both })
+  check('⟲ وإدراجه في السماح خطأً لا يفتحه — المنع أسبق',
+    stillDenied.ok === false && stillDenied.code === 'production_ref_denied', JSON.stringify(stillDenied))
+}
 let r = preflightOffline({ targetRef: STAGE_REF, env: OK_ENV, config: shipped })
 check('وبها يُرفض حتى مرجع تجريبي سليم', !r.ok && r.code === REFUSAL.NO_ALLOWLIST, r.code)
 check('ولا مفاتيح ولا أسرار في ملف التهيئة',

@@ -167,15 +167,19 @@ check('والمطالبة مرّة ثانية لا تضاعف شيئًا',
 // ═══════════════════════════════════════════════════════════════════════════
 console.log('\n③ أكواد التفعيل — إصدار · استهلاك · تسابق · إبطال')
 // ═══════════════════════════════════════════════════════════════════════════
-const CODE = stg.one(`select public.founder_issue_access_code('commissioning', 'batch-A', 14, 1, null, 'QMMAHSTAGE23');`,
-  { role: 'authenticated', uid: founderId })
-check('المؤسس يُصدر كودًا من الخادم', typeof CODE === 'string' && CODE.length > 0, String(CODE))
+// [20260824120005] الأكواد لم تعد تُكتب بيد — تُولَّد ويُلتقط نصّها من الرد
+// **مرّة واحدة**. وهذا هو نفس ما يفعله المؤسس في وحدة التحكّم بالضبط.
+const ISSUED_A = JSON.parse(stg.one(
+  `select public.founder_issue_access_code('commissioning', 'batch-A', 14, 1)::text;`,
+  { role: 'authenticated', uid: founderId }))
+const CODE = ISSUED_A.code
+check('المؤسس يُصدر كودًا من الخادم', typeof CODE === 'string' && CODE.length === 16, String(CODE))
 
 const carol = makeUser(stg, 'carol@example.test')
 check('المستخدم يستهلكه فيُمنح',
-  redeem('QMMAHSTAGE23', { role: 'authenticated', uid: carol }) === 'specialAccessActive')
+  redeem(CODE, { role: 'authenticated', uid: carol }) === 'specialAccessActive')
 refuses('وإعادة استهلاكه مرفوضة',
-  () => redeem('QMMAHSTAGE23', { role: 'authenticated', uid: carol }), 'invalid_code')
+  () => redeem(CODE, { role: 'authenticated', uid: carol }), 'invalid_code')
 
 // **دمجٌ متعمّد لا كسل:** المستنفَد والمجهول والمُبطَل كلّها `invalid_code`،
 // فلا يصير الردّ عرّافًا يكشف أيّ الأكواد حقيقي.
@@ -185,15 +189,14 @@ check('والأكواد مخزَّنة مجزّأة لا نصًّا — لا ع�
            where table_schema='public' and table_name='access_codes'
              and column_name in ('code','code_plain','code_normalized');`) === '0')
 check('  والمُصدَر لا يوجد نصًّا في أي صفّ',
-  stg.one(`select count(*) from public.access_codes where code_hash = 'QMMAHSTAGE23';`) === '0')
+  stg.one(`select count(*) from public.access_codes where code_hash = '${CODE}';`) === '0')
 
 // ⟂ التسابق الحقيقي: اتصالان مستقلّان على كودٍ بحصّة واحدة.
-const raceCode = 'RACEQMMAH234'
-stg.one(`select public.founder_issue_access_code('race', 'batch-R', 14, 1, null, '${raceCode}');`, { role: 'authenticated', uid: founderId })
+const raceIssued = JSON.parse(stg.one(`select public.founder_issue_access_code('race', 'batch-R', 14, 1)::text;`, { role: 'authenticated', uid: founderId }))
 const r1 = makeUser(stg, 'race1@example.test')
 const r2 = makeUser(stg, 'race2@example.test')
 const results = await stg.race(
-  [`select public.redeem_access_code_v2('${raceCode}');`, `select public.redeem_access_code_v2('${raceCode}');`],
+  [`select public.redeem_access_code_v2('${raceIssued.code}');`, `select public.redeem_access_code_v2('${raceIssued.code}');`],
   [{ role: 'authenticated', uid: r1 }, { role: 'authenticated', uid: r2 }]
 )
 const granted = results.filter((r) => r.code === 0 && r.out.includes('specialAccessActive')).length
@@ -206,12 +209,12 @@ check('⟂ وعدّاد الكود نفسه واحد — لا تجاوز للح�
   stg.one(`select redemption_count from public.access_codes where label = 'batch-R';`) === '1')
 
 // الإبطال قبل الاستهلاك.
-stg.one(`select public.founder_issue_access_code('to-revoke', 'batch-X', 14, 1, null, 'KLLQMMAH2345');`, { role: 'authenticated', uid: founderId })
+const revokeIssued = JSON.parse(stg.one(`select public.founder_issue_access_code('to-revoke', 'batch-X', 14, 1)::text;`, { role: 'authenticated', uid: founderId }))
 const codeId = stg.one(`select id::text from public.access_codes where label = 'batch-X';`)
 stg.one(`select public.founder_set_code_enabled('${codeId}', false, 'commissioning revoke');`, { role: 'authenticated', uid: founderId })
 const dave = makeUser(stg, 'dave@example.test')
 refuses('كودٌ مُبطَل لا يُستهلَك',
-  () => redeem('KLLQMMAH2345', { role: 'authenticated', uid: dave }), 'invalid_code')
+  () => redeem(revokeIssued.code, { role: 'authenticated', uid: dave }), 'invalid_code')
 
 refuses('وكودٌ مجهول يُرفض بردٍّ عامّ',
   () => redeem('ZZZZQMMAH999', { role: 'authenticated', uid: dave }), 'invalid_code')
@@ -321,9 +324,9 @@ check('  والردّ قبل الحدّ يبقى عامًّا — لا عرّا�
   outcomes[0].reason === 'invalid_code' && outcomes[9].reason === 'invalid_code')
 
 // والمستهلك الشرعي لا يُعاقَب: هوية أخرى تعمل فورًا.
-stg.one(`select public.founder_issue_access_code('legit', 'batch-L', 14, 1, null, 'LEGTQMMAH234');`, { role: 'authenticated', uid: founderId })
+const legitIssued = JSON.parse(stg.one(`select public.founder_issue_access_code('legit', 'batch-L', 14, 1)::text;`, { role: 'authenticated', uid: founderId }))
 const legit = makeUser(stg, 'legit@example.test')
-const legitOut = JSON.parse(stg.one(`select public.redeem_access_code_v2('LEGTQMMAH234')::text;`, { role: 'authenticated', uid: legit }))
+const legitOut = JSON.parse(stg.one(`select public.redeem_access_code_v2('${legitIssued.code}')::text;`, { role: 'authenticated', uid: legit }))
 check('ومن يستهلك كودًا صحيحًا لا يمسّه الحدّ', legitOut.outcome === 'specialAccessActive', JSON.stringify(legitOut))
 check('  والنواة واحدة: مستهلكٌ لم يبلغ حدَّه يتلقّى نفس الاسم العامّ',
   (() => { try { redeem('ZZZQMMAHPQR9', { role: 'authenticated', uid: legit }); return false }
@@ -490,19 +493,59 @@ for (let i = 0; i < 40; i += 1) {
 check('⟲ أربعون إصدارًا ⇒ أربعون كودًا مختلفًا — المولّد ليس ثابتًا', minted.size === 40, `${minted.size}/40`)
 check('⟲ وكلّها ١٦ رمزًا — لا يعود واحدٌ إلى ١٢ بصمت',
   [...minted].every((c) => c.length === 16))
-// ⟲ التأكيد المضادّ الحاسم: **الفحص قادر على الرسوب.** لو بقي النداء على ١٢
-// لسقط الفحص أعلاه — نُثبته بقياس المولّد نفسه على الطول القديم.
-check('⟲ والمولّد ذاته ما زال يقبل ١٢ — فالترقية في موضع الإصدار لا بكسر المولّد',
-  String(stg.one(`select private.generate_access_code(12);`)).length === 12)
-// وكودٌ نصّي يمرّه المؤسس يبقى مقبولًا **وموسومًا بضعفه** — القرار مرفوع لا مفترَض.
-const weak = JSON.parse(stg.one(
-  `select public.founder_issue_access_code('حملة', 'batch-W', 14, 1, null, 'RAMADAN2345')::text;`,
+// ⟲ التأكيد المضادّ: **الفحص قادر على الرسوب** — الأرضية تُرفض باسمها.
+refuses('⟲ والمولّد نفسه يرفض ما دون ١٦ باسمه — لا يرفعه بصمت',
+  () => stg.one(`select private.generate_access_code(12);`), 'code_entropy_floor')
+check('  وافتراضه صار ١٦ — المستدعي الناسي يقع على الآمن لا على الضعيف',
+  String(stg.one(`select private.generate_access_code();`)).length === 16)
+
+// ══ [20260824120005] حكم المؤسس منفَّذًا: الحملة اسم، والكود سرّ ══
+// كان هذا الموضع يؤكّد **قبول** `RAMADAN2345` ويصف منعَه «قرارَ عملٍ مرفوعًا».
+// وقد صدر القرار، فيُقلَب التأكيد في نفس الموجة — قاعدة صيانة وثيقة التهديدات.
+refuses('⚔️ كودٌ مقروء يكتبه المؤسس لم يعد يُصدَر — الحملة اسمٌ لا سرّ',
+  () => stg.one(`select public.founder_issue_access_code('حملة', 'RAMADAN', 14, 500, null, 'RAMADAN2345')::text;`,
+    { role: 'authenticated', uid: founderId }), 'code_must_be_generated')
+// ⟲ والمنع ليس منعًا للحملات: نفس الحملة تعمل، بكودٍ مولَّد تحت وسمها.
+const camp = JSON.parse(stg.one(
+  `select public.founder_issue_access_code('حملة رمضان', 'RAMADAN', 14, 1)::text;`,
   { role: 'authenticated', uid: founderId }))
-check('وكود الحملة النصّي يبقى مقبولًا — ومنعه قرار عمل لا قرار وكيل',
-  weak.code === 'RAMADAN2345' && weak.generated === false)
-check('  لكنّ ضعفه صار **مرئيًّا** لا خفيًّا — سقفٌ محفوظ وعلامةُ مصدر',
-  weak.entropy_ceiling_bits === 55
-  && stg.one(`select count(*) from public.access_codes where label = 'batch-W' and not generated_server_side;`) === '1')
+check('⟲ ونفس الحملة تُصدَر بكودٍ مولَّد تحت وسمها — الوسم باقٍ والسرّ تغيّر',
+  camp.label === 'RAMADAN' && /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{16}$/.test(camp.code)
+  && camp.entropy_ceiling_bits === 80 && camp.generated === true, JSON.stringify(camp).slice(0, 90))
+const campUser = makeUser(stg, 'campaign@qimmah.test')
+check('  ويُستبدل فعلًا — الأرضية لم تكسر مسار الحملة',
+  redeem(camp.code, { role: 'authenticated', uid: campUser }) === 'specialAccessActive')
+
+// ══ الدفعة: نموذج المؤسس المُعلَن — أكواد فردية تحت اسم حملة واحد ══
+// وبدونها يُدفَع المؤسس إلى سرٍّ واحد يتقاسمه الجميع، فيصير المنعُ أعلاه
+// إحكامًا في الشكل ودفعًا إلى الحيلة في الأثر.
+const batch = JSON.parse(stg.one(
+  `select public.founder_issue_code_batch('حملة رمضان', 'RAMADAN', 30, 1, null, 25)::text;`,
+  { role: 'authenticated', uid: founderId }))
+check('دفعةٌ واحدة تُصدر خمسة وعشرين كودًا فرديًّا تحت وسم واحد',
+  batch.count === 25 && batch.codes.length === 25 && batch.label === 'RAMADAN')
+check('  وكلّها مختلفة — لا سرّ متقاسَم', new Set(batch.codes).size === 25)
+check('  وكلّها ١٦ رمزًا من الأبجدية المقبولة',
+  batch.codes.every((c) => /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{16}$/.test(c)))
+const batchUser = makeUser(stg, 'batch@qimmah.test')
+check('  وواحدٌ منها يُستبدل فعلًا', redeem(batch.codes[0], { role: 'authenticated', uid: batchUser }) === 'specialAccessActive')
+check('  والوسم يجمعها كلّها في صفحة الحملة',
+  Number(stg.one(`select count(*) from public.access_codes where label = 'RAMADAN';`)) === 26)
+refuses('⟲ والدفعة محدودة السقف — نداءٌ واحد لا يقفل الجدول',
+  () => stg.one(`select public.founder_issue_code_batch('x', 'y', 14, 1, null, 501)::text;`,
+    { role: 'authenticated', uid: founderId }), 'batch_count_out_of_range')
+refuses('⟲ والدفعة للمؤسس وحده — لا يصدرها مستخدم عادي',
+  () => stg.one(`select public.founder_issue_code_batch('x', 'y', 14, 1, null, 1)::text;`,
+    { role: 'authenticated', uid: carol }), 'founder_role_required')
+
+// ══ صدق رقم القوّة: لا رقم يُختلق لما لا نعرف عشوائيته ══
+stg.sql(`select public.admin_create_access_code('HANDTYPEDCDE2','ops','مسار مفتاح الخادم',14,1,'batch-W');`,
+  { role: 'service_role' })
+check('كودُ مفتاح الخادم اليدوي لا يُنسَب له رقم قوّة — «ما نعرف» لا «صفر» ولا سقفٌ كاذب',
+  stg.one(`select coalesce(entropy_ceiling_bits::text,'NULL') from public.access_codes where label='batch-W';`) === 'NULL')
+refuses('⟲ وتكرارُه يُردّ باسمٍ عامّ ولا يُعيد البصمة المملّحة في التفصيل',
+  () => stg.one(`select public.admin_create_access_code('HANDTYPEDCDE2','ops','مرّة ثانية',14,1,'batch-W2');`,
+    { role: 'service_role' }), 'code_already_exists')
 
 // ⚠️ و«مرئيّ» تعني **تصل الشاشة**، لا «محفوظة في عمود». عمودٌ لا تقرأه صفحة
 // المؤسس ادّعاءُ رؤيةٍ بلا مسار — وهو بالضبط ما يمنعه التكليف. فتُقاس هنا من
@@ -510,9 +553,9 @@ check('  لكنّ ضعفه صار **مرئيًّا** لا خفيًّا — سق�
 const pageRow = (col) => stg.one(
   `select coalesce(${col}::text, 'NULL') from public.founder_code_page('batch-W', 1, 10);`,
   { role: 'authenticated', uid: founderId })
-check('  والصفحة التي تقرأها الواجهة تحمل السقف فعلًا — لا عمودٌ أعمى',
-  pageRow('entropy_ceiling_bits') === '55', pageRow('entropy_ceiling_bits'))
-check('  ومصدرَه: يدويّ لا مولَّد', pageRow('generated_server_side') === 'false')
+check('  والصفحة التي تقرأها الواجهة لا تنسب رقمًا لما لا تعرف عشوائيته',
+  pageRow('entropy_ceiling_bits') === 'NULL', pageRow('entropy_ceiling_bits'))
+check('  وتقول مصدره صراحةً: يدويّ لا مولَّد', pageRow('generated_server_side') === 'false')
 const genPage = (col) => stg.one(
   `select coalesce(${col}::text, 'NULL') from public.founder_code_page('batch-G', 1, 10);`,
   { role: 'authenticated', uid: founderId })
@@ -526,6 +569,36 @@ check('⟲ وكودٌ سبق القياس يصل الشاشة `NULL` لا صفر
 check('  وحالته تبقى ضمن المفردات الأربع — لا قيمة بلا ترجمة في العميل',
   ['issued', 'redeemed', 'expired', 'disabled'].includes(
     stg.one(`select status from public.founder_code_page('batch-OLD', 1, 10);`, { role: 'authenticated', uid: founderId })))
+
+// ═══════════════════════════════════════════════════════════════════════════
+console.log('\n⑪ حدّ الشبكة — الطبقة التي تعجز عنها القاعدة وحدها [20260824120006]')
+// القاعدة لا ترى عنوانًا؛ الطرفية تراه ولا تملك حالةً تدوم بين نسخها. فكلٌّ
+// يقدّم ما لا يملكه الآخر — وهذا الفحص يقيس نصيب القاعدة من الاتفاق.
+const IP_A = '203.0.113.9'
+const IP_B = '198.51.100.7'
+const admit = (ip, action, max) => stg.one(
+  `select public.gate_admit('${ip}', '${action}', ${max});`, { role: 'service_role' })
+
+let allowedA = 0
+for (let i = 0; i < 8; i += 1) if (admit(IP_A, 'redeem_access_code', 5) === 'allow') allowedA += 1
+check('⚔️ العنوان يُخنق بعد حدّه — ولو بحسابات مختلفة', allowedA === 5, `سُمح ${allowedA}/8`)
+check('⟲ وعنوان آخر لا يتأثّر — الحدّ لكل عنوان لا عامّ',
+  admit(IP_B, 'redeem_access_code', 5) === 'allow')
+check('⟲ وفعلٌ آخر من نفس العنوان له عدّاده — لا خنق متقاطع',
+  admit(IP_A, 'start_trial', 5) === 'allow')
+check('⚔️ وعنوانٌ فارغ يُمنع — فشلٌ مغلق لا تمرير بلا قياس',
+  admit('', 'redeem_access_code', 5) === 'deny' && admit('   ', 'x', 5) === 'deny')
+check('والعنوان لا يُخزَّن نصًّا — بيانٌ شخصي يُجزَّأ كالبريد',
+  stg.one(`select count(*) from private.gate_attempts where ip_hash like '%${IP_A}%';`) === '0'
+  && Number(stg.one(`select count(*) from private.gate_attempts;`)) > 0)
+refuses('⚔️ ولا ينالها العميل — وإلا أحرق حدّ عنوانٍ غيره',
+  () => stg.one(`select public.gate_admit('${IP_A}','x',5);`, { role: 'authenticated', uid: carol }),
+  'permission denied')
+// ⟲ التسجيل **قبل** الحكم: وإلا تجدّد الحدّ لمن بلغه بمجرّد مرور النافذة.
+const beforeDenied = Number(stg.one(`select count(*) from private.gate_attempts;`))
+admit(IP_A, 'redeem_access_code', 5)
+check('⟲ وحتى الطلب المرفوض يُحصى — فالنافذة متدحرجة فعلًا',
+  Number(stg.one(`select count(*) from private.gate_attempts;`)) === beforeDenied + 1)
 
 // ═══════════════════════════════════════════════════════════════════════════
 stg.drop()

@@ -18,8 +18,20 @@ const DEFAULT_SUPABASE_URL = 'https://ledlypcyrtnzvjvhykwz.supabase.co'
 const DEFAULT_SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlZGx5cGN5cnRuenZqdmh5a3d6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MjQ5MTAsImV4cCI6MjA5ODUwMDkxMH0.-wTD9w2vyDLaTjNJI_h_Bhjs2tqZ0bnNJHOUemCiKxo'
 
-const explicitUrl = import.meta.env.VITE_SUPABASE_URL?.trim() || ''
-const explicitAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || ''
+/**
+ * ⚠️ **الشكل هنا مقصود ومقيس: `(x || '')` لا `x?.trim()`.**
+ *
+ * Vite يستبدل `import.meta.env.VITE_SUPABASE_URL` بنصّ حرفي وقت البناء. ومع
+ * `?.` يبقى للمُصغِّر استدعاءُ توابعَ على قيمةٍ اختيارية فلا يطوي الشرط
+ * أدناه، فتبقى ثوابت الإنتاج **محمولة في أرتيفكت يشير إلى مشروع آخر**.
+ *
+ * مقيسٌ لا مُستنتَج: بناءٌ بعنوان تجريبي صريح كان يحمل عنوان الإنتاج في ملف
+ * واحد من الحزمة. وبهذا الشكل ينطوي الشرط إلى ثابت ويُهزّ الاحتياط خارج
+ * الحزمة — نفس الآلية التي يقوم عليها أمان معاينة المؤسس، مطبَّقةً على
+ * المخرج الصريح كذلك. ويحرسه `test:branch-preview-safety`.
+ */
+const explicitUrl = import.meta.env.VITE_SUPABASE_URL || ''
+const explicitAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 /**
  * الاحتياط المخبوز يسري في الإنتاج وحده — [FOUNDER-QA-PREVIEW-SAFETY].
  *
@@ -46,8 +58,15 @@ const explicitAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY?.trim() || ''
  * عليه: `grep` على `dist/assets/*.js` في بناء المعاينة يجب ألّا يجد العنوان.
  */
 const IS_FOUNDER_PREVIEW = import.meta.env.VITE_APP_ENV === 'founder_preview'
-const url = explicitUrl || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_URL)
-const anonKey = explicitAnonKey || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_ANON_KEY)
+// ⚠️ **التشذيب بعد الاختيار لا قبله** — والفرق مقيس في الأرتيفكت لا مُستنتَج.
+// كان `VITE_SUPABASE_URL?.trim()` يسبق الاختيار، والمُصغِّر **لا يطوي
+// `.trim()` على نصّ حرفي** (لأنّ تابع النموذج قد يُستبدَل نظريًّا). فيبقى
+// المخرج الصريح قيمةً غير معروفة وقت البناء، فلا ينطوي `||`، فتبقى ثوابت
+// الإنتاج محمولةً في أرتيفكتٍ يشير إلى مشروع آخر.
+// مقيسٌ: بناءٌ بعنوان تجريبي كان يحمل `ledlypcyrtnzvjvhykwz` في ملف من الحزمة.
+// وبهذا الترتيب ينطوي `||` إلى النصّ التجريبي، ويُهزّ الاحتياط خارج الحزمة.
+const url = (explicitUrl || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_URL)).trim()
+const anonKey = (explicitAnonKey || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_ANON_KEY)).trim()
 // المخرج الصريح محفوظ: تمرير `VITE_SUPABASE_URL`+`ANON_KEY` وقت البناء يتقدّم
 // على كل ما سبق، فمن أراد توجيه المعاينة لمشروع تجريبي فعل ذلك **بإعلان**.
 

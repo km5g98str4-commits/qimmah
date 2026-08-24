@@ -253,9 +253,6 @@ export interface AdminStrings {
     labelPlaceholder: string
     durationLabel: string
     maxLabel: string
-    customCodeLabel: string
-    customCodePlaceholder: string
-    customCodeHint: string
     issueButton: string
     issuing: string
     issuedHeading: string
@@ -806,9 +803,6 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       labelPlaceholder: 'حملة، اسم شريك…',
       durationLabel: 'المدّة بالأيام',
       maxLabel: 'أقصى عدد استخدامات',
-      customCodeLabel: 'كود بخطّ يدك (اختياري)',
-      customCodePlaceholder: 'اتركه فاضي والخادم يولّده',
-      customCodeHint: 'كود تكتبه بنفسك يبدو عشوائيًا وهو مو كذا. خلّه فاضي إلا إذا كانت حملة باسم معروف.',
       issueButton: 'أصدر',
       issuing: 'نصدر…',
       issuedHeading: 'الكود صدر',
@@ -1031,9 +1025,6 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       labelPlaceholder: 'Campaign, partner name…',
       durationLabel: 'Duration in days',
       maxLabel: 'Max redemptions',
-      customCodeLabel: 'Hand-written code (optional)',
-      customCodePlaceholder: 'Leave empty and the server generates it',
-      customCodeHint: 'A code you write yourself looks random and is not. Leave it empty unless this is a named campaign.',
       issueButton: 'Issue',
       issuing: 'Issuing…',
       issuedHeading: 'Code issued',

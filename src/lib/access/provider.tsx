@@ -128,11 +128,13 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
     const onVisible = () => {
       if (document.visibilityState !== 'visible') return
       if (!purchasePendingRef.current) return
-      purchasePendingRef.current = false
+      // ⚠️ **لا تُطفأ النيّة قبل أن تُنفَّذ.** كانت تُطفأ هنا، فإن تعثّرت
+      // المطالبة لحظتَها لم تُعَد أبدًا: من دفع ١٩٫٩٩ ورجع من سلة في لحظة
+      // عطلٍ عابر يقف أمام تطبيق مقفل بلا طريق سوى مراسلة الدعم.
+      // تُطفأ الآن **بعد** ردٍّ من الخادم، وتبقى مسلَّحة إن لم نبلغه.
       void (async () => {
-        // المطالبة أوّلًا: الشراء قد يكون سُجّل قبل وجود الحساب، فالمنحة
-        // تنتظر في السجلّ ولا تصل بإعادة الحسم وحدها.
-        await claimPendingGrants()
+        const claim = await claimPendingGrants()
+        if (claim !== 'unreachable') purchasePendingRef.current = false
         await refresh()
       })()
     }

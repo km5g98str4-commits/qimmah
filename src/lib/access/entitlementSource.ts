@@ -19,6 +19,7 @@ import type { EntitlementSource } from './entitlementStore'
 import {
   backendAvailable,
   claimPendingGrantsOnServer,
+  type ClaimOutcome,
   fetchEntitlement,
   redeemCodeOnServer,
   startTrialOnServer,
@@ -285,10 +286,17 @@ export async function startTrial(): Promise<TrialOutcome> {
   return startTrialOnServer()
 }
 
-/** استلام منحة اشتُريت قبل إنشاء الحساب. صامتة عند عدم وجود شيء. */
-export async function claimPendingGrants(): Promise<boolean> {
-  if (mockEnabled()) return false
-  if (!backendAvailable()) return false
+/**
+ * استلام منحة اشتُريت قبل إنشاء الحساب. صامتة عند عدم وجود شيء — **ولكن
+ * «لا شيء» و«ما وصلنا» تعودان مسمّيتين**، فيستطيع المستدعي إعادة المحاولة
+ * على الثانية دون أن يُزعج المستخدم بالأولى.
+ */
+export type { ClaimOutcome }
+
+export async function claimPendingGrants(): Promise<ClaimOutcome> {
+  // في التقليد لا خادم ولا منحة معلّقة — و«لا شيء ينتظر» أصدق من «ما وصلنا».
+  if (mockEnabled()) return 'nothing_pending'
+  if (!backendAvailable()) return 'nothing_pending'
   return claimPendingGrantsOnServer()
 }
 

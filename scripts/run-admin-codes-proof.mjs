@@ -144,7 +144,8 @@ const ADMIN_READS = [
 ]
 /** أفعال لا رجعة فيها: للمؤسس وحده. */
 const FOUNDER_WRITES = [
-  'founder_issue_access_code', 'founder_set_code_enabled', 'founder_revoke_access',
+  'founder_issue_access_code', 'founder_issue_code_batch',
+  'founder_set_code_enabled', 'founder_revoke_access',
   'founder_review_food_submission',
 ]
 const known = new Set([...ADMIN_READS, ...FOUNDER_WRITES])
@@ -238,8 +239,12 @@ check('أثر الفاعل جلسة مسمّاة لا سلسلة عامّة', St
 check('السبب مخزَّن كما كُتب', stored.rows[0].created_reason === 'حملة الإثبات')
 await asRole(db, 'authenticated', founderId)
 await mustFail('إصدار بلا سبب يُرفض', () => db.query(`select public.founder_issue_access_code('')`), 'reason required')
-await mustFail('كود يدوي دون العقد يُرفض بنفس البوّابة',
-  () => db.query(`select public.founder_issue_access_code('سبب',null,14,1,null,'SHORT1')`), 'invalid_access_code')
+// [20260824120005] حكم المؤسس: الحملة اسمٌ لا سرّ. فالكود اليدوي يُرفض الآن
+// **قبل** أن يبلغ عقد الشكل أصلًا — والرفض أبكر وأصرح، لا أضعف.
+await mustFail('كودٌ يكتبه المؤسس بيده لم يعد يُصدَر إطلاقًا',
+  () => db.query(`select public.founder_issue_access_code('سبب',null,14,1,null,'SHORT1')`), 'code_must_be_generated')
+await mustFail('  ولا حتى كودٌ يدويّ طويل — الطول ليس عشوائية',
+  () => db.query(`select public.founder_issue_access_code('سبب',null,14,1,null,'QIMMAHRAMADAN25')`), 'code_must_be_generated')
 
 // ٤-ج) القائمة بحالاتها الأربع
 const page = (await db.query(`select * from public.founder_code_page('',1,50)`)).rows
@@ -305,22 +310,28 @@ const DRAWS = 3000
 const seen = new Set()
 const symbolCounts = new Map()
 for (let i = 0; i < DRAWS; i += 1) {
-  const c = (await db.query(`select private.generate_access_code(12) as c`)).rows[0].c
+  const c = (await db.query(`select private.generate_access_code(16) as c`)).rows[0].c
   seen.add(c)
   for (const ch of c) symbolCounts.set(ch, (symbolCounts.get(ch) ?? 0) + 1)
 }
 check(`${DRAWS} سحبة بلا تكرار واحد`, seen.size === DRAWS, `${seen.size}`)
-check('الطول ١٢ رمزًا في كل سحبة', [...seen].every((c) => c.length === 12))
+check('الطول ١٦ رمزًا في كل سحبة — ٨٠ بتًا', [...seen].every((c) => c.length === 16))
 check('أبجدية العقد وحدها', [...seen].every((c) => /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]+$/.test(c)))
 check('الأبجدية مستعمَلة كاملة (٣٢ رمزًا)', symbolCounts.size === 32, `${symbolCounts.size}`)
 // توزيع منتظم: أي رمز يخرج ~١١٢٥ مرّة في ٣٦٠٠٠ موضع. حدّ فضفاض عمدًا (±٤٠٪):
 // الغرض كشف **انحياز بنيوي** (بايت ثابت · modulo منحاز)، لا اختبار عشوائية.
-const expected = (DRAWS * 12) / 32
+const expected = (DRAWS * 16) / 32
 const skewed = [...symbolCounts.entries()].filter(([, n]) => n < expected * 0.6 || n > expected * 1.4)
 check('لا رمز منحاز بنيويًا', skewed.length === 0, skewed.map(([s, n]) => `${s}:${n}`).join(' '))
-// حدّ العقد الأدنى مضمون حتى لو طُلب أقلّ.
-const short = (await db.query(`select private.generate_access_code(2) as c`)).rows[0].c
-check('طلب أقلّ من الحدّ يُرفع إلى ١٠ رموز', short.length === 10, short)
+// [20260824120005] الأرضية **ترفض ولا ترفع بصمت**: من طلب ١٢ ظنّ أنه نالها،
+// فكان يمشي على ٦٠ بتًا وهو يحسبها ما طلب. الرفض المسمّى يمنع ذلك الظنّ.
+let floorErr = ''
+try { await db.query(`select private.generate_access_code(2) as c`) }
+catch (e) { floorErr = String(e.message || e) }
+check('طلبٌ دون الأرضية يُرفض **باسمه** لا يُرفَع بصمت',
+  floorErr.includes('code_entropy_floor'), floorErr.slice(0, 90))
+const dflt = (await db.query(`select private.generate_access_code() as c`)).rows[0].c
+check('  والافتراض نفسه صار ١٦ — الناسي يقع على الآمن', dflt.length === 16, dflt)
 await db.close()
 
 // ═══════════════ ٦) التأكيد المضادّ ① — بيئة بلا بوّابة ═══════════════

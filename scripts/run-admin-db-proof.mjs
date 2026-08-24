@@ -133,7 +133,8 @@ const ADMIN_READS = [
 ]
 /** أفعال لا رجعة فيها: للمؤسس وحده. */
 const FOUNDER_WRITES = [
-  'founder_issue_access_code', 'founder_set_code_enabled', 'founder_revoke_access',
+  'founder_issue_access_code', 'founder_issue_code_batch',
+  'founder_set_code_enabled', 'founder_revoke_access',
   'founder_review_food_submission',
 ]
 const known = new Set([...ADMIN_READS, ...FOUNDER_WRITES])

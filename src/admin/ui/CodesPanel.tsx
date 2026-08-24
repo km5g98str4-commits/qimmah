@@ -26,7 +26,7 @@ export interface CodesPanelProps {
   live: LiveReadState
   search: string
   onSearch: (s: string) => void
-  onIssue: (input: { reason: string; label?: string; durationDays: number; maxRedemptions: number; code?: string }) => void
+  onIssue: (input: { reason: string; label?: string; durationDays: number; maxRedemptions: number }) => void
   onToggle: (codeId: string, enabled: boolean, reason: string) => void
   /** الكود الصادر للتوّ — يُعرض حتى يصرفه المؤسس بنفسه، لا بمؤقّت. */
   issued: IssuedCode | null
@@ -72,7 +72,6 @@ export function CodesPanel({
   const [label, setLabel] = useState('')
   const [days, setDays] = useState(14)
   const [maxUses, setMaxUses] = useState(1)
-  const [custom, setCustom] = useState('')
 
   // السبب إلزامي في القاعدة أيضًا — والواجهة تمنع الرحلة الضائعة لا أكثر.
   const canIssue = reason.trim().length > 0 && !busy
@@ -189,19 +188,13 @@ export function CodesPanel({
               onChange={(e) => setMaxUses(Math.max(1, Math.trunc(Number(e.target.value))))}
             />
           </div>
-          <div className="sm:col-span-2">
-            <label htmlFor="code-custom" className="mb-1 block text-xs font-bold text-ink-500">
-              {t.codes.customCodeLabel}
-            </label>
-            <input
-              id="code-custom"
-              className="input font-mono"
-              value={custom}
-              placeholder={t.codes.customCodePlaceholder}
-              onChange={(e) => setCustom(e.target.value)}
-            />
-            <p className="mt-1 text-[11px] leading-relaxed text-ink-500">{t.codes.customCodeHint}</p>
-          </div>
+          {/*
+            [STAGING-COMMISSIONING §8] **حقل «كود بخطّ يدك» نُزع.**
+            الخادم يرفضه الآن (`code_must_be_generated`)، وحقلٌ يبقى على الشاشة
+            بينما الخادم يردّه ليس تشدّدًا بل فخّ: يُملأ ثم يُرفض. والأسوأ أن
+            نصّه المشحون كان **يُرشد** إلى ما مُنع: «خلّه فاضي إلا إذا كانت
+            حملة باسم معروف». والحملة اسمها في حقل «الحملة» أعلاه — لا في السرّ.
+          */}
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           <button
@@ -214,7 +207,6 @@ export function CodesPanel({
                 label: label.trim() === '' ? undefined : label.trim(),
                 durationDays: days,
                 maxRedemptions: maxUses,
-                code: custom.trim() === '' ? undefined : custom.trim(),
               })
             }
           >

@@ -202,10 +202,56 @@ console.log('\n🔒 المرحلة ب — بعد التحصين (السلسلة 
   // ⚠️ **`redeem_access_code_v2` لا `redeem_access_code`:** الأخيرة نُزعت من
   // `authenticated` في `20260824120004` لأنها كانت تلتفّ على حدّ المعدّل بتبديل
   // الاسم. فالمدخل العميل للاسترداد صار `_v2` وحده.
-  const rpcOpen = await db.query(`select count(*)::int n from information_schema.role_routine_grants
-                                  where routine_schema='public' and grantee='authenticated'
-                                    and routine_name in ('my_entitlement','start_trial','redeem_access_code_v2','claim_pending_grants')`)
-  check('دوال العميل الأربع ما زالت مكشوفة صراحةً', rpcOpen.rows[0].n >= 4, `${rpcOpen.rows[0].n}`)
+  /**
+   * ═══ [STAGING-COMMISSIONING §7] عدٌّ بـ`>=` لا يرى إلا النقصان ═══
+   * كان هذا الفحص يعدّ أربع دوالّ ويطلب `n >= 4`. وهذا يمسك **النزع** ولا يمسك
+   * **الإضافة**: هجرةٌ قادمة تمنح `authenticated` دالّةً حسّاسة جديدة ترفع العدّ
+   * فيمرّ الفحص أخضر — وهو الحارس الوحيد الذي يمنع سطح الطفرات العامّ من
+   * التمدّد بصمت. وقد كانت `submit_missing_food` و`delete_own_account` خارج
+   * القائمة أصلًا رغم أنهما مكشوفتان للعميل فعلًا.
+   *
+   * فصار **مساواةً على المجموعة كاملةً**: هذه بالضبط لا أقلّ ولا أكثر. وإضافةُ
+   * دالّة عامّة جديدة تُسقط الفحص حتى يقرّر إنسانٌ أنها تنتمي إلى السطح — وهو
+   * القرار الذي يجب ألّا يُتّخذ بالسكوت.
+   */
+  const CLIENT_SURFACE = [
+    'my_entitlement', 'start_trial', 'redeem_access_code_v2',
+    'claim_pending_grants', 'submit_missing_food', 'delete_own_account',
+  ].sort()
+  const surfaceRows = await db.query(`select distinct routine_name from information_schema.role_routine_grants
+    where routine_schema='public' and grantee='authenticated' and privilege_type='EXECUTE'
+      and routine_name not like 'founder\\_%'
+      and routine_name not in (select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+                               where n.nspname='public' and p.prorettype = 'trigger'::regtype::oid)
+      -- ⚠️ **دوالّ الامتدادات ليست سطحنا.** pgcrypto تهبط في \`public\` داخل
+      -- صندوق PGlite (وفي \`extensions\` على Supabase الحقيقي)، وتمنح نفسها
+      -- لـPUBLIC. عدّها ضمن سطحنا يقيس قرار الامتداد لا قرارنا.
+      and routine_name not in (select p.proname from pg_proc p
+                               join pg_depend d on d.objid = p.oid and d.deptype = 'e')`)
+  const actual = surfaceRows.rows.map((r) => r.routine_name).sort()
+  const added = actual.filter((r) => !CLIENT_SURFACE.includes(r))
+  const removed = CLIENT_SURFACE.filter((r) => !actual.includes(r))
+  check('سطح طفرات العميل **مساوٍ** للمُعلَن — لا نقصان ولا تمدّد صامت',
+    added.length === 0 && removed.length === 0,
+    `زائد: [${added.join(' ')}] · ناقص: [${removed.join(' ')}]`)
+  // ⟲ محاكاة الالتفاف: منحُ دالّة حسّاسة جديدة يجب أن **يُسقط** الفحص أعلاه.
+  await db.exec(`create or replace function public.zz_new_mutation() returns text
+                 language sql security definer set search_path='' as $$ select 'x' $$;
+                 grant execute on function public.zz_new_mutation() to authenticated;`)
+  const afterRows = await db.query(`select distinct routine_name from information_schema.role_routine_grants
+    where routine_schema='public' and grantee='authenticated' and privilege_type='EXECUTE'
+      and routine_name not like 'founder\\_%'
+      and routine_name not in (select p.proname from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+                               where n.nspname='public' and p.prorettype = 'trigger'::regtype::oid)
+      -- ⚠️ **دوالّ الامتدادات ليست سطحنا.** pgcrypto تهبط في \`public\` داخل
+      -- صندوق PGlite (وفي \`extensions\` على Supabase الحقيقي)، وتمنح نفسها
+      -- لـPUBLIC. عدّها ضمن سطحنا يقيس قرار الامتداد لا قرارنا.
+      and routine_name not in (select p.proname from pg_proc p
+                               join pg_depend d on d.objid = p.oid and d.deptype = 'e')`)
+  const afterAdded = afterRows.rows.map((r) => r.routine_name).filter((r) => !CLIENT_SURFACE.includes(r))
+  check('⟲ ومنحُ دالّة جديدة لـ`authenticated` يُسقطه — فالعدّ بـ`>=` كان أعمى عن التمدّد',
+    afterAdded.includes('zz_new_mutation'), afterAdded.join(' '))
+  await db.exec(`drop function public.zz_new_mutation();`)
   // ⟲ والتأكيد المضادّ: النزع **فعليّ** لا اسمٌ في هجرة — الاسم القديم مغلق.
   const legacyClosed = await db.query(`select count(*)::int n from information_schema.role_routine_grants
                                        where routine_schema='public' and grantee in ('anon','authenticated')

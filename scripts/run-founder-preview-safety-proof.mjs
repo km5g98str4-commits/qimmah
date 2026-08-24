@@ -145,7 +145,12 @@ const redeem = await preview.redeemCodeOnServer('QIMMAHTEST2024')
 check('③ استهلاك كود تفعيل إنتاج مستحيل — الكاتب المباشر يرفض بـ`backend_unconfigured`', REFUSES_HONESTLY(redeem), `عاد: ${redeem}`)
 check('   وكذلك لا يلوم الشبكة', redeem !== 'offline', `عاد: ${redeem}`)
 const claim = await preview.claimPendingGrantsOnServer()
-check('منح معلّقة لا تُطالَب', claim === false, `عاد: ${claim}`)
+// [STAGING-COMMISSIONING §16] النتيجة صارت مسمّاة (`granted`/`nothing_pending`/
+// `unreachable`) بدل منطقيّ يخلط «لا شيء ينتظر» بـ«ما بلغنا الخادم».
+// والمحروس هنا **أن لا منحة تصل**، لا القيمة `false` بعينها.
+check('منح معلّقة لا تُطالَب في المعاينة', claim !== 'granted', `عاد: ${claim}`)
+check('   والسبب صادق: لا خادم في هذا البناء — لا «لا شيء لك»',
+  claim === 'unreachable', `عاد: ${claim}`)
 /**
  * [LIVE-QA-A] أمرُ المؤسس فتح **مراجعة QA** داخل بناء المعاينة وحده، فصار
  * مصدر الاستحقاق `mock` لا `none`. والخاصيّة المحروسة هنا **اشتدّت لا رخت**:
@@ -244,8 +249,8 @@ check('⑦ دسّ `production` في التخزين لا يقلب الوضع', pr
 // ── ④ محاكاة الارتداد — الحارس يعضّ ─────────────────────────────────────────
 console.log('\n④ محاكاة ارتداد — إعادة الاحتياط غير المشروط تُسقط الفحص باسمه')
 const restored = clientSrc
-  .replace("const url = explicitUrl || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_URL)", 'const url = explicitUrl || DEFAULT_SUPABASE_URL')
-  .replace("const anonKey = explicitAnonKey || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_ANON_KEY)", 'const anonKey = explicitAnonKey || DEFAULT_SUPABASE_ANON_KEY')
+  .replace("const url = (explicitUrl || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_URL)).trim()", 'const url = explicitUrl || DEFAULT_SUPABASE_URL')
+  .replace("const anonKey = (explicitAnonKey || (IS_FOUNDER_PREVIEW ? '' : DEFAULT_SUPABASE_ANON_KEY)).trim()", 'const anonKey = explicitAnonKey || DEFAULT_SUPABASE_ANON_KEY')
 check('نسخة الارتداد اختلفت فعلًا عن المصدر', restored !== clientSrc)
 check('وفيها يعود الاحتياط غير مشروط (الشرط البنيوي سقط)',
   !/IS_FOUNDER_PREVIEW \? '' : DEFAULT_SUPABASE_URL/.test(restored) && /explicitUrl \|\| DEFAULT_SUPABASE_URL/.test(restored))

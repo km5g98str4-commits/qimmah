@@ -159,6 +159,11 @@ const REDEEM_CAUSES = [
   ['function public.redeem_access_code(text) does not exist', '42883', 'service_error', 'postgres'],
   ['something nobody mapped yet', 'XX000', 'service_error', 'unmapped'],
   ['TypeError: Failed to fetch', '', 'offline', 'browser network'],
+  // [STAGING-COMMISSIONING §16] جلسةٌ رفضها الخادم — **ليست عطلًا عندنا**.
+  // كانت تسقط في `service_error` فيُقال «خلل عندنا» وتُخفى الخطوة التي تحلّها.
+  ['JWT expired', 'PGRST301', 'not_authenticated', 'session rejected by server'],
+  ['JWSError JWSInvalidSignature', 'PGRST301', 'not_authenticated', 'forged/rotated token'],
+  ['invalid JWT: unable to parse or verify signature', '', 'not_authenticated', 'GoTrue 401'],
 ]
 for (const [message, code, expected, whence] of REDEEM_CAUSES) {
   const got = be.classifyRedeemError(message, code)
@@ -171,6 +176,7 @@ const TRIAL_CAUSES = [
   ['not authenticated', '28000', 'not_authenticated'],
   ['unknown user', 'P0002', 'service_error'],
   ['NetworkError when attempting to fetch resource', '', 'offline'],
+  ['JWT expired', 'PGRST301', 'not_authenticated'],
 ]
 for (const [message, code, expected] of TRIAL_CAUSES) {
   const got = be.classifyTrialError(message, code)
@@ -180,6 +186,10 @@ check('★ المجهول يُصنَّف عطلًا **عندنا** لا شبكة
   be.classifyRedeemError('boom', 'XX000') === 'service_error'
   && be.classifyTrialError('boom', 'XX000') === 'service_error',
   'الافتراض القديم كان offline — أي لومُ نتِ المستخدم على عطلنا')
+check('⟲ وتمييز الجلسة المرفوضة لا يبتلع خطأ عمل — لا اسم عملٍ يحمل «jwt»',
+  be.classifyRedeemError('invalid_code', '22023') === 'invalid'
+  && be.classifyRedeemError('code_already_redeemed', '23505') === 'already_used'
+  && be.classifyTrialError('trial_already_used', '23505') === 'already_claimed')
 check('و«موقوف» لا تُصنَّف انقطاعَ شبكة على أيّ من المسارين',
   be.classifyRedeemError('access_revoked', '28000') !== 'offline'
   && be.classifyTrialError('access_revoked', '28000') !== 'offline')

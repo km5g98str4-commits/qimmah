@@ -49,7 +49,12 @@ const INTEGRITY = '20260816120001_commerce_integrity_fixes.sql'
 // `SHORT-1` — وينقلب الإثبات المضادّ ﺟ إلى ضجيج يخفي نفسه، تمامًا كما تصف
 // الفقرة أعلاه. فتُضاف إلى السلالة كما تأمر تلك الفقرة صراحةً.
 const ACTIVATION_HARDENING = '20260824120004_activation_hardening.sql'
-const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, ACTIVATION_HARDENING]
+// [STAGING-COMMISSIONING §8] وهذه تعيد تعريف `admin_create_access_code`
+// و`founder_issue_access_code` فوق `private.normalize_access_code` — التي
+// تنشئها FIX المستبعَدة. فتركُها في البيئة «القديمة» يترك دالّةً تشير إلى
+// دالّةٍ غير موجودة، فيسقط الإثبات المضادّ بخطأٍ تقنيّ لا بالسلوك الذي يقيسه.
+const CAMPAIGN_CODES = '20260824120005_campaign_is_not_a_credential.sql'
+const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, ACTIVATION_HARDENING, CAMPAIGN_CODES]
 
 /**
  * [OVERNIGHT-5] السلسلة **المطبَّقة فعلًا** في هذا الإثبات — بالترتيب.
