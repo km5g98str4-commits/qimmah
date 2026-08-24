@@ -204,6 +204,24 @@ const qaCleared = await preview.resolveEntitlement()
 check('   وإقفال واحد يعيدها `none` — إعادة ضبط حتمية لا احتمالية',
   qaCleared.status === 'none', JSON.stringify(qaCleared))
 
+/**
+ * ⚔️ **والدمج المتعمّد لا ينكسر بالصدق.**
+ *
+ * وقع فعلًا: فتحُ الردّ الصادق («لم يُجرَّب») على الأكواد المجهولة أبقى
+ * `QIMMAH-TEST-EXPIRED` على `invalid`، فافترق الجوابان — وصار الحقل عرّافًا
+ * يميّز كودًا نعرفه من كودٍ لا نعرفه. التقطه تقارب الإصدار لا مراجعة الكود،
+ * فيُثبَّت هنا كي يُلتقط في البوّابة قبل أن يصل هناك.
+ */
+const expiredOut = await preview.redeemActivationCode('QIMMAH-TEST-EXPIRED')
+const unknownOut = await preview.redeemActivationCode('AAAABBBBCCCC')
+const unknown2 = await preview.redeemActivationCode('DDDDEEEEFFFF')
+check('⚔️ المنتهي والمجهول جوابهما **واحد** — لا عرّاف يميّز ما نعرفه',
+  expiredOut === unknownOut, `منتهٍ=${expiredOut} · مجهول=${unknownOut}`)
+check('   ومجهولان مختلفان يتساويان كذلك',
+  unknownOut === unknown2, `${unknownOut} · ${unknown2}`)
+check('   والجواب هو السبب الصادق لا حكمًا على الكود',
+  unknownOut === 'backend_unconfigured', String(unknownOut))
+
 // ⚔️ ولا تُشترى الترقية من مخزن المستخدم: مفاتيح المنتج المزوَّرة لا تمنح شيئًا.
 //    (سلطة QA الوحيدة مخزنها المعلَن، وهو **غائب من الإنتاج** — يحرسه
 //     `test:qa-boundary` على الأرتيفكت لا على المصدر.)

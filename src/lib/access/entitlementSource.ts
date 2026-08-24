@@ -189,26 +189,36 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
   if (!normalized) return 'invalid'
   if (localEntitlementEnabled()) {
     const known = MOCK_CODES[mockKey]
-    if (known === undefined) {
-      // [LIVE-QA-A] كودٌ خارج مجموعة المراجعة، في بناءٍ **لا خادم فيه أصلًا**.
-      // و`invalid` تعني «جُرّب فلم يُقبل» — وقولها هنا حكمٌ بلا محاكمة على كودٍ
-      // قد يكون صحيحًا تمامًا على الإنتاج. الصدق أنّه **لم يُجرَّب** (§5).
-      //
-      // وبناء التقليد (مصفوفة الرحلات) يبقى على عقده المُعلَن: `invalid` جوابه
-      // المقصود، وعليه يقوم فحصا «لا عرّاف» و«الدمج المتعمّد مع المنتهي».
-      // أمّا معاينة المؤسس فبيانات اعتمادها مهزوزة خارج الحزمة بنيويًّا، فـ
-      // `backend_unconfigured` فيها ليست تخمينًا بل وصفٌ مقيس للأرتيفكت.
-      return mockEnabled() ? 'invalid' : 'backend_unconfigured'
-    }
-    const outcome = known
-    if (outcome === 'success') {
+
+    // المنحة أوّلًا: الكود المسمّى يعمل في **كلا** البناءين المحلّيين.
+    if (known === 'success') {
       try {
         window.sessionStorage.setItem(MOCK_KEY, 'active')
       } catch {
         return 'service_error'
       }
+      return 'success'
     }
-    return outcome
+
+    // ═══ [LIVE-QA-A → COMMISSIONING] وما دون المنحة يفترق البناءان ═══
+    //
+    // **بناء التقليد** مصفوفة حالات للرحلات: لكل كود مسمّى جوابه المُعلَن
+    // (`already_used` · `offline` · `timeout` …) و`invalid` لِما عداه. وعلى
+    // هذا يقوم فحصا «لا عرّاف» و«الدمج المتعمّد بين المنتهي والمجهول».
+    if (mockEnabled()) return known ?? 'invalid'
+
+    // **معاينة المؤسس** لا خادم فيها أصلًا (اعتمادها مهزوز خارج الحزمة
+    // بنيويًّا)، فالجواب الصادق الوحيد لغير المنحة أنّنا **لم نتحقّق**.
+    //
+    // ⚠️ ولماذا **كل** ما دون المنحة لا الأكواد المجهولة وحدها: الصيغة الأولى
+    // ردّت المجهول بـ`backend_unconfigured` وأبقت `QIMMAH-TEST-EXPIRED` على
+    // `invalid` — فصار الجوابان يفترقان، وانكسر **الدمج المتعمّد** الذي يمنع
+    // أن يصير الحقل عرّافًا يميّز كودًا معروفًا لنا من كودٍ لا نعرفه.
+    // التقطه `p2-premium-test-state` في تقارب الإصدار، لا مراجعةُ كود.
+    //
+    // فالصدق والدمج يجتمعان هنا بجملة واحدة: في نسخة بلا خادم، الجوابان
+    // الوحيدان الصادقان هما «مُنحت» و«ما قدرنا نتحقّق».
+    return 'backend_unconfigured'
   }
   // [SOVEREIGN-COMMERCE-001] غياب الخادم **ليس انقطاع نت**. كان يُقال هنا
   // `offline` فيُلام نتُ المستخدم على بناءٍ لا خادم فيه أصلًا (نسخة المراجعة).
