@@ -258,6 +258,7 @@
     "test:gateway-contract": "node scripts/run-gateway-contract-proof.mjs",
     "test:nonsuperuser-apply": "node scripts/db/nonsuperuser-apply-proof.mjs",
     "staging:sql": "node scripts/staging/build-sql-bundle.mjs",
+    "staging:probe": "node scripts/staging/anon-surface-probe.mjs",
     "test:staging-sql": "node scripts/staging/sql-bundle-proof.mjs"
   },
   "dependencies": {
