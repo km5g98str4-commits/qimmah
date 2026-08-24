@@ -288,6 +288,17 @@ export function CodesPanel({
                     <td className="px-3 py-2">
                       <span className="font-bold text-ink-900">{r.label ?? t.codes.noLabel}</span>
                       <span className="block text-[11px] text-ink-400">{r.createdBy}</span>
+                      {/*
+                        [COMMISSIONING §5] قوّة الكود — **سطرٌ لا عمود**: التصميم
+                        مجمَّد ولا يُوسَّع الجدول. والغياب يُقال بنصّه ولا يُعرض
+                        صفرًا: كودٌ صدر قبل القياس «ما تُقاس قوّته»، لا «صفر بت».
+                      */}
+                      <span className="block text-[11px] text-ink-400" data-code-strength={r.codeId}>
+                        {r.entropyCeilingBits === null
+                          ? t.codes.strengthUnknown
+                          : (r.generatedServerSide ? t.codes.strengthGenerated : t.codes.strengthManual)
+                              .replace('{bits}', String(r.entropyCeilingBits))}
+                      </span>
                     </td>
                     <td className="px-3 py-2">
                       <StatusChip status={r.status} />

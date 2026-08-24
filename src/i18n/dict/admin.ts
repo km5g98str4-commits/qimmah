@@ -275,6 +275,10 @@ export interface AdminStrings {
     rows: string
     noRows: string
     noLabel: string
+    /** قوّة الكود — سقفٌ لا شهادة. انظر `AdminCodeRow.entropyCeilingBits`. */
+    strengthGenerated: string
+    strengthManual: string
+    strengthUnknown: string
     days: string
     writeFailed: string
     needReason: string
@@ -824,6 +828,11 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       rows: 'كود',
       noRows: 'ما فيه أكواد تطابق البحث.',
       noLabel: 'بلا وسم',
+      // «سقف» لا «قوّة»: الرقم حدٌّ أعلى، والكود المعجميّ يبلغه وقيمته أدنى بكثير.
+      strengthGenerated: 'مولَّد · سقف {bits} بت',
+      strengthManual: 'يدوي · سقف {bits} بت',
+      // كود سابق للقياس: **ما نعرف** لا صفر.
+      strengthUnknown: 'قوّته ما تُقاس — كود قديم',
       days: 'يوم',
       writeFailed: 'ما تمّ الفعل — والسبب:',
       needReason: 'لازم سبب قبل أي فعل — الأثر الإداري ما يكون مجهول.',
@@ -1044,6 +1053,9 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       rows: 'codes',
       noRows: 'No codes match this search.',
       noLabel: 'No label',
+      strengthGenerated: 'Generated · {bits}-bit ceiling',
+      strengthManual: 'Manual · {bits}-bit ceiling',
+      strengthUnknown: 'Strength not measured — older code',
       days: 'days',
       writeFailed: 'The action did not go through — reason:',
       needReason: 'A reason is required before any action — no anonymous admin trail.',

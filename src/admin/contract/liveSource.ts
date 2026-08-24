@@ -461,6 +461,10 @@ function toCodeRow(raw: Record<string, unknown>): AdminCodeRow | null {
     createdBy: typeof raw.created_by === 'string' ? raw.created_by : '',
     createdReason: typeof raw.created_reason === 'string' ? raw.created_reason : '',
     createdAt: raw.created_at,
+    // ⚠️ **لا `?? 0` ولا `?? false`**: الحقلان غائبان عمدًا لأكواد سبقت
+    // `20260824120004`، وبديلٌ صفريّ يحوّل «لا نعرف» إلى رقمٍ يقول ما ليس هو.
+    entropyCeilingBits: typeof raw.entropy_ceiling_bits === 'number' ? raw.entropy_ceiling_bits : null,
+    generatedServerSide: typeof raw.generated_server_side === 'boolean' ? raw.generated_server_side : null,
   }
 }
 

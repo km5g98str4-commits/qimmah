@@ -504,6 +504,29 @@ check('  لكنّ ضعفه صار **مرئيًّا** لا خفيًّا — سق�
   weak.entropy_ceiling_bits === 55
   && stg.one(`select count(*) from public.access_codes where label = 'batch-W' and not generated_server_side;`) === '1')
 
+// ⚠️ و«مرئيّ» تعني **تصل الشاشة**، لا «محفوظة في عمود». عمودٌ لا تقرأه صفحة
+// المؤسس ادّعاءُ رؤيةٍ بلا مسار — وهو بالضبط ما يمنعه التكليف. فتُقاس هنا من
+// نفس الدالّة التي تقرأها الواجهة.
+const pageRow = (col) => stg.one(
+  `select coalesce(${col}::text, 'NULL') from public.founder_code_page('batch-W', 1, 10);`,
+  { role: 'authenticated', uid: founderId })
+check('  والصفحة التي تقرأها الواجهة تحمل السقف فعلًا — لا عمودٌ أعمى',
+  pageRow('entropy_ceiling_bits') === '55', pageRow('entropy_ceiling_bits'))
+check('  ومصدرَه: يدويّ لا مولَّد', pageRow('generated_server_side') === 'false')
+const genPage = (col) => stg.one(
+  `select coalesce(${col}::text, 'NULL') from public.founder_code_page('batch-G', 1, 10);`,
+  { role: 'authenticated', uid: founderId })
+check('  والمولَّد يصلها بثمانين ووسمِه', genPage('entropy_ceiling_bits') === '80' && genPage('generated_server_side') === 'true')
+// ⟲ والغياب يبقى غيابًا عبر الطريق كلّه — لا يتحوّل صفرًا في أي طبقة.
+stg.sql(`insert into public.access_codes (code_hash, hash_version, label, duration_days, max_redemptions, created_by, created_reason)
+         values (private.hash_identity('LEGACYCODE234', 1), 1, 'batch-OLD', 14, 1, 'ops', 'كود سابق للقياس');`)
+check('⟲ وكودٌ سبق القياس يصل الشاشة `NULL` لا صفرًا — «ما نعرف» ليست «صفر»',
+  stg.one(`select coalesce(entropy_ceiling_bits::text, 'NULL') from public.founder_code_page('batch-OLD', 1, 10);`,
+    { role: 'authenticated', uid: founderId }) === 'NULL')
+check('  وحالته تبقى ضمن المفردات الأربع — لا قيمة بلا ترجمة في العميل',
+  ['issued', 'redeemed', 'expired', 'disabled'].includes(
+    stg.one(`select status from public.founder_code_page('batch-OLD', 1, 10);`, { role: 'authenticated', uid: founderId })))
+
 // ═══════════════════════════════════════════════════════════════════════════
 stg.drop()
 console.log('\n──────────────────────────────────────────────────────────────')

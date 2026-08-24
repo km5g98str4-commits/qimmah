@@ -414,3 +414,102 @@ grant execute on function public.admin_create_access_code(text,text,text,int,int
  * وكود الحملة المقروء قد يكون مقصودًا. المتاح الآن أن ضعفه **مقيس ومحفوظ**
  * في `entropy_ceiling_bits` ومميَّز بـ`generated_server_side = false`.
  */
+
+-- ── ٦) قوّة الكود تصل الشاشة ──────────────────────────────────────────────
+/**
+ * إعادة إعلان حرفية لـ`founder_code_page` من `20260824120002`، بعمودين
+ * يُضافان قبل `total_rows` لا غير. **ولا تُجدَّد مفردات الحالة** — التحذير
+ * المكتوب داخل جسمها يشرح لماذا: العميل والقاموسان يعرفون أربع قيم فقط،
+ * وتوسيعها كسرٌ صامت لطرف العقد الآخر.
+ *
+ * والعمودان `null` للأكواد السابقة — **غيابٌ يُقال لا صفرٌ يُختلق** (التكليف:
+ * «Never convert we-do-not-collect-this into the number zero»).
+ */
+drop function if exists public.founder_code_page(text, int, int);
+
+create or replace function public.founder_code_page(p_search text, p_page int, p_page_size int)
+returns table (
+  code_id          uuid,
+  label            text,
+  status           text,
+  duration_days    int,
+  max_redemptions  int,
+  redemption_count int,
+  starts_at        timestamptz,
+  expires_at       timestamptz,
+  created_by       text,
+  created_reason   text,
+  created_at       timestamptz,
+  updated_by       text,
+  updated_at       timestamptz,
+  last_redeemed_at timestamptz,
+  -- [COMMISSIONING §5] قوّة الكود تصل الشاشة — وإلا فالقول إنها «مرئيّة في
+  -- وحدة التحكّم» ادّعاءٌ بلا مسار، وهو ما يمنعه التكليف نصًّا.
+  entropy_ceiling_bits int,
+  generated_server_side boolean,
+  total_rows       bigint
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  -- ⚠️ **الترقيم واحد لا صفر** — كما في `20260822120002` حرفيًّا.
+  -- الصيغة الأولى هنا حسبت `off = page * lim` (صفريّة)، فصارت الصفحة الأولى
+  -- التي يطلبها العميل (`1`) تُزيح خمسين صفًّا وتعود فارغة. كسرٌ صامت: لا خطأ
+  -- يُرفع، ولا نصّ يتغيّر — قائمةٌ تبدو «لا أكواد» وفيها أكواد.
+  size int  := least(greatest(coalesce(p_page_size, 25), 1), 200);
+  pg   int  := greatest(coalesce(p_page, 1), 1);
+  term text := nullif(btrim(coalesce(p_search, '')), '');
+begin
+  perform private.require_admin();
+  return query
+    with filtered as (
+      select c.*
+        from public.access_codes c
+       where term is null
+          or c.label ilike '%' || term || '%'
+          or c.created_reason ilike '%' || term || '%'
+          or c.created_by ilike '%' || term || '%'
+    )
+    select f.id,
+           f.label,
+           -- الحالة مشتقّة لا مخزَّنة: مخزَّنةً كانت ستشيخ بصمت عند الانتهاء.
+           --
+           -- ⚠️ **المفردات هي مفردات `20260822120002` حرفًا بحرف** ولا تُجدَّد.
+           -- الصيغة الأولى هنا سمّتها `active/exhausted/scheduled` — أوصاف أدقّ
+           -- بالإنجليزية، وكارثة عمليًّا: `CodeStatus` في العميل و`codeStatus`
+           -- في القاموسين يعرفون أربع قيم فقط (`issued`/`redeemed`/`expired`/
+           -- `disabled`)، فكل صفٍّ كان سيصل الشاشة بحالةٍ **لا ترجمة لها**.
+           -- توسيع مفردات عقدٍ قائم ليس تحسينًا بل كسرٌ صامت لطرفه الآخر.
+           case
+             when not f.enabled                                      then 'disabled'
+             when f.expires_at is not null and f.expires_at <= now() then 'expired'
+             when f.redemption_count >= f.max_redemptions            then 'redeemed'
+             else 'issued'
+           end,
+           f.duration_days,
+           f.max_redemptions,
+           f.redemption_count,
+           f.starts_at,
+           f.expires_at,
+           f.created_by,
+           f.created_reason,
+           f.created_at,
+           f.updated_by,
+           f.updated_at,
+           (select max(l.redeemed_at) from public.access_code_redemptions l where l.code_id = f.id),
+           -- `null` للأكواد السابقة لـ20260824120004 — **غيابٌ يُقال لا صفرٌ
+           -- يُختلق**: صفرٌ هنا يعني «بلا إنتروبيا إطلاقًا» وهو ادّعاء كاذب.
+           f.entropy_ceiling_bits,
+           f.generated_server_side,
+           (select count(*) from filtered)
+      from filtered f
+     order by f.created_at desc
+     limit size offset (pg - 1) * size;
+end;
+$$;
+
+revoke all on function public.founder_code_page(text, int, int) from public, anon;
+grant execute on function public.founder_code_page(text, int, int) to authenticated;

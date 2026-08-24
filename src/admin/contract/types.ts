@@ -358,6 +358,17 @@ export interface AdminCodeRow {
   readonly createdBy: string
   readonly createdReason: string
   readonly createdAt: string
+  /**
+   * [COMMISSIONING §5] **سقف** إنتروبيا الكود بالبتّات — لا إنتروبيته الفعلية.
+   * كودٌ معجميّ مثل `RAMADAN2345` يبلغ السقف نفسه وقيمته الحقيقية قريبة من
+   * الصفر، ولذلك الاسم `Ceiling` لا `Bits`.
+   *
+   * `null` للأكواد الصادرة قبل `20260824120004` — **غيابٌ يُقال لا صفرٌ
+   * يُختلق**: الصفر هنا يعني «بلا إنتروبيا إطلاقًا» وهو ادّعاء كاذب.
+   */
+  readonly entropyCeilingBits: number | null
+  /** `true` ⇒ ولّده الخادم بـ٨٠ بتًا. `null` ⇒ لا نعرف (كود سابق للهجرة). */
+  readonly generatedServerSide: boolean | null
 }
 
 export interface AdminCodePage {
