@@ -256,7 +256,9 @@
     "db:commission": "node scripts/staging/commission.mjs",
     "db:commission:verify": "node scripts/staging/commission.mjs --verify-only",
     "test:gateway-contract": "node scripts/run-gateway-contract-proof.mjs",
-    "test:nonsuperuser-apply": "node scripts/db/nonsuperuser-apply-proof.mjs"
+    "test:nonsuperuser-apply": "node scripts/db/nonsuperuser-apply-proof.mjs",
+    "staging:sql": "node scripts/staging/build-sql-bundle.mjs",
+    "test:staging-sql": "node scripts/staging/sql-bundle-proof.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",

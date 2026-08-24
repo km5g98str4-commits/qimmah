@@ -95,6 +95,11 @@ jobs:
         env:
           QIMMAH_PG_PORT: '55432'
 
+      - name: SQL paste bundles (no drift · clean apply · re-paste safe)
+        run: npm run test:staging-sql
+        env:
+          QIMMAH_PG_PORT: '55432'
+
       - name: Commissioning journeys (real Postgres, all migrations)
         run: npm run test:commissioning
 
