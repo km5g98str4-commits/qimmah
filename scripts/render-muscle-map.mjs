@@ -13,7 +13,9 @@ const root = resolve(__dirname, '..')
 const tsSource = readFileSync(resolve(root, 'src/data/bodyAnatomy.ts'), 'utf8')
 const { code } = await transform(tsSource, { loader: 'ts', format: 'esm' })
 const mod = await import(`data:text/javascript;base64,${Buffer.from(code).toString('base64')}`)
-const { buildSilhouette, buildFrontRegions, buildBackRegions, buildClothing } = mod
+// [مسح المنتج] كانت تفكّ أسماء دوالّ لا وجود لها (buildFront/BackRegions) —
+// الوحدة تصدّر ثوابت FRONT_REGIONS/BACK_REGIONS، فكانت الأداة ميتة منذ التصدير.
+const { buildSilhouette, FRONT_REGIONS, BACK_REGIONS, buildClothing } = mod
 
 // ألوان مطابقة لمكوّن WeeklyMuscleMap.
 const SKIN_FILL = '#E9D9C4'
@@ -48,7 +50,7 @@ function regionSvg(regions, heatMap) {
 
 function panel(gender, view) {
   const sil = buildSilhouette(gender, view)
-  const regions = view === 'front' ? buildFrontRegions(gender) : buildBackRegions(gender)
+  const regions = view === 'front' ? FRONT_REGIONS : BACK_REGIONS
   const clothing = buildClothing(gender, view)
   const heatMap = view === 'front' ? FRONT_HEAT : BACK_HEAT
   let svg = `<svg viewBox="0 0 220 470" width="200" xmlns="http://www.w3.org/2000/svg">`
