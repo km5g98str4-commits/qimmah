@@ -54,11 +54,11 @@ interface Proportions {
 
 const PROPORTIONS: Record<Gender, Proportions> = {
   // ذكر: أكتاف عريضة، خصر ضيّق، نحت عضلي واضح (مظهر V).
-  male: { shoulderW: 18.8, chestD: 12.8, waistW: 12.5, waistD: 9.7, hipW: 15.4, hipD: 11.2, limb: 1, bulge: 1.15, glute: 1.18 },
+  male: { shoulderW: 18.8, chestD: 12.8, waistW: 12.5, waistD: 9.7, hipW: 14.3, hipD: 10.8, limb: 1, bulge: 1.38, glute: 1.12 },
   // أنثى: أكتاف أضيق، خصر منحوت، ورك أوسع، نحت أنعم.
-  female: { shoulderW: 15.1, chestD: 11.3, waistW: 11, waistD: 8.8, hipW: 17.3, hipD: 12.2, limb: 0.9, bulge: 0.62, glute: 1.32 },
+  female: { shoulderW: 15.1, chestD: 11.3, waistW: 11, waistD: 8.8, hipW: 17.3, hipD: 12.2, limb: 0.9, bulge: 0.72, glute: 1.32 },
   // غير محدّد: وسط بين الاثنين.
-  unspecified: { shoulderW: 16.9, chestD: 12, waistW: 11.8, waistD: 9.3, hipW: 16.4, hipD: 11.7, limb: 0.95, bulge: 0.85, glute: 1.25 },
+  unspecified: { shoulderW: 16.9, chestD: 12, waistW: 11.8, waistD: 9.3, hipW: 15.7, hipD: 11.4, limb: 0.95, bulge: 1, glute: 1.22 },
 }
 
 /** اتجاه طرف يتّجه لأسفل بميل خارجي بالدرجات (موجب = يبتعد عن المحور). */
@@ -126,7 +126,7 @@ function torsoSections(p: Proportions): Section[] {
     { y: 142, rx: S, rz: C * 0.93, n: 2.3, back: 1.04 },
     { y: 146, rx: S * 0.95, rz: C * 0.85, n: 2.3, back: 1.02 },
     // من هنا يهبط الجذع بسرعة داخل الرقبة كي تظهر الرقبة فعليًا بدل مخروط ممتد.
-    { y: 149, rx: S * 0.74, rz: C * 0.74, n: 2.2, back: 1 },
+    { y: 149, rx: S * 0.79, rz: C * 0.76, n: 2.25, back: 1.01 },
     { y: 151, rx: S * 0.46, rz: C * 0.6, n: 2.1, back: 1 },
     { y: 152.5, rx: S * 0.26, rz: C * 0.42, n: 2, back: 1 },
   ]
@@ -325,15 +325,19 @@ export function buildBodySpec(gender: Gender, quality: BodyQuality = 'high'): Bo
       capBottom: true,
       capTop: true,
       sections: [
-        // فكّ ← وجنتان ← قبّة الجمجمة. الوجه بلا ملامح (مجسّم تشريحي محترم).
-        { y: 155, rx: 4.6, rz: 5.8, oz: 1.7, n: 2.2 },
-        { y: 158, rx: 6, rz: 7.4, oz: 1.4, n: 2.2 },
-        { y: 162, rx: 7, rz: 8.7, oz: 0.8, n: 2.1 },
-        { y: 166, rx: 7.4, rz: 9.2, oz: 0.3, n: 2.1 },
-        { y: 170, rx: 7.4, rz: 9.1, oz: -0.1, n: 2.1 },
-        { y: 174, rx: 6.9, rz: 8.4, oz: -0.5, n: 2.1 },
-        { y: 177, rx: 5.6, rz: 6.6, oz: -0.8, n: 2.1 },
-        { y: 178.5, rx: 3.6, rz: 4.2, oz: -1, n: 2.1 },
+        // ذقن ← فكّ ← وجنتان ← صدغان ← قبّة مستديرة. الوجه بلا ملامح (مجسّم تشريحي محترم).
+        // [مهمة المنتج] كانت القبّة تنغلق ببطء فتقرأ بيضةً مدبّبة؛ الآن أوسع نقطة عند
+        // الصدغين وقفلة سريعة مستديرة عند القمّة، مع ذقن أضيق من الوجنتين.
+        { y: 154.5, rx: 4.3, rz: 5, oz: 1.9, n: 2.3 },
+        { y: 157, rx: 5.9, rz: 6.9, oz: 1.6, n: 2.25 },
+        { y: 161, rx: 7.4, rz: 8.6, oz: 0.9, n: 2.15 },
+        { y: 165, rx: 8.2, rz: 9.4, oz: 0.3, n: 2.1 },
+        { y: 169, rx: 8.3, rz: 9.4, oz: -0.1, n: 2.1 },
+        { y: 173, rx: 7.9, rz: 8.9, oz: -0.4, n: 2.1 },
+        // إغلاق القبّة بخطوات عريضة متقاربة — خطوة ضيّقة أخيرة تصنع «عقدة» فوق الرأس.
+        { y: 176, rx: 7.3, rz: 8, oz: -0.6, n: 2.1 },
+        { y: 178, rx: 6.1, rz: 6.6, oz: -0.8, n: 2.1 },
+        { y: 179.3, rx: 4.2, rz: 4.6, oz: -0.9, n: 2.1 },
       ],
     },
 
@@ -349,9 +353,9 @@ export function buildBodySpec(gender: Gender, quality: BodyQuality = 'high'): Bo
       sections: thick(
         [
           { y: -2, rx: 4.6, rz: 4.6, n: 2.1 },
-          { y: 0, rx: 6.2, rz: 6.1, n: 2.1 },
-          { y: 3, rx: 7.2, rz: 7.1, n: 2.1 },
-          { y: 7, rx: 7.2, rz: 7.2, n: 2.1 },
+          { y: 0, rx: 6.4, rz: 6.3, n: 2.1 },
+          { y: 3, rx: 7.5, rz: 7.3, n: 2.1 },
+          { y: 7, rx: 7.4, rz: 7.3, n: 2.1 },
           { y: 12, rx: 6.7, rz: 6.9, n: 2.1 },
           { y: 18, rx: 6.1, rz: 6.4, n: 2.1 },
           { y: 25, rx: 5.4, rz: 5.6, n: 2.1 },
@@ -405,11 +409,11 @@ export function buildBodySpec(gender: Gender, quality: BodyQuality = 'high'): Bo
       capTop: true,
       sections: thick(
         [
-          { y: -2, rx: 9.5, rz: 9.3, n: 2.2 },
-          { y: 0, rx: 10.3, rz: 9.9, n: 2.2 },
-          { y: 5, rx: 10.5, rz: 10.1, n: 2.2 },
-          { y: 12, rx: 9.9, rz: 9.6, n: 2.2 },
-          { y: 20, rx: 9.1, rz: 8.8, n: 2.2 },
+          { y: -2, rx: 9.2, rz: 9.1, n: 2.2 },
+          { y: 0, rx: 9.9, rz: 9.7, n: 2.2 },
+          { y: 5, rx: 10.1, rz: 9.9, n: 2.2 },
+          { y: 12, rx: 9.6, rz: 9.4, n: 2.2 },
+          { y: 20, rx: 8.9, rz: 8.7, n: 2.2 },
           { y: 29, rx: 8.1, rz: 7.8, n: 2.2 },
           { y: 37, rx: 7, rz: 6.7, n: 2.2 },
           // الركبة
@@ -418,10 +422,10 @@ export function buildBodySpec(gender: Gender, quality: BodyQuality = 'high'): Bo
           // بطن السمانة
           { y: 54, rx: 6.4, rz: 6.8, oz: -1.5, n: 2.2 },
           { y: 61, rx: 5.6, rz: 6, oz: -1.1, n: 2.2 },
-          { y: 69, rx: 4.5, rz: 4.6, oz: -0.5, n: 2.2 },
-          { y: 76, rx: 3.5, rz: 3.5, n: 2.2 },
-          // الكاحل
-          { y: 84, rx: 3, rz: 2.9, n: 2.2 },
+          { y: 69, rx: 4.7, rz: 4.8, oz: -0.5, n: 2.2 },
+          { y: 76, rx: 3.9, rz: 3.8, n: 2.2 },
+          // الكاحل — لا يُترك إبرةً: عظما الكعب يمنعان النحافة الورقية
+          { y: 84, rx: 3.3, rz: 3.1, n: 2.2 },
         ],
         k,
       ),
@@ -441,10 +445,12 @@ export function buildBodySpec(gender: Gender, quality: BodyQuality = 'high'): Bo
         [
           { y: -7, rx: 3.3, rz: 4.2, oz: 4.2 - ankle.y, n: 2.4 },
           { y: -3, rx: 3.7, rz: 4.6, oz: 4.6 - ankle.y, n: 2.4 },
-          { y: 2, rx: 4.1, rz: 4.2, oz: 4.2 - ankle.y, n: 2.5 },
-          { y: 8, rx: 4.1, rz: 3.2, oz: 3.2 - ankle.y, n: 2.5 },
-          { y: 14, rx: 3.7, rz: 2.2, oz: 2.2 - ankle.y, n: 2.5 },
-          { y: 18, rx: 2.9, rz: 1.5, oz: 1.5 - ankle.y, n: 2.4 },
+          { y: 2, rx: 4.1, rz: 4.3, oz: 4.3 - ankle.y, n: 2.5 },
+          { y: 9, rx: 4.2, rz: 3.4, oz: 3.4 - ankle.y, n: 2.5 },
+          { y: 16, rx: 4, rz: 2.4, oz: 2.4 - ankle.y, n: 2.5 },
+          { y: 21, rx: 3.5, rz: 1.7, oz: 1.7 - ankle.y, n: 2.45 },
+          // الأصابع — قفلة أمامية مسطّحة قليلة الارتفاع
+          { y: 24, rx: 2.8, rz: 1.2, oz: 1.2 - ankle.y, n: 2.4 },
         ],
         1,
       ),

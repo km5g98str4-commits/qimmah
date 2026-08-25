@@ -628,7 +628,9 @@ export function BodyModel3D({ lang, className }: { lang: Lang; className?: strin
         <span className="flex items-center gap-1.5">
           <span
             className="inline-block h-3 w-6 rounded-full"
-            style={{ background: 'linear-gradient(90deg, rgba(242,106,33,0.35), var(--c-primary))' }}
+            // طرف التدرّج الخافت يُشتق من لون الهوية الحيّ نفسه — كان مثبّتًا بلون
+            // العلامة الافتراضي فينفكّ عن السخونة الفعلية إذا تغيّرت الثيمة.
+            style={{ background: 'linear-gradient(90deg, color-mix(in srgb, var(--c-primary) 35%, transparent), var(--c-primary))' }}
           />
           {t('درّبتها (الأغمق أكثر)', 'Trained (darker means more)')}
         </span>

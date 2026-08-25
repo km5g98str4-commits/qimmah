@@ -59,10 +59,12 @@ export interface RenderOptions {
 // إضاءة ناعمة: ضوء رئيسي علوي أمامي-يسار + ضوء ملء مقابل + حافة ضوئية.
 const KEY_LIGHT = { x: -0.4, y: 0.46, z: 0.79 }
 const FILL_LIGHT = { x: 0.66, y: -0.1, z: 0.34 }
-const AMBIENT = 0.42
-const KEY_STRENGTH = 0.68
-const FILL_STRENGTH = 0.2
-const RIM_STRENGTH = 0.34
+// [مهمة المنتج] عُمّق تباين الشكل: محيطية أقل + مفتاح أقوى + حافة أوضح —
+// الشكل ثلاثي الأبعاد يُقرأ من تدرّج الإضاءة لا من الخطوط.
+const AMBIENT = 0.3
+const KEY_STRENGTH = 0.85
+const FILL_STRENGTH = 0.17
+const RIM_STRENGTH = 0.5
 
 /** مسافة الكاميرا بوحدات النموذج — تتحكّم بقوة المنظور. */
 const CAMERA_DISTANCE = 520
