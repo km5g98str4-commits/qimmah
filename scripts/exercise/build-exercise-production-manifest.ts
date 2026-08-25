@@ -14,7 +14,8 @@
 // reaches into exerciseMedia / exerciseGifs / machineImages / videoUrl separately.
 //
 // Status vocabulary (mission-mandated): APPROVED | NEEDS_REVIEW | REJECTED | MISSING
-//   images: 'stills' → APPROVED · 'placeholder-only' → APPROVED when an in-house diagram
+//   images: 'stills' → APPROVED · in-house movement illustration → APPROVED (an honest,
+//           original vector that says it is a drawing) · 'placeholder-only' → APPROVED when an in-house diagram
 //           exists (a deliberate, honest asset) · else MISSING. A placeholder-only card
 //           WITHOUT a diagram is MISSING, never APPROVED: refusing a wrong photo is honest,
 //           but it still leaves the user with nothing to look at.
@@ -26,14 +27,16 @@ import { exercises } from '@/data/exercises'
 import { exerciseMediaManifest } from '@/data/exerciseMediaManifest.generated'
 import { EXERCISE_VIDEO_REGISTRY } from '@/data/exerciseVideoRegistry'
 import { machineImages } from '@/data/machineImages'
+import { exerciseIllustrations } from '@/data/exerciseIllustrations'
 
 declare const __OUT_DIR__: string
 
 const today = new Date().toISOString().slice(0, 10)
 const diagrams = machineImages as Record<string, string>
+const illustrations = exerciseIllustrations as Record<string, string>
 
 interface ImageAsset {
-  kind: 'stills' | 'diagram'
+  kind: 'stills' | 'diagram' | 'illustration'
   start: string
   end: string | null
 }
@@ -75,6 +78,11 @@ for (const ex of exercises) {
     imageStatus = 'MISSING'
     image = null
     imageNote = 'Machine card with no in-house diagram yet — upstream photography was a mis-attribution and was withdrawn.'
+  } else if (illustrations[ex.id]) {
+    // لا لقطة مرخّصة لنمط الحركة هذا — رسم حركة داخلي أصلي يقول عن نفسه إنه رسم.
+    imageStatus = 'APPROVED'
+    image = { kind: 'illustration', start: illustrations[ex.id], end: null }
+    imageNote = 'In-house vector movement illustration — no rights-cleared photography exists for this movement.'
   } else {
     imageStatus = 'MISSING'
     image = null
@@ -85,8 +93,11 @@ for (const ex of exercises) {
     exerciseId: ex.id,
     image,
     imageStatus,
-    imageSource: img.source ?? null,
-    imageLicense: img.license ?? null,
+    imageSource: image?.kind === 'illustration' ? 'qimmah-inhouse-illustration' : (img.source ?? null),
+    imageLicense:
+      image?.kind === 'illustration'
+        ? 'In-house original vector illustration — Qimmah owns full rights'
+        : (img.license ?? null),
     imageAttribution: img.attribution ?? null,
     video:
       vid.youtubeVideoId && vid.canonicalUrl
@@ -133,7 +144,7 @@ export type ExerciseAssetStatus = 'APPROVED' | 'NEEDS_REVIEW' | 'REJECTED' | 'MI
  * not imply motion it does not have.
  */
 export interface ExerciseImageAsset {
-  kind: 'stills' | 'diagram'
+  kind: 'stills' | 'diagram' | 'illustration'
   start: string
   end: string | null
 }

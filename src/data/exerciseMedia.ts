@@ -3,7 +3,8 @@
 // لإعادة التوليد:  node scripts/build-exercise-media.mjs
 // لفتح GIF المتحرّك (اختياري):  WORKOUTX_API_KEY=xxxx node scripts/build-exercise-media.mjs
 //
-// التغطية: 125/170 تمرينًا له صورة حقيقية.
+// التغطية تُقاس من exerciseProductionManifest.generated.ts (الحاكم) — هذا الملف طبقة أدلّة اللقطات فقط.
+// أُزيلت أربع خرائط خاطئة نمط حركة (single-leg-rdl · nordic-curl · جهازا ضغط الصدر) — انظر NEVER_MATCH في المولّد.
 // (استُبعِدت بطاقات الأجهزة في PLACEHOLDER_ONLY_EXERCISE_IDS — لا تُطابَق بصور وزن حرّ خاطئة.)
 // الصور مُنزَّلة محليًا في public/exercise-images/ (لا اعتماد على شبكة وقت التشغيل)؛ الروابط البعيدة تبقى كـ fallback.
 
@@ -160,12 +161,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/chest-dip/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Chest_Version/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dips_-_Chest_Version/1.jpg"
-  },
-  "chest-press-machine": {
-    "img0": "/exercise-images/chest-press-machine/0.jpg",
-    "img1": "/exercise-images/chest-press-machine/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Chest_Press/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Chest_Press/1.jpg"
   },
   "child-pose": {
     "img0": "/exercise-images/child-pose/0.jpg",
@@ -395,12 +390,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Press/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Press/1.jpg"
   },
-  "incline-machine-press": {
-    "img0": "/exercise-images/incline-machine-press/0.jpg",
-    "img1": "/exercise-images/incline-machine-press/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Cable_Chest_Press/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Cable_Chest_Press/1.jpg"
-  },
   "incline-push-up": {
     "img0": "/exercise-images/incline-push-up/0.jpg",
     "img1": "/exercise-images/incline-push-up/1.jpg",
@@ -526,12 +515,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/neutral-grip-pulldown/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/1.jpg"
-  },
-  "nordic-curl": {
-    "img0": "/exercise-images/nordic-curl/0.jpg",
-    "img1": "/exercise-images/nordic-curl/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Band_Hamstring_Curl/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Band_Hamstring_Curl/1.jpg"
   },
   "overhead-press": {
     "img0": "/exercise-images/overhead-press/0.jpg",
@@ -664,12 +647,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/single-leg-calf-raise/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Seated_One-Leg_Calf_Raise/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Seated_One-Leg_Calf_Raise/1.jpg"
-  },
-  "single-leg-rdl": {
-    "img0": "/exercise-images/single-leg-rdl/0.jpg",
-    "img1": "/exercise-images/single-leg-rdl/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Single_Leg_Glute_Bridge/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Single_Leg_Glute_Bridge/1.jpg"
   },
   "sissy-squat": {
     "img0": "/exercise-images/sissy-squat/0.jpg",

@@ -4,6 +4,7 @@ import { cn } from '@/lib/cn'
 import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
 import { getMachineImage } from '@/data/machineImages'
+import { getExerciseIllustration } from '@/data/exerciseIllustrations'
 import { LEGACY_EXERCISE_ID_MAP, canonicalExerciseId, isPlaceholderOnlyMedia, getExercise } from '@/data/exercises'
 import { muscleLabelAr } from '@/data/muscleGroups'
 import { exerciseMediaStrings } from '@/i18n/dict/exerciseMedia'
@@ -126,17 +127,21 @@ export function ExerciseMedia({
 
   const media = placeholderOnly ? undefined : resolveByCandidates(exerciseId, getExerciseMedia)
   const gif = placeholderOnly ? undefined : resolveByCandidates(exerciseId, getExerciseGif)
+  // رسم الحركة الداخلي — تمارين بلا لقطة مرخّصة لنمط حركتها (يمرّ بسجلّ الحقوق كالأجهزة).
+  const illustration = placeholderOnly ? undefined : resolveByCandidates(exerciseId, getExerciseIllustration)
 
   const [startFailed, setStartFailed] = useState(false)
   const [endFailed, setEndFailed] = useState(false)
   const [machineFailed, setMachineFailed] = useState(false)
   const [gifFailed, setGifFailed] = useState(false)
+  const [illustrationFailed, setIllustrationFailed] = useState(false)
 
   useEffect(() => {
     setStartFailed(false)
     setEndFailed(false)
     setMachineFailed(false)
     setGifFailed(false)
+    setIllustrationFailed(false)
   }, [exerciseId])
 
   const startSrcs = chain(media?.img0, media?.img0Remote)
@@ -145,6 +150,7 @@ export function ExerciseMedia({
 
   const hasGif = gifSrcs.length > 0 && !gifFailed
   const hasStart = startSrcs.length > 0 && !startFailed
+  const hasIllustration = !!illustration && !illustrationFailed
   const hasEnd = endSrcs.length > 0 && !endFailed && endSrcs.join('|') !== startSrcs.join('|')
   const hasMachine = !!machineImg && !machineFailed
 
@@ -160,7 +166,7 @@ export function ExerciseMedia({
     ) : null
 
   // ————— لا وسيط موثوق → الحالة الصادقة —————
-  if (placeholderOnly ? !hasMachine : !hasGif && !hasStart) {
+  if (placeholderOnly ? !hasMachine : !hasGif && !hasStart && !hasIllustration) {
     return (
       <Shell heightClass={heightClass} chips={chips}>
         <MediaPending lang={lang} compact={variant === 'thumb'} />
@@ -170,19 +176,22 @@ export function ExerciseMedia({
 
   // ————— مصغّرة: إطار واحد بلا تسميات —————
   if (variant === 'thumb') {
-    const srcs = placeholderOnly ? [machineImg!] : hasGif ? gifSrcs : startSrcs
+    const srcs = placeholderOnly ? [machineImg!] : hasGif ? gifSrcs : hasStart ? startSrcs : [illustration!]
+    const isVector = placeholderOnly || (!hasGif && !hasStart)
     const onOut = placeholderOnly
       ? () => setMachineFailed(true)
       : hasGif
         ? () => setGifFailed(true)
-        : () => setStartFailed(true)
+        : hasStart
+          ? () => setStartFailed(true)
+          : () => setIllustrationFailed(true)
     return (
       <div className={cn('relative w-full overflow-hidden bg-beige', heightClass)}>
         <FallbackImg
           srcs={srcs}
           alt={name}
           onExhausted={onOut}
-          className={cn('absolute inset-0 h-full w-full', placeholderOnly ? 'object-contain p-1' : 'object-cover')}
+          className={cn('absolute inset-0 h-full w-full', isVector ? 'object-contain p-1' : 'object-cover')}
         />
       </div>
     )
@@ -200,6 +209,23 @@ export function ExerciseMedia({
             className="absolute inset-0 h-full w-full object-contain p-3"
           />
           <FrameLabel text={s.machineLabel} at="bottom" />
+        </figure>
+      </Shell>
+    )
+  }
+
+  // ————— رسم الحركة الداخلي: لوحة موسومة بصدق (رسم لا صورة) —————
+  if (!hasGif && !hasStart && hasIllustration) {
+    return (
+      <Shell heightClass={heightClass} chips={chips}>
+        <figure className="relative h-full w-full bg-surface">
+          <FallbackImg
+            srcs={[illustration!]}
+            alt={s.illustrationAlt(name)}
+            onExhausted={() => setIllustrationFailed(true)}
+            className="absolute inset-0 h-full w-full object-contain p-3"
+          />
+          <FrameLabel text={s.illustrationLabel} at="bottom" />
         </figure>
       </Shell>
     )

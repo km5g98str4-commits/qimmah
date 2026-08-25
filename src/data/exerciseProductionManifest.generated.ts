@@ -11,7 +11,7 @@
 // Honesty: a status is never optimistic. MISSING means the user gets an honest empty state,
 // not a wrong picture. NEEDS_REVIEW never reaches a user surface.
 //
-// Coverage at generation time — images APPROVED 144/181 · MISSING 37
+// Coverage at generation time — images APPROVED 181/181 · MISSING 0
 //                              video  APPROVED 159/181 · NEEDS_REVIEW 22 · MISSING 0
 
 /** Review state of one asset. Only APPROVED may be shown to a user. */
@@ -23,7 +23,7 @@ export type ExerciseAssetStatus = 'APPROVED' | 'NEEDS_REVIEW' | 'REJECTED' | 'MI
  * not imply motion it does not have.
  */
 export interface ExerciseImageAsset {
-  kind: 'stills' | 'diagram'
+  kind: 'stills' | 'diagram' | 'illustration'
   start: string
   end: string | null
 }
@@ -52,54 +52,16 @@ export interface ExerciseProductionEntry {
 }
 
 /** Exercises a user may be shown a picture for. */
-export const PRODUCTION_IMAGE_APPROVED = 144
+export const PRODUCTION_IMAGE_APPROVED = 181
 /** Exercises with no visual asset of any kind — the real image gap. */
-export const PRODUCTION_IMAGE_MISSING = 37
+export const PRODUCTION_IMAGE_MISSING = 0
 /** Exercises a user may be shown a video reference for. */
 export const PRODUCTION_VIDEO_APPROVED = 159
 /** Catalog total at generation time. */
 export const PRODUCTION_CATALOG_TOTAL = 181
 
 /** The exact image gap — every id with no approved visual. Drives the generation spec. */
-export const PRODUCTION_IMAGE_GAP_IDS: readonly string[] = [
-  "chest-press-machine",
-  "incline-chest-press-machine",
-  "cable-shoulder-press",
-  "mountain-climber",
-  "treadmill-run",
-  "stationary-bike",
-  "rowing-machine",
-  "elliptical",
-  "jump-rope",
-  "pendlay-row",
-  "chest-supported-row",
-  "meadows-row",
-  "landmine-press",
-  "pike-push-up",
-  "single-arm-pushdown",
-  "belt-squat",
-  "wall-sit",
-  "single-leg-hip-thrust",
-  "banded-lateral-walk",
-  "frog-pump",
-  "bicycle-crunch",
-  "hollow-hold",
-  "cable-woodchop",
-  "toes-to-bar",
-  "incline-treadmill-walk",
-  "stairmaster",
-  "burpees",
-  "high-knees",
-  "battle-ropes",
-  "assault-bike",
-  "outdoor-walk",
-  "leg-swings",
-  "shoulder-dislocates",
-  "thoracic-rotation",
-  "ankle-mobility",
-  "dumbbell-sumo-squat",
-  "cable-hip-adduction"
-]
+export const PRODUCTION_IMAGE_GAP_IDS: readonly string[] = []
 
 export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntry> = {
   "barbell-bench-press": {
@@ -192,8 +154,12 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "chest-press-machine": {
     "exerciseId": "chest-press-machine",
-    "image": null,
-    "imageStatus": "MISSING",
+    "image": {
+      "kind": "diagram",
+      "start": "/exercise-machine-images/chest-press-machine.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
     "imageSource": null,
     "imageLicense": null,
     "imageAttribution": null,
@@ -206,7 +172,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "Machine card with no in-house diagram yet — upstream photography was a mis-attribution and was withdrawn. | Title names the exact exercise. Colossus Fitness is a dedicated form-tutorial channel but is not on the preferred top-tier list, hence medium."
+    "notes": "In-house vector diagram: this machine card deliberately refuses free-weight photography. | Title names the exact exercise. Colossus Fitness is a dedicated form-tutorial channel but is not on the preferred top-tier list, hence medium."
   },
   "iso-lateral-chest-press": {
     "exerciseId": "iso-lateral-chest-press",
@@ -227,8 +193,12 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "incline-chest-press-machine": {
     "exerciseId": "incline-chest-press-machine",
-    "image": null,
-    "imageStatus": "MISSING",
+    "image": {
+      "kind": "diagram",
+      "start": "/exercise-machine-images/incline-chest-press-machine.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
     "imageSource": null,
     "imageLicense": null,
     "imageAttribution": null,
@@ -236,7 +206,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "NEEDS_REVIEW",
     "videoConfidence": null,
     "reviewedAt": "2026-08-14",
-    "notes": "Machine card with no in-house diagram yet — upstream photography was a mis-attribution and was withdrawn. | A candidate titled 'Seated Incline Machine Chest Press Setup and Technique' (id -QRu-lMwh4k) appeared in search but was never fetched/verified and its channel is unknown. Deliberately not shipped."
+    "notes": "In-house vector diagram: this machine card deliberately refuses free-weight photography. | A candidate titled 'Seated Incline Machine Chest Press Setup and Technique' (id -QRu-lMwh4k) appeared in search but was never fetched/verified and its channel is unknown. Deliberately not shipped."
   },
   "iso-lateral-incline-press": {
     "exerciseId": "iso-lateral-incline-press",
@@ -802,10 +772,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "cable-shoulder-press": {
     "exerciseId": "cable-shoulder-press",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/cable-shoulder-press.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "fBTGwHChaf4",
@@ -816,7 +790,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Exact exercise match. Physique Development is a credentialed evidence-based coaching channel but is not on the named top-tier list."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Exact exercise match. Physique Development is a credentialed evidence-based coaching channel but is not on the named top-tier list."
   },
   "lateral-raise": {
     "exerciseId": "lateral-raise",
@@ -1932,10 +1906,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "mountain-climber": {
     "exerciseId": "mountain-climber",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/mountain-climber.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "ZhiCSdOVJp0",
@@ -1946,14 +1924,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Title names the exact exercise and it is a genuine form tutorial, but Fit Father Project is a mid-tier fitness-education channel, not one of the top-tier named sources. No Bodybuilding.com / Muscle & Strength / Athlean-X mountain-climber tutorial was found."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Title names the exact exercise and it is a genuine form tutorial, but Fit Father Project is a mid-tier fitness-education channel, not one of the top-tier named sources. No Bodybuilding.com / Muscle & Strength / Athlean-X mountain-climber tutorial was found."
   },
   "treadmill-run": {
     "exerciseId": "treadmill-run",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/treadmill-run.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "G7QjU44eBvA",
@@ -1964,14 +1946,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Treadmill-specific proper-form tutorial (17:35), not a HIIT workout. Channel is a treadmill-focused review/education channel rather than a top-tier coaching channel, hence medium. Alternative if a bigger name is preferred: Global Triathlon Network 'How To Run Properly | Running Technique Explained' (_kGESn8ArrU) - reputable but not treadmill-specific; not independently verified."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Treadmill-specific proper-form tutorial (17:35), not a HIIT workout. Channel is a treadmill-focused review/education channel rather than a top-tier coaching channel, hence medium. Alternative if a bigger name is preferred: Global Triathlon Network 'How To Run Properly | Running Technique Explained' (_kGESn8ArrU) - reputable but not treadmill-specific; not independently verified."
   },
   "stationary-bike": {
     "exerciseId": "stationary-bike",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/stationary-bike.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "jhPqTyejY_0",
@@ -1982,14 +1968,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Proper 'how to use the machine' tutorial (setup + correct pedalling), not a workout video. Channel is an exercise-bike manufacturer's instructional channel - credible for machine use but commercially interested, hence medium."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Proper 'how to use the machine' tutorial (setup + correct pedalling), not a workout video. Channel is an exercise-bike manufacturer's instructional channel - credible for machine use but commercially interested, hence medium."
   },
   "rowing-machine": {
     "exerciseId": "rowing-machine",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/rowing-machine.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "4zWu1yuJ0_g",
@@ -2000,14 +1990,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Concept2 is the erg manufacturer and is on the approved reputable-source list. Covers the catch, drive and recovery."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Concept2 is the erg manufacturer and is on the approved reputable-source list. Covers the catch, drive and recovery."
   },
   "elliptical": {
     "exerciseId": "elliptical",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/elliptical.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "YWfswVvOaiI",
@@ -2018,14 +2012,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Machine-use technique tutorial, not a workout video. Manufacturer instructional channel, hence medium. Alternative: 'You're Using the Elliptical WRONG | Physical Therapist Explains' (EesEvYohy5o, Rehab and Revive) - PT-led but clickbait framing; not independently verified."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Machine-use technique tutorial, not a workout video. Manufacturer instructional channel, hence medium. Alternative: 'You're Using the Elliptical WRONG | Physical Therapist Explains' (EesEvYohy5o, Rehab and Revive) - PT-led but clickbait framing; not independently verified."
   },
   "jump-rope": {
     "exerciseId": "jump-rope",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/jump-rope.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "kDOGb9C5kp0",
@@ -2036,7 +2034,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Jump Rope Dudes is the leading jump-rope-specialist instructional channel. 8:23 beginner form/technique guide."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Jump Rope Dudes is the leading jump-rope-specialist instructional channel. 8:23 beginner form/technique guide."
   },
   "kettlebell-swing": {
     "exerciseId": "kettlebell-swing",
@@ -2235,10 +2233,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "pendlay-row": {
     "exerciseId": "pendlay-row",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/pendlay-row.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "h4nkoayPFWw",
@@ -2249,14 +2251,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement."
   },
   "chest-supported-row": {
     "exerciseId": "chest-supported-row",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/chest-supported-row.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "_b6ch2nIchk",
@@ -2267,7 +2273,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Exact-name match for the chest-supported DUMBBELL row. Channel is an established fitness-education brand but not one of the top-tier names on the preferred list, hence medium."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Exact-name match for the chest-supported DUMBBELL row. Channel is an established fitness-education brand but not one of the top-tier names on the preferred list, hence medium."
   },
   "wide-grip-lat-pulldown": {
     "exerciseId": "wide-grip-lat-pulldown",
@@ -2393,10 +2399,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "meadows-row": {
     "exerciseId": "meadows-row",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/meadows-row.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "WyzVl-G3zWU",
@@ -2407,7 +2417,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Exact-name match; established fitness-education brand but not top-tier, hence medium. Verified alternate: eUEWwVLrG3E 'How To: Meadows Row' (Live Lean TV Daily Exercises)."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Exact-name match; established fitness-education brand but not top-tier, hence medium. Verified alternate: eUEWwVLrG3E 'How To: Meadows Row' (Live Lean TV Daily Exercises)."
   },
   "neutral-grip-pulldown": {
     "exerciseId": "neutral-grip-pulldown",
@@ -2577,10 +2587,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "landmine-press": {
     "exerciseId": "landmine-press",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/landmine-press.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "3gYz0bLG-wY",
@@ -2591,14 +2605,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Exact-match technique video from a strength-and-conditioning channel. Small channel, hence medium."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Exact-match technique video from a strength-and-conditioning channel. Small channel, hence medium."
   },
   "pike-push-up": {
     "exerciseId": "pike-push-up",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/pike-push-up.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "lIZ_C4VJnmc",
@@ -2609,7 +2627,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Calisthenics-specialist channel with progressions, which suits this bodyweight movement. Not on the named list, hence medium."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Calisthenics-specialist channel with progressions, which suits this bodyweight movement. Not on the named list, hence medium."
   },
   "incline-dumbbell-curl": {
     "exerciseId": "incline-dumbbell-curl",
@@ -2762,16 +2780,20 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "single-arm-pushdown": {
     "exerciseId": "single-arm-pushdown",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/single-arm-pushdown.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": null,
     "videoStatus": "NEEDS_REVIEW",
     "videoConfidence": null,
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Real video with an exactly matching title, but 'Hammer Fitness' is not a vetted instructional channel and its teaching quality was not assessable. A human can approve RhkRr9eyOzQ quickly if the channel checks out."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Real video with an exactly matching title, but 'Hammer Fitness' is not a vetted instructional channel and its teaching quality was not assessable. A human can approve RhkRr9eyOzQ quickly if the channel checks out."
   },
   "cable-overhead-extension": {
     "exerciseId": "cable-overhead-extension",
@@ -2902,10 +2924,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "belt-squat": {
     "exerciseId": "belt-squat",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/belt-squat.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "FCIZZvIM-I0",
@@ -2916,14 +2942,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Straightforward machine-setup and execution tutorial, clean title. Small gym channel — medium. Alternatives verified: NaJiMZZD3Xw 'Belt Squat Tutorial' by 'The Gym In The North'; zAE2wJRUyLA 'Your Belt Squat Form is Probably Wrong (Here's Why)' by 'The Strength Classroom' (rejected as primary for clickbait framing)."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Straightforward machine-setup and execution tutorial, clean title. Small gym channel — medium. Alternatives verified: NaJiMZZD3Xw 'Belt Squat Tutorial' by 'The Gym In The North'; zAE2wJRUyLA 'Your Belt Squat Form is Probably Wrong (Here's Why)' by 'The Strength Classroom' (rejected as primary for clickbait framing)."
   },
   "wall-sit": {
     "exerciseId": "wall-sit",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/wall-sit.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "JaZNYM3zAP0",
@@ -2934,7 +2964,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Exact-title match, demonstrated by a certified trainer. Well+Good is mainstream wellness media rather than a strength-instruction channel, hence medium."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Exact-title match, demonstrated by a certified trainer. Well+Good is mainstream wellness media rather than a strength-instruction channel, hence medium."
   },
   "stiff-leg-deadlift": {
     "exerciseId": "stiff-leg-deadlift",
@@ -2961,13 +2991,13 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   "nordic-curl": {
     "exerciseId": "nordic-curl",
     "image": {
-      "kind": "stills",
-      "start": "/exercise-images/nordic-curl/0.jpg",
-      "end": "/exercise-images/nordic-curl/1.jpg"
+      "kind": "illustration",
+      "start": "/exercise-illustrations/nordic-curl.svg",
+      "end": null
     },
     "imageStatus": "APPROVED",
-    "imageSource": "yuhonas/free-exercise-db",
-    "imageLicense": "Unlicense / public-domain dedication",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "_e9vFU9-tkc",
@@ -2978,18 +3008,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "Title names the exact exercise. E3 Rehab is a credentialed physical-therapy, evidence-based education channel — not on the caller's named list but equivalently authoritative, and it covers regressions, which matters for a hard exercise."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Title names the exact exercise. E3 Rehab is a credentialed physical-therapy, evidence-based education channel — not on the caller's named list but equivalently authoritative, and it covers regressions, which matters for a hard exercise."
   },
   "single-leg-rdl": {
     "exerciseId": "single-leg-rdl",
     "image": {
-      "kind": "stills",
-      "start": "/exercise-images/single-leg-rdl/0.jpg",
-      "end": "/exercise-images/single-leg-rdl/1.jpg"
+      "kind": "illustration",
+      "start": "/exercise-illustrations/single-leg-rdl.svg",
+      "end": null
     },
     "imageStatus": "APPROVED",
-    "imageSource": "yuhonas/free-exercise-db",
-    "imageLicense": "Unlicense / public-domain dedication",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "Zfr6wizR8rs",
@@ -3000,7 +3030,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "Squat University is on the preferred list; title names the exact exercise."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Squat University is on the preferred list; title names the exact exercise."
   },
   "glute-ham-raise": {
     "exerciseId": "glute-ham-raise",
@@ -3048,10 +3078,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "single-leg-hip-thrust": {
     "exerciseId": "single-leg-hip-thrust",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/single-leg-hip-thrust.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "xKDhmWlf1UE",
@@ -3062,7 +3096,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Muscle & Motion is a well-regarded anatomy/biomechanics education brand (3D muscle animation + demo). Medium because it is not on the named top-tier list."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Muscle & Motion is a well-regarded anatomy/biomechanics education brand (3D muscle animation + demo). Medium because it is not on the named top-tier list."
   },
   "hip-abduction-machine": {
     "exerciseId": "hip-abduction-machine",
@@ -3088,10 +3122,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "banded-lateral-walk": {
     "exerciseId": "banded-lateral-walk",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/banded-lateral-walk.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "M5uxEQH5BUM",
@@ -3102,14 +3140,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | NASM is on the approved list. Short (0:17) but a clean full demonstration."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | NASM is on the approved list. Short (0:17) but a clean full demonstration."
   },
   "frog-pump": {
     "exerciseId": "frog-pump",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/frog-pump.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "HyCiZVMMDW4",
@@ -3120,7 +3162,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Bret Contreras (glute research) is on the approved list and popularized this exercise."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Bret Contreras (glute research) is on the approved list and popularized this exercise."
   },
   "leg-press-calf-raise": {
     "exerciseId": "leg-press-calf-raise",
@@ -3212,10 +3254,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "bicycle-crunch": {
     "exerciseId": "bicycle-crunch",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/bicycle-crunch.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "i6mPCVUrtNk",
@@ -3226,7 +3272,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | NAMING CAUTION: 'Air Bike' is Bodybuilding.com's database name for the bicycle crunch (lying, alternating elbow-to-knee) and the video is filed under Ab Exercises - it is NOT the air/assault cardio bike. Downgraded to medium because the title does not literally read 'bicycle crunch' and could confuse a reviewer against the separate assault-bike entry."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | NAMING CAUTION: 'Air Bike' is Bodybuilding.com's database name for the bicycle crunch (lying, alternating elbow-to-knee) and the video is filed under Ab Exercises - it is NOT the air/assault cardio bike. Downgraded to medium because the title does not literally read 'bicycle crunch' and could confuse a reviewer against the separate assault-bike entry."
   },
   "dead-bug": {
     "exerciseId": "dead-bug",
@@ -3252,10 +3298,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "hollow-hold": {
     "exerciseId": "hollow-hold",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/hollow-hold.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "lmkw48_CGm0",
@@ -3266,14 +3316,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Sourced from the Muscle & Strength exercise-database page /exercises/hollow-body-hold, which embeds this exact video."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Sourced from the Muscle & Strength exercise-database page /exercises/hollow-body-hold, which embeds this exact video."
   },
   "cable-woodchop": {
     "exerciseId": "cable-woodchop",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/cable-woodchop.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "iTmMPyDzeYA",
@@ -3284,7 +3338,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Official Bodybuilding.com exercise-database demonstration."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Official Bodybuilding.com exercise-database demonstration."
   },
   "ab-crunch-machine": {
     "exerciseId": "ab-crunch-machine",
@@ -3310,10 +3364,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "toes-to-bar": {
     "exerciseId": "toes-to-bar",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/toes-to-bar.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "kjYuPnmMjfo",
@@ -3324,7 +3382,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | WODprep is a well-established CrossFit skill-coaching channel; toes-to-bar is a CrossFit gymnastics movement so this is the appropriate domain expert. 6:29 progression tutorial."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | WODprep is a well-established CrossFit skill-coaching channel; toes-to-bar is a CrossFit gymnastics movement so this is the appropriate domain expert. 6:29 progression tutorial."
   },
   "pallof-press": {
     "exerciseId": "pallof-press",
@@ -3372,10 +3430,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "incline-treadmill-walk": {
     "exerciseId": "incline-treadmill-walk",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/incline-treadmill-walk.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "NAsObfFJXvE",
@@ -3386,14 +3448,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Title names the exact activity and the channel is a dedicated exercise-demonstration library. Medium because Live Lean TV is not a top-tier named source and the video is framed around the 12-3-30 protocol specifically."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Title names the exact activity and the channel is a dedicated exercise-demonstration library. Medium because Live Lean TV is not a top-tier named source and the video is framed around the 12-3-30 protocol specifically."
   },
   "stairmaster": {
     "exerciseId": "stairmaster",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/stairmaster.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "ww3YV_N6U_U",
@@ -3404,14 +3470,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | McKinley Health Center is the University of Illinois student health centre - an institutional, non-commercial instructional source. Genuine 'how to use the machine with proper form' tutorial rather than a workout montage. Medium because it is not a fitness-education channel of record."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | McKinley Health Center is the University of Illinois student health centre - an institutional, non-commercial instructional source. Genuine 'how to use the machine with proper form' tutorial rather than a workout montage. Medium because it is not a fitness-education channel of record."
   },
   "burpees": {
     "exerciseId": "burpees",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/burpees.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "auBLPXO8Fww",
@@ -3422,14 +3492,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Official CrossFit movement-standards demonstration - the canonical reference for burpee form."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Official CrossFit movement-standards demonstration - the canonical reference for burpee form."
   },
   "high-knees": {
     "exerciseId": "high-knees",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/high-knees.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "sTvekaq6vOU",
@@ -3440,14 +3514,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Exact title match from PureGym's exercise-library series (PureGym is a major UK gym chain). Caveat: it is a very short (~8s) silent demonstration loop, adequate as a form reference but with no verbal coaching. Longer alternative: 'How To Do HIGH KNEE RUNS | Exercise Demonstration Video and Guide' (m1numnKLrG8, Live Lean TV Daily Exercises); not independently verified."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Exact title match from PureGym's exercise-library series (PureGym is a major UK gym chain). Caveat: it is a very short (~8s) silent demonstration loop, adequate as a form reference but with no verbal coaching. Longer alternative: 'How To Do HIGH KNEE RUNS | Exercise Demonstration Video and Guide' (m1numnKLrG8, Live Lean TV Daily Exercises); not independently verified."
   },
   "battle-ropes": {
     "exerciseId": "battle-ropes",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/battle-ropes.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "FInbOExDeU0",
@@ -3458,14 +3536,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Genuine 5:06 technique tutorial from a mainstream fitness publication. Medium because the title carries the channel's editorial 'Overrated' series framing, which reads slightly clickbait even though the content is instructional."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Genuine 5:06 technique tutorial from a mainstream fitness publication. Medium because the title carries the channel's editorial 'Overrated' series framing, which reads slightly clickbait even though the content is instructional."
   },
   "assault-bike": {
     "exerciseId": "assault-bike",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/assault-bike.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "Sg3Id7Lu8XU",
@@ -3476,14 +3558,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Official technique tutorial from Assault Fitness, the manufacturer of the AssaultBike - the authoritative source for this machine's form."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Official technique tutorial from Assault Fitness, the manufacturer of the AssaultBike - the authoritative source for this machine's form."
   },
   "outdoor-walk": {
     "exerciseId": "outdoor-walk",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/outdoor-walk.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "2BfbiyIKnK4",
@@ -3494,7 +3580,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | FLAG FOR HUMAN REVIEW. No true 'how to do an outdoor walk' instructional video exists - outdoor walking has no machine or lift technique to teach. This is a reputable physical-therapist walking-gait/posture tutorial, which is the closest legitimate form reference. If the product prefers no video over an indirect one, set this entry to null; that would be a defensible call."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | FLAG FOR HUMAN REVIEW. No true 'how to do an outdoor walk' instructional video exists - outdoor walking has no machine or lift technique to teach. This is a reputable physical-therapist walking-gait/posture tutorial, which is the closest legitimate form reference. If the product prefers no video over an indirect one, set this entry to null; that would be a defensible call."
   },
   "arm-circles": {
     "exerciseId": "arm-circles",
@@ -3586,10 +3672,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "leg-swings": {
     "exerciseId": "leg-swings",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/leg-swings.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "difYoBtZi2s",
@@ -3600,14 +3690,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Exact-title match. PureGym is a large gym chain producing clean instructional demos, but not a top-tier instructional channel — medium."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Exact-title match. PureGym is a large gym chain producing clean instructional demos, but not a top-tier instructional channel — medium."
   },
   "shoulder-dislocates": {
     "exerciseId": "shoulder-dislocates",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/shoulder-dislocates.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "riVxa9By-pM",
@@ -3618,27 +3712,35 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Exact match for banded shoulder dislocates / pass-throughs as a mobility drill. Small coaching channel, hence medium."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Exact match for banded shoulder dislocates / pass-throughs as a mobility drill. Small coaching channel, hence medium."
   },
   "thoracic-rotation": {
     "exerciseId": "thoracic-rotation",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/thoracic-rotation.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": null,
     "videoStatus": "NEEDS_REVIEW",
     "videoConfidence": null,
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Not researched. Also note the name covers several distinct drills (open-book, quadruped/thread-the-needle, seated), so a human should pick the intended variation first."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Not researched. Also note the name covers several distinct drills (open-book, quadruped/thread-the-needle, seated), so a human should pick the intended variation first."
   },
   "ankle-mobility": {
     "exerciseId": "ankle-mobility",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/ankle-mobility.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "IikP_teeLkI",
@@ -3649,7 +3751,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Covers three ankle mobility drills (11:00) rather than a single named drill — appropriate for a generic 'Ankle Mobility Drill' library entry."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Covers three ankle mobility drills (11:00) rather than a single named drill — appropriate for a generic 'Ankle Mobility Drill' library entry."
   },
   "hamstring-stretch": {
     "exerciseId": "hamstring-stretch",
@@ -3792,10 +3894,14 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "dumbbell-sumo-squat": {
     "exerciseId": "dumbbell-sumo-squat",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/dumbbell-sumo-squat.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "daK6R6Y6fcU",
@@ -3806,14 +3912,18 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | Title names the exact exercise (dual-dumbbell variant). Channel (Team Evolve / Vivian Ngo) is small and not on the preferred list, hence medium."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | Title names the exact exercise (dual-dumbbell variant). Channel (Team Evolve / Vivian Ngo) is small and not on the preferred list, hence medium."
   },
   "cable-hip-adduction": {
     "exerciseId": "cable-hip-adduction",
-    "image": null,
-    "imageStatus": "MISSING",
-    "imageSource": null,
-    "imageLicense": null,
+    "image": {
+      "kind": "illustration",
+      "start": "/exercise-illustrations/cable-hip-adduction.svg",
+      "end": null
+    },
+    "imageStatus": "APPROVED",
+    "imageSource": "qimmah-inhouse-illustration",
+    "imageLicense": "In-house original vector illustration — Qimmah owns full rights",
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "5Mkus4JdXDE",
@@ -3824,6 +3934,6 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "No rights-cleared visual matched this movement yet. | '(LF Cable)' = Life Fitness cable column, i.e. the cable hip adduction. Scott Herman Fitness is on the approved list."
+    "notes": "In-house vector movement illustration — no rights-cleared photography exists for this movement. | '(LF Cable)' = Life Fitness cable column, i.e. the cable hip adduction. Scott Herman Fitness is on the approved list."
   }
 }

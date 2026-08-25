@@ -5,10 +5,11 @@
 // تعيدان وزنًا حرًّا، والملفات المحلّية السابقة كانت UNKNOWN/RESTRICTED بلا سلسلة حقوق — انظر
 // docs/content/MEDIA-RIGHTS.md). فنعرض رسمًا توضيحيًا متجهيًا أصليًا (SVG) نملك حقوقه بالكامل،
 // بدل مادة مقيّدة أو صورة «تشبه» الجهاز فتضلّل المستخدم. غياب الملف → البديل الأنيق (لا صورة مكسورة).
-// التغطية الحالية: 24 جهازًا.
+// التغطية الحالية: 26 جهازًا.
 
 /** خريطة ثابتة: مُعرّف جهاز قانوني → مسار الرسم التوضيحي الداخلي. */
 export const machineImages: Record<string, string> = {
+  'chest-press-machine': '/exercise-machine-images/chest-press-machine.svg',
   'chest-supported-row-machine': '/exercise-machine-images/chest-supported-row-machine.svg',
   'decline-chest-press-machine': '/exercise-machine-images/decline-chest-press-machine.svg',
   'glute-kickback-machine': '/exercise-machine-images/glute-kickback-machine.svg',
@@ -16,6 +17,7 @@ export const machineImages: Record<string, string> = {
   'hack-squat-machine': '/exercise-machine-images/hack-squat-machine.svg',
   'hip-abduction-machine': '/exercise-machine-images/hip-abduction-machine.svg',
   'hip-adductor-machine': '/exercise-machine-images/hip-adductor-machine.svg',
+  'incline-chest-press-machine': '/exercise-machine-images/incline-chest-press-machine.svg',
   'iso-lateral-chest-press': '/exercise-machine-images/iso-lateral-chest-press.svg',
   'iso-lateral-high-row': '/exercise-machine-images/iso-lateral-high-row.svg',
   'iso-lateral-incline-press': '/exercise-machine-images/iso-lateral-incline-press.svg',

@@ -16,6 +16,10 @@ export interface ExerciseMediaStrings {
   sequenceAlt: (name: string) => string
   /** تسمية الرسم التوضيحي للجهاز (رسم داخلي، ليس صورة فوتوغرافية). */
   machineLabel: string
+  /** تسمية رسم الحركة الداخلي (رسم لا صورة — الصدق قبل الإيهام). */
+  illustrationLabel: string
+  /** وصف للوصول لرسم الحركة. */
+  illustrationAlt: (name: string) => string
   /** وصف للوصول لرسم الجهاز. */
   machineAlt: (name: string) => string
   /** لقطة واحدة متاحة فقط — لا ندّعي أنها تُظهر الحركة كاملة. */
@@ -31,6 +35,8 @@ const ar: ExerciseMediaStrings = {
   sequenceAlt: (name) => `${name} — وضعية البداية ثم وضعية النهاية`,
   machineLabel: 'رسم الجهاز',
   machineAlt: (name) => `${name} — رسم توضيحي للجهاز`,
+  illustrationLabel: 'رسم الحركة',
+  illustrationAlt: (name) => `${name} — رسم توضيحي للحركة`,
   singleFrameLabel: 'لقطة واحدة',
   pendingTitle: 'الشرح المرئي قيد الإضافة',
   pendingBody: 'ما عندنا صورة موثوقة لهذا التمرين بعد. الخطوات المكتوبة تحت كاملة وصحيحة.',
@@ -42,6 +48,8 @@ const en: ExerciseMediaStrings = {
   sequenceAlt: (name) => `${name} — start position, then end position`,
   machineLabel: 'Machine diagram',
   machineAlt: (name) => `${name} — machine diagram`,
+  illustrationLabel: 'Movement diagram',
+  illustrationAlt: (name) => `${name} — movement diagram`,
   singleFrameLabel: 'Single frame',
   pendingTitle: 'Visual guide coming soon',
   pendingBody: "We don't have a verified image for this exercise yet. The written steps below are complete and correct.",

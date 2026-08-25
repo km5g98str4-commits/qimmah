@@ -26,6 +26,10 @@ const MAP_FILE = resolve(ROOT, 'src/data/machineImages.ts')
 // خريطة الأجهزة: مُعرّف قانوني → الاسم العربي + الإنجليزي (مصدرها src/data/exercises.ts).
 // الترتيب أبجدي بالمعرّف كي يبقى المخرَج حتميًا ومستقرًا في الـ diff.
 const MACHINES = [
+  // [مهمة الصور] الجهازان كانا الوحيدين في قائمة placeholder-only بلا رسم — صورتاهما
+  // القديمتان كانتا لمحطة كيبل لا لجهاز الضغط، فحُذفتا وحلّ الرسم الداخلي محلّهما.
+  ['chest-press-machine', 'جهاز ضغط صدر', 'Chest Press Machine'],
+  ['incline-chest-press-machine', 'جهاز ضغط صدر علوي', 'Incline Chest Press Machine'],
   ['chest-supported-row-machine', 'تجديف بمسند صدر', 'Chest-Supported Row Machine'],
   ['decline-chest-press-machine', 'جهاز ضغط صدر سفلي', 'Decline Chest Press Machine'],
   ['glute-kickback-machine', 'جهاز ركل خلفي', 'Glute Kickback Machine'],

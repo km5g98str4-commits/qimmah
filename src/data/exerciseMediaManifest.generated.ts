@@ -1,6 +1,6 @@
 // ⚙️ ملف مُولّد آليًا — لا تُحرّره يدويًا. المولّد: scripts/build-media-manifest.mjs
 // إعادة التوليد: node scripts/build-media-manifest.mjs · الحارس: npm run test:media-pipeline
-// التغطية: 121/181 تمرينًا بإطارَي بداية/نهاية حقيقيَّين (المقاسات مفحوصة من الملفات).
+// التغطية: 119/181 تمرينًا بإطارَي بداية/نهاية حقيقيَّين (المقاسات مفحوصة من الملفات).
 // gif/video = null بصدق — لا مصدر متحرّك نظيف الحقوق حاليًا (روابط «بحث يوتيوب» ليست وسائط).
 // الحقوق من سجلّ scripts/media/provenance-manifest.json المُراجَع — أصل بلا صف = 'unverified'.
 
@@ -35,7 +35,7 @@ export interface ExerciseMediaManifestEntry {
 }
 
 /** عدد التمارين المغطاة بإطارات حقيقية. */
-export const MEDIA_STILLS_COVERAGE = 121
+export const MEDIA_STILLS_COVERAGE = 119
 /** إجمالي تمارين الكتالوج وقت التوليد. */
 export const MEDIA_CATALOG_TOTAL = 181
 /** تمارين بلا وسائط مطابقة بعد (لا تشمل بطاقات placeholder-only المتعمّدة). */
@@ -55,6 +55,8 @@ export const MEDIA_MISSING_IDS: readonly string[] = [
   "single-arm-pushdown",
   "belt-squat",
   "wall-sit",
+  "nordic-curl",
+  "single-leg-rdl",
   "single-leg-hip-thrust",
   "banded-lateral-walk",
   "frog-pump",
@@ -215,8 +217,8 @@ export const exerciseMediaManifest: Record<string, ExerciseMediaManifestEntry> =
   "belt-squat": { "id": "belt-squat", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "wall-sit": { "id": "wall-sit", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "stiff-leg-deadlift": { "id": "stiff-leg-deadlift", "status": "stills", "stillStart": { "path": "/exercise-images/stiff-leg-deadlift/0.jpg", "width": 850, "height": 567, "bytes": 67855 }, "stillEnd": { "path": "/exercise-images/stiff-leg-deadlift/1.jpg", "width": 850, "height": 567, "bytes": 68335 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
-  "nordic-curl": { "id": "nordic-curl", "status": "stills", "stillStart": { "path": "/exercise-images/nordic-curl/0.jpg", "width": 850, "height": 567, "bytes": 88999 }, "stillEnd": { "path": "/exercise-images/nordic-curl/1.jpg", "width": 850, "height": 567, "bytes": 87291 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
-  "single-leg-rdl": { "id": "single-leg-rdl", "status": "stills", "stillStart": { "path": "/exercise-images/single-leg-rdl/0.jpg", "width": 850, "height": 567, "bytes": 54678 }, "stillEnd": { "path": "/exercise-images/single-leg-rdl/1.jpg", "width": 850, "height": 567, "bytes": 55170 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
+  "nordic-curl": { "id": "nordic-curl", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
+  "single-leg-rdl": { "id": "single-leg-rdl", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "glute-ham-raise": { "id": "glute-ham-raise", "status": "stills", "stillStart": { "path": "/exercise-images/glute-ham-raise/0.jpg", "width": 850, "height": 567, "bytes": 42247 }, "stillEnd": { "path": "/exercise-images/glute-ham-raise/1.jpg", "width": 850, "height": 567, "bytes": 36712 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "glute-machine": { "id": "glute-machine", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "single-leg-hip-thrust": { "id": "single-leg-hip-thrust", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },

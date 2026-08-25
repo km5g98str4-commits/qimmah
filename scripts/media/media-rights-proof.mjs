@@ -99,8 +99,36 @@ function machineEntries() {
   })
 }
 
+const ILLUS_GENERATOR = 'scripts/media/build-exercise-illustrations.mjs'
+
+// رسوم الحركة الداخلية — تمارين بلا لقطة مرخّصة لنمط حركتها (كارديو/إحماء/كيبل خارج
+// تغطية free-exercise-db، وتمرينان سُحبت صورتاهما لأنهما كانتا لنمط حركة مختلف).
+// عمل داخلي 100% كالأجهزة تمامًا → IN-HOUSE.
+function illustrationEntries() {
+  const source = readFileSync(resolve(ROOT, 'src/data/exerciseIllustrations.ts'), 'utf8')
+  return [...source.matchAll(/^[ ]{2}'([^']+)': '([^']+)',/gm)].map(([, slug, localPath]) => {
+    if (!localPath.endsWith('.svg')) {
+      throw new Error(`${slug}: in-house illustration must be an .svg, got ${localPath}`)
+    }
+    return {
+      id: `illustration:${slug}`,
+      localPath,
+      upstreamUrl: null,
+      sourceId: INHOUSE_SOURCE_ID,
+      sourceRepo: null,
+      evidenceUrl: INHOUSE_EVIDENCE,
+      evidenceReadmeUrl: 'docs/content/MEDIA-RIGHTS.md',
+      license: INHOUSE_LICENSE,
+      verdict: 'IN-HOUSE',
+      attributionRequired: false,
+      risk: 'clean',
+      note: `Original branded movement illustration generated deterministically by ${ILLUS_GENERATOR}; no third-party photo, watermark, or restricted material.`,
+    }
+  })
+}
+
 function liveInventory() {
-  const entries = [...exerciseEntries(), ...machineEntries()]
+  const entries = [...exerciseEntries(), ...machineEntries(), ...illustrationEntries()]
   for (const entry of entries) {
     const file = resolve(PUBLIC, entry.localPath.replace(/^\//, ''))
     if (!existsSync(file)) throw new Error(`${entry.id}: local file missing: ${entry.localPath}`)
@@ -182,11 +210,13 @@ for (const e of live) {
   if (e.upstreamUrl !== null && !TRUSTED_UPSTREAM.test(e.upstreamUrl)) {
     throw new Error(`${e.id}: untrusted/unknown upstream URL: ${e.upstreamUrl}`)
   }
-  const isMachine = e.id.startsWith('machine:')
-  if (isMachine && e.magicMime !== 'image/svg+xml') {
-    throw new Error(`${e.id}: in-house machine asset must be image/svg+xml, got ${e.magicMime}`)
+  // قاعدة الشكل بالفئة: الأصول الداخلية (أجهزة + رسوم حركة) متجهية دائمًا؛
+  // وإطارات اللقطات المرخّصة خام دائمًا. SVG في فئة اللقطات = خلطٌ يلتقطه هذا.
+  const isInHouseVector = e.id.startsWith('machine:') || e.id.startsWith('illustration:')
+  if (isInHouseVector && e.magicMime !== 'image/svg+xml') {
+    throw new Error(`${e.id}: in-house asset must be image/svg+xml, got ${e.magicMime}`)
   }
-  if (!isMachine && e.magicMime === 'image/svg+xml') {
+  if (!isInHouseVector && e.magicMime === 'image/svg+xml') {
     throw new Error(`${e.id}: exercise frame unexpectedly SVG (raster expected)`)
   }
 }
@@ -196,7 +226,9 @@ if (!existsSync(MANIFEST)) throw new Error('provenance manifest missing; reviewe
 const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'))
 const reviewed = [...manifest.entries].sort((a, b) => a.id.localeCompare(b.id))
 
-if (live.length !== 274) throw new Error(`inventory count changed: expected 274, found ${live.length}`)
+// كان 274. التغيير المقصود [مهمة الصور]: −8 إطارات أُزيلت (٤ خرائط خاطئة نمط حركة ×٢ إطار)
+// +2 رسما جهازَي ضغط الصدر +37 رسم حركة داخليًا = 305. أي انحراف عن هذا الرقم غير مقصود.
+if (live.length !== 305) throw new Error(`inventory count changed: expected 305, found ${live.length}`)
 if (reviewed.length !== live.length) throw new Error(`manifest count ${reviewed.length} != live count ${live.length}`)
 for (let i = 0; i < live.length; i++) {
   const actual = live[i]

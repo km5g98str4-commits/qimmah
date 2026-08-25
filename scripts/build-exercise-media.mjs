@@ -98,6 +98,12 @@ const MANUAL_OVERRIDE = {
   'rear-delt-fly': 'Reverse_Flyes',
 }
 
+// ⛔ منع مطابقة نهائي — عدم تطابق **نمط حركة** لا نقص مفردات: المطابقة الرمزية كانت
+// تعطي single-leg-rdl صورة جسر ألوية، وnordic-curl صورة ثني أوتار جالسًا. صورة
+// «تشبه» التمرين وليست إيّاه تكذب على المستخدم (§5) — فهذان يأخذان رسم الحركة
+// الداخلي من build-exercise-illustrations.mjs ولا يطابَقان بصور أبدًا.
+const NEVER_MATCH = new Set(['single-leg-rdl', 'nordic-curl'])
+
 const STOP = new Set(['the', 'a', 'with', 'and', 'of', 'to', 'for', 'on', 'machine'])
 
 function tokens(s) {
@@ -268,6 +274,11 @@ async function main() {
     }
     // بطاقات أجهزة بلا لقطة جهاز أصيلة → البديل الأنيق (لا نطابقها بصورة وزن حرّ خاطئة).
     if (placeholderOnly.has(q.id)) {
+      unmatched.push(q.id)
+      continue
+    }
+    // عدم تطابق نمط حركة معلوم — رسم الحركة الداخلي يغطّيه، والمطابقة الرمزية تكذب هنا.
+    if (NEVER_MATCH.has(q.id)) {
       unmatched.push(q.id)
       continue
     }
