@@ -14,7 +14,7 @@
 // ⚠️ **ولا تُنسخ الشجرة هنا** — تُستورد. النسخة تشيخ فيُصادق الإثبات على منطق
 // لم يعد موجودًا، وهو عين العطل الذي تكرّر في هذه الموجة.
 // ============================================================================
-import { diagnose, EXPLAIN } from './probe-diagnosis.mjs'
+import { diagnose, EXPLAIN, classifyConfirmEmail, CONFIRM_EMAIL_FAILS } from './probe-diagnosis.mjs'
 
 let pass = 0
 const fails = []
@@ -63,6 +63,39 @@ const verdicts = ['PROXY', 'KEY_REJECTED', 'WIDE_OPEN', 'UNCLASSIFIED']
 check('⟲ ولكل حكم شرحٌ غير فارغ — فالتوقّف الآمن يجب أن يكون مفيدًا',
   missing.length === 0 && verdicts.every((v) => EXPLAIN[v]?.length > 0),
   missing.join(', ') || `${verdicts.length} حكمًا مشروحًا`)
+
+
+// ── تصنيف تأكيد البريد — ثلاثة لا اثنان ───────────────────────────────────
+console.log('\n══ تصنيف تأكيد البريد ══')
+const EMAIL_CASES = [
+  ['التأكيد مطلوب', { mailer_autoconfirm: false }, 'ENABLED'],
+  ['★ التأكيد مُعطَّل — فشلٌ حقيقي', { mailer_autoconfirm: true }, 'DISABLED'],
+  ['★ الحقل غائب — الحالة المرصودة فعلًا', { external: {}, disable_signup: false }, 'UNKNOWN'],
+  ['ناتج فارغ', {}, 'UNKNOWN'],
+  ['ليس كائنًا', null, 'UNKNOWN'],
+  ['نصّ لا كائن', 'not-json', 'UNKNOWN'],
+  ['⚔️ قيمة نصّية "false" لا منطقية', { mailer_autoconfirm: 'false' }, 'UNKNOWN'],
+]
+for (const [name, cfg, want] of EMAIL_CASES) {
+  const got = classifyConfirmEmail(cfg)
+  check(name, got === want, got === want ? got : `جاء ${got} وتوقّعنا ${want}`)
+}
+
+// ⟲ **جوهر الإصلاح:** «لا أعرف» **لا تُسقِط**، و«مُعطَّل» **تُسقِط**.
+//    الخلط بينهما وسم نتيجةً ناجحة (١٥ رفضًا مرّت) بالفشل.
+check('⟲ و«غير متحقَّق» لا تُسقِط المسبار — فهي تعذُّر معرفة لا خلل إعداد',
+  CONFIRM_EMAIL_FAILS.UNKNOWN === false)
+check('⟲ و«مُعطَّل» تُسقِطه — فالتساهل هنا يكسر نموذج الوصول كلّه',
+  CONFIRM_EMAIL_FAILS.DISABLED === true)
+check('⟲ و«مُفعَّل» لا تُسقِطه', CONFIRM_EMAIL_FAILS.ENABLED === false)
+// ⟲ ولكل تصنيف قرارُ إسقاطٍ معلَن — فلا تصنيفٌ بلا حكم.
+const EM = ['ENABLED', 'DISABLED', 'UNKNOWN']
+check('⟲ ولكل تصنيف قرارُ إسقاطٍ معلَن — لا تصنيف بلا حكم',
+  EM.every((k) => typeof CONFIRM_EMAIL_FAILS[k] === 'boolean'),
+  EM.map((k) => `${k}=${CONFIRM_EMAIL_FAILS[k]}`).join(' · '))
+// ⟲ وليست الثلاثة حكمًا واحدًا مقنَّعًا.
+check('⟲ والتصنيفات ثلاثة مميّزة',
+  new Set(EMAIL_CASES.map(([, c]) => classifyConfirmEmail(c))).size === 3)
 
 console.log(`\n${fails.length === 0 ? '✅' : '❌'} شجرة القرار: ${pass} فحصًا · ${fails.length} فشل`)
 if (fails.length) { fails.forEach((f) => console.log(`   • ${f}`)); process.exit(1) }

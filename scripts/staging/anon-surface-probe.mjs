@@ -32,7 +32,7 @@
 //    يجعل كل رفضٍ يتحوّل قبولًا فيقلب المعنى رأسًا على عقب.
 // ✅ ولا يكتب هذا المسبار شيئًا: كل نداء فيه قراءةٌ أو نداءٌ يُنتظَر رفضه.
 // ============================================================================
-import { diagnose, EXPLAIN } from './probe-diagnosis.mjs'
+import { diagnose, EXPLAIN, classifyConfirmEmail } from './probe-diagnosis.mjs'
 
 const URL_ = (process.env.SUPABASE_URL || '').replace(/\/+$/, '')
 const KEY = process.env.SUPABASE_ANON_KEY || ''
@@ -59,6 +59,7 @@ try {
 }
 
 let pass = 0
+let unknowns = 0
 const fails = []
 const check = (label, ok, detail = '') => {
   if (ok) { pass += 1; console.log(`  ✓ ${label}${detail ? `  — ${detail}` : ''}`) }
@@ -147,20 +148,37 @@ if (!sighted) {
 // `/auth/v1/settings` نقطةٌ **عامّة** يقرؤها المتصفّح بالمفتاح العامّ نفسه.
 {
   const s = await call('/auth/v1/settings')
+  console.log('\n② تأكيد البريد — من نقطةٍ عامّة، بلا توسيع صلاحية')
   if (s.status !== 200) {
-    console.log(`\n  ⓘ تعذّر قراءة إعدادات المصادقة (HTTP ${s.status}) — يبقى Confirm email غير متحقَّق.`)
+    console.log(`  ⓘ تعذّر قراءة إعدادات المصادقة (HTTP ${s.status}) — يبقى غير متحقَّق.`)
   } else {
-    let cfg = {}
-    try { cfg = JSON.parse(s.text) } catch { cfg = {} }
-    // `mailer_autoconfirm = true` تعني **تأكيدًا تلقائيًّا** — أي أن التأكيد مُعطَّل.
-    const auto = cfg.mailer_autoconfirm
-    console.log('\n② تأكيد البريد — من نقطةٍ عامّة، بلا توسيع صلاحية')
-    check('Confirm email مُفعَّل (mailer_autoconfirm = false)',
-      auto === false,
-      auto === undefined ? 'الحقل غائب — أرسل ناتج /auth/v1/settings' : `mailer_autoconfirm = ${auto}`)
-    if (auto === true) {
-      console.log('     ⚠️ التأكيد التلقائي مُشغَّل ⇒ **تأكيد البريد مُعطَّل**.')
-      console.log('        وكل نموذج الوصول يشترط `email_confirmed_at`.')
+    let cfg = null
+    try { cfg = JSON.parse(s.text) } catch { cfg = null }
+    const verdict = classifyConfirmEmail(cfg)
+    if (verdict === 'ENABLED') {
+      check('Confirm email مُفعَّل — التأكيد مطلوب', true, 'mailer_autoconfirm = false')
+    } else if (verdict === 'DISABLED') {
+      // فشلٌ حقيقي: كل مسار في نموذج الوصول يشترط `email_confirmed_at`.
+      check('Confirm email مُفعَّل — التأكيد مطلوب', false,
+        'mailer_autoconfirm = true ⇒ **التأكيد مُعطَّل**، وكل نموذج الوصول ينكسر')
+    } else {
+      /**
+       * ⚠️ «لا أعرف» تُبلَّغ **ومعها الدليل** — ولا تُسقِط.
+       * غيابُ الحقل تعذُّرُ معرفة لا خللُ إعداد. وإسقاطُ المسبار عليه يسم
+       * نتيجةً ناجحة بالفشل: خمسة عشر رفضًا مرّت، ثم يُقرأ الرمز ١ «السطح
+       * مكسور». وطباعةُ المفاتيح تُنهي السؤال في دورةٍ واحدة بدل دورتين.
+       */
+      unknowns += 1
+      const keys = cfg && typeof cfg === 'object' ? Object.keys(cfg) : []
+      const related = keys.filter((k) => /confirm|mailer|signup|autoconfirm|email/i.test(k))
+      console.log('  ⓘ **غير متحقَّق** — الحقل `mailer_autoconfirm` غائب عن الناتج.')
+      console.log('     وهذا تعذُّرُ معرفة، لا خللُ إعداد — فلا يُسقِط المسبار.')
+      console.log(`     مفاتيح الناتج (${keys.length}): ${keys.join(' · ') || '—'}`)
+      if (related.length) {
+        console.log('     وذات الصلة بقيمها:')
+        for (const k of related) console.log(`       ${k} = ${JSON.stringify(cfg[k])}`)
+      }
+      console.log('     ⇒ أرسل هذين السطرين؛ يُحسم منهما بلا دورةٍ أخرى.')
     }
   }
 }
@@ -205,7 +223,10 @@ console.log('\n⑤ المسار القديم — مسحوب')
   check('`redeem_access_code` غير معروضة للعميل', r.status !== 200, `HTTP ${r.status}`)
 }
 
-console.log(`\n${fails.length === 0 ? '✅' : '❌'} السطح العامّ: ${pass} فحصًا · ${fails.length} فشل`)
+// ⚠️ «غير متحقَّق» يُعدّ على حدة ولا يُخلط بالفشل — الخلط بينهما يسم نتيجةً
+//    ناجحة بالفشل، وقد وقع فعلًا.
+console.log(`\n${fails.length === 0 ? '✅' : '❌'} السطح العامّ: ${pass} فحصًا · ${fails.length} فشل`
+  + (unknowns ? ` · ${unknowns} غير متحقَّق` : ''))
 if (fails.length) { fails.forEach((f) => console.log(`   • ${f}`)); process.exit(1) }
 console.log('\n⚠️ حدّه المعلَن: يُثبت أن السطح **يرفض**، لا أن المصادَق **ينجح**.')
 console.log('   ذاك يحتاج JWT مستخدمٍ حقيقي — أي حسابًا، أي بعد Confirm email.\n')
