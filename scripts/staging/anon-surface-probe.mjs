@@ -32,6 +32,8 @@
 //    يجعل كل رفضٍ يتحوّل قبولًا فيقلب المعنى رأسًا على عقب.
 // ✅ ولا يكتب هذا المسبار شيئًا: كل نداء فيه قراءةٌ أو نداءٌ يُنتظَر رفضه.
 // ============================================================================
+import { diagnose, EXPLAIN } from './probe-diagnosis.mjs'
+
 const URL_ = (process.env.SUPABASE_URL || '').replace(/\/+$/, '')
 const KEY = process.env.SUPABASE_ANON_KEY || ''
 
@@ -78,16 +80,89 @@ const call = async (path, { method = 'GET', key = KEY, body } = {}) => {
   return { status: res.status, text: text.slice(0, 300) }
 }
 
-// ── ٠) الضابط الموجب — يسبق كل شيء، ويوقف كل شيء إن سقط ──────────────────
-console.log('\n① الضابط الموجب — أيميّز المسبار المسموحَ من الممنوع؟')
-const good = await call('/rest/v1/')
-const bad = await call('/rest/v1/', { key: `${KEY.slice(0, -6)}XXXXXX` })
-check('نداءٌ بمفتاح صحيح يصل (200)', good.status === 200, `HTTP ${good.status}`)
-check('ونفسه بمفتاح مهشَّم يُردّ (401)', bad.status === 401, `HTTP ${bad.status}`)
-if (good.status !== 200 || bad.status === good.status) {
-  console.log('\n⛔ المسبار **أعمى**: لا يفرّق بين مسموحٍ وممنوع.')
-  console.log('   وكل رفضٍ سيطبعه بعد هذا لا يُثبت حراسة — فيتوقّف قبل أن يضلّل.')
+/**
+ * ═══ ٠) الضابط الموجب — ولماذا صار **جدولًا** لا نقطةً واحدة ═══
+ *
+ * أوّل صيغةٍ قاست نقطةً واحدة (`/rest/v1/`). فعادت `401` بمفتاحٍ صحيح على
+ * staging الحقيقي، فأعلن المسبار عماه وتوقّف — **وهو الصواب**. لكنه توقّف
+ * **بلا أن يُفيد**: و`401` لها سببان متناقضان تمامًا، ولم يُعطِ ما يفرّق:
+ *
+ *   ① ضابطي رديء — لنقطة PostgREST الجذر دلالةٌ خاصّة قد تردّ بلا مصادقة
+ *     مستخدم حتى بمفتاح صحيح.
+ *   ② أو **المفتاح لا يعمل أصلًا** — وذاك أخطر بكثير: يعني أن بناء التطبيق
+ *     على staging لا يصادق، فلا تسجيل ولا تجربة ولا استرداد. (والمرجَّح:
+ *     المفتاح من طراز JWT القديم، وقد يكون المشروع أوقف المفاتيح القديمة
+ *     لصالح `sb_publishable_…`.)
+ *
+ * **والتوقّف الآمن ليس توقّفًا مفيدًا.** بوابةٌ ترفض أن تضلّل ثم لا تسلّم
+ * الدليل اللازم لإصلاحها تُكلّف دورةً كاملة — وقد كلّفت واحدة فعلًا.
+ *
+ * فصار يجرّب **عدّة نقاط** ويطبع جدولها كاملًا **قبل أي حكم**: يكفي أن
+ * تفرّق واحدةٌ منها ليكون المسبار مبصرًا. وإن عميت كلّها، خرج الجدول معه —
+ * فتُقرأ العلّة من رقمٍ لا من تخمين.
+ */
+console.log('\n① الضابط الموجب — جدول نقاط، لا نقطة واحدة')
+const mangled = `${KEY.slice(0, -6)}XXXXXX`
+const CONTROLS = [
+  { path: '/auth/v1/health',   note: 'صحّة خدمة المصادقة' },
+  { path: '/auth/v1/settings', note: 'إعدادات المصادقة العامّة' },
+  { path: '/rest/v1/',         note: 'جذر PostgREST' },
+]
+let sighted = null
+const table = []
+console.log('   نقطة                     بمفتاح صحيح   بمفتاح مهشَّم')
+for (const c of CONTROLS) {
+  const okRes = await call(c.path)
+  const badRes = await call(c.path, { key: mangled })
+  const distinguishes = okRes.status === 200 && badRes.status !== 200
+  table.push({ path: c.path, ok: okRes.status, bad: badRes.status })
+  console.log(`   ${c.path.padEnd(24)} ${String(okRes.status).padEnd(13)} ${badRes.status}`
+    + (distinguishes ? '   ← يفرّق' : ''))
+  if (distinguishes && !sighted) sighted = { ...c, res: okRes }
+}
+check('نقطةٌ واحدة على الأقل تفرّق بين المفتاح الصحيح والمهشَّم',
+  sighted !== null, sighted ? sighted.path : 'لا واحدة')
+
+if (!sighted) {
+  console.log('\n⛔ المسبار **أعمى**: لا نقطة تفرّق بين مسموحٍ وممنوع.')
+  console.log('   وكل رفضٍ بعد هذا لا يُثبت حراسة — فيتوقّف قبل أن يضلّل.')
+  /**
+   * ═══ والاستنتاج **يُحسب** من الجدول، لا يُترك قائمةً يقرؤها القارئ ═══
+   * أوّل صيغةٍ طبعت أربع احتمالات وتركت المطابقة للإنسان. وهو نصفُ إفادة:
+   * الحالة الأرجح — `health` تعمل بلا مفتاح بينما البقيّة تُردّ — لم تكن في
+   * القائمة أصلًا، فكان القارئ سيقع بين سطرين.
+   * فالمسبار يقول ما رآه: أوصلت الشبكة؟ وهل رُدّ المفتاح؟
+   */
+  // الحكم من `probe-diagnosis.mjs` — **سلطة واحدة** يستوردها هذا وإثباته،
+  // فلا تشيخ نسخةٌ منه في مكانٍ ويُعدَّل الأصل في آخر.
+  const verdict = diagnose(table)
+  console.log('')
+  for (const line of EXPLAIN[verdict]) console.log(`   ${line === EXPLAIN[verdict][0] ? '⇒ ' : '  '}${line}`)
   process.exit(1)
+}
+
+// ── ٠-ب) وسؤالٌ يُجاب مجّانًا من نقطةٍ عامّة: أتأكيدُ البريد مُفعَّل؟ ──────
+// `Confirm email` بقي «غير متحقَّق منه» لأن `/config/auth` الإدارية تحتاج
+// صلاحيةً أوسع، **ولا تُوسَّع صلاحية رمزٍ من أجل قراءة إعداد**. لكن
+// `/auth/v1/settings` نقطةٌ **عامّة** يقرؤها المتصفّح بالمفتاح العامّ نفسه.
+{
+  const s = await call('/auth/v1/settings')
+  if (s.status !== 200) {
+    console.log(`\n  ⓘ تعذّر قراءة إعدادات المصادقة (HTTP ${s.status}) — يبقى Confirm email غير متحقَّق.`)
+  } else {
+    let cfg = {}
+    try { cfg = JSON.parse(s.text) } catch { cfg = {} }
+    // `mailer_autoconfirm = true` تعني **تأكيدًا تلقائيًّا** — أي أن التأكيد مُعطَّل.
+    const auto = cfg.mailer_autoconfirm
+    console.log('\n② تأكيد البريد — من نقطةٍ عامّة، بلا توسيع صلاحية')
+    check('Confirm email مُفعَّل (mailer_autoconfirm = false)',
+      auto === false,
+      auto === undefined ? 'الحقل غائب — أرسل ناتج /auth/v1/settings' : `mailer_autoconfirm = ${auto}`)
+    if (auto === true) {
+      console.log('     ⚠️ التأكيد التلقائي مُشغَّل ⇒ **تأكيد البريد مُعطَّل**.')
+      console.log('        وكل نموذج الوصول يشترط `email_confirmed_at`.')
+    }
+  }
 }
 
 // ── ١) جداول لا يملك `anon` عليها شيئًا ───────────────────────────────────
