@@ -422,11 +422,22 @@ ok(
   availability.searchableRecords <= availability.declaredRecords,
   `معلَن ${availability.declaredRecords} · قابل ${availability.searchableRecords}`,
 )
-ok(
-  'وهذه التغطية تحقّقت بجودة بحث وتنسيق — لا بشرائح غير مشحونة',
-  availability.searchableRecords === cat.getStats().hotSetCount,
-  `قابل ${availability.searchableRecords} = طقم ساخن ${cat.getStats().hotSetCount}`,
-)
+// [مهمة الطعام ٢٠k] الفحص ثنائي الحالة **بالاسم** — لا حالة تمرّ مجّانًا (§4.2):
+//   • الذيل غائب ⇒ القابل للبحث هو الطقم الساخن بالضبط (التدهور الصادق).
+//   • الذيل مشحون ⇒ القابل للبحث هو فهرس الحزم بالضبط — وكان الشرط القديم
+//     (قابل === ساخن) يحمرّ هنا على النجاح نفسه، فكان بوّابة ضدّ الشحن.
+{
+  const longTailShipped = availability.corpusRecords > 0
+  ok(
+    longTailShipped
+      ? `الذيل الطويل مشحون: القابل للبحث يساوي فهرس الحزم (${availability.corpusRecords})`
+      : 'وهذه التغطية تحقّقت بجودة بحث وتنسيق — لا بشرائح غير مشحونة',
+    longTailShipped
+      ? availability.searchableRecords === availability.corpusRecords
+      : availability.searchableRecords === cat.getStats().hotSetCount,
+    `قابل ${availability.searchableRecords} · حزم ${availability.corpusRecords} · ساخن ${cat.getStats().hotSetCount}`,
+  )
+}
 
 // ═════════════════════════════════════════════════════════════════════════
 const failed = checks.filter((c) => !c.pass)

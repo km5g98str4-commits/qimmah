@@ -7,7 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && node scripts/food-production/ensure-search-assets.mjs && vite build",
     "build:founder-preview": "VITE_APP_ENV=founder_preview npm run build",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
@@ -228,6 +228,7 @@
     "test:food-longtail": "node scripts/run-food-longtail-proof.mjs",
     "test:food-catalog": "node scripts/run-food-catalog-proof.mjs",
     "food:emit": "node scripts/food-production/emit-static-assets.mjs",
+    "food:emit-search": "node scripts/food-production/emit-search-buckets.mjs",
     "test:e2e:food-catalog": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/food-catalog-live.mjs",
     "test:artifact-freshness": "node scripts/run-artifact-freshness-proof.mjs",
     "test:numeral-policy": "node scripts/run-numeral-policy-proof.mjs",

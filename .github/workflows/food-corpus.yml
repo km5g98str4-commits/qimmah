@@ -1,0 +1,112 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# إعادة بناء كتالوج الطعام من مصدره — [مهمة الطعام ٢٠k]
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# ═══ لماذا في CI ═══
+# التصدير الجملي لـ Open Food Facts (~1.2 غ.ب) هو المصدر الوحيد المعتمد
+# (robots يمنع الزحف على /api)، وبيئات الوكلاء خلف وكيل يحجب مضيفي OFF
+# بسياسة — بينما عدّاء GitHub Actions شبكته مفتوحة. فالبناء يجري هنا،
+# والنتيجة (شرائح الباركود المقبولة + الطقم الساخن + البيانات) تُدفَع إلى
+# الفرع نفسه وفق الخيار (أ) المعتمد في FOOD-LONGTAIL-PLAN.md — الشرائح
+# تُلتزم في public/food/shards (+~15.5 م.ب مضغوطة في git)، وحزم البحث
+# تبقى مولَّدة (يولّدها ensure-search-assets.mjs في كل بناء عند الحاجة).
+#
+# ⚠️ يدويّ الإطلاق حصرًا (workflow_dispatch): إعادة البناء تغيّر بيانات
+#    المنتج، فتُطلق قصدًا لا بجدول.
+# ⚠️ لا يلمس main — يدفع إلى الفرع الذي أُطلق منه فقط، وCI العادي يتولّى
+#    التحقّق الكامل (test:gate يضمّ براهين الطعام كلّها) على الدفعة الناتجة.
+name: Food corpus (OFF rebuild)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: food-corpus-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download Open Food Facts bulk export (~1.2GB)
+        run: |
+          mkdir -p .food-cache
+          curl -L --retry 5 --retry-delay 10 -C - \
+            -A 'Qimmah-DataPipeline/1.0 (github-actions; contact: repo owner)' \
+            -o .food-cache/off-products.csv.gz \
+            https://static.openfoodfacts.org/data/en.openfoodfacts.org.products.csv.gz
+          ls -la .food-cache/
+
+      # SOURCE_DATE_EPOCH مثبّتة: الحقل الوحيد الكاسر للحتمية هو ingested_at —
+      # التثبيت يجعل إعادة التشغيل على نفس المدخلات مطابقة بالبايت.
+      - name: Ingest (curated + OFF)
+        run: SOURCE_DATE_EPOCH=1786000000 npm run food:ingest
+
+      - name: Build shards + hot set + manifests
+        run: SOURCE_DATE_EPOCH=1786000000 npm run food:build
+
+      - name: Verify artifacts against their manifest
+        run: npm run food:verify
+
+      - name: Emit static assets (hot set + manifest)
+        run: npm run food:emit
+
+      - name: Ship shards into public/food/shards (Plan A)
+        run: |
+          mkdir -p public/food/shards
+          rm -f public/food/shards/*.json
+          cp data/food-production/accepted/shards/*.json public/food/shards/
+          ls public/food/shards | wc -l
+
+      - name: Generate search buckets and prove the long tail is live
+        run: |
+          node scripts/food-production/ensure-search-assets.mjs
+          node scripts/run-food-longtail-proof.mjs
+          node scripts/run-food-coverage-proof.mjs
+
+      - name: Refresh production report
+        run: npm run food:report
+
+      - name: Commit and push the corpus to this branch
+        run: |
+          git config user.name 'qimmah-food-pipeline'
+          git config user.email 'actions@users.noreply.github.com'
+          git add public/food data/food-production
+          git add docs/data-factory 2>/dev/null || true
+          git add docs/execution 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo 'لا تغيير في الكتالوج — لا شيء يُدفع.'
+            exit 0
+          fi
+          COUNT=$(node -e "const m=require('./public/food/manifest.json');console.log((m.shards||[]).reduce((a,s)=>a+(s.count||0),0))")
+          git commit -m "data(food): [مهمة الطعام ٢٠k] كتالوج OFF كامل — ${COUNT} سجلًّا مقبولًا
+
+إعادة بناء من التصدير الجملي الرسمي داخل CI (الشبكة المفتوحة الوحيدة
+المتاحة)، وفق الخيار (أ) المعتمد في FOOD-LONGTAIL-PLAN.md: الشرائح تُلتزم
+في public/food/shards وتخدمها Pages من نفس الأصل، وحزم البحث تُولَّد عند
+البناء (ensure-search-assets). SOURCE_DATE_EPOCH=1786000000 للحتمية.
+food:verify مرّ قبل الدفع، وبراهين longtail+coverage مرّت بالبيانات الحيّة.
+ODbL: النسبة تظهر في الواجهة عند ظهور نتائج off: (قائمة).
+
+Generated-by: .github/workflows/food-corpus.yml"
+          for i in 1 2 3; do
+            git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            git pull --rebase origin "${{ github.ref_name }}"
+          done
+          git push origin "HEAD:${{ github.ref_name }}"
