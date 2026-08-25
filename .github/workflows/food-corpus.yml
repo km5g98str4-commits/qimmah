@@ -103,16 +103,19 @@ jobs:
             exit 0
           fi
           COUNT=$(node -e "const m=require('./public/food/manifest.json');console.log((m.shards||[]).reduce((a,s)=>a+(s.count||0),0))")
-          git commit -m "data(food): [مهمة الطعام ٢٠k] كتالوج OFF كامل — ${COUNT} سجلًّا مقبولًا
-
-إعادة بناء من التصدير الجملي الرسمي داخل CI (الشبكة المفتوحة الوحيدة
-المتاحة)، وفق الخيار (أ) المعتمد في FOOD-LONGTAIL-PLAN.md: الشرائح تُلتزم
-في public/food/shards وتخدمها Pages من نفس الأصل، وحزم البحث تُولَّد عند
-البناء (ensure-search-assets). SOURCE_DATE_EPOCH=1786000000 للحتمية.
-food:verify مرّ قبل الدفع، وبراهين longtail+coverage مرّت بالبيانات الحيّة.
-ODbL: النسبة تظهر في الواجهة عند ظهور نتائج off: (قائمة).
-
-Generated-by: .github/workflows/food-corpus.yml"
+          {
+            echo "data(food): [مهمة الطعام ٢٠k] كتالوج OFF كامل — ${COUNT} سجلًّا مقبولًا"
+            echo ""
+            echo "إعادة بناء من التصدير الجملي الرسمي داخل CI، وفق الخيار (أ) المعتمد"
+            echo "في FOOD-LONGTAIL-PLAN.md: الشرائح تُلتزم في public/food/shards وتخدمها"
+            echo "Pages من نفس الأصل، وحزم البحث تُولَّد عند البناء (ensure-search-assets)."
+            echo "SOURCE_DATE_EPOCH=1786000000 للحتمية. food:verify مرّ قبل الدفع،"
+            echo "وبراهين longtail+coverage مرّت بالبيانات الحيّة. ODbL: النسبة تُعرض"
+            echo "في الواجهة عند ظهور نتائج off: (قائمة)."
+            echo ""
+            echo "Generated-by: .github/workflows/food-corpus.yml"
+          } > /tmp/food-commit-msg
+          git commit -F /tmp/food-commit-msg
           for i in 1 2 3; do
             git push origin "HEAD:${{ github.ref_name }}" && exit 0
             git pull --rebase origin "${{ github.ref_name }}"
