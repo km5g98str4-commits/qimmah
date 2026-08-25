@@ -19,6 +19,14 @@ name: Food corpus (OFF rebuild)
 
 on:
   workflow_dispatch:
+  # مشغّل بديل: تكامل الوكيل لا يملك actions:write لإطلاق dispatch يدويًّا (403
+  # مقيسة)، فالإطلاق يكون بدفع تعديل على ملف الطلب أدناه — قصديّ تمامًا
+  # كالزرّ، ولا حلقة: دفعة البيانات الناتجة لا تلمس هذا الملف.
+  push:
+    branches:
+      - codex/qimmah-final-sovereign-convergence-001
+    paths:
+      - .github/food-corpus-request
 
 permissions:
   contents: write
