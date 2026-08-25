@@ -234,7 +234,6 @@ export interface V2OnboardingCopy {
     previewVsUse: string
   }
   /** Full-screen plan-assembly loading state (shown while the plan is generated). */
-  building: { title: string; subtitle: string }
   /** Visible plan-generation failure + retry (never a silent drop into the app). */
   error: { title: string; message: string; retry: string }
   /**
@@ -322,10 +321,6 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       subtitle: 'بنيناها على هدفك ووقتك ومعداتك.',
       enter: 'الدخول للوحة',
       previewNote: 'خطتك تنبنى وتنحفظ على هذا الجهاز. المزامنة السحابية تحتاج تسجيل الدخول.',
-    },
-    building: {
-      title: 'نجهّز خطتك',
-      subtitle: 'نرتّب أيامك وتمارينك…',
     },
     error: {
       title: 'ما قدرنا نجهّز الخطة',
@@ -425,10 +420,6 @@ export const V2_ONBOARDING: Record<'ar' | 'en', V2OnboardingCopy> = {
       subtitle: 'Built on your goal, time, and equipment.',
       enter: 'Enter dashboard',
       previewNote: 'Your plan is built and saved on this device. Cloud sync needs sign-in.',
-    },
-    building: {
-      title: 'Setting up your plan',
-      subtitle: 'Arranging your days and workouts…',
     },
     error: {
       title: 'Couldn’t build the plan',

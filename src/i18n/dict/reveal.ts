@@ -115,7 +115,9 @@ const ar: RevealStrings = {
     ariaLabel: 'نجهّز خطتك، لحظة من فضلك',
     stages: [
       'نفهم هدفك',
+      'نحسب احتياجك اليومي',
       'نبني مسارك',
+      'نختار تمارينك وبدائلها',
       'نوازن التدريب والغذاء',
       'نرتّب أول أسبوع لك',
       'نجهّز قِمّتك',
@@ -186,7 +188,9 @@ const en: RevealStrings = {
     ariaLabel: 'Building your plan, one moment',
     stages: [
       'Understanding your goal',
+      'Computing your daily needs',
       'Mapping your path',
+      'Picking your exercises and alternates',
       'Balancing training and food',
       'Laying out your first week',
       'Finishing your Qimmah',

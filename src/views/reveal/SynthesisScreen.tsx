@@ -16,8 +16,10 @@ import type { Lang } from '@/lib/appPreferences'
 import { revealStrings } from '@/i18n/dict/reveal'
 import { Icon } from '@/components/Icon'
 
-/** أقلّ مكوث لمرحلة — تحت هذا الحدّ يصير النصّ وميضًا لا يُقرأ. */
-const MIN_STAGE_MS = 420
+/** أقلّ مكوث لمرحلة — تحت هذا الحدّ يصير النصّ وميضًا لا يُقرأ.
+ *  [مهمة المنتج] رُفع 420 → 480 مع توسيع القصّة إلى سبع مراحل: إيقاع أهدأ
+ *  يُقرأ فعلًا — والقاعدة الحاكمة أعلاه (لا انتظار مزيّف) كما هي. */
+const MIN_STAGE_MS = 480
 
 /** هل طلب المستخدم تقليل الحركة؟ يُقرأ مرّة، ويُحترم بلا استثناء. */
 function prefersReducedMotion(): boolean {

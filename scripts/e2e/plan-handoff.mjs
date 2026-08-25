@@ -130,7 +130,8 @@ async function driveToHandoff(page, ar) {
 /** يُملأ من أول تشغيل — اللحظة لا تتغيّر بالعرض، فتُقاس مرّة. */
 let synthesis = null
 const SYNTH_FLOOR_MS = 800
-const SYNTH_CEILING_MS = 2500
+// [مهمة المنتج] الأرضية 3400 (سبع مراحل × 480) + هامش توليد ورسم — رُفع مع الأرضية في نفس الموجة.
+const SYNTH_CEILING_MS = 4800
 
 const preview = startPreview()
 let browser

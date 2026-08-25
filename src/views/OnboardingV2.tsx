@@ -77,13 +77,17 @@ import type { TrialOutcome } from '@/lib/access/entitlementBackend'
 import { SynthesisScreen } from '@/views/reveal/SynthesisScreen'
 
 /**
- * [COMMISSIONING §10] أقلّ مكوث للحظة التجهيز.
+ * [مهمة المنتج] أقلّ مكوث للحظة التجهيز.
  *
- * ‏١١٠٠م.ث = مرحلتان بحدّ `MIN_STAGE_MS` (٤٢٠) وزيادة صغيرة. الرقم مختار
- * ليُقرأ سطران لا لِيُملأ وقت: التوليد ينتهي في ~٢٠م.ث، فبلا أرضيةٍ ما تُقرأ
- * كلمة واحدة. وأطول من ذلك يصير الانتظار مصطنعًا — والتكليف يمنعه صراحةً.
+ * ‏٣٤٠٠م.ث = ستّة انتقالات بحدّ `MIN_STAGE_MS` (٤٨٠) تُظهر مراحل القصّة السبع
+ * كاملةً + مكوث أخير يُقرأ. كانت الأرضية ١١٠٠م.ث (سطران فقط) بتكليف سابق
+ * منع الإطالة؛ ثم طلب المؤسس صراحةً تجهيزًا أطول وأقرب لثقل العمل الحقيقي —
+ * فطالت **القصّة** لا العدّاد: كل مرحلة تصف ناتجًا يُجهَّز فعلًا (الاحتياج
+ * اليومي، اختيار التمارين وبدائلها…)، وقاعدة «لا انتظار مزيّف» في
+ * `SynthesisScreen` كما هي. سقف إثبات المتصفّح رُفع معها في نفس الموجة
+ * (`scripts/e2e/plan-handoff.mjs`).
  */
-const SYNTHESIS_FLOOR_MS = 1100
+const SYNTHESIS_FLOOR_MS = 3400
 import { RevealJourney } from '@/views/reveal/RevealJourney'
 import { RevealValue } from '@/views/reveal/RevealValue'
 import { revealStrings } from '@/i18n/dict/reveal'
@@ -1342,7 +1346,6 @@ function LimitationsStep({
   )
 }
 
-/** Full-screen plan-assembly loading state (a bare button spinner is forbidden). */
 /** Visible plan-generation failure with retry — never a silent drop into the app. */
 function ErrorScreen({ lang, t, onRetry, onDismiss }: { lang: Lang; t: T; onRetry: () => void; onDismiss: () => void }) {
   return (
