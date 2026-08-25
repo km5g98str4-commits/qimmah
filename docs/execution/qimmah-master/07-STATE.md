@@ -3,7 +3,7 @@
 > **Canonical owner of one fact only: where execution stands right now.**
 > A zero-context session reads `README.md` → `00-GROUND.md` → this file, and can continue.
 
-**Last updated:** 2026-08-24 · **by:** Codex staging commissioning
+**Last updated:** 2026-08-25 · **by:** Codex staging anon-surface probe
 
 ---
 
@@ -87,12 +87,16 @@ Everything else on the board is either closed above, environment-blocked, or fou
   `odpkvswfiihrkglgfghd`, each returning HTTP 201. `supabase-shim.sql` was not run.
 - **Database verification:** `tables=27`, `with_rls=27`, `policies=71`, `anon_writes=0`,
   `pepper=1`, `client_rpcs=6`, `legacy_open=0`, `migrations=33`.
-- **Behavioral smoke:** preflight found `total_users=0`; the unmodified `staging-smoke.sql` then
-  returned HTTP 201 and cleanup row `leftover_users=0`, `leftover_codes=0`, `total_users=0`.
-  The Management API response and Postgres logs do not expose the nine `RAISE NOTICE` messages,
-  so their exact text is not yet captured; the SQL Editor requires an authenticated dashboard
-  session. No `✗` was visible in the API response, but success of all nine checks is not inferred
-  from the cleanup row alone.
+- **Behavioral smoke:** after fast-forwarding the branch to `cb838d8d`, a direct staging preflight
+  returned `total_users=0`. The updated, unmodified `staging-smoke.sql` then returned its computed
+  final row through the Supabase SQL interface: `verdict=PASS`, `passed=9`, `failed=0`,
+  `leftover_users=0`, `leftover_codes=0`, `total_users=0`. The `checks` column returned all nine
+  named checks with `ok=true`; no notice, dashboard session, login, or inferred success was needed.
+- **Anon-surface probe:** after fast-forwarding to `c8e1d8cc`, `npm run staging:probe` ran against
+  staging with the active public legacy `anon` key only and no `service_role`. Its positive control
+  returned HTTP 401 for both the correct key and a deliberately corrupted key, so the probe declared
+  itself **blind** and stopped before the table/RPC checks. This run proves no public-surface verdict;
+  the probe made no database writes and no repair or permission expansion was attempted.
 - **Auth:** `GET /config/auth` returned HTTP 403 because the supplied PAT is scoped to Database +
   Project; `Confirm email = ON` is therefore not yet independently verified. The public legacy
   anon key was retrieved through the publishable-keys endpoint; no secret key was requested or
