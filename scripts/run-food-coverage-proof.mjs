@@ -286,10 +286,37 @@ ok('«nuts»: الصدارة منسَّقة لا «nutella»', nutsAfter[0]?.sou
     tampered[0]?.source === 'packaged',
     `المعطوب: ${tampered[0]?.item.nameEn} [${tampered[0]?.strength}]`,
   )
-  counter(
-    'والصيغة المخمَّنة موسومة فعلًا في البيانات الحيّة — لا يمرّ الفحص على مصادفة',
-    (await unified.rankPackaged(cat, 'nuts')).some((h) => h.derivedOnly === true),
-  )
+  /**
+   * ⚠️ شاهد الوسم الحيّ كان `.some(derivedOnly)` على نتائج «nuts» — ومات على
+   * الكتالوج الكامل: ستّون ألف سجل جعلت كل نتائج «nuts» مطابقات **أصلية**
+   * فغاب المشتق من القائمة المقتطعة. (رابع شاهد يموت اليوم لأنه معلَّق
+   * بتوزيع بيانات بعينه.)
+   *
+   * فصار الشاهد **متكيّفًا حتميًّا**: سجل ساخن حقيقي يُختار وقت التشغيل —
+   * اسمه العربي كلمة واحدة لا تبدأ بـ«ال» — ويُستعلم بـ«ال»+اسمه. الشكل
+   * الأصلي للاستعلام لا يستطيع مطابقته (أوّله مختلف)، والصيغة المشتقّة
+   * (حذف «ال») تطابقه تمامًا ⇒ وصوله مستحيل إلا موسومًا. يعمل على أي
+   * كتالوج يحمل سجلًا عربيًا واحدًا كهذا — ويسقط باسمه إن غاب الوسم.
+   */
+  {
+    const hot = JSON.parse(await readFile(resolve(ROOT, 'public/food/hot-set.json'), 'utf8'))
+    const witnessRec = (hot.order ?? [])
+      .map((g) => hot.records[g])
+      .find((r) => {
+        const n = (r?.name_ar ?? '').trim()
+        return n && !n.includes(' ') && !n.startsWith('ال') && n.length >= 3 && n.length <= 8
+      })
+    counter('يوجد سجل ساخن صالح شاهدًا (اسم عربي مفرد بلا «ال»)', !!witnessRec, witnessRec?.name_ar)
+    if (witnessRec) {
+      const hits = await unified.rankPackaged(cat, `ال${witnessRec.name_ar.trim()}`)
+      const mine = hits.find((h) => h.product.gtin === witnessRec.gtin)
+      counter(
+        `والصيغة المخمَّنة موسومة فعلًا في البيانات الحيّة — «ال${witnessRec.name_ar.trim()}» يبلغ سجلّه المشتقَّ موسومًا`,
+        mine?.derivedOnly === true,
+        mine ? `derivedOnly=${mine.derivedOnly}` : 'السجل لم يصل قائمة المرشّحين أصلًا',
+      )
+    }
+  }
 }
 
 /**
