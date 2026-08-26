@@ -255,16 +255,39 @@ ok('«nuts»: الصدارة منسَّقة لا «nutella»', nutsAfter[0]?.sou
  * العطل حرفيًا. لو كانت الأرضية بلا أثر لبقيت الصدارة كما هي — فتسقط هذه القاعدة.
  */
 {
-  const curatedNuts = unified.rankCurated('nuts')
-  const rawHits = (await unified.rankPackaged(cat, 'nuts')).map((h) => ({ ...h, derivedOnly: false }))
-  const tampered = unified.mergeUnified(curatedNuts, rawHits, 'en', 8)
+  /**
+   * ⚠️ كان الشاهد هنا «nutella تتصدّر عند نزع الأرضية» — وهو شاهد **مرهون
+   * ببيانات حيّة**: معايرة السلّم على الكتالوج الكامل جعلت المنسَّق القويّ (≤٥)
+   * يسبق بادئة المعبّأ (٥٫٧٥) حتى بلا أرضية، فمات الشاهد لا الآلية. (وهي
+   * نفسها علّة سقوط فحوص «الصدارة» يوم اتّسع الكتالوج — شاهدٌ معلَّق بسجلّ
+   * بعينه يشيخ مع كل تحديث بيانات.)
+   *
+   * فصار الشاهد **آليّ المستوى وحتميًّا**: مرشّح معبّأ مصنوع بوسم التخمين مقابل
+   * منسَّق متوسّط (٧ — بادئة إنجليزية). الأرضية تعمل ⇒ المنسَّق يتصدّر؛
+   * نزعُ الوسم من **نفس** المرشّح ⇒ ينقلب المعبّأ للصدارة. لو فقدت الأرضية
+   * أثرها سقط الفحص باسمه — والمقصد المعلَن كما هو: التنسيق البشري يسبق
+   * التخمين البنيوي.
+   */
+  const syntheticHit = {
+    product: { gtin: '00000000000017', name_en: 'Nut Discovery Cereal', name_ar: null, brand_en: 'TestBrand' },
+    tier: 'name-prefix',
+    derivedOnly: true,
+  }
+  const midCurated = [{ item: { id: 'witness', nameAr: 'شاهد', nameEn: 'Witness food' }, source: 'curated', strength: 7 }]
+  const floored = unified.mergeUnified(midCurated, [syntheticHit], 'en', 8)
   counter(
-    'نزع أرضية الصيغ المخمَّنة يعيد «nutella» إلى الصدارة',
-    tampered[0]?.source === 'packaged' && /nutella/i.test(tampered[0]?.item.nameEn ?? ''),
-    `المعطوب: ${tampered[0]?.item.nameEn} · السليم: ${nutsAfter[0]?.item.nameEn}`,
+    'الأرضية تحمي المنسَّق المتوسّط (٧) من بادئة مخمَّنة',
+    floored[0]?.source === 'curated',
+    `الصدارة: ${floored[0]?.item.nameEn} [${floored[0]?.strength}]`,
+  )
+  const tampered = unified.mergeUnified(midCurated, [{ ...syntheticHit, derivedOnly: false }], 'en', 8)
+  counter(
+    'ونزعُ وسم التخمين من نفس المرشّح يقلب الصدارة للمعبّأ — فالأرضية فاعلة لا زينة',
+    tampered[0]?.source === 'packaged',
+    `المعطوب: ${tampered[0]?.item.nameEn} [${tampered[0]?.strength}]`,
   )
   counter(
-    'والصيغة المخمَّنة موسومة فعلًا — لا يمرّ الفحص على مصادفة',
+    'والصيغة المخمَّنة موسومة فعلًا في البيانات الحيّة — لا يمرّ الفحص على مصادفة',
     (await unified.rankPackaged(cat, 'nuts')).some((h) => h.derivedOnly === true),
   )
 }
