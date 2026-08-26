@@ -99,7 +99,18 @@ try {
   // الدليل أن المحتوى **ليس** شريحة: لا JSON ولا حقل records.
   const shardProbe = await fetch(`${BASE}/food/shards/shard-00.json`)
   const shardBody = shardProbe.ok ? await shardProbe.text() : ''
-  check('الذيل الطويل غير مشحون مع الأصول', !shardBody.includes('"records"'), shardBody.slice(0, 40))
+  // [مهمة الطعام ٢٠k] كان الفحص مثبَّتًا على الغياب («غير مشحون») فاحمرّ لحظة
+  // الشحن — على النجاح نفسه. صار ثنائي الحالة بالاسم (§4.2): مشحون ⇒ الشريحة
+  // المخدومة حقيقية البنية؛ غائب ⇒ ليست سقطة SPA fallback تدّعي الوجود.
+  if (shardBody.includes('"records"')) {
+    let shard = null
+    try { shard = JSON.parse(shardBody) } catch { shard = null }
+    check('الذيل الطويل مشحون: الشريحة المخدومة JSON حقيقي بعدّاد موجب',
+      !!shard && typeof shard.count === 'number' && shard.count > 0 && !!shard.records,
+      shard ? `count=${shard.count}` : 'JSON معطوب')
+  } else {
+    check('الذيل الطويل غير مشحون مع الأصول — والغياب صادق لا fallback يدّعي', !shardBody.includes('"records"'), shardBody.slice(0, 40))
+  }
 
   // ═══ ٢) البحث المحلي + العربي + نتائج OFF + النسب ═══
   for (const width of [320, 390, 430]) {
@@ -143,9 +154,28 @@ try {
       check(`${width}/${lang}: لا نسب على نتائج محلية بحتة`, offIds === 0 || attrLocal === 0 || offIds > 0)
 
       // حالة بلا نتيجة.
-      await input.fill(''); await input.type('زززززقققق', { delay: 30 }); await page.waitForTimeout(1200)
-      const noRes = await page.locator('li', { hasText: /لا نتائج|No results|ما لقينا/ }).count()
-      check(`${width}/${lang}: حالة «بلا نتيجة» تظهر`, noRes > 0 || (await page.locator('ul li button').count()) === 0)
+      // ⚠️ كانت مهلةً ثابتة (١٢٠٠م.ث) ثم عدًّا — فصارت سباقًا مع حجم البيانات:
+      // فهرس البحث العميق (٤٬٨٣٣ حزمة) يُجلب أول مرّة أثناء العدّ، فتُعدّ نتائج
+      // الاستعلام السابق قبل أن تحسم الواجهة. الانتظار صار **شرطيًّا** بنفس
+      // المعنى تمامًا: رسالة «لا نتائج» ظاهرة أو القائمة فارغة — حتى ٦ ثوانٍ.
+      // ⚠️ درسا هذا الفحص: مهلة ثابتة صارت سباق بيانات؛ ونصوص منسوخة شاخت
+      // («لا نتائج» صارت «ما فيه نتائج») وزرّ البلاغ [COMMISSIONING §7] داخل
+      // عنصر الحالة الفارغة جعل عدّ الأزرار لا يصفر — فاحمرّ والتطبيق سليم،
+      // ولم يُلحظ لأنه خارج البوابة. المعتمد الآن علامة **هيكلية** يملكها
+      // المكوّن: زرّ البلاغ لا يُرسم إلا في فرع «لا نتائج».
+      await input.fill(''); await input.type('زززززقققق', { delay: 30 })
+      const emptySettled = await page.waitForFunction(
+        () => document.querySelector('[data-testid="report-missing-food"]') !== null
+          || document.querySelectorAll('ul li button').length === 0,
+        null,
+        { timeout: 6000 },
+      ).then(() => true).catch(() => false)
+      // تشخيص عند الفشل: ما الذي تعرضه القائمة فعلًا؟ — الفشل الأبكم يكلّف دورة كاملة.
+      const listDump = emptySettled ? '' : await page.evaluate(() => {
+        const items = [...document.querySelectorAll('ul li')].slice(0, 4).map((li) => (li.textContent || '').slice(0, 60))
+        return `العناصر=${document.querySelectorAll('ul li button').length} · ${items.join(' | ')}`
+      })
+      check(`${width}/${lang}: حالة «بلا نتيجة» تظهر (زرّ البلاغ حاضر)`, emptySettled, listDump)
 
       check(`${width}/${lang}: بلا خطأ صفحة`, !(page.__errors || []).length, (page.__errors || [])[0] || '')
       await page.__ctx.close()
