@@ -46,6 +46,14 @@ try {
 // الأطباق السعودية التقليدية تُدمج في foodItems عبر spread بمعرّفات «sfct-*».
 const saudiCount = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('sfct-')).length
 const gccCount = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('gcc-')).length
+// أصناف السلاسل المنسَّقة (فئة «مطاعم» خارج r2-eat-*) — يُصدَّر للبوّابة كي
+// يُثبَّت بدقّة: total>=581 أرضية لا تعلن إضافة صامتة، والعدّ الدقيق يعلنها
+// (نمط gcc==46). استثناء r2 قصديّ: عدّه مثبَّت بمسماره الخاص (r2==60).
+const restaurantItems = foodItems.filter((f) => f.category === 'مطاعم' && !String(f.id).startsWith('r2-eat-'))
+const restaurantCount = restaurantItems.length
+// وسم «تقديري» على مستوى الصنف المعروض (نظير r2Estimated): رأس الكتلة كان يعلن
+// التقدير عن الجميع والصنف المعروض للمستخدم صامت — الوسم الآن حيث يُقرأ.
+const restaurantsEstimated = restaurantItems.filter((f) => typeof f.notesAr === 'string' && f.notesAr.includes('تقديري')).length
 const r2Items = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('r2-eat-'))
 const r2Estimated = r2Items.filter((f) => typeof f.notesAr === 'string' && f.notesAr.includes('تقديري')).length
 const r2Categories = [...new Set(r2Items.map((f) => f.category))]
@@ -86,6 +94,19 @@ const TRADEMARKS = [
   /شاورمر|shawarmer/i,
   /الطازج|al[\s-]?tazaj/i,
   /نمرة\s?تسعة/i,
+  // [مهمة الصقل §5] سدّ فجوة الحارس/المحتوى: القائمة كانت 18 نمطًا والسلاسل
+  // المنسَّقة في القاعدة 25 — فصنف r2 عام باسم إحدى السبع الناقصة كان يمرّ صامتًا.
+  // «مايسترو/ماسترو» بالهجاءين لأن LOANWORD_SPELLINGS تكافئهما في البحث أصلًا.
+  /مايسترو|ماسترو|maestro/i,
+  /الرومانسية|romansiah/i,
+  /ماما\s?نورة|mama\s?noura/i,
+  /برجرايزر|burgerizzr/i,
+  /بابا\s?جونز|papa\s?john/i,
+  /فايف\s?غايز|فايف\s?قايز|five\s?guys/i,
+  /شيك\s?شاك|shake\s?shack/i,
+  /باسكن|باسكين|baskin/i,
+  /تكساس|texas\s?chicken/i,
+  /كاريبو|caribou/i,
 ]
 
 // تصنيف فئة فرعية من نص الاسم/الكلمات المفتاحية — لفحص منطقية كثافة السعرات فقط.
@@ -273,7 +294,7 @@ const nameSpellReport = {
 }
 
 if (JSON_OUT) {
-  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, r2: r2Items.length, r2Estimated, r2Categories, r2RangeViolations, nameSpell: nameSpellReport, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
+  console.log(JSON.stringify({ total: foodItems.length, saudi: saudiCount, gcc: gccCount, restaurants: restaurantCount, restaurantsEstimated, r2: r2Items.length, r2Estimated, r2Categories, r2RangeViolations, nameSpell: nameSpellReport, errors: errors.length, warnings: warns.length, byCode: Object.fromEntries(Object.entries(byCode).map(([k, v]) => [k, v.length])), findings }, null, 2))
 } else {
   console.log('════════ مُدقِّق قاعدة الأطعمة — قِمّة ════════')
   console.log(`الإجمالي: ${foodItems.length} صنفًا (منها ${saudiCount} طبقًا سعوديًا)`)

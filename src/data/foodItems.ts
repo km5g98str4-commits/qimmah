@@ -2519,6 +2519,7 @@ export const foodItems: FoodItem[] = [
     carbs: 40,
     fat: 52,
     keywords: ['albaik', 'al baik', 'بيك', 'broasted', 'بروست'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'albaik-fillet-4pc',
@@ -2532,6 +2533,7 @@ export const foodItems: FoodItem[] = [
     carbs: 55,
     fat: 36,
     keywords: ['albaik', 'al baik', 'بيك', 'fillet', 'فيليه'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'albaik-nuggets',
@@ -2545,6 +2547,7 @@ export const foodItems: FoodItem[] = [
     carbs: 26,
     fat: 27,
     keywords: ['albaik', 'al baik', 'بيك', 'nuggets', 'نجت'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'albaik-fish-4pc',
@@ -2558,6 +2561,7 @@ export const foodItems: FoodItem[] = [
     carbs: 50,
     fat: 33,
     keywords: ['albaik', 'al baik', 'بيك', 'fish', 'سمك'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'albaik-fries',
@@ -2577,6 +2581,7 @@ export const foodItems: FoodItem[] = [
       { id: 'albaik-fries-m', labelAr: 'وسط', labelEn: 'Medium', servingLabelAr: 'وسط (150غ)', servingGrams: 150, calories: 430, protein: 5, carbs: 55, fat: 22 },
       { id: 'albaik-fries-l', labelAr: 'كبير', labelEn: 'Large', servingLabelAr: 'كبير (220غ)', servingGrams: 220, calories: 630, protein: 7, carbs: 81, fat: 32 },
     ],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'albaik-garlic-sauce',
@@ -2590,6 +2595,7 @@ export const foodItems: FoodItem[] = [
     carbs: 3,
     fat: 19,
     keywords: ['albaik', 'al baik', 'بيك', 'garlic', 'صوص'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- هرفي ---
@@ -2606,6 +2612,7 @@ export const foodItems: FoodItem[] = [
     fat: 33,
     fiber: 2,
     keywords: ['herfy', 'هيرفي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'herfy-chicken-burger',
@@ -2620,6 +2627,7 @@ export const foodItems: FoodItem[] = [
     fat: 25,
     fiber: 2,
     keywords: ['herfy', 'هيرفي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'herfy-chicken-fillet',
@@ -2634,6 +2642,7 @@ export const foodItems: FoodItem[] = [
     fat: 22,
     fiber: 2,
     keywords: ['herfy', 'هيرفي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'herfy-fries',
@@ -2648,6 +2657,7 @@ export const foodItems: FoodItem[] = [
     fat: 17,
     fiber: 4,
     keywords: ['herfy', 'هيرفي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'herfy-apple-pie',
@@ -2661,6 +2671,7 @@ export const foodItems: FoodItem[] = [
     carbs: 32,
     fat: 13,
     keywords: ['herfy', 'هيرفي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- كودو ---
@@ -2677,6 +2688,7 @@ export const foodItems: FoodItem[] = [
     fat: 20,
     fiber: 2,
     keywords: ['kudu', 'كودو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'kudu-chicken-fillet',
@@ -2691,6 +2703,7 @@ export const foodItems: FoodItem[] = [
     fat: 26,
     fiber: 2,
     keywords: ['kudu', 'كودو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'kudu-beef-burger',
@@ -2705,6 +2718,7 @@ export const foodItems: FoodItem[] = [
     fat: 31,
     fiber: 2,
     keywords: ['kudu', 'كودو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'kudu-fries',
@@ -2719,6 +2733,7 @@ export const foodItems: FoodItem[] = [
     fat: 16,
     fiber: 4,
     keywords: ['kudu', 'كودو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- ماكدونالدز ---
@@ -2735,6 +2750,7 @@ export const foodItems: FoodItem[] = [
     fat: 30,
     fiber: 3,
     keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز', 'بيق ماك'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'mcd-mcchicken',
@@ -2749,6 +2765,7 @@ export const foodItems: FoodItem[] = [
     fat: 21,
     fiber: 2,
     keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'mcd-filet-o-fish',
@@ -2763,6 +2780,7 @@ export const foodItems: FoodItem[] = [
     fat: 18,
     fiber: 2,
     keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز', 'فيش'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'mcd-nuggets-6',
@@ -2776,6 +2794,7 @@ export const foodItems: FoodItem[] = [
     carbs: 16,
     fat: 17,
     keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز', 'nuggets', 'ناجتس'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'mcd-fries-medium',
@@ -2795,6 +2814,7 @@ export const foodItems: FoodItem[] = [
       { id: 'mcd-fries-m', labelAr: 'وسط', labelEn: 'Medium', servingLabelAr: 'وسط (117غ)', servingGrams: 117, calories: 340, protein: 4, carbs: 44, fat: 16 },
       { id: 'mcd-fries-l', labelAr: 'كبير', labelEn: 'Large', servingLabelAr: 'كبير (154غ)', servingGrams: 154, calories: 480, protein: 6, carbs: 63, fat: 23 },
     ],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- برجر كنج ---
@@ -2811,6 +2831,7 @@ export const foodItems: FoodItem[] = [
     fat: 40,
     fiber: 2,
     keywords: ['burger king', 'bk', 'برجر كنق', 'وابر', 'whopper'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'bk-double-whopper',
@@ -2825,6 +2846,7 @@ export const foodItems: FoodItem[] = [
     fat: 58,
     fiber: 2,
     keywords: ['burger king', 'bk', 'برجر كنق', 'وابر', 'whopper'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'bk-chicken-royale',
@@ -2839,6 +2861,7 @@ export const foodItems: FoodItem[] = [
     fat: 33,
     fiber: 2,
     keywords: ['burger king', 'bk', 'برجر كنق', 'royale'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'bk-fries',
@@ -2853,6 +2876,7 @@ export const foodItems: FoodItem[] = [
     fat: 19,
     fiber: 4,
     keywords: ['burger king', 'bk', 'برجر كنق'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- كنتاكي (KFC) ---
@@ -2868,6 +2892,7 @@ export const foodItems: FoodItem[] = [
     carbs: 9,
     fat: 19,
     keywords: ['kfc', 'كنتاكي', 'دجاج مقرمش'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'kfc-zinger',
@@ -2882,6 +2907,7 @@ export const foodItems: FoodItem[] = [
     fat: 24,
     fiber: 2,
     keywords: ['kfc', 'كنتاكي', 'زنجر', 'zinger'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'kfc-twister',
@@ -2896,6 +2922,7 @@ export const foodItems: FoodItem[] = [
     fat: 25,
     fiber: 2,
     keywords: ['kfc', 'كنتاكي', 'تويستر', 'twister'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'kfc-fries',
@@ -2910,6 +2937,7 @@ export const foodItems: FoodItem[] = [
     fat: 15,
     fiber: 4,
     keywords: ['kfc', 'كنتاكي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- تكساس تشيكن ---
@@ -2925,6 +2953,7 @@ export const foodItems: FoodItem[] = [
     carbs: 12,
     fat: 19,
     keywords: ['texas chicken', 'texas', 'تكساس'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'texas-tenders-3',
@@ -2938,6 +2967,7 @@ export const foodItems: FoodItem[] = [
     carbs: 20,
     fat: 19,
     keywords: ['texas chicken', 'texas', 'تكساس', 'tenders'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'texas-chicken-burger',
@@ -2952,6 +2982,7 @@ export const foodItems: FoodItem[] = [
     fat: 26,
     fiber: 2,
     keywords: ['texas chicken', 'texas', 'تكساس'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'texas-biscuit',
@@ -2965,6 +2996,7 @@ export const foodItems: FoodItem[] = [
     carbs: 26,
     fat: 10,
     keywords: ['texas chicken', 'texas', 'تكساس', 'biscuit'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- الطازج ---
@@ -2980,6 +3012,7 @@ export const foodItems: FoodItem[] = [
     carbs: 2,
     fat: 34,
     keywords: ['al tazaj', 'tazaj', 'الطازج', 'طازج', 'دجاج مشوي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'tazaj-quarter-grilled-chicken',
@@ -2993,6 +3026,7 @@ export const foodItems: FoodItem[] = [
     carbs: 1,
     fat: 18,
     keywords: ['al tazaj', 'tazaj', 'الطازج', 'طازج'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'tazaj-chicken-sandwich',
@@ -3007,6 +3041,7 @@ export const foodItems: FoodItem[] = [
     fat: 18,
     fiber: 2,
     keywords: ['al tazaj', 'tazaj', 'الطازج', 'طازج'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'tazaj-garlic-sauce',
@@ -3020,6 +3055,7 @@ export const foodItems: FoodItem[] = [
     carbs: 3,
     fat: 18,
     keywords: ['al tazaj', 'tazaj', 'الطازج', 'طازج'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- ماما نورة ---
@@ -3036,6 +3072,7 @@ export const foodItems: FoodItem[] = [
     fat: 21,
     fiber: 2,
     keywords: ['mama noura', 'نورة', 'ماما نوره'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'mamanoura-meat-shawarma',
@@ -3050,6 +3087,7 @@ export const foodItems: FoodItem[] = [
     fat: 27,
     fiber: 2,
     keywords: ['mama noura', 'نورة', 'ماما نوره'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'mamanoura-shish-tawook',
@@ -3064,6 +3102,7 @@ export const foodItems: FoodItem[] = [
     fat: 22,
     fiber: 2,
     keywords: ['mama noura', 'نورة', 'ماما نوره', 'طاووق'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'mamanoura-kabab',
@@ -3078,6 +3117,7 @@ export const foodItems: FoodItem[] = [
     fat: 30,
     fiber: 2,
     keywords: ['mama noura', 'نورة', 'ماما نوره', 'كباب'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- شاورمر ---
@@ -3094,6 +3134,7 @@ export const foodItems: FoodItem[] = [
     fat: 22,
     fiber: 2,
     keywords: ['shawarmer', 'شورمر'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'shawarmer-meat',
@@ -3108,6 +3149,7 @@ export const foodItems: FoodItem[] = [
     fat: 28,
     fiber: 2,
     keywords: ['shawarmer', 'شورمر'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'shawarmer-mix-plate',
@@ -3122,6 +3164,7 @@ export const foodItems: FoodItem[] = [
     fat: 34,
     fiber: 3,
     keywords: ['shawarmer', 'شورمر'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'shawarmer-fries',
@@ -3136,6 +3179,7 @@ export const foodItems: FoodItem[] = [
     fat: 16,
     fiber: 4,
     keywords: ['shawarmer', 'شورمر'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- بيتزا هت ---
@@ -3152,6 +3196,7 @@ export const foodItems: FoodItem[] = [
     fat: 12,
     fiber: 2,
     keywords: ['pizza hut', 'بيتزا هت', 'بيتزاهت'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'pizzahut-supreme-slice',
@@ -3166,6 +3211,7 @@ export const foodItems: FoodItem[] = [
     fat: 13,
     fiber: 2,
     keywords: ['pizza hut', 'بيتزا هت', 'بيتزاهت'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'pizzahut-wings-4',
@@ -3179,6 +3225,7 @@ export const foodItems: FoodItem[] = [
     carbs: 8,
     fat: 22,
     keywords: ['pizza hut', 'بيتزا هت', 'بيتزاهت', 'wings'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'pizzahut-garlic-bread',
@@ -3193,6 +3240,7 @@ export const foodItems: FoodItem[] = [
     fat: 11,
     fiber: 2,
     keywords: ['pizza hut', 'بيتزا هت', 'بيتزاهت'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- دومينوز ---
@@ -3209,6 +3257,7 @@ export const foodItems: FoodItem[] = [
     fat: 9,
     fiber: 2,
     keywords: ['dominos', 'domino', 'دومينوز', 'دومينو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'dominos-chicken-slice',
@@ -3223,6 +3272,7 @@ export const foodItems: FoodItem[] = [
     fat: 10,
     fiber: 2,
     keywords: ['dominos', 'domino', 'دومينوز', 'دومينو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'dominos-garlic-twist',
@@ -3237,6 +3287,7 @@ export const foodItems: FoodItem[] = [
     fat: 9,
     fiber: 2,
     keywords: ['dominos', 'domino', 'دومينوز', 'دومينو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'dominos-wings',
@@ -3250,6 +3301,7 @@ export const foodItems: FoodItem[] = [
     carbs: 10,
     fat: 20,
     keywords: ['dominos', 'domino', 'دومينوز', 'دومينو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- بابا جونز ---
@@ -3266,6 +3318,7 @@ export const foodItems: FoodItem[] = [
     fat: 10,
     fiber: 2,
     keywords: ['papa johns', 'papa john', 'بابا جونز'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'papajohns-veggie-slice',
@@ -3280,6 +3333,7 @@ export const foodItems: FoodItem[] = [
     fat: 9,
     fiber: 3,
     keywords: ['papa johns', 'papa john', 'بابا جونز'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'papajohns-cheese-sticks',
@@ -3294,6 +3348,7 @@ export const foodItems: FoodItem[] = [
     fat: 13,
     fiber: 2,
     keywords: ['papa johns', 'papa john', 'بابا جونز'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- صب واي ---
@@ -3310,6 +3365,7 @@ export const foodItems: FoodItem[] = [
     fat: 7,
     fiber: 5,
     keywords: ['subway', 'صب واي', 'صبواي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'subway-turkey-6',
@@ -3324,6 +3380,7 @@ export const foodItems: FoodItem[] = [
     fat: 4,
     fiber: 5,
     keywords: ['subway', 'صب واي', 'صبواي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'subway-tuna-6',
@@ -3338,6 +3395,7 @@ export const foodItems: FoodItem[] = [
     fat: 25,
     fiber: 5,
     keywords: ['subway', 'صب واي', 'صبواي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'subway-cookie',
@@ -3351,6 +3409,7 @@ export const foodItems: FoodItem[] = [
     carbs: 30,
     fat: 11,
     keywords: ['subway', 'صب واي', 'صبواي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- فايف غايز ---
@@ -3367,6 +3426,7 @@ export const foodItems: FoodItem[] = [
     fat: 55,
     fiber: 2,
     keywords: ['five guys', 'فايف غايز', '5 guys'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'fiveguys-little-hamburger',
@@ -3381,6 +3441,7 @@ export const foodItems: FoodItem[] = [
     fat: 26,
     fiber: 2,
     keywords: ['five guys', 'فايف غايز', '5 guys'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'fiveguys-fries',
@@ -3394,7 +3455,7 @@ export const foodItems: FoodItem[] = [
     carbs: 110,
     fat: 49,
     fiber: 11,
-    notesAr: 'حصة كبيرة جدًّا مقارنة بالمطاعم الأخرى',
+    notesAr: 'تقديري · حصة كبيرة جدًّا مقارنة بالمطاعم الأخرى',
     keywords: ['five guys', 'فايف غايز', '5 guys'],
   },
   {
@@ -3409,6 +3470,7 @@ export const foodItems: FoodItem[] = [
     carbs: 40,
     fat: 35,
     keywords: ['five guys', 'فايف غايز', '5 guys'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- شيك شاك ---
@@ -3425,6 +3487,7 @@ export const foodItems: FoodItem[] = [
     fat: 33,
     fiber: 2,
     keywords: ['shake shack', 'شيك شاك'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'shakeshack-double',
@@ -3439,6 +3502,7 @@ export const foodItems: FoodItem[] = [
     fat: 50,
     fiber: 2,
     keywords: ['shake shack', 'شيك شاك'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'shakeshack-chicken',
@@ -3453,6 +3517,7 @@ export const foodItems: FoodItem[] = [
     fat: 27,
     fiber: 2,
     keywords: ['shake shack', 'شيك شاك'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'shakeshack-fries',
@@ -3467,6 +3532,7 @@ export const foodItems: FoodItem[] = [
     fat: 20,
     fiber: 4,
     keywords: ['shake shack', 'شيك شاك'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'shakeshack-shake',
@@ -3480,6 +3546,7 @@ export const foodItems: FoodItem[] = [
     carbs: 88,
     fat: 23,
     keywords: ['shake shack', 'شيك شاك'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- ستاربكس ---
@@ -3494,7 +3561,7 @@ export const foodItems: FoodItem[] = [
     protein: 12,
     carbs: 19,
     fat: 7,
-    notesAr: 'بحليب كامل الدسم',
+    notesAr: 'تقديري · بحليب كامل الدسم',
     keywords: ['starbucks', 'ستاربكس', 'قهوة', 'لاتيه'],
     sizes: [
       { id: 'starbucks-latte-s', labelAr: 'صغير', labelEn: 'Tall', servingLabelAr: 'صغير (240مل)', servingGrams: 240, calories: 130, protein: 8, carbs: 13, fat: 5 },
@@ -3519,6 +3586,7 @@ export const foodItems: FoodItem[] = [
       { id: 'starbucks-cm-m', labelAr: 'وسط', labelEn: 'Grande', servingLabelAr: 'وسط (350مل)', servingGrams: 350, calories: 250, protein: 10, carbs: 35, fat: 7 },
       { id: 'starbucks-cm-l', labelAr: 'كبير', labelEn: 'Venti', servingLabelAr: 'كبير (470مل)', servingGrams: 470, calories: 320, protein: 13, carbs: 47, fat: 9 },
     ],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'starbucks-mocha',
@@ -3532,6 +3600,7 @@ export const foodItems: FoodItem[] = [
     carbs: 42,
     fat: 9,
     keywords: ['starbucks', 'ستاربكس', 'موكا'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'starbucks-americano',
@@ -3550,6 +3619,7 @@ export const foodItems: FoodItem[] = [
       { id: 'starbucks-am-m', labelAr: 'وسط', labelEn: 'Grande', servingLabelAr: 'وسط (350مل)', servingGrams: 350, calories: 15, protein: 1, carbs: 3, fat: 0 },
       { id: 'starbucks-am-l', labelAr: 'كبير', labelEn: 'Venti', servingLabelAr: 'كبير (470مل)', servingGrams: 470, calories: 25, protein: 1, carbs: 4, fat: 0 },
     ],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'starbucks-caramel-frappuccino',
@@ -3563,6 +3633,7 @@ export const foodItems: FoodItem[] = [
     carbs: 55,
     fat: 15,
     keywords: ['starbucks', 'ستاربكس', 'فرابتشينو'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- دانكن ---
@@ -3578,6 +3649,7 @@ export const foodItems: FoodItem[] = [
     carbs: 31,
     fat: 14,
     keywords: ['dunkin', 'dunkin donuts', 'دانكن', 'دونات'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'dunkin-chocolate-donut',
@@ -3591,6 +3663,7 @@ export const foodItems: FoodItem[] = [
     carbs: 34,
     fat: 16,
     keywords: ['dunkin', 'dunkin donuts', 'دانكن', 'دونات'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'dunkin-munchkins-5',
@@ -3604,6 +3677,7 @@ export const foodItems: FoodItem[] = [
     carbs: 38,
     fat: 15,
     keywords: ['dunkin', 'dunkin donuts', 'دانكن'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'dunkin-latte',
@@ -3617,6 +3691,7 @@ export const foodItems: FoodItem[] = [
     carbs: 24,
     fat: 8,
     keywords: ['dunkin', 'dunkin donuts', 'دانكن'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- كرسبي كريم ---
@@ -3632,6 +3707,7 @@ export const foodItems: FoodItem[] = [
     carbs: 22,
     fat: 11,
     keywords: ['krispy kreme', 'كرسبي كريم', 'كريسبي', 'دونات'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'krispykreme-chocolate-filled',
@@ -3645,6 +3721,7 @@ export const foodItems: FoodItem[] = [
     carbs: 36,
     fat: 18,
     keywords: ['krispy kreme', 'كرسبي كريم', 'كريسبي', 'دونات'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'krispykreme-sugar-donut',
@@ -3658,6 +3735,7 @@ export const foodItems: FoodItem[] = [
     carbs: 28,
     fat: 12,
     keywords: ['krispy kreme', 'كرسبي كريم', 'كريسبي', 'دونات'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- باسكن روبنز ---
@@ -3673,6 +3751,7 @@ export const foodItems: FoodItem[] = [
     carbs: 31,
     fat: 14,
     keywords: ['baskin robbins', 'باسكن روبنز', 'بسكن', 'آيس كريم'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'baskin-double-scoop',
@@ -3686,6 +3765,7 @@ export const foodItems: FoodItem[] = [
     carbs: 62,
     fat: 28,
     keywords: ['baskin robbins', 'باسكن روبنز', 'بسكن', 'آيس كريم'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'baskin-milkshake',
@@ -3699,6 +3779,7 @@ export const foodItems: FoodItem[] = [
     carbs: 95,
     fat: 30,
     keywords: ['baskin robbins', 'باسكن روبنز', 'بسكن'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'baskin-sundae',
@@ -3712,6 +3793,7 @@ export const foodItems: FoodItem[] = [
     carbs: 80,
     fat: 28,
     keywords: ['baskin robbins', 'باسكن روبنز', 'بسكن'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- هارديز (Hardee's) ---
@@ -3727,6 +3809,7 @@ export const foodItems: FoodItem[] = [
     carbs: 50,
     fat: 40,
     keywords: ['hardees', "hardee's", 'هارديز', 'هارديس', 'famous star'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'hardees-thickburger',
@@ -3740,6 +3823,7 @@ export const foodItems: FoodItem[] = [
     carbs: 50,
     fat: 51,
     keywords: ['hardees', "hardee's", 'هارديز', 'هارديس', 'thickburger', 'ثيك برجر'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'hardees-charbroiled-chicken',
@@ -3753,6 +3837,7 @@ export const foodItems: FoodItem[] = [
     carbs: 42,
     fat: 26,
     keywords: ['hardees', "hardee's", 'هارديز', 'هارديس', 'chicken'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'hardees-curly-fries',
@@ -3766,6 +3851,7 @@ export const foodItems: FoodItem[] = [
     carbs: 50,
     fat: 21,
     keywords: ['hardees', "hardee's", 'هارديز', 'curly fries', 'كيرلي', 'بطاطس'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'hardees-chicken-tenders',
@@ -3779,6 +3865,7 @@ export const foodItems: FoodItem[] = [
     carbs: 22,
     fat: 19,
     keywords: ['hardees', "hardee's", 'هارديز', 'tenders', 'أصابع دجاج'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- ماسترو بيتزا (Maestro Pizza) ---
@@ -3794,6 +3881,7 @@ export const foodItems: FoodItem[] = [
     carbs: 33,
     fat: 10,
     keywords: ['maestro', 'ماسترو', 'ماسترو بيتزا', 'pizza', 'بيتزا'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'maestro-pepperoni-slice',
@@ -3807,6 +3895,7 @@ export const foodItems: FoodItem[] = [
     carbs: 33,
     fat: 13,
     keywords: ['maestro', 'ماسترو', 'ماسترو بيتزا', 'pepperoni', 'ببروني'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'maestro-chicken-ranch-slice',
@@ -3820,6 +3909,7 @@ export const foodItems: FoodItem[] = [
     carbs: 33,
     fat: 12,
     keywords: ['maestro', 'ماسترو', 'ماسترو بيتزا', 'chicken ranch', 'رانش'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'maestro-margherita-slice',
@@ -3833,6 +3923,7 @@ export const foodItems: FoodItem[] = [
     carbs: 32,
     fat: 9,
     keywords: ['maestro', 'ماسترو', 'ماسترو بيتزا', 'margherita', 'مارغريتا'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- برجرايزر (Burgerizzr) ---
@@ -3848,6 +3939,7 @@ export const foodItems: FoodItem[] = [
     carbs: 38,
     fat: 24,
     keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'classic', 'كلاسيك'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'burgerizzr-double',
@@ -3861,6 +3953,7 @@ export const foodItems: FoodItem[] = [
     carbs: 40,
     fat: 42,
     keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'double', 'دبل'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'burgerizzr-crispy-chicken',
@@ -3874,6 +3967,7 @@ export const foodItems: FoodItem[] = [
     carbs: 45,
     fat: 28,
     keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'crispy chicken', 'كرسبي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'burgerizzr-fries',
@@ -3887,6 +3981,7 @@ export const foodItems: FoodItem[] = [
     carbs: 45,
     fat: 18,
     keywords: ['burgerizzr', 'برجرايزر', 'برجرايزر', 'fries', 'بطاطس'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- كاريبو كوفي (Caribou Coffee) ---
@@ -3902,6 +3997,7 @@ export const foodItems: FoodItem[] = [
     carbs: 40,
     fat: 12,
     keywords: ['caribou', 'كاريبو', 'كاريبو كوفي', 'mocha', 'موكا'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'caribou-caramel-latte',
@@ -3915,6 +4011,7 @@ export const foodItems: FoodItem[] = [
     carbs: 35,
     fat: 8,
     keywords: ['caribou', 'كاريبو', 'كاريبو كوفي', 'caramel latte', 'كراميل'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'caribou-iced-caramel',
@@ -3928,6 +4025,7 @@ export const foodItems: FoodItem[] = [
     carbs: 45,
     fat: 9,
     keywords: ['caribou', 'كاريبو', 'كاريبو كوفي', 'iced', 'آيس'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'caribou-plain-latte',
@@ -3941,6 +4039,7 @@ export const foodItems: FoodItem[] = [
     carbs: 18,
     fat: 7,
     keywords: ['caribou', 'كاريبو', 'كاريبو كوفي', 'latte', 'لاتيه'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // --- الرومانسية (مندي/كبسة محلي) ---
@@ -3957,6 +4056,7 @@ export const foodItems: FoodItem[] = [
     fat: 30,
     fiber: 3,
     keywords: ['romansiah', 'الرومانسية', 'رومانسية', 'mandi', 'مندي'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'romansiah-lamb-mandi',
@@ -3971,6 +4071,7 @@ export const foodItems: FoodItem[] = [
     fat: 45,
     fiber: 3,
     keywords: ['romansiah', 'الرومانسية', 'رومانسية', 'mandi', 'مندي', 'لحم'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'romansiah-chicken-kabsa',
@@ -3985,6 +4086,7 @@ export const foodItems: FoodItem[] = [
     fat: 28,
     fiber: 3,
     keywords: ['romansiah', 'الرومانسية', 'رومانسية', 'kabsa', 'كبسة'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
   {
     id: 'romansiah-lamb-kabsa',
@@ -3999,6 +4101,7 @@ export const foodItems: FoodItem[] = [
     fat: 42,
     fiber: 3,
     keywords: ['romansiah', 'الرومانسية', 'رومانسية', 'kabsa', 'كبسة', 'لحم'],
+    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
   // ===== بقالة يومية: ألبان (علامات سعودية) =====
@@ -5721,6 +5824,15 @@ export const LOANWORD_SPELLINGS: readonly (readonly string[])[] = [
   // margherita — البيانات «مارغريتا»، و«مارجريتا» شائعة بالقدر نفسه.
   // قياس قبل الإضافة: «بيتزا مارجريتا» ⇒ **صفر**.
   ['مارغريتا', 'مارجريتا'],
+  // Baskin Robbins — البيانات «باسكن»، والياء شائعة في الكتابة اليومية.
+  // قياس قبل الإضافة [مهمة الصقل §5]: «باسكين» ⇒ **صفر**، و«باسكن» ⇒ ٤ أصناف.
+  ['باسكن', 'باسكين'],
+  // Five Guys — البيانات «فايف غايز»، والقاف الخليجية «قايز» شائعة.
+  // قياس قبل الإضافة: «فايف قايز» ⇒ **صفر**، و«فايف غايز» ⇒ ٤ أصناف.
+  // ⚠️ كلمة بعينها لا قاعدة حرف: التكافؤ لـ«غايز≡قايز» حصرًا — وقلب قاف/غين
+  // المعمَّم كارثة («قشطة» أصيلة ولا تُرى «غشطة»)، ويحرسه تأكيد مضاد مسمّى
+  // في run-food-coverage-proof.mjs.
+  ['غايز', 'قايز'],
 ]
 
 /**

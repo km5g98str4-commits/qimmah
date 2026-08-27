@@ -1,0 +1,19 @@
+{
+  "_readme": "سجلّ مصادر التغذية الرسمية للسلاسل — [مهمة الصقل §5]. مصدره docs/content/CHAIN-MENU-SOURCES.md §3. يقرؤه fetch-chain-evidence.mjs في CI (شبكة العدّاء مفتوحة بينما بيئة الوكلاء تحجب هذه المضيفين — مقيس CONNECT 403). render=true يلتقط الصفحة بعد تنفيذ JS لأن قوائم كثيرة تُرسم عميلًا. اللقطات دليل قراءة فعلية، لا مصدر استيراد آلي: الاستيراد يبقى موجة مُراجَعة تقرأ الدليل وتلتزم شرط القبول (ماكروز أربعة كاملة من المصدر).",
+  "sources": [
+    { "slug": "mcdonalds-sa", "chain": "ماكدونالدز السعودية", "url": "https://www.mcdonalds.com/sa/en-sa.html", "render": true, "note": "فهرس — صفحات المنتجات تحت /sa/en-sa/<city>/product/*.html" },
+    { "slug": "herfy-calculator", "chain": "هرفي", "url": "https://herfy.com/calculator/", "render": true, "note": "حاسبة التغذية الرسمية" },
+    { "slug": "subway-sa-nutrition", "chain": "صب واي", "url": "https://www.subway.com/ar-SA/MenuNutrition", "render": true, "note": "صفحة التغذية الرسمية للسوق السعودي" },
+    { "slug": "shawarmer-menu", "chain": "شاورمر", "url": "https://shawarmer.com/en/menu/83", "render": true, "note": "المنيو الرسمي بسعرات الأصناف" },
+    { "slug": "alromansiah", "chain": "الرومانسية", "url": "https://www.alromansiah.com/", "render": true, "note": "فهرس — المنيو الرسمي يعرض سعرات بتفويض SFDA" },
+    { "slug": "mamanoura-menu", "chain": "ماما نورة", "url": "https://mamanoura.my.taker.io/", "render": true, "note": "منصة الطلب الرسمية بسعرات الأصناف" },
+    { "slug": "maestro-help", "chain": "مايسترو", "url": "https://help.maestropizza.com/", "render": true, "note": "مركز المساعدة الرسمي — سعرات لكل سلايس" },
+    { "slug": "dominos-us-nutrition-pdf", "chain": "دومينوز (دليل US)", "url": "https://cache.dominos.com/olo/6_152_7/assets/build/market/US/_en/pdf/DominosNutritionGuide.pdf", "render": false, "note": "كامل الماكروز لسوق أمريكا — اعتماده للسوق السعودي قرار منتج معلّق" },
+    { "slug": "kudu", "chain": "كودو", "url": "https://kudu.com.sa/", "render": true, "note": "فهرس — السعرات في تطبيق كودو" },
+    { "slug": "pizzahut-sa", "chain": "بيتزا هت", "url": "https://www.pizzahut.sa/", "render": true, "note": "فهرس — لا PDF سعودي معروف" },
+    { "slug": "kfc-sa", "chain": "كنتاكي", "url": "https://www.kfc.com.sa/", "render": true, "note": "فهرس — دليل الإمارات الرسمي يُطلب من أصله لا من scribd" },
+    { "slug": "albaik", "chain": "البيك", "url": "https://albaik.com/", "render": true, "note": "توثيق غياب/وجود قسم تغذية رسمي — كل نتائج البحث مواقع معجبين" },
+    { "slug": "burgerizzr", "chain": "برجرايزر", "url": "https://burgerizzr.com/", "render": true, "note": "فهرس — لا مصدر تغذية معروف" },
+    { "slug": "papajohns-sa", "chain": "بابا جونز", "url": "https://papajohns.sa/", "render": true, "note": "فهرس — لم يُمسح مصدره بعد" }
+  ]
+}

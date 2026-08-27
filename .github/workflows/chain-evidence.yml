@@ -1,0 +1,75 @@
+# جلب أدلة قوائم السلاسل الرسمية في CI — [مهمة الصقل §5]
+#
+# ═══ لماذا في CI ═══
+# كل مضيفي مصادر التغذية الرسمية للسلاسل محجوبون في بيئة الوكلاء (CONNECT 403
+# مقيسة على 27 مضيفًا — docs/content/CHAIN-MENU-SOURCES.md §2)، بينما عدّاء
+# GitHub Actions شبكته مفتوحة (نفس منطق food-corpus.yml وvideo-verify.yml).
+# فالجلب يجري هنا: صفحة خام + صفحة بعد JS + لقطة شاشة لكل مصدر، وتُدفع الأدلة
+# إلى الفرع نفسه. **ليس مستوردًا آليًا** — الاستيراد إلى foodItems.ts يبقى موجة
+# مُراجَعة تقرأ الدليل وتلتزم شرط القبول (الماكروز الأربعة كاملة من المصدر، §5).
+#
+# الإطلاق: دفع تعديل على سجلّ المصادر (قصديّ كالزرّ — تكامل الوكيل لا يملك
+# actions:write)، ولا حلقة: دفعة الأدلة لا تلمس السجلّ.
+name: Chain menu evidence (official sources)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/qimmah-final-sovereign-convergence-001
+    paths:
+      - scripts/food-production/chain-evidence-sources.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: chain-evidence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium for rendered captures
+        run: npx playwright install --with-deps chromium
+
+      - name: Fetch official chain sources (raw + rendered + screenshot)
+        run: node scripts/food-production/fetch-chain-evidence.mjs
+
+      - name: Commit and push the evidence to this branch
+        run: |
+          git config user.name 'qimmah-chain-evidence'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/food-production/chain-evidence
+          if git diff --cached --quiet; then
+            echo 'no evidence change - nothing to push.'
+            exit 0
+          fi
+          {
+            echo "data(food): [مهمة الصقل §5] أدلة المصادر الرسمية لقوائم السلاسل"
+            echo ""
+            echo "جلب CI (شبكة مفتوحة) لسجل chain-evidence-sources.json: خام + بعد JS +"
+            echo "لقطة لكل مصدر. دليل قراءة فعلية لموجة استيراد مراجعة - لا استيراد آلي."
+            echo ""
+            echo "Generated-by: .github/workflows/chain-evidence.yml"
+          } > /tmp/chain-commit-msg
+          git commit -F /tmp/chain-commit-msg
+          for i in 1 2 3; do
+            git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            git pull --rebase origin "${{ github.ref_name }}"
+          done
+          git push origin "HEAD:${{ github.ref_name }}"
