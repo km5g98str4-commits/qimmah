@@ -80,6 +80,7 @@ export const usersReadyFixture: UsersSnapshot = {
 }
 
 export const activityReadyFixture: ActivitySnapshot = {
+  signedInToday: ready(63, FIXTURE_AS_OF),
   signedIn7d: ready(418, FIXTURE_AS_OF),
   signedIn30d: ready(769, FIXTURE_AS_OF),
   dormant30d: ready(515, FIXTURE_AS_OF),
@@ -197,6 +198,7 @@ function allUsers(v: <T>() => MetricValue<T>): UsersSnapshot {
 }
 function allActivity(v: <T>() => MetricValue<T>): ActivitySnapshot {
   return {
+    signedInToday: v(),
     signedIn7d: v(),
     signedIn30d: v(),
     dormant30d: v(),
@@ -314,7 +316,16 @@ export const userDetailFixture: AdminUserDetail = {
     lastOrderId: ready('SLA-10241', FIXTURE_AS_OF),
     lastPurchaseAt: ready('2026-08-01T09:11:40.000Z', FIXTURE_AS_OF),
     accessRevoked: ready(false, FIXTURE_AS_OF),
+    // [ADMIN-CONV] سجلّ مملوء كي تُرسَم الحالة الممتلئة ويُصمَّم عليها.
+    codeHistory: ready(
+      [{ label: 'ramadan', redeemedAt: '2026-08-02T10:00:00.000Z', durationDays: 30 }],
+      FIXTURE_AS_OF,
+    ),
   },
+  foodSubmissions: ready(
+    [{ id: 'fixture-food-1', status: 'pending', productName: 'تمر سكري — عبوة ٥٠٠غ', submittedAt: '2026-08-10T08:00:00.000Z' }],
+    FIXTURE_AS_OF,
+  ),
 }
 
 // ───────────────────────────── لقطات كاملة ─────────────────────────────
@@ -379,6 +390,7 @@ export const snapshotPartial: ExecutiveSnapshot = {
   platform: platformFixture,
   users: usersReadyFixture,
   activity: {
+    signedInToday: ready(41, FIXTURE_AS_OF),
     signedIn7d: ready(418, FIXTURE_AS_OF),
     signedIn30d: ready(769, FIXTURE_AS_OF),
     dormant30d: unavailable('NEEDS_BACKEND'),
@@ -415,6 +427,7 @@ export const snapshotToday: ExecutiveSnapshot = {
   platform: platformFixture,
   users: allUsers(gapV),
   activity: {
+    signedInToday: unavailable('NEEDS_BACKEND'),
     signedIn7d: unavailable('NEEDS_BACKEND'),
     signedIn30d: unavailable('NEEDS_BACKEND'),
     dormant30d: unavailable('NEEDS_BACKEND'),

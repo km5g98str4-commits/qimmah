@@ -186,7 +186,8 @@ await badDb.close()
 // عشرة ملفات كُتبت قبل أن يوجد الوسم. وفرضُ تعديلٍ على عشرة ملفات ليست ملك
 // هذه الحارة ليس إصلاحًا بل توسيع نطاق. والعقد الحقيقي أصلًا ليس الوسم:
 // **الوثيقة التي يقرأها المؤسس قبل أن يطبّق**. فالرباط عليها.
-const PENDING_PREFIXES = ['20260806', '20260809', '20260812', '20260816', '20260822', '20260824']
+// [ADMIN-CONV] زادت بادئة 20260826 — هجرات الحملات/signedInToday/صفحة الحساب/المعلّق.
+const PENDING_PREFIXES = ['20260806', '20260809', '20260812', '20260816', '20260822', '20260824', '20260826']
 const pending = files.filter((f) => PENDING_PREFIXES.some((p) => f.startsWith(p)))
 const APPLY_DOC = 'docs/execution/qimmah-sovereign-closure/MIGRATIONS-APPLY-PENDING.md'
 const { readFileSync, existsSync } = await import('node:fs')

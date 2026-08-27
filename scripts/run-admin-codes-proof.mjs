@@ -93,6 +93,11 @@ const NEW_FNS = [
   'founder_revoke_access',
   'founder_code_page',
   'generate_access_code',
+  // [ADMIN-CONV] الدفعة والحملات والمعلّق — ونواة الإصدار الداخلية.
+  'founder_issue_code_batch',
+  'founder_code_batches',
+  'founder_pending_orders',
+  'issue_code_core',
 ]
 const shape = await db.query(
   `select p.proname, p.prosecdef, coalesce(array_to_string(p.proconfig, ','), '') as cfg
@@ -100,7 +105,7 @@ const shape = await db.query(
     where n.nspname in ('public','private') and p.proname = any($1)`,
   [NEW_FNS],
 )
-check(`الدوال الست أُنشئت (${shape.rows.length})`, shape.rows.length === NEW_FNS.length, shape.rows.map((r) => r.proname).join(' '))
+check(`الدوال العشر أُنشئت (${shape.rows.length})`, shape.rows.length === NEW_FNS.length, shape.rows.map((r) => r.proname).join(' '))
 const lax = shape.rows.filter((r) => !r.prosecdef || !/(^|,)search_path=""(,|$)/.test(r.cfg))
 check('كل دالة جديدة SECURITY DEFINER بمسار مفرَّغ حرفيًا', lax.length === 0, lax.map((r) => r.proname).join(' '))
 
@@ -124,6 +129,8 @@ for (const fn of NEW_FNS.filter((f) => f.startsWith('founder_'))) {
 }
 // المولّد داخلي بحت — لا يناديه عميل بأي دور.
 check('المولّد ليس لأي دور عميل', !grantOf('generate_access_code').includes('authenticated') && !grantOf('generate_access_code').includes('anon'))
+// [ADMIN-CONV] نواة الإصدار داخلية بحتة — موضع الإصدار الوحيد لا يبلغه عميل.
+check('نواة الإصدار ليست لأي دور عميل', !grantOf('issue_code_core').includes('authenticated') && !grantOf('issue_code_core').includes('anon'))
 /**
  * وكل دالة `founder_*` تحمل البوّابة في **جسمها** لا في المنح وحده.
  *
@@ -136,11 +143,11 @@ check('المولّد ليس لأي دور عميل', !grantOf('generate_access_
  * لا تُذكر في أيّهما **تُسقط الفحص** — فلا تُضاف قدرةٌ بلا قرار عن دورها.
  */
 const bodies = await db.query(`select proname, prosrc from pg_proc where proname like 'founder\\_%'`)
-/** قراءات: يبلغها المؤسس **والدعم**. */
+/** قراءات: يبلغها المؤسس **والدعم**. [ADMIN-CONV] زادت الحملات والمعلّق. */
 const ADMIN_READS = [
   'founder_executive_snapshot', 'founder_user_page', 'founder_user_detail', 'founder_code_page',
-  'founder_failed_orders', 'founder_code_redemptions', 'founder_email_health',
-  'founder_grants_by_source', 'founder_food_submissions',
+  'founder_failed_orders', 'founder_pending_orders', 'founder_code_redemptions', 'founder_code_batches',
+  'founder_email_health', 'founder_grants_by_source', 'founder_food_submissions',
 ]
 /** أفعال لا رجعة فيها: للمؤسس وحده. */
 const FOUNDER_WRITES = [
@@ -188,6 +195,10 @@ const CALLS = [
   ['تفصيل الحساب', (id) => db.query(`select public.founder_user_detail($1)`, [id])],
   ['قائمة الأكواد', () => db.query(`select * from public.founder_code_page('',1,10)`)],
   ['إصدار كود', () => db.query(`select public.founder_issue_access_code('محاولة')`)],
+  // [ADMIN-CONV] الدفعة فعل والحملات قراءة — وكلاهما ممنوع على غير الإداري.
+  ['إصدار دفعة', () => db.query(`select public.founder_issue_code_batch('محاولة')`)],
+  ['حملات الأكواد', () => db.query(`select * from public.founder_code_batches()`)],
+  ['طلبات معلّقة', () => db.query(`select * from public.founder_pending_orders(10)`)],
   ['تعطيل كود', () => db.query(`select public.founder_set_code_enabled(gen_random_uuid(), false, 'محاولة')`)],
   ['سحب وصول', (id) => db.query(`select public.founder_revoke_access($1,'محاولة')`, [id])],
 ]
@@ -222,9 +233,20 @@ check('حالة الاستحقاق مشتقّة لا مخزَّنة', detail.ent
 check('أثر الشراء مربوط بالبصمة', detail.commerce.purchases === 1 && detail.commerce.lastOrderId === 'ORDER-77')
 check('التخصيص المجهول يبقى unknown لا incomplete', detail.onboarding === 'unknown')
 // ⚠️ **ولا حقل صحّي واحد** — ولا حتى عدّاد أحداث القياس.
+// [ADMIN-CONV] كتلة `foodSubmissions` تُستبعد من المسح **باسمها** لا بصمت:
+// اسم مفتاحها يحمل «food» وهي بلاغات كتالوج أرسلها المستخدم للمشغّل بنفسه،
+// لا بيانات تغذية شخصية. ويُشدّد عليها فحص مستقلّ أدناه: حقولها الأربعة فقط.
 const SENSITIVE = ['weight', 'height', 'injur', 'medicat', 'allerg', 'bodyMetrics', 'measurement', 'food', 'workout']
-const detailText = JSON.stringify(detail).toLowerCase()
-check(`التفصيل بلا أي حقل صحّي (${SENSITIVE.length} كلمات)`, SENSITIVE.every((k) => !detailText.includes(k.toLowerCase())))
+const { foodSubmissions: foodBlock, ...detailNoFood } = detail
+const detailText = JSON.stringify(detailNoFood).toLowerCase()
+check(`التفصيل بلا أي حقل صحّي خارج بلاغات الطعام (${SENSITIVE.length} كلمات)`, SENSITIVE.every((k) => !detailText.includes(k.toLowerCase())))
+const FOOD_KEYS_ALLOWED = ['id', 'status', 'product_name', 'submitted_at']
+check('بلاغات الطعام في التفصيل مصفوفة', Array.isArray(foodBlock))
+check('بلاغات الطعام تحمل الحقول الأربعة المعلَنة فقط — لا evidence_*',
+  (foodBlock ?? []).every((r) => Object.keys(r).every((k) => FOOD_KEYS_ALLOWED.includes(k))))
+// [ADMIN-CONV] سجلّ الأكواد موجود ومصفوفةٌ فارغة **جواب مقيس** قبل أي استهلاك.
+check('سجلّ الأكواد مصفوفة فارغة قبل الاستهلاك — صفر مقيس لا غياب',
+  Array.isArray(detail.commerce.codeHistory) && detail.commerce.codeHistory.length === 0)
 await mustFail('حساب غير موجود يُرفع استثناءً لا كائنًا فارغًا',
   () => db.query(`select public.founder_user_detail('00000000-0000-0000-0000-000000000000'::uuid)`), 'no such account')
 
@@ -246,10 +268,48 @@ await mustFail('كودٌ يكتبه المؤسس بيده لم يعد يُصدَ
 await mustFail('  ولا حتى كودٌ يدويّ طويل — الطول ليس عشوائية',
   () => db.query(`select public.founder_issue_access_code('سبب',null,14,1,null,'QIMMAHRAMADAN25')`), 'code_must_be_generated')
 
+// ٤-ب-٢) [ADMIN-CONV] الإصدار الدفعيّ — حملة = وسم فوق أكواد فردية
+const batch = (await db.query(`select public.founder_issue_code_batch('حملة الإثبات الدفعية','batch-proof',7,1,null,5) as j`)).rows[0].j
+check('الدفعة تعيد ٥ أكواد خام مرّة واحدة', Array.isArray(batch.codes) && batch.codes.length === 5)
+check('أكواد الدفعة متمايزة كلّها', new Set(batch.codes).size === 5)
+check('كل كود ١٦ رمزًا من أبجدية العقد', batch.codes.every((c) => /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{16}$/.test(c)))
+check('الدفعة تحمل وسمها وعدّها', batch.label === 'batch-proof' && batch.count === 5)
+await asRole(db, null)
+const batchStored = (await db.query(`select code_hash from public.access_codes where label = 'batch-proof'`)).rows
+check('٥ صفوف زُرعت تحت الوسم', batchStored.length === 5)
+// ⚠️ الخام لا يُخزَّن: لا بصمة تساوي كودًا ولا تحتويه.
+check('لا كود خام مخزَّن — البصمات وحدها', batchStored.every((s) => batch.codes.every((c) => s.code_hash !== c && !s.code_hash.includes(c))))
+await asRole(db, 'authenticated', founderId)
+// الحدود مسمّاة: تجاوزها هو **محاكاة الالتفاف المنفَّذة** لهذا الشدّ — من ينزع
+// السقف من الهجرة يُسقط هذين الفحصين باسميهما («لم يُرفع أي استثناء»).
+await mustFail('دفعة صفر تُرفض باسمها', () => db.query(`select public.founder_issue_code_batch('سبب','x',7,1,null,0)`), 'batch_count_out_of_range')
+await mustFail('دفعة ٥٠١ تُرفض باسمها', () => db.query(`select public.founder_issue_code_batch('سبب','x',7,1,null,501)`), 'batch_count_out_of_range')
+await mustFail('دفعة بلا سبب تُرفض', () => db.query(`select public.founder_issue_code_batch('')`), 'reason required')
+
+// ٤-ب-٣) [ADMIN-CONV] الحملات مجمّعة بالوسم
+const batchesView = (await db.query(`select * from public.founder_code_batches()`)).rows
+const proofBatch = batchesView.find((b) => b.label === 'batch-proof')
+check('عرض الحملات يحمل صفّ الوسم', Boolean(proofBatch))
+check('الحملة: صادر ٥ · متبقٍ ٥ · معطَّل ٠',
+  Number(proofBatch.codes_issued) === 5 && Number(proofBatch.codes_remaining) === 5 && Number(proofBatch.codes_disabled) === 0)
+// تعطيل كود واحد من الحملة يقلب عدّاديها — الحالة مشتقّة لا مخزَّنة.
+await asRole(db, null)
+const batchCodeId = (await db.query(`select id from public.access_codes where label = 'batch-proof' limit 1`)).rows[0].id
+await asRole(db, 'authenticated', founderId)
+await db.query(`select public.founder_set_code_enabled($1, false, 'إيقاف كود من الحملة')`, [batchCodeId])
+const afterBatchDisable = (await db.query(`select * from public.founder_code_batches()`)).rows.find((b) => b.label === 'batch-proof')
+check('بعد التعطيل: متبقٍ ٤ · معطَّل ١',
+  Number(afterBatchDisable.codes_remaining) === 4 && Number(afterBatchDisable.codes_disabled) === 1)
+
 // ٤-ج) القائمة بحالاتها الأربع
+// [ADMIN-CONV] القائمة الآن ٦: المفرد + دفعة الخمسة. الكود المفرد يُلتقط بوسمه.
 const page = (await db.query(`select * from public.founder_code_page('',1,50)`)).rows
-check('القائمة تعيد الكود الصادر', page.length === 1 && page[0].status === 'issued')
-check('القائمة لا تحمل بصمة ولا كودًا خامًا', !Object.keys(page[0]).some((k) => /hash|code$/.test(k)) && !JSON.stringify(page).includes(issued.code))
+check('القائمة تعيد الأكواد الستة والمفرد صادر',
+  page.length === 6 && page.some((r) => r.label === 'proof-label' && r.status === 'issued'))
+check('القائمة لا تحمل بصمة ولا كودًا خامًا — ولا كود دفعة',
+  !Object.keys(page[0]).some((k) => /hash|code$/.test(k))
+    && !JSON.stringify(page).includes(issued.code)
+    && batch.codes.every((c) => !JSON.stringify(page).includes(c)))
 // الاسترداد يقلب الحالة إلى «استُرد» حين تُستنفد الاستخدامات.
 await asRole(db, 'authenticated', founderId)
 const single = (await db.query(`select public.founder_issue_access_code('كود لمرّة','once',7,1) as j`)).rows[0].j
@@ -270,6 +330,33 @@ check('الاسترداد نفسه نجح — لا يُبتلع فشلٌ يُق�
 await asRole(db, 'authenticated', founderId)
 const afterRedeem = (await db.query(`select * from public.founder_code_page('once',1,10)`)).rows[0]
 check('كود استُنفد يصير «استُرد»', afterRedeem.status === 'redeemed', afterRedeem.status)
+
+// ٤-ج-٢) [ADMIN-CONV] «من استخدم الكود» — سجلّ لا عدّاد
+const redemptionRows = (await db.query(`select * from public.founder_code_redemptions($1)`, [single.id])).rows
+check('سجلّ المستبدلين يحمل صفًّا واحدًا', redemptionRows.length === 1)
+check('الصفّ يحمل معرّف المستهلك ووقته', redemptionRows[0].user_id === normalId && Boolean(redemptionRows[0].redeemed_at))
+check('البريد مُقنَّع في SQL', String(redemptionRows[0].masked_email ?? '').includes('***@'))
+check('لا بريد كامل في سجلّ المستبدلين', !JSON.stringify(redemptionRows).includes('normal@qimmah.test'))
+
+// ٤-ج-٣) [ADMIN-CONV] صفحة الحساب بعد الاستهلاك والبلاغ — العدّاد صار أسماءً
+await asRole(db, 'authenticated', normalId)
+const foodOut = (await db.query(
+  `select public.submit_missing_food('حليب المراعي كامل الدسم','المراعي',null,'كوب ٢٥٠ مل',150,8,12,8,'من الملصق','ar') as j`,
+)).rows[0].j
+check('بلاغ الطعام انضاف للطابور', (typeof foodOut === 'string' ? JSON.parse(foodOut) : foodOut).outcome === 'queued')
+await asRole(db, 'authenticated', founderId)
+const detail2 = (await db.query(`select public.founder_user_detail($1) as j`, [normalId])).rows[0].j
+check('سجلّ الأكواد يحمل استهلاك «once»',
+  Array.isArray(detail2.commerce.codeHistory) && detail2.commerce.codeHistory.length === 1
+    && detail2.commerce.codeHistory[0].label === 'once' && Boolean(detail2.commerce.codeHistory[0].redeemed_at))
+check('سجلّ الأكواد يحمل المدّة لا البصمة',
+  detail2.commerce.codeHistory[0].duration_days === 7 && !('code_hash' in detail2.commerce.codeHistory[0]))
+check('بلاغات الطعام في الصفحة: البلاغ ظهر بحالته',
+  Array.isArray(detail2.foodSubmissions) && detail2.foodSubmissions.length === 1
+    && detail2.foodSubmissions[0].status === 'pending'
+    && detail2.foodSubmissions[0].product_name === 'حليب المراعي كامل الدسم')
+check('بلاغ الصفحة بلا evidence_* — الحقول الأربعة فقط',
+  detail2.foodSubmissions.every((r) => Object.keys(r).every((k) => ['id', 'status', 'product_name', 'submitted_at'].includes(k))))
 // التعطيل يقلب الحالة ولا يحذف الصفّ.
 await db.query(`select public.founder_set_code_enabled($1, false, 'إيقاف الحملة')`, [issued.id])
 const afterDisable = (await db.query(`select * from public.founder_code_page('proof-label',1,10)`)).rows[0]
@@ -395,6 +482,19 @@ check(
   'بلا البوّابة: المستخدم العادي يُصدر كودًا — فمنع الكتابة مصدره البوّابة',
   Boolean(ungatedWrite) && typeof ungatedWrite.code === 'string',
   ungatedWrite?.error ? `منع لسبب آخر: ${String(ungatedWrite.error).slice(0, 120)}` : '',
+)
+// ⚔️ [ADMIN-CONV] ونفس الهجوم المنفَّذ على الدفعة: نزع `require_founder`
+// يجعل مستخدمًا عاديًا يُصدر حملة كاملة — فمنعها في البيئة السليمة حارسٌ لا صدفة.
+let ungatedBatch = null
+try {
+  ungatedBatch = (await ungatedDb.query(`select public.founder_issue_code_batch('counter','x',7,1,null,2) as j`)).rows[0].j
+} catch (e) {
+  ungatedBatch = { error: String(e.message || e) }
+}
+check(
+  'بلا البوّابة: المستخدم العادي يُصدر دفعة — فمنع الدفعة مصدره البوّابة',
+  Boolean(ungatedBatch) && Array.isArray(ungatedBatch.codes) && ungatedBatch.codes.length === 2,
+  ungatedBatch?.error ? `منع لسبب آخر: ${String(ungatedBatch.error).slice(0, 120)}` : '',
 )
 await ungatedDb.close()
 

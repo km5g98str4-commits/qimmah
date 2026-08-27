@@ -1,12 +1,14 @@
 # الهجرات المنتظرة — الترتيب والأوامر والتحقّق
 
-> **حالة الحقيقة اليوم:** ثماني عشرة هجرة مكتوبة في المستودع و**لم تُطبَّق على أي
-> قاعدة إنتاج أو تجربة**. الاثنتا عشرة الأولى من موجات سابقة، والثلاث بعدها من
-> موجة `[ADMIN-R4]`، والثلاث الأخيرة من `[COMMISSIONING]`.
+> **حالة الحقيقة اليوم:** خمس وعشرون هجرة مكتوبة في المستودع و**لم تُطبَّق على أي
+> قاعدة إنتاج أو تجربة**. الاثنتا عشرة الأولى من موجات سابقة، وثلاث من موجة
+> `[ADMIN-R4]`، وستّ من `[COMMISSIONING]`، والأربع الأخيرة من `[ADMIN-CONV]`
+> (الحملات · `signedInToday` · اكتمال صفحة الحساب · الطلبات المعلّقة).
 >
-> **وقد طُبّقت الثماني عشرة كاملةً من قاعدة نظيفة على عنقود PostgreSQL 16
-> حقيقي** — صفر فشل — ويحرس ذلك `test:commissioning` في سير CI. فما ينقص هو
-> **تفويض التطبيق على قاعدة المؤسس**، لا صحّة الهجرات.
+> **وقد طُبّقت الحزمة كاملةً من قاعدة نظيفة** — صفر فشل — على PostgreSQL داخل
+> العملية عبر `test:migration-order` و`test:admin-db` و`test:admin-codes`
+> (والحزمة الأقدم على عنقود PostgreSQL 16 حقيقي عبر `test:commissioning`).
+> فما ينقص هو **تفويض التطبيق على قاعدة المؤسس**، لا صحّة الهجرات.
 >
 > ⚠️ **وهي هجرات تُطبَّق مرّة واحدة، لا تُعاد.** إعادة تشغيل الحزمة على قاعدة
 > طُبّقت عليها ترفع أخطاء (سياسات وقيود موجودة أصلًا). فخطأُ إعادةٍ **ليس**
@@ -34,7 +36,7 @@
 
 ---
 
-## ١. الترتيب — خمس عشرة خطوة، بهذا التسلسل حرفيًا
+## ١. الترتيب — خمس وعشرون خطوة، بهذا التسلسل حرفيًا
 
 | # | الملف | ماذا يفعل | يعتمد على |
 |---|---|---|---|
@@ -59,6 +61,14 @@
 | ١٩ | `20260824120004_activation_hardening.sql` | نزع الغلاف القديم عن العميل (تجاوز حدّ المعدّل) · `private.canonical_identity` + عمود بصمة ثانٍ على `trial_ledger` · فحص تأكيد البريد داخل `redeem_core` · طول الكود المُصدَر ٨٠ بتًا | **١٤ و١٦ إلزامًا** |
 | ٢٠ | `20260824120005_campaign_is_not_a_credential.sql` | `private.issue_code_core` (موضع الإصدار الوحيد) · أرضية الإنتروبيا ترفض الكود الحرفي · `founder_issue_code_batch` · سقف القوّة يتوقّف عن ادّعاء رقم للكود اليدوي · أرضية المولّد ١٦ | **١٤ و١٩ إلزامًا** |
 | ٢١ | `20260824120006_gateway_network_limit.sql` | `private.gate_attempts` + `public.gate_admit` — حدٌّ لكل **عنوان شبكة**، تناديه طرفية البوّابة بمفتاح الخدمة وحدها | ٢ (الملح) |
+| ٢٢ | `20260826120001_founder_code_batches.sql` | `founder_code_batches` — الحملات مجمّعة بالوسم: صادر/مستبدَل/متبقٍ/معطَّل | ١ · ١٦ |
+| ٢٣ | `20260826120002_founder_snapshot_signed_in_today.sql` | **تعيد تعريف** `founder_executive_snapshot()` بمفتاح `signedInToday` | **١٧ إلزامًا** |
+| ٢٤ | `20260826120003_founder_user_detail_history.sql` | **تعيد تعريف** `founder_user_detail(uuid)` بـ`commerce.codeHistory` و`foodSubmissions` | **١٧ و١٨ إلزامًا** |
+| ٢٥ | `20260826120004_founder_pending_orders.sql` | `founder_pending_orders` — أحداث سلة العالقة (`received`/`verified`) | ٨ · ١٦ |
+
+> ⛔ **والخطوتان ٢٣ و٢٤ بعد ١٧ قطعًا** (و٢٤ بعد ١٨ أيضًا: تقرأ `food_submissions`).
+> كلتاهما تعيد تعريف دالّة عرّفتها ١٧ — عكس الترتيب يكتب النسخة القديمة فوق
+> الجديدة **بلا خطأ واحد**، نفس الفخّ المُثبَت أعلاه.
 
 > ⛔ **والخطوة ٢٠ بعد ١٤ و١٩ قطعًا.** تعيد تعريف `founder_issue_access_code`
 > (من ١٤، ثم ١٩) و`admin_create_access_code` و`private.generate_access_code`.
@@ -155,13 +165,22 @@ supabase db push
 | ١٦ | `select to_regprocedure('public.redeem_access_code_v2(text)') is not null and to_regprocedure('private.redeem_core(text)') is not null;` | `true` |
 | ١٧ | `select prosrc like '%require_admin%' from pg_proc where proname='founder_executive_snapshot';` | **`true` — وهذا هو الفحص الذي يكشف الترتيب المعكوس**: تطبيق ١٧ قبل ١٥ يُعيد الحارس القديم بلا خطأ واحد |
 | ١٨ | `select to_regprocedure('public.submit_missing_food(text,text,text,text,numeric,numeric,numeric,numeric,text,text)') is not null and (select count(*) from information_schema.role_table_grants where table_name='food_submissions' and grantee='authenticated' and privilege_type='SELECT') = 1;` | `true` · `1` |
+| ٢٢ | `select to_regprocedure('public.founder_code_batches(integer)') is not null;` | `true` |
+| ٢٣ | `select prosrc like '%signedInToday%' from pg_proc where proname='founder_executive_snapshot';` | `true` — **وهذا يكشف الترتيب المعكوس**: تطبيق ٢٣ قبل ١٧ يُرجِع الجسد القديم بلا خطأ |
+| ٢٤ | `select prosrc like '%codeHistory%' and prosrc like '%foodSubmissions%' from pg_proc where proname='founder_user_detail';` | `true` |
+| ٢٥ | `select to_regprocedure('public.founder_pending_orders(integer)') is not null;` | `true` |
 
-**وفحص شامل أخير — البوّابة في جسم كل دالة مؤسس:**
+**وفحص شامل أخير — الحارس في جسم كل دالة مؤسس، بدوره الصحيح:**
 
 ```sql
-select proname, prosrc like '%require_founder%' as gated
+-- القراءات تحمل require_admin (المؤسس والدعم)، والأفعال require_founder وحدها.
+-- دالّة بلا أيّ من الحارسين ⇒ توقّف فورًا ولا تُصدر الدور.
+select proname,
+       prosrc like '%require_admin%'   as admin_gated,
+       prosrc like '%require_founder%' as founder_gated
   from pg_proc where proname like 'founder\_%' order by proname;
--- المتوقَّع: كل صفّ gated = true. أي false ⇒ توقّف فورًا ولا تُصدر الدور.
+-- المتوقَّع: كل صفّ فيه واحد من العمودين true على الأقل — ولا **فعل**
+-- (issue/enable/revoke/review/issue_batch) يحمل require_admin.
 ```
 
 ---

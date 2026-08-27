@@ -114,6 +114,7 @@ function usersGap(): UsersSnapshot {
 
 function activityGap(): ActivitySnapshot {
   return {
+    signedInToday: gapOf('activity.signedInToday'),
     signedIn7d: gapOf('activity.signedIn7d'),
     signedIn30d: gapOf('activity.signedIn30d'),
     dormant30d: gapOf('activity.dormant30d'),

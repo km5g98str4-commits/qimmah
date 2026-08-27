@@ -51,6 +51,11 @@ export {
   loadLiveUserPage,
   loadLiveCodePage,
   issueAccessCode,
+  issueAccessCodeBatch,
+  loadCodeBatches,
+  loadCodeRedemptions,
+  loadFailedOrders,
+  loadPendingOrders,
   setAccessCodeEnabled,
   revokeUserAccess,
 } from './contract/liveSource'
@@ -73,7 +78,10 @@ export {
   USER_DETAIL_RPC,
   CODE_PAGE_RPC,
   CODE_ISSUE_RPC,
+  CODE_BATCH_ISSUE_RPC,
+  CODE_BATCHES_RPC,
   CODE_ENABLE_RPC,
+  PENDING_ORDERS_RPC,
   REVOKE_ACCESS_RPC,
 } from './contract/metrics'
 export { buildAttentionQueue, detectedCount, blindCount } from './model/attention'

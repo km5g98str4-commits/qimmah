@@ -24,10 +24,14 @@ import { AdminShell } from '@/admin/ui/AdminShell'
 import { ADMIN_ROLE_CLAIM, resolveAdminRole } from '@/admin/auth/adminRole'
 import {
   issueAccessCode,
+  issueAccessCodeBatch,
+  loadCodeBatches,
+  loadCodeRedemptions,
   loadLiveCodePage,
   loadLiveExecutiveSnapshot,
   loadLiveUserDetail,
   loadLiveUserPage,
+  loadPendingOrders,
   revokeUserAccess,
   setAccessCodeEnabled,
 } from '@/admin/contract/liveSource'
@@ -75,7 +79,7 @@ const AS_OF = '2026-08-16T00:00:00.000Z'
 const PAYLOAD = {
   as_of: AS_OF,
   users: { total: 1284, newToday: 7, new7d: 41, new30d: 160, verified: 900, growthSeries: [{ date: '2026-08-15', value: 3 }] },
-  activity: { signedIn7d: 418, signedIn30d: 769, dormant30d: 515 },
+  activity: { signedInToday: 12, signedIn7d: 418, signedIn30d: 769, dormant30d: 515 },
   entitlement: { premiumActive: 188, trialActive: 24, trialExpired: 61, previewOnly: 1072, revokedActive: 3 },
   commerce: { ordersSeen: 241, ordersPaid: 188, ordersFailed: 9, codesIssued: 500, codesRedeemed: 213, codesUnused: 287 },
 }
@@ -178,6 +182,8 @@ const live = await loadLiveExecutiveSnapshot(FOUNDER)
 check('نجاح ⇒ الحالة live', live.live === 'live')
 check('إجمالي الحسابات وصل', live.snapshot.users.total.state === 'ready' && live.snapshot.users.total.value === 1284)
 check('لحظة القياس من الخادم لا من المتصفّح', live.snapshot.users.total.state === 'ready' && live.snapshot.users.total.asOf === AS_OF)
+// [ADMIN-CONV] «دخلوا اليوم» يمرّ حين يرسله الخادم.
+check('signedInToday يصل حيًّا', live.snapshot.activity.signedInToday.state === 'ready' && live.snapshot.activity.signedInToday.value === 12)
 check('التجارة وصلت', live.snapshot.commerce.ordersPaid.state === 'ready' && live.snapshot.commerce.ordersPaid.value === 188)
 check('نسبة التحوّل مشتقّة لا مخترعة', live.snapshot.entitlement.conversionOfAccounts.state === 'ready')
 
@@ -204,6 +210,8 @@ setRpc(ok({ as_of: AS_OF, users: { total: 10 }, entitlement: {}, commerce: {}, a
 const partial = await loadLiveExecutiveSnapshot(FOUNDER)
 check('حقل ناقص ⇒ غياب لا صفر', partial.snapshot.users.newToday.state === 'unavailable')
 check('كتلة ناقصة ⇒ غياب لا صفر', partial.snapshot.commerce.ordersPaid.state === 'unavailable')
+// [ADMIN-CONV] ردّ هجرةٍ أقدم لا يحمل المفتاح الجديد — **غياب نوعًا لا صفر**.
+check('signedInToday ناقص ⇒ غياب لا صفر', partial.snapshot.activity.signedInToday.state === 'unavailable')
 check('الحقل الموجود بجانب الناقص يمرّ', partial.snapshot.users.total.state === 'ready')
 
 // قيم غير عددية ⇒ غياب.
@@ -294,6 +302,23 @@ const NEW_READERS: [string, (d: Decision) => Promise<{ live: string }>][] = [
     const r = await revokeUserAccess(d, 'u1', 'x')
     return { live: r.ok ? 'live' : r.live }
   }],
+  // [ADMIN-CONV] القرّاء والكاتب الجدد — نفس عقد «لا نداء قبل حسم الدور».
+  ['سجلّ المستبدلين', async (d) => {
+    const r = await loadCodeRedemptions(d, 'c1')
+    return { live: r.ok ? 'live' : r.live }
+  }],
+  ['حملات الأكواد', async (d) => {
+    const r = await loadCodeBatches(d)
+    return { live: r.ok ? 'live' : r.live }
+  }],
+  ['الطلبات المعلّقة', async (d) => {
+    const r = await loadPendingOrders(d)
+    return { live: r.ok ? 'live' : r.live }
+  }],
+  ['إصدار دفعة', async (d) => {
+    const r = await issueAccessCodeBatch(d, { reason: 'x', durationDays: 14, maxRedemptions: 1, expiresAt: null, count: 3 })
+    return { live: r.ok ? 'live' : r.live }
+  }],
 ]
 for (const [label, run] of NEW_READERS) {
   setRpc(ok({}))
@@ -333,7 +358,12 @@ const DETAIL_OK = {
   },
   entitlement: { state: 'premiumActive', source: 'salla', activated_at: '2026-08-01T00:00:00Z', expires_at: null, revoked_at: null, revoked_reason: null },
   onboarding: 'unknown',
-  commerce: { codesRedeemed: 0, purchases: 1, lastOrderId: 'O-1', lastPurchaseAt: '2026-08-01T00:00:00Z', accessRevoked: false },
+  commerce: {
+    codesRedeemed: 0, purchases: 1, lastOrderId: 'O-1', lastPurchaseAt: '2026-08-01T00:00:00Z', accessRevoked: false,
+    // [ADMIN-CONV] سجلّ الأكواد كما تعيده الهجرة الأحدث.
+    codeHistory: [{ label: 'ramadan', redeemed_at: '2026-08-02T00:00:00Z', duration_days: 30 }],
+  },
+  foodSubmissions: [{ id: 'fs1', status: 'pending', product_name: 'تمر', submitted_at: '2026-08-10T00:00:00Z' }],
 }
 setRpc(ok(DETAIL_OK))
 const detailLive = await loadLiveUserDetail(FOUNDER, 'u1')
@@ -360,6 +390,37 @@ setRpc(ok({ as_of: AS_OF, entitlement: {}, commerce: {} }))
 const noAccount = await loadLiveUserDetail(FOUNDER, 'u1')
 check('رد بلا كتلة حساب يُرفض كلّه', noAccount.live === 'failed' && noAccount.detail === null)
 
+// ٨-د-٢) [ADMIN-CONV] سجلّ الأكواد وبلاغات الطعام في صفحة الحساب.
+check('سجلّ الأكواد يصل جاهزًا من الرد الكامل',
+  d.commerce.codeHistory.state === 'ready' && d.commerce.codeHistory.value.length === 1
+    && d.commerce.codeHistory.value[0].label === 'ramadan' && d.commerce.codeHistory.value[0].durationDays === 30)
+check('بلاغات الطعام تصل جاهزة من الرد الكامل',
+  d.foodSubmissions.state === 'ready' && d.foodSubmissions.value.length === 1
+    && d.foodSubmissions.value[0].status === 'pending' && d.foodSubmissions.value[0].productName === 'تمر')
+// ردّ هجرةٍ أقدم **بلا المفتاحين** ⇒ الغياب نوعًا، لا مصفوفة فارغة تُقرأ «لا سجلّ».
+{
+  const oldPayload = { ...DETAIL_OK } as Record<string, unknown>
+  delete oldPayload.foodSubmissions
+  const oldCommerce = { ...DETAIL_OK.commerce } as Record<string, unknown>
+  delete oldCommerce.codeHistory
+  setRpc(ok({ ...oldPayload, commerce: oldCommerce }))
+  const oldDetail = await loadLiveUserDetail(FOUNDER, 'u1')
+  check('كتلة قديمة بلا سجلّ الأكواد ⇒ غياب نوعًا لا مصفوفة فارغة',
+    oldDetail.detail !== null && oldDetail.detail.commerce.codeHistory.state === 'unavailable')
+  check('كتلة قديمة بلا بلاغات الطعام ⇒ غياب نوعًا كذلك',
+    oldDetail.detail !== null && oldDetail.detail.foodSubmissions.state === 'unavailable')
+}
+// صفّ سجلّ مشوّه (بلا وقت استهلاك) **يُسقط الكتلة كلّها** — لا نصف سجلّ.
+setRpc(ok({ ...DETAIL_OK, commerce: { ...DETAIL_OK.commerce, codeHistory: [{ label: 'x' }] } }))
+const brokenHistory = await loadLiveUserDetail(FOUNDER, 'u1')
+check('صفّ سجلّ أكواد مشوّه يُسقط الكتلة كلّها',
+  brokenHistory.detail !== null && brokenHistory.detail.commerce.codeHistory.state === 'unavailable')
+// حالة بلاغ خارج القائمة لا تُخترع ولا تُطوى في pending.
+setRpc(ok({ ...DETAIL_OK, foodSubmissions: [{ id: 'fs1', status: 'GOD_MODE', product_name: 'تمر', submitted_at: AS_OF }] }))
+const weirdFood = await loadLiveUserDetail(FOUNDER, 'u1')
+check('حالة بلاغ مجهولة تُسقط الكتلة لا تُخترع',
+  weirdFood.detail !== null && weirdFood.detail.foodSubmissions.state === 'unavailable')
+
 // ٨-هـ) صفحة الأكواد: حالة مجهولة تُسقط الصفحة، والخام لا يُقبل بلا نصّ.
 const CODE_ROW = {
   code_id: 'c1', label: 'ramadan', status: 'issued', duration_days: 30, max_redemptions: 5,
@@ -375,6 +436,53 @@ check('حالة كود مجهولة تُسقط الصفحة كلّها لا تُ
 setRpc(ok({ id: 'c9' }))
 const noPlain = await issueAccessCode(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1 })
 check('إصدار بلا نصّ كود ليس نجاحًا', !noPlain.ok)
+
+// ═══════════════ ٩) [ADMIN-CONV] المستبدلون · الحملات · المعلّق · الدفعة ═══════════════
+// ٩-أ) سجلّ المستبدلين: الفشل يُسمّى ولا يصير قائمة فارغة تُقرأ «ما استخدمه أحد».
+setRpc(fail({ code: '42501', message: 'founder_role_required' }))
+const redsDenied = await loadCodeRedemptions(FOUNDER, 'c1')
+check('سجلّ المستبدلين: منع الخادم يُسمّى ولا يصير قائمة فارغة', !redsDenied.ok && redsDenied.live === 'denied-by-server')
+setRpc(ok([{ redeemed_at: AS_OF, user_id: 'u9', masked_email: 'zi***@x.com' }]))
+const redsLive = await loadCodeRedemptions(FOUNDER, 'c1')
+check('سجلّ المستبدلين يصل بصفوفه', redsLive.ok && redsLive.rows.length === 1 && redsLive.rows[0].userId === 'u9')
+check('بريد المستبدل مُقنَّع كما أرسله الخادم', redsLive.ok && (redsLive.rows[0].maskedEmail ?? '').includes('***@'))
+
+// ٩-ب) الحملات: «الهجرة ما انطبقت» تتدهور بأدب إلى rpc-missing لا إلى فراغ.
+setRpc(fail({ code: 'PGRST202', message: 'Could not find the function' }))
+const batchesMissing = await loadCodeBatches(FOUNDER)
+check('الحملات: الهجرة غير مطبَّقة ⇒ rpc-missing مسمّاة', !batchesMissing.ok && batchesMissing.live === 'rpc-missing')
+setRpc(ok([{ label: 'ramadan', codes_issued: '5', codes_redeemed: 1, codes_remaining: 4, codes_disabled: 0, last_issued_at: AS_OF }]))
+const batchesLive = await loadCodeBatches(FOUNDER)
+check('الحملات تصل — وbigint النصّي يُقرأ عددًا', batchesLive.ok && batchesLive.rows[0].codesIssued === 5)
+// عددٌ غائب في صفّ حملة يبقى null — **لا يصير «صفر أكواد»**.
+setRpc(ok([{ label: 'x' }]))
+const batchesSparse = await loadCodeBatches(FOUNDER)
+check('عدد غائب في الحملة يبقى null لا صفرًا', batchesSparse.ok && batchesSparse.rows[0].codesIssued === null)
+
+// ٩-ج) الطلبات المعلّقة — نفس عقد الفاشلة حرفيًّا.
+setRpc(fail({ code: 'PGRST202', message: 'Could not find the function' }))
+const pendingMissing = await loadPendingOrders(FOUNDER)
+check('المعلّق: الهجرة غير مطبَّقة ⇒ rpc-missing', !pendingMissing.ok && pendingMissing.live === 'rpc-missing')
+setRpc(ok([{ provider_order_id: 'O-9', classification: 'received', reason: null, received_at: AS_OF, amount_minor: 1999, currency: 'SAR', identity_ref: 'ab12cd34' }]))
+const pendingLive = await loadPendingOrders(FOUNDER)
+check('المعلّق يصل بصفوفه ومرجع الهوية مقصوص', pendingLive.ok && pendingLive.rows[0].providerOrderId === 'O-9' && pendingLive.rows[0].identityRef === 'ab12cd34')
+
+// ٩-د) الدفعة: **ردّ بلا قائمة أكواد ليس نجاحًا** — النجاح هو ظهور الأكواد مرّة.
+setRpc(ok({ label: 'x', count: 2, duration_days: 14, max_redemptions: 1, expires_at: null, codes: ['ABCDEFGHJKLMNPQ2', 'ABCDEFGHJKLMNPQ3'], issued_at: AS_OF }))
+const batchOk = await issueAccessCodeBatch(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1, expiresAt: null, count: 2 })
+check('الدفعة تصل بأكوادها', batchOk.ok && batchOk.value.codes.length === 2)
+setRpc(ok({ label: 'x', count: 2 }))
+const batchNoCodes = await issueAccessCodeBatch(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1, expiresAt: null, count: 2 })
+check('دفعة بلا قائمة أكواد ليست نجاحًا', !batchNoCodes.ok)
+setRpc(ok({ label: 'x', count: 2, codes: [] }))
+const batchEmptyCodes = await issueAccessCodeBatch(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1, expiresAt: null, count: 2 })
+check('دفعة بأكواد صفر ليست نجاحًا — النجاح هو ظهور الأكواد', !batchEmptyCodes.ok)
+setRpc(ok({ codes: ['GOOD5678JKLMNPQ2', 42] }))
+const batchJunk = await issueAccessCodeBatch(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1, expiresAt: null, count: 2 })
+check('كودٌ غير نصّي في الدفعة يُسقطها كلّها', !batchJunk.ok)
+setRpc(fail({ code: '42501', message: 'founder_role_required' }))
+const batchDenied = await issueAccessCodeBatch(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1, expiresAt: null, count: 2 })
+check('الدفعة: منع الخادم يُسمّى ولا يُبتلع', !batchDenied.ok && batchDenied.live === 'denied-by-server')
 
   console.log(`\n✅ ${pass} فحصًا — التركيب والقراءة الحيّة صادقان\n`)
 }

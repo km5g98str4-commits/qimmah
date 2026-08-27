@@ -125,11 +125,11 @@ check('founder_user_page ليست لـanon', !grantOf('founder_user_page').inclu
  * لا تُذكر في أيّهما **تُسقط الفحص** — فلا تُضاف قدرةٌ بلا قرار عن دورها.
  */
 const bodies = await db.query(`select proname, prosrc from pg_proc where proname like 'founder\\_%'`)
-/** قراءات: يبلغها المؤسس **والدعم**. */
+/** قراءات: يبلغها المؤسس **والدعم**. [ADMIN-CONV] زادت الحملات والمعلّق. */
 const ADMIN_READS = [
   'founder_executive_snapshot', 'founder_user_page', 'founder_user_detail', 'founder_code_page',
-  'founder_failed_orders', 'founder_code_redemptions', 'founder_email_health',
-  'founder_grants_by_source', 'founder_food_submissions',
+  'founder_failed_orders', 'founder_pending_orders', 'founder_code_redemptions', 'founder_code_batches',
+  'founder_email_health', 'founder_grants_by_source', 'founder_food_submissions',
 ]
 /** أفعال لا رجعة فيها: للمؤسس وحده. */
 const FOUNDER_WRITES = [
@@ -158,6 +158,14 @@ check(`ولا فعل يقبل الدعم — كلّها require_founder وحده
   check('⚔️ ترخية حارس فعلٍ إلى require_admin تُسقط الفحص',
     tampered.every((b) => b.includes('require_admin') && !b.includes('require_founder')))
 }
+// ⚔️ [ADMIN-CONV] والاتجاه المعاكس: **نزع** حارس قراءة جديدة (الحملات/المعلّق)
+// يجب أن يسقط عند فحص `require_admin` المسمّى أعلاه — لا أن يمرّ بصمت.
+{
+  const strippedReads = ['founder_code_batches', 'founder_pending_orders']
+    .map((fn) => bodyOf(fn).replace(/perform private\.require_admin\(\);/, ''))
+  check('⚔️ نزع حارس قراءة جديدة يفقده فحص require_admin باسمه',
+    strippedReads.every((b) => b.length > 0 && !b.includes('require_admin')))
+}
 
 // ═══════════════ ٢) بيانات واقعية ═══════════════
 await asRole(db, null)
@@ -171,14 +179,16 @@ await db.exec(`insert into public.profiles (user_id, display_name, data)
                select u.id, 'حساب ' || left(u.id::text, 4), '{"_meta":{"completed":true}}'::jsonb
                  from auth.users u
                 where not exists (select 1 from public.profiles p where p.user_id = u.id)`)
-await db.query(`update auth.users set last_sign_in_at = now() - interval '2 days' where id = $1`, [founderId])
+// [ADMIN-CONV] المؤسس دخل **الآن**: يظهر في «اليوم» و«٧ أيام» معًا.
+await db.query(`update auth.users set last_sign_in_at = now() where id = $1`, [founderId])
 await db.query(`update auth.users set last_sign_in_at = now() - interval '90 days' where id = $1`, [normalId])
 // منحة Premium حقيقية عبر المسار الإداري القائم.
 await asRole(db, 'service_role')
 await db.query(`select public.admin_grant_premium('normal@qimmah.test','salla','ORDER-1',1999,'{}'::jsonb)`)
 await asRole(db, null)
+// [ADMIN-CONV] حدث ثالث **معلّق** (`received`) — يغذّي `founder_pending_orders`.
 await db.exec(`insert into public.salla_webhook_events (event_fingerprint, provider_order_id, classification)
-               values ('fp-1','ORDER-1','processed'), ('fp-2','ORDER-2','failed')`)
+               values ('fp-1','ORDER-1','processed'), ('fp-2','ORDER-2','failed'), ('fp-3','ORDER-3','received')`)
 await db.exec(`insert into public.access_codes (code_hash, hash_version, created_by, created_reason)
                values ('hash-a', 1, 'proof', 'test'), ('hash-b', 1, 'proof', 'test')`)
 
@@ -186,11 +196,15 @@ await db.exec(`insert into public.access_codes (code_hash, hash_version, created
 await asRole(db, 'anon', null)
 await mustFail('زائر anon لا ينفّذ لقطة اللوحة', () => db.query('select public.founder_executive_snapshot()'), 'permission denied')
 await mustFail('زائر anon لا ينفّذ صفحة الجدول', () => db.query(`select * from public.founder_user_page('',1,10)`), 'permission denied')
+await mustFail('زائر anon لا يقرأ الحملات', () => db.query('select * from public.founder_code_batches()'), 'permission denied')
+await mustFail('زائر anon لا يقرأ الطلبات المعلّقة', () => db.query('select * from public.founder_pending_orders(10)'), 'permission denied')
 await mustFail('زائر anon لا يمنح دورًا', () => db.query(`select public.admin_set_role('x@y.z','founder','r')`), 'permission denied')
 
 await asRole(db, 'authenticated', normalId)
 await mustFail('مستخدم عادي مسجّل يُمنع بالاسم', () => db.query('select public.founder_executive_snapshot()'), 'founder_role_required')
 await mustFail('مستخدم عادي لا يقرأ صفحة الجدول', () => db.query(`select * from public.founder_user_page('',1,10)`), 'founder_role_required')
+await mustFail('مستخدم عادي لا يقرأ الحملات', () => db.query('select * from public.founder_code_batches()'), 'founder_role_required')
+await mustFail('مستخدم عادي لا يقرأ الطلبات المعلّقة', () => db.query('select * from public.founder_pending_orders(10)'), 'founder_role_required')
 await mustFail('مستخدم عادي لا يمنح نفسه الدور', () => db.query(`select public.admin_set_role('normal@qimmah.test','founder','self')`), 'permission denied')
 
 // ⚠️ **الفحص الأهمّ:** ادّعاء مكتوب في الحقل الذي يملكه المستخدم نفسه.
@@ -221,12 +235,15 @@ check('اللقطة تحمل لحظة قياس من الخادم', typeof snap.a
 check('إجمالي الحسابات مقيس (٣)', snap.users.total === 3)
 check('سلسلة النمو مصفوفة', Array.isArray(snap.users.growthSeries))
 check('سجّلوا دخول ٧ أيام = ١', snap.activity.signedIn7d === 1)
+// [ADMIN-CONV] المؤسس دخل الآن ⇒ يظهر في نافذة «اليوم» (منتصف ليل الرياض).
+check('سجّلوا دخول اليوم = ١', snap.activity.signedInToday === 1)
 check('الخامل ٣٠ يومًا = ٢', snap.activity.dormant30d === 2)
 check('Premium فعّال = ١', snap.entitlement.premiumActive === 1)
 check('المعاينة = ٢ (مشتقّة من المقام الكامل)', snap.entitlement.previewOnly === 2)
-check('أوامر سلة المميّزة = ٢', snap.commerce.ordersSeen === 2)
+check('أوامر سلة المميّزة = ٣', snap.commerce.ordersSeen === 3)
 check('أوامر مدفوعة = ١', snap.commerce.ordersPaid === 1)
 check('أوامر فاشلة = ١', snap.commerce.ordersFailed === 1)
+check('أحداث معلّقة = ١', snap.commerce.webhookPending === 1)
 check('أكواد صادرة = ٢', snap.commerce.codesIssued === 2)
 // ⚠️ **ما لا مصدر له لا يُرجَع أصلًا** — لا مفتاحًا ولا صفرًا.
 check('اللقطة لا تحمل محاولات استرداد مرفوضة', !('redemptionFailures24h' in snap.commerce))
@@ -250,6 +267,20 @@ const search = await db.query(`select * from public.founder_user_page('normal',1
 check('البحث يصفّي على الخادم', search.rows.length === 1)
 const empty = await db.query(`select * from public.founder_user_page('zzz-لا-يوجد',1,10)`)
 check('بحث بلا نتيجة يعيد فارغًا لا خطأ', empty.rows.length === 0)
+
+// ═══════════════ ٤-ب) [ADMIN-CONV] القوائم الجديدة — المعلّق والفاشل والحملات ═══════════════
+const pendingRows = (await db.query(`select * from public.founder_pending_orders(10)`)).rows
+check('المعلّق قائمة لا عدد: ORDER-3 وحده', pendingRows.length === 1 && pendingRows[0].provider_order_id === 'ORDER-3')
+check('صفّ المعلّق يحمل تصنيفه', pendingRows[0].classification === 'received')
+const failedRows = (await db.query(`select * from public.founder_failed_orders(10)`)).rows
+check('الفاشل قائمة لا عدد: ORDER-2 وحده', failedRows.length === 1 && failedRows[0].provider_order_id === 'ORDER-2')
+// القائمتان لا تتقاطعان — طلبٌ واحد لا يظهر معلّقًا وفاشلًا معًا.
+check('المعلّق والفاشل لا يتقاطعان', failedRows.every((f) => pendingRows.every((p) => p.provider_order_id !== f.provider_order_id)))
+const batchRows = (await db.query(`select * from public.founder_code_batches()`)).rows
+check('الحملات مجمّعة: صفّ واحد للوسم الفارغ', batchRows.length === 1 && batchRows[0].label === null)
+check('الحملة تعدّ الكودين المزروعين', Number(batchRows[0].codes_issued) === 2 && Number(batchRows[0].codes_disabled) === 0)
+check('المتبقي = الصادر (لا استهلاك بعد)', Number(batchRows[0].codes_remaining) === 2 && Number(batchRows[0].codes_redeemed) === 0)
+check('صفّ الحملة بلا بصمة ولا كود خام', !Object.keys(batchRows[0]).some((k) => /hash|^code$/.test(k)))
 
 // ⚠️ **ثلاثية القيم**: حساب بلا ادّعاء يجعل المقارنة `NULL` لا `false`.
 // الفحص صريح لأن هذا بالضبط ما فشل مفتوحًا قبل الإصلاح.
@@ -328,6 +359,30 @@ check(
   'بلا البوّابة: المستخدم العادي يقرأ اللقطة — فالمنع مصدره البوّابة لا الصدفة',
   Boolean(ungatedRead) && typeof ungatedRead.users?.total === 'number',
   ungatedRead?.error ? `منع لسبب آخر: ${ungatedRead.error.slice(0, 120)}` : '',
+)
+// ⚔️ [ADMIN-CONV] ونفس الهجوم المنفَّذ على القراءتين الجديدتين: نزع
+// `require_admin` **يكشفهما فعلًا** — فالمنع في البيئة السليمة من الحارس وحده.
+let ungatedPending = null
+try {
+  ungatedPending = (await ungatedDb.query('select * from public.founder_pending_orders(5)')).rows
+} catch (e) {
+  ungatedPending = { error: String(e.message || e) }
+}
+check(
+  'بلا البوّابة: المستخدم العادي يقرأ الطلبات المعلّقة — الحارس هو المنع',
+  Array.isArray(ungatedPending),
+  ungatedPending?.error ? `منع لسبب آخر: ${String(ungatedPending.error).slice(0, 120)}` : '',
+)
+let ungatedBatches = null
+try {
+  ungatedBatches = (await ungatedDb.query('select * from public.founder_code_batches()')).rows
+} catch (e) {
+  ungatedBatches = { error: String(e.message || e) }
+}
+check(
+  'بلا البوّابة: المستخدم العادي يقرأ الحملات — الحارس هو المنع',
+  Array.isArray(ungatedBatches),
+  ungatedBatches?.error ? `منع لسبب آخر: ${String(ungatedBatches.error).slice(0, 120)}` : '',
 )
 await ungatedDb.close()
 

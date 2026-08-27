@@ -254,6 +254,8 @@ export function AdminShell({
             <MetricCard metricId="users.new7d" value={snapshot.users.new7d} />
             <MetricCard metricId="users.new30d" value={snapshot.users.new30d} />
             <MetricCard metricId="users.verified" value={snapshot.users.verified} />
+            {/* [ADMIN-CONV] «اليوم» قبل النوافذ الأطول — أول سؤال صباحي يُجاب أولًا. */}
+            <MetricCard metricId="activity.signedInToday" value={snapshot.activity.signedInToday} />
             <MetricCard metricId="activity.signedIn7d" value={snapshot.activity.signedIn7d} />
             <MetricCard metricId="activity.signedIn30d" value={snapshot.activity.signedIn30d} />
             <MetricCard metricId="activity.dormant30d" value={snapshot.activity.dormant30d} />

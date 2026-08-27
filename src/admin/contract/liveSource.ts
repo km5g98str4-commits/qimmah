@@ -35,7 +35,10 @@ import {
   USER_DETAIL_RPC,
   USER_PAGE_RPC,
   FAILED_ORDERS_RPC,
+  PENDING_ORDERS_RPC,
   CODE_REDEMPTIONS_RPC,
+  CODE_BATCHES_RPC,
+  CODE_BATCH_ISSUE_RPC,
   EMAIL_HEALTH_RPC,
   GRANTS_BY_SOURCE_RPC,
   FOOD_SUBMISSIONS_RPC,
@@ -46,10 +49,12 @@ import type { AdminRoleDecision } from '../auth/adminRole'
 import type {
   AdminCodePage,
   AdminCodeRow,
+  CodeBatchRow,
   CodeRedemptionRow,
   EmailHealth,
   FailedOrderRow,
   FoodSubmissionRow,
+  FoodSubmissionStatus,
   AdminUserDetail,
   AdminUserPage,
   AdminUserRow,
@@ -57,9 +62,12 @@ import type {
   EntitlementView,
   ExecutiveSnapshot,
   IssuedCode,
+  IssuedCodeBatch,
   MetricValue,
   OnboardingView,
   SeriesPoint,
+  UserCodeHistoryEntry,
+  UserFoodSubmissionEntry,
 } from './types'
 import { ready, unavailable } from './types'
 
@@ -181,6 +189,7 @@ export async function loadLiveExecutiveSnapshot(decision: AdminRoleDecision): Pr
     },
     activity: {
       ...base.activity,
+      signedInToday: num(a.signedInToday, asOf, base.activity.signedInToday),
       signedIn7d: num(a.signedIn7d, asOf, base.activity.signedIn7d),
       signedIn30d: num(a.signedIn30d, asOf, base.activity.signedIn30d),
       dormant30d: num(a.dormant30d, asOf, base.activity.dormant30d),
@@ -318,6 +327,53 @@ function bool(raw: unknown, asOf: string): MetricValue<boolean> {
   return unavailable<boolean>('NEEDS_BACKEND')
 }
 
+/**
+ * [ADMIN-CONV] سجلّ استهلاك الأكواد لحساب واحد.
+ *
+ * **المفتاح الغائب غيابٌ نوعًا لا مصفوفة فارغة**: ردٌّ من هجرة أقدم لا يحمل
+ * `codeHistory` أصلًا، وقولُ «لا سجلّ» عنه كذبٌ — الخادم لم يُسأل. والمصفوفة
+ * الفارغة التي **أرسلها الخادم** جوابٌ مقيس وتمرّ كما هي.
+ * **وصفّ مشوّه يُسقط الكتلة كلّها** — نصف سجلّ أخطر من لا سجلّ.
+ */
+function codeHistoryOf(raw: unknown, asOf: string): MetricValue<readonly UserCodeHistoryEntry[]> {
+  if (!Array.isArray(raw)) return unavailable<readonly UserCodeHistoryEntry[]>('NEEDS_BACKEND')
+  const out: UserCodeHistoryEntry[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') return unavailable<readonly UserCodeHistoryEntry[]>('NEEDS_BACKEND')
+    const rec = item as Record<string, unknown>
+    if (typeof rec.redeemed_at !== 'string') return unavailable<readonly UserCodeHistoryEntry[]>('NEEDS_BACKEND')
+    out.push({
+      label: typeof rec.label === 'string' ? rec.label : null,
+      redeemedAt: rec.redeemed_at,
+      durationDays:
+        typeof rec.duration_days === 'number' && Number.isFinite(rec.duration_days) ? rec.duration_days : null,
+    })
+  }
+  return ready(out, asOf)
+}
+
+const FOOD_STATUSES: readonly FoodSubmissionStatus[] = ['pending', 'approved', 'rejected', 'needs_info']
+
+/** [ADMIN-CONV] بلاغات الطعام لحساب واحد — نفس قواعد `codeHistoryOf` حرفيًّا. */
+function foodSubmissionsOf(raw: unknown, asOf: string): MetricValue<readonly UserFoodSubmissionEntry[]> {
+  if (!Array.isArray(raw)) return unavailable<readonly UserFoodSubmissionEntry[]>('NEEDS_BACKEND')
+  const out: UserFoodSubmissionEntry[] = []
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') return unavailable<readonly UserFoodSubmissionEntry[]>('NEEDS_BACKEND')
+    const rec = item as Record<string, unknown>
+    const status = FOOD_STATUSES.find((s) => s === rec.status)
+    if (typeof rec.id !== 'string' || typeof rec.product_name !== 'string') {
+      return unavailable<readonly UserFoodSubmissionEntry[]>('NEEDS_BACKEND')
+    }
+    // حالة خارج القائمة لا تُخترع ولا تُطوى في `pending` — الكتلة كلّها تسقط.
+    if (!status || typeof rec.submitted_at !== 'string') {
+      return unavailable<readonly UserFoodSubmissionEntry[]>('NEEDS_BACKEND')
+    }
+    out.push({ id: rec.id, status, productName: rec.product_name, submittedAt: rec.submitted_at })
+  }
+  return ready(out, asOf)
+}
+
 /** حالة استحقاق الخادم ⟵ تصنيف الواجهة. المجهول يبقى مجهولًا ولا يُطوى. */
 function entitlementViewOf(state: unknown): EntitlementView {
   switch (state) {
@@ -417,7 +473,9 @@ export async function loadLiveUserDetail(
         lastOrderId: str(com.lastOrderId, asOf),
         lastPurchaseAt: str(com.lastPurchaseAt, asOf),
         accessRevoked: bool(com.accessRevoked, asOf),
+        codeHistory: codeHistoryOf(com.codeHistory, asOf),
       },
+      foodSubmissions: foodSubmissionsOf(payload.foodSubmissions, asOf),
     },
     live: 'live',
   }
@@ -552,6 +610,65 @@ export async function issueAccessCode(
   }
 }
 
+/**
+ * [ADMIN-CONV] يُصدر **دفعة** أكواد تحت وسم حملة واحد — نموذج المؤسس المُعلَن:
+ * «حملة = وسم، وتُولَّد تحتها أكواد فردية قوية» (رأس `20260824120005`).
+ *
+ * ⚠️ **النصوص الخام تعود هنا مرّة واحدة ولا تُخزَّن في أي مكان** — لا حالة
+ * دائمة ولا تخزين محلّي: الجدول يحفظ البصمات وحدها.
+ * **وردٌّ بلا قائمة أكواد ليس نجاحًا**: النجاح هنا هو أن تظهر الأكواد مرّة.
+ */
+export async function issueAccessCodeBatch(
+  decision: AdminRoleDecision,
+  input: {
+    reason: string
+    label?: string
+    durationDays: number
+    maxRedemptions: number
+    expiresAt?: string | null
+    count: number
+  },
+): Promise<WriteOutcome<IssuedCodeBatch>> {
+  if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(CODE_BATCH_ISSUE_RPC, {
+      p_reason: input.reason,
+      p_label: input.label ?? null,
+      p_duration_days: input.durationDays,
+      p_max_redemptions: input.maxRedemptions,
+      p_expires_at: input.expiresAt ?? null,
+      // الحدّ ٥٠٠ يفرضه الخادم باسمه (`batch_count_out_of_range`) — الواجهة
+      // تمنع الرحلة الضائعة، والخادم هو السلطة.
+      p_count: input.count,
+    })
+    if (error) return { ok: false, live: classify(error) }
+    const rec = (data ?? {}) as Record<string, unknown>
+    const rawCodes = rec.codes
+    if (!Array.isArray(rawCodes) || rawCodes.length === 0) return { ok: false, live: 'failed' }
+    const codes: string[] = []
+    for (const c of rawCodes) {
+      if (typeof c !== 'string' || c === '') return { ok: false, live: 'failed' }
+      codes.push(c)
+    }
+    return {
+      ok: true,
+      value: {
+        label: typeof rec.label === 'string' ? rec.label : null,
+        count: typeof rec.count === 'number' && Number.isFinite(rec.count) ? rec.count : codes.length,
+        durationDays: typeof rec.duration_days === 'number' ? rec.duration_days : input.durationDays,
+        maxRedemptions: typeof rec.max_redemptions === 'number' ? rec.max_redemptions : input.maxRedemptions,
+        expiresAt: typeof rec.expires_at === 'string' ? rec.expires_at : null,
+        codes,
+        issuedAt: typeof rec.issued_at === 'string' ? rec.issued_at : new Date().toISOString(),
+      },
+    }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
 /** يعطّل كودًا أو يعيد تشغيله. **لا حذف** — صفّ الكود أثر إداري. */
 export async function setAccessCodeEnabled(
   decision: AdminRoleDecision,
@@ -640,19 +757,51 @@ const numOrNull = (v: unknown): number | null => {
   return Number.isFinite(n) ? n : null
 }
 
+/** صفّ طلب سلة — نفس الشكل للفاشل والمعلّق، فالمحوِّل واحد لا نسختان تتباعدان. */
+const toOrderRow = (r: Record<string, unknown>): FailedOrderRow => ({
+  providerOrderId: txt(r.provider_order_id),
+  classification: txt(r.classification),
+  reason: txtOrNull(r.reason),
+  receivedAt: txt(r.received_at),
+  amountMinor: numOrNull(r.amount_minor),
+  currency: txtOrNull(r.currency),
+  identityRef: txtOrNull(r.identity_ref),
+})
+
 /** طابور الطلبات التي لم تُسلَّم — الرقم صار أسماءً. */
 export async function loadFailedOrders(
   decision: AdminRoleDecision,
   limit = 50,
 ): Promise<ListResult<FailedOrderRow>> {
-  return readRows(decision, FAILED_ORDERS_RPC, { p_limit: limit }, (r) => ({
-    providerOrderId: txt(r.provider_order_id),
-    classification: txt(r.classification),
-    reason: txtOrNull(r.reason),
-    receivedAt: txt(r.received_at),
-    amountMinor: numOrNull(r.amount_minor),
-    currency: txtOrNull(r.currency),
-    identityRef: txtOrNull(r.identity_ref),
+  return readRows(decision, FAILED_ORDERS_RPC, { p_limit: limit }, toOrderRow)
+}
+
+/**
+ * [ADMIN-CONV] الطلبات المعلّقة — وصلت (`received`) أو تحقّق توقيعها
+ * (`verified`) ولم تبلغ المعالجة. أخطر من الفاشلة لأنها **صامتة**.
+ */
+export async function loadPendingOrders(
+  decision: AdminRoleDecision,
+  limit = 50,
+): Promise<ListResult<FailedOrderRow>> {
+  return readRows(decision, PENDING_ORDERS_RPC, { p_limit: limit }, toOrderRow)
+}
+
+/**
+ * [ADMIN-CONV] الحملات مجمّعة بالوسم. الأعداد `numOrNull` **لا `?? 0`**:
+ * عددٌ لم يصل غيابٌ تعرضه الشاشة «—»، لا صفرًا يقول «حملة بلا أكواد».
+ */
+export async function loadCodeBatches(
+  decision: AdminRoleDecision,
+  limit = 100,
+): Promise<ListResult<CodeBatchRow>> {
+  return readRows(decision, CODE_BATCHES_RPC, { p_limit: limit }, (r) => ({
+    label: txtOrNull(r.label),
+    codesIssued: numOrNull(r.codes_issued),
+    codesRedeemed: numOrNull(r.codes_redeemed),
+    codesRemaining: numOrNull(r.codes_remaining),
+    codesDisabled: numOrNull(r.codes_disabled),
+    lastIssuedAt: txtOrNull(r.last_issued_at),
   }))
 }
 

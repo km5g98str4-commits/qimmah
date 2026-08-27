@@ -183,11 +183,15 @@ const CODE_PAGE: AdminCodePage = {
       codeId: 'c1', label: 'ramadan', status: 'issued', durationDays: 30, maxRedemptions: 5,
       redemptionCount: 1, startsAt: '2026-08-01T00:00:00.000Z', expiresAt: null,
       createdBy: 'founder:u1', createdReason: 'حملة رمضان', createdAt: '2026-08-01T00:00:00.000Z',
+      // [ADMIN-CONV] كانا ناقصين فطبعت الشاشة «undefined بت» بصمت — الحقلان
+      // إلزاميان في النوع، والتجهيزة تحملهما الآن بالحالتين.
+      entropyCeilingBits: 80, generatedServerSide: true,
     },
     {
       codeId: 'c2', label: null, status: 'disabled', durationDays: 14, maxRedemptions: 1,
       redemptionCount: 0, startsAt: '2026-07-01T00:00:00.000Z', expiresAt: null,
       createdBy: 'founder:u1', createdReason: 'اختبار', createdAt: '2026-07-01T00:00:00.000Z',
+      entropyCeilingBits: null, generatedServerSide: null,
     },
   ],
   total: 2, page: 1, pageSize: 25,
@@ -202,6 +206,20 @@ const codesProps = {
   issued: null,
   onDismissIssued: () => {},
   writeError: null,
+  // [ADMIN-CONV] الدفعة والحملات والمستبدلون.
+  onIssueBatch: () => {},
+  issuedBatch: null,
+  onDismissIssuedBatch: () => {},
+  batches: {
+    kind: 'rows',
+    rows: [
+      { label: 'ramadan', codesIssued: 5, codesRedeemed: 1, codesRemaining: 4, codesDisabled: 0, lastIssuedAt: '2026-08-01T00:00:00.000Z' },
+      // أعداد غائبة — يجب أن تُرسم «—» لا صفرًا.
+      { label: 'legacy', codesIssued: null, codesRedeemed: null, codesRemaining: null, codesDisabled: null, lastIssuedAt: null },
+    ],
+  } as const,
+  redemptions: null,
+  onToggleRedemptions: () => {},
 }
 const codesHtml = render(<CodesPanel {...codesProps} />, 'ar')
 check('لوحة الأكواد تُرسم', codesHtml.includes('data-codes-panel="true"'))
@@ -234,11 +252,58 @@ const codesEn = render(<CodesPanel {...codesProps} />, 'en')
 check('لوحة الأكواد بالإنجليزية', codesEn.includes('Issued') && codesEn.includes('Disabled'))
 check('لا نصّ عربي متسرّب في الإنجليزية', !codesEn.includes('صادر'))
 
+// ═══════════ ٨-ب) [ADMIN-CONV] الحملات والدفعة والمستبدلون ═══════════
+check('جدول الحملات يُرسم', codesHtml.includes('data-code-batches="true"') && codesHtml.includes('data-code-batch="ramadan"'))
+// عددٌ غائب يُرسم «—» — **لا صفر مخترع** في صفّ الحملة الناقصة.
+const legacyRow = codesHtml.split('data-code-batch="legacy"')[1]?.slice(0, 600) ?? ''
+check('أعداد الحملة الغائبة تُرسم «—» لا صفرًا', legacyRow.includes('—') && !/>\s*0\s*</.test(legacyRow))
+check('نموذج الدفعة معروض', codesHtml.includes('data-batch-issue="true"'))
+// حملات غير متاحة تعلن سببها — لا جدول فارغ يبدو جوابًا.
+const batchesGap = render(
+  <CodesPanel {...codesProps} batches={{ kind: 'gap', why: 'rpc-missing' }} />,
+  'ar',
+)
+check('حملات غير متاحة تُعلن سببها لا جدولًا فارغًا',
+  batchesGap.includes('data-code-batches-state="rpc-missing"') && !batchesGap.includes('data-code-batch='))
+// الدفعة الصادرة: الأكواد تظهر مرّة مع تحذير النسخ-الآن.
+const issuedBatchHtml = render(
+  <CodesPanel
+    {...codesProps}
+    issuedBatch={{ label: 'ramadan', count: 2, durationDays: 14, maxRedemptions: 1, expiresAt: null, codes: ['WZVZJ2WZ34VJAB22', 'WZVZJ2WZ34VJAB23'], issuedAt: '2026-08-22T00:00:00.000Z' }}
+  />,
+  'ar',
+)
+check('أكواد الدفعة معروضة', issuedBatchHtml.includes('WZVZJ2WZ34VJAB22') && issuedBatchHtml.includes('WZVZJ2WZ34VJAB23'))
+check('وتحذير الظهور الواحد للدفعة معها', issuedBatchHtml.includes('data-issued-batch="true"') && issuedBatchHtml.includes('ما نخزّنها'))
+// سجلّ المستبدلين المفتوح: صفوفه تُرسم، وفشله يُسمّى.
+const redsOpenHtml = render(
+  <CodesPanel
+    {...codesProps}
+    redemptions={{ codeId: 'c1', list: { kind: 'rows', rows: [{ redeemedAt: '2026-08-05T10:00:00.000Z', userId: 'u-77', maskedEmail: 'zi***@x.com' }] } }}
+  />,
+  'ar',
+)
+check('سجلّ المستبدلين يُرسم تحت صفّ الكود', redsOpenHtml.includes('data-code-redemptions="c1"') && redsOpenHtml.includes('zi***@x.com'))
+const redsGapHtml = render(
+  <CodesPanel {...codesProps} redemptions={{ codeId: 'c1', list: { kind: 'gap', why: 'denied-by-server' } }} />,
+  'ar',
+)
+check('فشل سجلّ المستبدلين مسمّى لا قائمة فارغة', redsGapHtml.includes('data-code-redemptions-state="denied-by-server"'))
+
+// ═══════════ ٨-ج) [ADMIN-CONV] بطاقة «دخلوا اليوم» ═══════════
+check('بطاقة signedInToday معروضة في اللقطة', todayHtml.includes('data-metric="activity.signedInToday"'))
+const signedTodayCard = todayHtml.split('data-metric="activity.signedInToday"')[1]?.slice(0, 1200) ?? ''
+check('وغيابها «غير متاح» لا صفر', signedTodayCard.includes('data-state="unavailable"') && !/>\s*0\s*</.test(signedTodayCard))
+
 // ═══════════ ٩) الكتلة التشغيلية في صفحة الحساب ═══════════
 check('تفصيل الاستحقاق معروض', detailHtml.includes('حالة الاستحقاق') && detailHtml.includes('Premium فعّال'))
 check('أثر التجارة معروض', detailHtml.includes('آخر رقم طلب') && detailHtml.includes('SLA-10241'))
 // و«بلا انتهاء» ليست «—»: `null` جوابُ خادم لا جهلٌ.
 check('انتهاء null يُعرض «بلا انتهاء» لا شرطة', detailHtml.includes('بلا انتهاء'))
+
+// ═══════════ ٩-ب) [ADMIN-CONV] سجلّ الأكواد وبلاغات الطعام في الصفحة ═══════════
+check('سجلّ الأكواد معروض بوسم الحملة', detailHtml.includes('data-detail-list="code-history"') && detailHtml.includes('ramadan'))
+check('بلاغات الطعام معروضة بحالتها المترجمة', detailHtml.includes('data-detail-list="food-submissions"') && detailHtml.includes('ينتظر المراجعة'))
 
 console.log(`\n✅ ${pass} فحص رسم — الشاشة تُخرج ما يقوله العقد\n`)
 

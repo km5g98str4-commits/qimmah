@@ -27,6 +27,9 @@ import { CLOSED_DECISION, canWrite, isAdmin, resolveAdminRole } from '../auth/ad
 import type { AdminRoleDecision } from '../auth/adminRole'
 import {
   issueAccessCode,
+  issueAccessCodeBatch,
+  loadCodeBatches,
+  loadCodeRedemptions,
   loadLiveCodePage,
   loadLiveExecutiveSnapshot,
   loadLiveUserDetail,
@@ -39,13 +42,17 @@ import type {
   AdminCodePage,
   AdminUserDetail,
   AdminUserPage,
+  CodeBatchRow,
+  CodeRedemptionRow,
   ExecutiveSnapshot,
   IssuedCode,
+  IssuedCodeBatch,
   MetricValue,
 } from '../contract/types'
 import { unavailable } from '../contract/types'
 import { AdminDenied } from './AdminDenied'
 import { AdminShell } from './AdminShell'
+import type { PanelList } from './CodesPanel'
 
 /** شاشة انتظار — بلا رقم واحد، فلا هيكل يوهم بقيمة قادمة. */
 function AdminLoading({ label }: { label: string }) {
@@ -100,6 +107,14 @@ export function AdminRoute() {
   const [codeBusy, setCodeBusy] = useState(false)
   const [codeNonce, setCodeNonce] = useState(0)
   const codeRunRef = useRef(0)
+  // ═══ [ADMIN-CONV] الحملات · الدفعة · سجلّ المستبدلين ═══
+  const [batches, setBatches] = useState<PanelList<CodeBatchRow>>({ kind: 'loading' })
+  const batchesRunRef = useRef(0)
+  const [issuedBatch, setIssuedBatch] = useState<IssuedCodeBatch | null>(null)
+  // سجلّ مستبدلي كود واحد مفتوح — الفتح فعل طلب، فالنداء يقع عنده لا مع الجدول.
+  const [redemptions, setRedemptions] = useState<{ codeId: string; list: PanelList<CodeRedemptionRow> } | null>(null)
+  const redemptionsRunRef = useRef(0)
+  const openRedemptionsRef = useRef<string | null>(null)
 
   const [openUserId, setOpenUserId] = useState<string | null>(null)
   const [detail, setDetail] = useState<AdminUserDetail | null>(null)
@@ -207,6 +222,26 @@ export function AdminRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed, auth.user?.id, codeSearch, codeNonce, nonce])
 
+  // ── [ADMIN-CONV] الحملات مجمّعة بالوسم — تُعاد مع كل فعل أكواد ──
+  useEffect(() => {
+    if (!allowed) {
+      setBatches({ kind: 'loading' })
+      return
+    }
+    const run = ++batchesRunRef.current
+    let alive = true
+    void (async () => {
+      const res = await loadCodeBatches(decision)
+      if (!alive || run !== batchesRunRef.current) return
+      // الفشل يبقى باسمه — «الهجرة ما انطبقت» تصل الشاشة `rpc-missing` لا فراغًا.
+      setBatches(res.ok ? { kind: 'rows', rows: res.rows } : { kind: 'gap', why: res.live })
+    })()
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowed, auth.user?.id, codeNonce, nonce])
+
   const refresh = useCallback(() => setNonce((n) => n + 1), [])
   const onSearch = useCallback((v: string) => setTyped(v), [])
   const onPage = useCallback((p: number) => setPage(Math.max(1, Math.trunc(p))), [])
@@ -276,6 +311,59 @@ export function AdminRoute() {
   const onDismissIssued = useCallback(() => setIssued(null), [])
   const onCodeSearch = useCallback((v: string) => setCodeSearch(v), [])
 
+  /**
+   * [ADMIN-CONV] الإصدار الدفعيّ. **الأكواد الخام تعيش في الحالة وحدها** —
+   * لا تخزين محلّي ولا سجلّ: تظهر مرّة، ويصرفها المؤسس بنفسه.
+   */
+  const onIssueBatch = useCallback(
+    (input: {
+      reason: string
+      label?: string
+      durationDays: number
+      maxRedemptions: number
+      expiresAt: string | null
+      count: number
+    }) => {
+      setCodeBusy(true)
+      setWriteError(null)
+      void (async () => {
+        const res = await issueAccessCodeBatch(decision, input)
+        setCodeBusy(false)
+        if (!res.ok) {
+          setWriteError(res.live)
+          return
+        }
+        setIssuedBatch(res.value)
+        setCodeNonce((n) => n + 1)
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+  const onDismissIssuedBatch = useCallback(() => setIssuedBatch(null), [])
+
+  /** [ADMIN-CONV] «من استخدمه؟» — فتح السجلّ هو لحظة النداء، وإغلاقه لا ينادي. */
+  const onToggleRedemptions = useCallback(
+    (codeId: string) => {
+      const run = ++redemptionsRunRef.current
+      if (openRedemptionsRef.current === codeId) {
+        openRedemptionsRef.current = null
+        setRedemptions(null)
+        return
+      }
+      openRedemptionsRef.current = codeId
+      setRedemptions({ codeId, list: { kind: 'loading' } })
+      void (async () => {
+        const res = await loadCodeRedemptions(decision, codeId)
+        // استجابة قديمة لا تكتب فوق أحدث فتح — نفس نمط بقيّة النداءات هنا.
+        if (run !== redemptionsRunRef.current || openRedemptionsRef.current !== codeId) return
+        setRedemptions({ codeId, list: res.ok ? { kind: 'rows', rows: res.rows } : { kind: 'gap', why: res.live } })
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+
   if (!allowed) return <AdminDenied decision={decision} />
   if (!snapshot) return <AdminLoading label={t.states.loading} />
 
@@ -310,6 +398,12 @@ export function AdminRoute() {
         onDismissIssued,
         writeError,
         busy: codeBusy,
+        onIssueBatch,
+        issuedBatch,
+        onDismissIssuedBatch,
+        batches,
+        redemptions,
+        onToggleRedemptions,
       }}
     />
   )

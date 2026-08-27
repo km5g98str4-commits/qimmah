@@ -167,6 +167,11 @@ export interface AdminStrings {
     accessRevoked: string
     /** ما يُعرض حين يقول الخادم «لا شيء» (لا حين لا نعرف). */
     none: string
+    /** [ADMIN-CONV] سجلّ الأكواد وبلاغات الطعام — قسمان جديدان في صفحة الحساب. */
+    codeHistoryHeading: string
+    codeHistoryEmpty: string
+    foodSubmissionsHeading: string
+    foodSubmissionsEmpty: string
   }
   /** أسماء حالات الاستحقاق كما تشتقّها القاعدة — لا يُعرض المعرّف الخام. */
   entitlementState: Record<string, string>
@@ -238,6 +243,15 @@ export interface AdminStrings {
     foodNotePrompt: string
     foodPublishedPrompt: string
     foodEvidenceNote: string
+    /** [ADMIN-CONV] «نشر» قرارٌ ومؤشّر — الكتالوج الحيّ يمرّ بإصدار بيانات التطبيق. */
+    foodPublishNote: string
+    /** [ADMIN-CONV] تنبيه بلاغات شقيقة محتملة داخل القائمة المحمّلة. */
+    foodSiblings: string
+    /** [ADMIN-CONV] طابور الطلبات المعلّقة — النصف الثاني من طابور التسليم. */
+    pendingHeading: string
+    pendingEmpty: string
+    /** عدّاد ما هو معروض فعلًا في القائمة — لا ادّعاء إجمالي أكبر منها. */
+    shown: string
     actionFailed: string
   }
   /** لوحة أكواد الوصول — الإصدار والقائمة والتعطيل. */
@@ -279,9 +293,37 @@ export interface AdminStrings {
     days: string
     writeFailed: string
     needReason: string
+    /** [ADMIN-CONV] «من استخدمه» — سجلّ مستبدلي كود واحد. */
+    redemptionsShow: string
+    redemptionsHide: string
+    redemptionsEmpty: string
+    redemptionsUnavailable: string
+    colRedeemedAt: string
+    colRedeemerId: string
+    colRedeemerEmail: string
+    /** [ADMIN-CONV] الإصدار الدفعيّ — حملة = وسم فوق أكواد فردية مولَّدة. */
+    batchHeading: string
+    batchNote: string
+    batchCountLabel: string
+    batchExpiryLabel: string
+    batchIssueButton: string
+    batchIssuing: string
+    batchIssuedHeading: string
+    batchIssuedOnce: string
+    /** [ADMIN-CONV] عرض الحملات مجمّعة بالوسم. */
+    batchesHeading: string
+    batchesEmpty: string
+    batchesUnavailable: string
+    colBatchIssued: string
+    colBatchRedeemed: string
+    colBatchRemaining: string
+    colBatchDisabled: string
+    colBatchLast: string
   }
   /** حالات الكود كما تشتقّها القاعدة. */
   codeStatus: Record<string, string>
+  /** [ADMIN-CONV] حالات بلاغ الطعام — لا يُعرض المعرّف الخام. */
+  foodStatus: Record<string, string>
 }
 
 const arLabels: Record<string, string> = {
@@ -295,6 +337,7 @@ const arLabels: Record<string, string> = {
   'users.new30d': 'جديدة — ٣٠ يوم',
   'users.verified': 'حسابات موثّقة البريد',
   'users.growthSeries': 'نمو الحسابات',
+  'activity.signedInToday': 'سجّلوا دخول اليوم',
   'activity.signedIn7d': 'سجّلوا دخول — ٧ أيام',
   'activity.signedIn30d': 'سجّلوا دخول — ٣٠ يوم',
   'activity.dormant30d': 'بلا دخول من ٣٠ يوم+',
@@ -348,6 +391,7 @@ const enLabels: Record<string, string> = {
   'users.new30d': 'New — 30 days',
   'users.verified': 'Email-verified accounts',
   'users.growthSeries': 'Account growth',
+  'activity.signedInToday': 'Signed in today',
   'activity.signedIn7d': 'Signed in — 7 days',
   'activity.signedIn30d': 'Signed in — 30 days',
   'activity.dormant30d': 'No sign-in for 30+ days',
@@ -722,6 +766,10 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       lastPurchaseAt: 'تاريخ آخر شراء',
       accessRevoked: 'وصوله محظور',
       none: 'ما فيه',
+      codeHistoryHeading: 'سجلّ الأكواد',
+      codeHistoryEmpty: 'ما استبدل أي كود.',
+      foodSubmissionsHeading: 'بلاغات الطعام',
+      foodSubmissionsEmpty: 'ما أرسل أي بلاغ.',
     },
     entitlementState: {
       premiumActive: 'Premium فعّال',
@@ -789,6 +837,12 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       foodNotePrompt: 'وش السبب؟ (يُسجَّل مع القرار)',
       foodPublishedPrompt: 'معرّف الصنف بعد ما تنشره (اختياري)',
       foodEvidenceNote: 'هذي أرقام المستخدم — دليل مو مصدر. ما تدخل الكتالوج إلا بعد ما تتحقّق منها بنفسك.',
+      foodPublishNote:
+        '«اعتمد» و«معرّف الصنف» قرار ومؤشّر بس — الصنف ما يوصل بحث المستخدمين من هنا. دخوله الفعلي للكتالوج يمرّ بإصدار بيانات التطبيق نفسه.',
+      foodSiblings: 'فيه بلاغات شقيقة محتملة في نفس القائمة (نفس الباركود أو اسم قريب):',
+      pendingHeading: 'طلبات سلة معلّقة',
+      pendingEmpty: 'ما فيه طلب معلّق — كل اللي وصل اتّصنف.',
+      shown: 'معروض',
       actionFailed: 'ما تمّ الإجراء. السبب:',
     },
     codes: {
@@ -830,12 +884,42 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       days: 'يوم',
       writeFailed: 'ما تمّ الفعل — والسبب:',
       needReason: 'لازم سبب قبل أي فعل — الأثر الإداري ما يكون مجهول.',
+      redemptionsShow: 'من استخدمه؟',
+      redemptionsHide: 'أخفِ المستبدلين',
+      redemptionsEmpty: 'ما استخدمه أحد بعد.',
+      redemptionsUnavailable: 'ما قدرنا نجيب قائمة المستبدلين. السبب:',
+      colRedeemedAt: 'متى',
+      colRedeemerId: 'معرّف الحساب',
+      colRedeemerEmail: 'البريد (مقنَّع)',
+      batchHeading: 'أصدر دفعة أكواد',
+      batchNote:
+        'الحملة اسم مو سرّ: تكتب اسمها في «الوسم»، والأكواد نفسها تتولّد قوية وحدة وحدة. كل كود يشتغل مستقل تحت نفس الحملة.',
+      batchCountLabel: 'كم كود؟ (١–٥٠٠)',
+      batchExpiryLabel: 'تاريخ الانتهاء (اختياري)',
+      batchIssueButton: 'أصدر الدفعة',
+      batchIssuing: 'نصدر الدفعة…',
+      batchIssuedHeading: 'الدفعة صدرت',
+      batchIssuedOnce: 'انسخها كلها الحين — هذي المرّة الوحيدة اللي تظهر فيها، وما نخزّنها في أي مكان.',
+      batchesHeading: 'الحملات',
+      batchesEmpty: 'ما فيه حملات بعد.',
+      batchesUnavailable: 'ما قدرنا نجيب الحملات. السبب:',
+      colBatchIssued: 'صادر',
+      colBatchRedeemed: 'مستبدَل',
+      colBatchRemaining: 'متبقٍ',
+      colBatchDisabled: 'معطَّل',
+      colBatchLast: 'آخر إصدار',
     },
     codeStatus: {
       issued: 'صادر',
       redeemed: 'استُرد',
       expired: 'منتهٍ',
       disabled: 'معطّل',
+    },
+    foodStatus: {
+      pending: 'ينتظر المراجعة',
+      approved: 'معتمد',
+      rejected: 'مرفوض',
+      needs_info: 'ناقص معلومات',
     },
   },
   en: {
@@ -977,6 +1061,10 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       lastPurchaseAt: 'Last purchase on',
       accessRevoked: 'Access blocked',
       none: 'None',
+      codeHistoryHeading: 'Code history',
+      codeHistoryEmpty: 'No codes redeemed.',
+      foodSubmissionsHeading: 'Food reports',
+      foodSubmissionsEmpty: 'No reports sent.',
     },
     entitlementState: {
       premiumActive: 'Premium active',
@@ -1050,12 +1138,42 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       days: 'days',
       writeFailed: 'The action did not go through — reason:',
       needReason: 'A reason is required before any action — no anonymous admin trail.',
+      redemptionsShow: 'Who used it?',
+      redemptionsHide: 'Hide redeemers',
+      redemptionsEmpty: 'Nobody has used it yet.',
+      redemptionsUnavailable: 'We could not fetch the redeemer list. Reason:',
+      colRedeemedAt: 'When',
+      colRedeemerId: 'Account id',
+      colRedeemerEmail: 'Email (masked)',
+      batchHeading: 'Issue a code batch',
+      batchNote:
+        'A campaign is a name, not a secret: put the name in "Label" and the codes themselves are generated strong, one by one. Each code works on its own under the same campaign.',
+      batchCountLabel: 'How many codes? (1–500)',
+      batchExpiryLabel: 'Expiry date (optional)',
+      batchIssueButton: 'Issue the batch',
+      batchIssuing: 'Issuing the batch…',
+      batchIssuedHeading: 'Batch issued',
+      batchIssuedOnce: 'Copy them all now — this is the only time they are shown, and we store none of them.',
+      batchesHeading: 'Campaigns',
+      batchesEmpty: 'No campaigns yet.',
+      batchesUnavailable: 'We could not fetch the campaigns. Reason:',
+      colBatchIssued: 'Issued',
+      colBatchRedeemed: 'Redeemed',
+      colBatchRemaining: 'Remaining',
+      colBatchDisabled: 'Disabled',
+      colBatchLast: 'Last issued',
     },
     codeStatus: {
       issued: 'Issued',
       redeemed: 'Redeemed',
       expired: 'Expired',
       disabled: 'Disabled',
+    },
+    foodStatus: {
+      pending: 'Awaiting review',
+      approved: 'Approved',
+      rejected: 'Rejected',
+      needs_info: 'Needs info',
     },
     roadmap: {
       heading: 'Roadmap',
@@ -1088,6 +1206,12 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       foodNotePrompt: 'Why? (recorded with the decision)',
       foodPublishedPrompt: 'Catalog id once you publish it (optional)',
       foodEvidenceNote: 'These are the user\'s numbers — evidence, not a source. Nothing enters the catalog until you verify it yourself.',
+      foodPublishNote:
+        '"Approve" and "catalog id" record a decision and a pointer only — the item does not reach user search from here. It actually enters the catalog through an app data release.',
+      foodSiblings: 'Possible sibling reports in this same list (same barcode or a close name):',
+      pendingHeading: 'Pending Salla orders',
+      pendingEmpty: 'Nothing pending — everything that arrived got classified.',
+      shown: 'shown',
       actionFailed: 'The action did not go through. Reason:',
     },
   },

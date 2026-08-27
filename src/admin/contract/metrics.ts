@@ -54,7 +54,17 @@ export const REVOKE_ACCESS_RPC = 'founder_revoke_access'
 // كلّها محروسة بـ`require_admin` في الخادم: المؤسس **والدعم** يقرآن.
 // وفعلُ المراجعة وحده يبقى على `require_founder`.
 export const FAILED_ORDERS_RPC = 'founder_failed_orders'
+/** [ADMIN-CONV] النصف الثاني من طابور التسليم: ما علِق قبل المعالجة. */
+export const PENDING_ORDERS_RPC = 'founder_pending_orders'
 export const CODE_REDEMPTIONS_RPC = 'founder_code_redemptions'
+/** [ADMIN-CONV] الحملات مجمّعة بالوسم — قراءة، يبلغها المؤسس والدعم. */
+export const CODE_BATCHES_RPC = 'founder_code_batches'
+/**
+ * [ADMIN-CONV] الإصدار الدفعيّ — **فعل، للمؤسس وحده** (`require_founder`).
+ * اسمٌ مستقلّ لا وسيط جديد على المفرد: إضافة `p_count` إلى الدالّة القائمة
+ * تُنشئ حِملًا زائدًا فيصير النداء السداسي القائم ملتبسًا (رأس `20260824120005`).
+ */
+export const CODE_BATCH_ISSUE_RPC = 'founder_issue_code_batch'
 export const EMAIL_HEALTH_RPC = 'founder_email_health'
 export const GRANTS_BY_SOURCE_RPC = 'founder_grants_by_source'
 export const FOOD_SUBMISSIONS_RPC = 'founder_food_submissions'
@@ -210,6 +220,22 @@ export const METRIC_REGISTRY: readonly MetricDefinition[] = [
   // ─────────────────────────────────────────────────────────────────────
   // النشاط — شقّان لا واحد. الخلط بينهما هو الخطأ الشائع في هذه اللوحة.
   // ─────────────────────────────────────────────────────────────────────
+  {
+    // [ADMIN-CONV] «اليوم» بيوم الرياض نفسه الذي تُعدّ به الحسابات الجديدة —
+    // نافذتان مختلفتان في شاشة واحدة تقرآن تناقضًا وهميًّا.
+    id: 'activity.signedInToday',
+    labelKey: 'activity.signedInToday',
+    group: 'activity',
+    source: 'auth.users.last_sign_in_at ≥ منتصف ليل الرياض → founder_executive_snapshot()',
+    aggregation: 'count',
+    privacyClass: 'aggregate',
+    requiredRole: 'founder',
+    refresh: '5m',
+    owner: 'backend',
+    availability: 'NEEDS_BACKEND',
+    backendGap: 'endpoint-missing',
+    unavailableReasonKey: 'reason.migrationPending',
+  },
   {
     id: 'activity.signedIn7d',
     labelKey: 'activity.signedIn7d',

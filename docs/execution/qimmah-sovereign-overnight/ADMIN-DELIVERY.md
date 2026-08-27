@@ -103,7 +103,7 @@
 | `platform.buildLabel` · `platform.syncPipeline` · `platform.entitlementSource` · `platform.backendConfigured` | ملاحظة العميل لنفسه | ✅ **متاح الآن** |
 | `users.total` · `users.newToday` · `users.new7d` · `users.new30d` · `users.growthSeries` | `public.profiles` عبر `founder_executive_snapshot()` | 🔌 موصول · ⏳ الهجرة |
 | `users.verified` | `auth.users.email_confirmed_at` عبر نفس الدالة | 🔌 موصول · ⏳ الهجرة |
-| `activity.signedIn7d` · `activity.signedIn30d` · `activity.dormant30d` | `auth.users.last_sign_in_at` | 🔌 موصول · ⏳ الهجرة |
+| `activity.signedInToday` · `activity.signedIn7d` · `activity.signedIn30d` · `activity.dormant30d` | `auth.users.last_sign_in_at` (اليوم بمنتصف ليل الرياض — [ADMIN-CONV]) | 🔌 موصول · ⏳ الهجرة |
 | `entitlement.premiumActive` · `entitlement.trialActive` · `entitlement.trialExpired` · `entitlement.previewOnly` · `entitlement.conversionOfAccounts` | `public.entitlements` + `private.derive_state` | 🔌 موصول · ⏳ الهجرة |
 | `entitlement.activationRedeemed` · `entitlement.activationPending` | `public.code_redemption_ledger` · `public.access_codes` | 🔌 موصول · ⏳ الهجرة |
 | `commerce.ordersSeen` · `commerce.ordersFailed` | `public.salla_webhook_events` | 🔌 موصول · ⏳ الهجرة |
@@ -128,11 +128,11 @@
 | الدرجة | العدد |
 |---|---|
 | `AVAILABLE_NOW` | **٤** — وضع المنصّة كاملًا، ولا واحد منها يقرأ صفّ مستخدم |
-| `endpoint-missing` | **٢٦** — المصدر موجود والمسار ينتظر تطبيق الهجرة |
+| `endpoint-missing` | **٢٧** — المصدر موجود والمسار ينتظر تطبيق الهجرة (زاد `activity.signedInToday` في [ADMIN-CONV]) |
 | `source-system-missing` | **١٢** — لا جدول ولا سجلّ أصلًا |
 | `IMPOSSIBLE_WITHOUT_CONSENT_CHANGE` | **٨** — متحيّز بنيويًا بمقام الموافقة |
 
-المجموع: **٥٠ مقياسًا**.
+المجموع: **٥١ مقياسًا**.
 
 ### ٤-أ. ما أضافته موجة [ADMIN-R4] — أحد عشر بندًا
 

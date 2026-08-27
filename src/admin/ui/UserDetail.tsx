@@ -22,6 +22,52 @@ import { findMetric } from '../contract/metrics'
 import type { LiveReadState } from '../contract/liveSource'
 import type { AdminUserDetail, MetricValue } from '../contract/types'
 
+/**
+ * [ADMIN-CONV] كتلة قائمة — سجلّ الأكواد وبلاغات الطعام.
+ *
+ * أربع حالات لا تُطوى في بعضها: **جاهز وفارغ** («ما استبدل شيئًا» — جواب مقيس
+ * من الخادم) ≠ **غير متاح** («الهجرة ما انطبقت» — ما سألنا أصلًا). طيّهما في
+ * قائمة فارغة واحدة يجعل نقص القراءة يُقرأ حقيقةً عن الحساب.
+ */
+function ListBlock<T>({
+  id,
+  heading,
+  value,
+  emptyText,
+  render,
+}: {
+  id: string
+  heading: string
+  value: MetricValue<readonly T[]>
+  emptyText: string
+  render: (item: T, index: number) => React.ReactNode
+}) {
+  const lang = useLang()
+  const t = adminStrings[lang]
+  return (
+    <div data-detail-list={id}>
+      <h3 className="text-xs font-extrabold text-ink-500">{heading}</h3>
+      <div className="mt-2">
+        {value.state === 'ready' ? (
+          value.value.length === 0 ? (
+            <p className="text-xs text-ink-500">{emptyText}</p>
+          ) : (
+            <ul className="flex flex-col">{value.value.map((item, i) => render(item, i))}</ul>
+          )
+        ) : value.state === 'loading' ? (
+          <span className="skeleton block h-4 w-24" aria-label={t.states.loading} />
+        ) : value.state === 'error' ? (
+          <p className="text-sm font-bold text-danger">{t.states.error}</p>
+        ) : (
+          <p className="text-sm font-bold text-ink-500" data-detail-list-gap={id}>
+            {t.states.unavailable}
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 /** سطر قيمة — يعرض الجاهز، ويعلن الغائب بسببه. لا شرطة تُقرأ صفرًا. */
 function ValueRow({
   label,
@@ -274,6 +320,49 @@ export function UserDetailPanel({ detail, onBack, live, onRevoke }: UserDetailPr
             />
           </div>
         </div>
+      </div>
+
+      {/* ——— [ADMIN-CONV] سجلّ الأكواد وبلاغات الطعام — العدّاد صار أسماءً ——— */}
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <ListBlock
+          id="code-history"
+          heading={t.detail.codeHistoryHeading}
+          value={detail.commerce.codeHistory}
+          emptyText={t.detail.codeHistoryEmpty}
+          render={(h, i) => (
+            <li
+              key={`${h.redeemedAt}-${i}`}
+              className="flex flex-wrap items-baseline justify-between gap-2 border-t border-line py-2 text-sm first:border-t-0"
+            >
+              <span className="font-bold text-ink-900">{h.label ?? t.codes.noLabel}</span>
+              <span className="tabular-nums text-ink-500">
+                {h.redeemedAt.slice(0, 10)}
+                {/* المدّة غائبة؟ تُقال «—» لا صفر أيام. */}
+                {' · '}
+                {h.durationDays === null ? '—' : `${h.durationDays} ${t.codes.days}`}
+              </span>
+            </li>
+          )}
+        />
+        <ListBlock
+          id="food-submissions"
+          heading={t.detail.foodSubmissionsHeading}
+          value={detail.foodSubmissions}
+          emptyText={t.detail.foodSubmissionsEmpty}
+          render={(f) => (
+            <li
+              key={f.id}
+              className="flex flex-wrap items-baseline justify-between gap-2 border-t border-line py-2 text-sm first:border-t-0"
+            >
+              <span className="font-bold text-ink-900">{f.productName}</span>
+              <span className="text-ink-500">
+                {t.foodStatus[f.status] ?? f.status}
+                {' · '}
+                <span className="tabular-nums">{f.submittedAt.slice(0, 10)}</span>
+              </span>
+            </li>
+          )}
+        />
       </div>
 
       {/* ——— سحب الوصول — فعلٌ لا رجعة فيه، فيسأل عن سببه أوّلًا ——— */}

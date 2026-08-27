@@ -158,6 +158,31 @@ export interface AdminCommerceDetail {
   readonly lastOrderId: MetricValue<string | null>
   readonly lastPurchaseAt: MetricValue<string | null>
   readonly accessRevoked: MetricValue<boolean>
+  /**
+   * [ADMIN-CONV] العدّاد صار أسماءً: أيّ حملة ومتى وبأيّ مدّة.
+   * **المصفوفة الفارغة جوابٌ مقيس** («ما استبدل شيئًا») والغياب `unavailable` —
+   * وهما في الشاشة شيئان مختلفان تمامًا.
+   */
+  readonly codeHistory: MetricValue<readonly UserCodeHistoryEntry[]>
+}
+
+/** استهلاك كود واحد كما يراه المؤسس — وسم الحملة وتاريخها، لا بصمة ولا خام. */
+export interface UserCodeHistoryEntry {
+  readonly label: string | null
+  readonly redeemedAt: string
+  readonly durationDays: number | null
+}
+
+/**
+ * بلاغ طعام في صفحة الحساب — **الحقول الأربعة وحدها**.
+ * لا `evidence_*` هنا: أرقام المُبلِّغ دليلٌ يعيش في طابور المراجعة، ونقلها
+ * إلى صفحة الحساب يجعلها تُقرأ ملفًّا غذائيًّا شخصيًّا وهي ليست كذلك.
+ */
+export interface UserFoodSubmissionEntry {
+  readonly id: string
+  readonly status: FoodSubmissionStatus
+  readonly productName: string
+  readonly submittedAt: string
 }
 
 /**
@@ -178,6 +203,8 @@ export interface AdminUserDetail {
   readonly emailVerified: MetricValue<boolean>
   readonly entitlementDetail: AdminEntitlementDetail
   readonly commerce: AdminCommerceDetail
+  /** [ADMIN-CONV] بلاغات الطعام التي أرسلها الحساب — جواب «وش صار على بلاغي؟». */
+  readonly foodSubmissions: MetricValue<readonly UserFoodSubmissionEntry[]>
 }
 
 /** شدّة بند طابور الاهتمام. */
@@ -232,6 +259,8 @@ export interface UsersSnapshot {
 
 /** النشاط — بشقّيه المنفصلين عمدًا (دخول ≠ استخدام). */
 export interface ActivitySnapshot {
+  /** [ADMIN-CONV] «من دخل اليوم» — بيوم الرياض نفسه الذي تُعدّ به الحسابات الجديدة. */
+  readonly signedInToday: MetricValue<number>
   readonly signedIn7d: MetricValue<number>
   readonly signedIn30d: MetricValue<number>
   readonly dormant30d: MetricValue<number>
@@ -390,6 +419,34 @@ export interface IssuedCode {
   readonly maxRedemptions: number
   readonly expiresAt: string | null
   readonly issuedAt: string
+}
+
+/**
+ * دفعة أكواد صدرت للتوّ — **الظهور الوحيد لنصوصها الخام**، كالمفرد تمامًا.
+ * الجدول يحفظ البصمات المملّحة فقط؛ فإن أُغلقت الشاشة لا يستعيدها أحد.
+ */
+export interface IssuedCodeBatch {
+  readonly label: string | null
+  readonly count: number
+  readonly durationDays: number
+  readonly maxRedemptions: number
+  readonly expiresAt: string | null
+  readonly codes: readonly string[]
+  readonly issuedAt: string
+}
+
+/**
+ * حملة مجمّعة بالوسم — صفّ من `founder_code_batches`.
+ * الأعداد `number | null` عمدًا: **الغياب نوع لا صفر** — عددٌ لم يصل ليس
+ * «صفر أكواد»، والواجهة تعرضه «—».
+ */
+export interface CodeBatchRow {
+  readonly label: string | null
+  readonly codesIssued: number | null
+  readonly codesRedeemed: number | null
+  readonly codesRemaining: number | null
+  readonly codesDisabled: number | null
+  readonly lastIssuedAt: string | null
 }
 
 /** بانٍ مختصر لقيمة غير متاحة. */

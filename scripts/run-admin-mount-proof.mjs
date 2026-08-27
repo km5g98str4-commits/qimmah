@@ -227,6 +227,47 @@ const ATTACKS = [
     file: 'src/admin/ui/AdminRoute.tsx',
     patch: (s) => s.replace('  const allowed = isAdmin(decision)', "  const allowed = isAdmin(decision) || localStorage.getItem('qimmah:admin') === '1'"),
   },
+  // ═══ [ADMIN-CONV] محاكاة التفاف على الشدّ الجديد — كلٌّ تسقط بفحص مسمّى ═══
+  {
+    // فشل القائمة يُقلب صفوفًا فارغة تُقرأ «ما فيه شيء» — عكس عقد التسمية.
+    name: 'فشل قائمةٍ يُقلب قائمة فارغة',
+    file: 'src/admin/contract/liveSource.ts',
+    patch: (s) =>
+      s.replace(
+        "    const { data, error } = await client.rpc(rpc, args)\n    if (error) return { ok: false, live: classify(error) }",
+        "    const { data, error } = await client.rpc(rpc, args)\n    if (error) return { ok: true, rows: [] }",
+      ),
+  },
+  {
+    // دفعة بلا أكواد تُعلَن نجاحًا — «النجاح هو ظهور الأكواد» يسقط.
+    name: 'دفعة بأكواد صفر تُعلَن نجاحًا',
+    file: 'src/admin/contract/liveSource.ts',
+    patch: (s) =>
+      s.replace(
+        "    if (!Array.isArray(rawCodes) || rawCodes.length === 0) return { ok: false, live: 'failed' }",
+        "    if (!Array.isArray(rawCodes)) return { ok: false, live: 'failed' }",
+      ),
+  },
+  {
+    // صفّ مشوّه في سجلّ الأكواد يُتخطّى بدل أن يُسقط الكتلة — نصف سجلّ يمرّ.
+    name: 'صفّ سجلّ أكواد مشوّه يُتخطّى بصمت',
+    file: 'src/admin/contract/liveSource.ts',
+    patch: (s) =>
+      s.replace(
+        "    if (typeof rec.redeemed_at !== 'string') return unavailable<readonly UserCodeHistoryEntry[]>('NEEDS_BACKEND')",
+        "    if (typeof rec.redeemed_at !== 'string') continue",
+      ),
+  },
+  {
+    // غياب المفتاح الجديد يصير صفرًا جاهزًا — عكس «الغياب نوع».
+    name: 'signedInToday الغائب يُقرأ صفرًا',
+    file: 'src/admin/contract/liveSource.ts',
+    patch: (s) =>
+      s.replace(
+        '      signedInToday: num(a.signedInToday, asOf, base.activity.signedInToday),',
+        '      signedInToday: num(a.signedInToday, asOf, ready(0, asOf)),',
+      ),
+  },
 ]
 
 let killed = 0
