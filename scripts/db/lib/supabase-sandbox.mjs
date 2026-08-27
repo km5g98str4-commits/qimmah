@@ -14,6 +14,10 @@ import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto'
 import { readFileSync, readdirSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
+import { randomBytes } from 'node:crypto'
+// وعي البوّابة [20260827120004]: نُعيد استعمال ساكّ الختم المتزامن نفسه الذي
+// يستعمله طقم Postgres الحقيقي — مصدرٌ واحد فلا يتباعد التنفيذان.
+import { mintStampSync, GATE_ACTION_BY_RPC } from './pg-staging.mjs'
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..')
 export const MIGRATIONS_DIR = join(ROOT, 'supabase/migrations')
@@ -72,7 +76,48 @@ export async function createSandbox({ exclude = [] } = {}) {
       failed.push({ file: f, message: String(e.message || e).split('\n')[0] })
     }
   }
-  return { db, applied, failed }
+
+  // ── بديل Vault + وعي البوّابة [20260827120004] ─────────────────────────────
+  // بعد تبويب الطفرات الأربع، لا تُنفَّذ بلا ختم `x-qimmah-gate` صالح. الصندوق —
+  // بوصفه محاكيًا أمينًا — يزرع بديل vault بنفس شكل Supabase (name/decrypted_secret)
+  // بسرٍّ يُولَّد وقت التشغيل، ثم **يلفّ** db.query/db.exec فيسكّ الختم نفسه الذي
+  // تسكّه البوّابة لكل نداء مبوَّب — فتبقى الإثباتات القائمة خضراء بلا تعديل سطر
+  // فيها، بينما يبقى الحارس فعّالًا (غياب السرّ ⇒ فشل مغلق).
+  const gateSecret = `sbx-gate-secret-${randomBytes(24).toString('hex')}` // ≥32 محرفًا
+  await db.exec(`
+    create schema if not exists vault;
+    create table if not exists vault._secrets (id uuid primary key default gen_random_uuid(), name text unique, secret text);
+    create or replace view vault.decrypted_secrets as select id, name, secret as decrypted_secret from vault._secrets;
+    insert into vault._secrets(name, secret) values ('qimmah_gate_secret', '${gateSecret}')
+      on conflict (name) do update set secret = excluded.secret;
+  `)
+
+  const origQuery = db.query.bind(db)
+  const origExec = db.exec.bind(db)
+  const gateActionsInSql = (sql) => {
+    const hits = new Set()
+    for (const [rpc, action] of Object.entries(GATE_ACTION_BY_RPC)) {
+      if (new RegExp(`\\b${rpc}\\s*\\(`).test(sql)) hits.add(action)
+    }
+    return [...hits]
+  }
+  // قبل كل نداء لِـRPC مبوَّبة (فعلٌ واحد بالضبط في العبارة)، اقرأ الهوية الحاليّة
+  // واسكّ ختمًا صحيحًا في request.headers — تمامًا كما تفعل البوّابة. بلا هوية أو
+  // بأفعال متعدّدة: لا نلمس شيئًا (يسقط عند «not authenticated» كما كان).
+  const ensureStamp = async (sql) => {
+    if (typeof sql !== 'string') return
+    const actions = gateActionsInSql(sql)
+    if (actions.length !== 1) return
+    let uid = null
+    try { uid = (await origQuery(`select nullif(current_setting('request.jwt.claim.sub', true), '') as u`)).rows[0].u } catch { /* لا هوية */ }
+    if (!uid) return
+    await origQuery(`select set_config('request.headers', $1, false)`,
+      [JSON.stringify({ 'x-qimmah-gate': mintStampSync(gateSecret, actions[0], uid) })])
+  }
+  db.query = async (sql, params) => { await ensureStamp(sql); return origQuery(sql, params) }
+  db.exec = async (sql) => { await ensureStamp(sql); return origExec(sql) }
+
+  return { db, applied, failed, gateSecret }
 }
 
 /** يبدّل الدور الفعّال ومطالبة الهوية. `role=null` ⇒ مالك القاعدة. */

@@ -55,7 +55,13 @@ const ACTIVATION_HARDENING = '20260824120004_activation_hardening.sql'
 // دالّةٍ غير موجودة، فيسقط الإثبات المضادّ بخطأٍ تقنيّ لا بالسلوك الذي يقيسه.
 const CAMPAIGN_CODES = '20260824120005_campaign_is_not_a_credential.sql'
 const RATE_LIMIT = '20260824120001_roles_and_redeem_rate_limit.sql'
-const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, RATE_LIMIT, ACTIVATION_HARDENING, CAMPAIGN_CODES]
+// [GATEWAY-ENFORCEMENT] 20260827120004 يعيد تعريف `public.claim_pending_grants`
+// (دالّةٌ **تحصّنها FIX**) — فهي مشتقّةٌ بحكم الحارس أدناه، وتُستبعَد من البيئة
+// «القديمة» كبقيّة السلالة. (وأمّا 20260827120003 فلا يعيد تعريف أيّ دالّة
+// تحصّنها FIX — يعيد `gtin_check_digit_valid` وحدها — فلا يدخل السلالة؛ وتأكيده
+// المضادّ محروسٌ بفحص وجود الدالّة فيمرّ نظيفًا في التاريخ المبتور.)
+const GATEWAY_ENFORCE = '20260827120004_gateway_stamp_enforcement.sql'
+const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, RATE_LIMIT, ACTIVATION_HARDENING, CAMPAIGN_CODES, GATEWAY_ENFORCE]
 
 /**
  * [OVERNIGHT-5] السلسلة **المطبَّقة فعلًا** في هذا الإثبات — بالترتيب.
