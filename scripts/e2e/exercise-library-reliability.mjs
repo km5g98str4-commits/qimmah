@@ -3,7 +3,7 @@
 
 import { spawn } from 'node:child_process'
 import { chromium } from './lib/engine.mjs'
-import { answerHistory, finishInputSteps } from './lib/onboarding-driver.mjs'
+import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-driver.mjs'
 
 const PORT = 5326
 const EXTERNAL = process.env.PREVIEW_URL || ''
@@ -57,12 +57,15 @@ async function onboardToPreview(page) {
   const next = () => page.locator('footer button').last().click({ force: true })
   await next()
   await page.waitForSelector('#onb-title-intent', { timeout: 20_000 })
-  const rows = page.locator('button[aria-pressed]')
-  await rows.nth(1).click({ force: true })
-  await rows.nth(3).click({ force: true })
+  // [مهمة الصقل §7] عيب التقاء مقيس: كانت الرحلة تنقر خيار النيّة بفهرسه الخام
+  // `nth(1)` (= «اقتراحات أكل») ثم تستدعي `finishInputSteps` بافتراضه `plan`،
+  // فيصدق حارس «نمط الأكل» على التناقض ويُسقط الرحلة كلها. `selectIntent`
+  // يجعل المُختار والمُبلَّغ قيمة واحدة — كما توصي وثيقة السائق نفسها.
+  const chosenIntent = await selectIntent(page, 'meals')
+  await page.locator('button[aria-pressed]').nth(3).click({ force: true })
   await answerHistory(page, next, { trained: true })
   await page.locator('button[aria-pressed]').first().click({ force: true })
-  await finishInputSteps(page, next)
+  await finishInputSteps(page, next, { intent: chosenIntent })
   await settle(page, 1_600)
   await tap(page, /الدخول للوحة/)
   await page.waitForSelector('[data-testid="plan-handoff"]', { timeout: 25_000 })
@@ -86,9 +89,23 @@ try {
   await page.evaluate(() => { location.hash = '/exercises' })
   await page.locator('[data-testid="library-screen"]').waitFor()
   check('المسار العميق #/exercises يصل المكتبة', (await currentHash(page)) === '#/exercises')
-  check('العداد المرئي يعلن 181 تمرينًا', /^181\b/.test((await page.locator('[data-testid="exercise-library-count"]').innerText()).trim()))
+  // [مهمة الصقل §7] فحصان كانا مثبَّتين على بيانات تغيّرت: العدّاد صار يُعرض
+  // بالأرقام العربية بعد موجة سياسة الأرقام (فيُطوى النظامان قبل المطابقة)،
+  // وبديل الوسيط فقد شاهده لأن التغطية اكتملت 181/181 — فالفحص ثنائي الحالة:
+  // بديل معلَن عند وجود نقص، أو تغطية كاملة مسمّاة عند غيابه. لا حالة صامتة.
+  const foldDigits = (t) => t.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+  const countText = foldDigits((await page.locator('[data-testid="exercise-library-count"]').innerText()).trim())
+  check('العداد المرئي يعلن 181 تمرينًا (بأي نظام أرقام)', /^181\b/.test(countText), countText)
   check('كل بطاقات التمارين الـ181 موجودة', await page.locator('[data-testid="exercise-card"]').count() === 181)
-  check('بديل الوسيط الصادق مستخدم عند غياب الصورة', await page.locator('[data-media-state="fallback"]').count() > 0)
+  const fallbackCount = await page.locator('[data-media-state="fallback"]').count()
+  const cardMediaCount = await page.locator('[data-testid="exercise-card-media"]').count()
+  check(
+    fallbackCount > 0
+      ? 'بديل الوسيط الصادق مستخدم عند غياب الصورة'
+      : 'لا بديل لأن تغطية الوسائط كاملة — حالة صادقة مسمّاة لا فحص صامت',
+    fallbackCount > 0 || cardMediaCount === 181,
+    `fallback=${fallbackCount} · media=${cardMediaCount}`,
+  )
 
   const firstCard = page.locator('[data-testid="exercise-card"]').first()
   const firstId = await firstCard.getAttribute('data-exercise-id')
