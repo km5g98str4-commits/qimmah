@@ -1,0 +1,159 @@
+{
+  "_readme": "دليل تحقّق oEmbed لمرشّحي video-candidates.json — يُنتجه CI. الدمج في video-research.json قرار منسّق يقرأ هذا الدليل، لا خطوة آلية.",
+  "verifiedAt": "2026-08-27",
+  "results": [
+    {
+      "exerciseId": "iso-lateral-chest-press",
+      "candidateVideoId": "RNSArdOW-rw",
+      "ok": true,
+      "title": "Hammer Strength Plate-Loaded Bench Press Instructions",
+      "author": "Life Fitness / Hammer Strength",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=RNSArdOW-rw returned title \"Hammer Strength Plate-Loaded Bench Press Instructions\" by author_name \"Life Fitness / Hammer Strength\""
+    },
+    {
+      "exerciseId": "incline-chest-press-machine",
+      "candidateVideoId": "whaV86_J6HY",
+      "ok": true,
+      "title": "How To Properly Use The incline Chess Press Machine With Good Form (Hammer Strength)",
+      "author": "Colossus Fitness",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=whaV86_J6HY returned title \"How To Properly Use The incline Chess Press Machine With Good Form (Hammer Strength)\" by author_name \"Colossus Fitness\""
+    },
+    {
+      "exerciseId": "iso-lateral-incline-press",
+      "candidateVideoId": "xwK8Wd5F0Hk",
+      "ok": true,
+      "title": "Hammer Strength Plate-Loaded Incline Press Instructions",
+      "author": "Life Fitness / Hammer Strength",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=xwK8Wd5F0Hk returned title \"Hammer Strength Plate-Loaded Incline Press Instructions\" by author_name \"Life Fitness / Hammer Strength\""
+    },
+    {
+      "exerciseId": "chest-supported-row-machine",
+      "candidateVideoId": "BeTZjAneZpk",
+      "ok": true,
+      "title": "Hammer Strength Plate-Loaded Row Instructions",
+      "author": "Life Fitness / Hammer Strength",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=BeTZjAneZpk returned title \"Hammer Strength Plate-Loaded Row Instructions\" by author_name \"Life Fitness / Hammer Strength\""
+    },
+    {
+      "exerciseId": "triceps-extension-machine",
+      "candidateVideoId": "_JoblP7fggo",
+      "ok": true,
+      "title": "Hammer Strength Select Triceps Extension",
+      "author": "Hammer Strength",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=_JoblP7fggo returned title \"Hammer Strength Select Triceps Extension\" by author_name \"Hammer Strength\""
+    },
+    {
+      "exerciseId": "decline-dumbbell-press",
+      "candidateVideoId": "Pf1nDoqx_1A",
+      "ok": true,
+      "title": "Decline Dumbbell Bench Press  - Chest Exercise - Bodybuilding.com",
+      "author": "Bodybuilding.com",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=Pf1nDoqx_1A returned title \"Decline Dumbbell Bench Press  - Chest Exercise - Bodybuilding.com\" by author_name \"Bodybuilding.com\""
+    },
+    {
+      "exerciseId": "incline-cable-fly",
+      "candidateVideoId": "Zj98QV_E7w8",
+      "ok": true,
+      "title": "Incline Cable Fly - HASfit Upper Chest Exercise Demonstration - Chest Fly - Cable Flys Pectoral Fly",
+      "author": "HASfit",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=Zj98QV_E7w8 returned title \"Incline Cable Fly - HASfit Upper Chest Exercise Demonstration - Chest Fly - Cable Flys Pectoral Fly\" by author_name \"HASfit\""
+    },
+    {
+      "exerciseId": "svend-press",
+      "candidateVideoId": "Mooao_wZHv4",
+      "ok": true,
+      "title": "Svend Press- We DON'T Usually Recommend this Exercise EXCEPT for Chest Focus Sessions",
+      "author": "Mind Pump TV",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=Mooao_wZHv4 returned title \"Svend Press- We DON'T Usually Recommend this Exercise EXCEPT for Chest Focus Sessions\" by author_name \"Mind Pump TV\""
+    },
+    {
+      "exerciseId": "machine-fly",
+      "candidateVideoId": "sAeDw6xhFFw",
+      "ok": true,
+      "title": "Hammer Strength Select Pectoral Fly",
+      "author": "Hammer Strength",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=sAeDw6xhFFw returned title \"Hammer Strength Select Pectoral Fly\" by author_name \"Hammer Strength\""
+    },
+    {
+      "exerciseId": "knee-push-up",
+      "candidateVideoId": "PDr5B2jLUOw",
+      "ok": true,
+      "title": "How to do a Modified Push-Up | Proper Form & Technique | NASM",
+      "author": "National Academy of Sports Medicine (NASM)",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=PDr5B2jLUOw returned title \"How to do a Modified Push-Up | Proper Form & Technique | NASM\" by author_name \"National Academy of Sports Medicine (NASM)\""
+    },
+    {
+      "exerciseId": "close-grip-pulldown",
+      "candidateVideoId": "ecRF8ERf2q4",
+      "ok": true,
+      "title": "Close Grip Front Lat Pulldown - Back Exercise - Bodybuilding.com",
+      "author": "Bodybuilding.com",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=ecRF8ERf2q4 returned title \"Close Grip Front Lat Pulldown - Back Exercise - Bodybuilding.com\" by author_name \"Bodybuilding.com\""
+    },
+    {
+      "exerciseId": "single-arm-cable-row",
+      "candidateVideoId": "CrylzZHfO1c",
+      "ok": true,
+      "title": "Single Arm Seated Cable Row | How To Perform It Correctly",
+      "author": "KAGED ",
+      "channelMatchesExpected": false,
+      "verificationEvidence": "YouTube oEmbed for watch?v=CrylzZHfO1c returned title \"Single Arm Seated Cable Row | How To Perform It Correctly\" by author_name \"KAGED \""
+    },
+    {
+      "exerciseId": "neutral-grip-pulldown",
+      "candidateVideoId": "kVB6SlEyjQM",
+      "ok": true,
+      "title": "How to: Neutral Grip Pulldown [Lats-focused] for Physique Development",
+      "author": "Physique Development",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=kVB6SlEyjQM returned title \"How to: Neutral Grip Pulldown [Lats-focused] for Physique Development\" by author_name \"Physique Development\""
+    },
+    {
+      "exerciseId": "single-arm-pushdown",
+      "candidateVideoId": "oxXEsQgIUrM",
+      "ok": true,
+      "title": "Single-Arm Tricep Pushdown | Olympic Weightlifting Exercise Library",
+      "author": "Catalyst Athletics",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=oxXEsQgIUrM returned title \"Single-Arm Tricep Pushdown | Olympic Weightlifting Exercise Library\" by author_name \"Catalyst Athletics\""
+    },
+    {
+      "exerciseId": "thoracic-rotation",
+      "candidateVideoId": "snzLuyYgbVI",
+      "ok": true,
+      "title": "Thoracic Rotation in Quadruped - Ask Doctor Jo",
+      "author": "AskDoctorJo",
+      "channelMatchesExpected": false,
+      "verificationEvidence": "YouTube oEmbed for watch?v=snzLuyYgbVI returned title \"Thoracic Rotation in Quadruped - Ask Doctor Jo\" by author_name \"AskDoctorJo\""
+    },
+    {
+      "exerciseId": "child-pose",
+      "candidateVideoId": "l-mtV34Afok",
+      "ok": true,
+      "title": "How to Do a Child's Pose (Balasana) | Yoga",
+      "author": "Howcast",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=l-mtV34Afok returned title \"How to Do a Child's Pose (Balasana) | Yoga\" by author_name \"Howcast\""
+    },
+    {
+      "exerciseId": "decline-chest-press-machine",
+      "candidateVideoId": "1YrEp_Dh7fE",
+      "ok": true,
+      "title": "Hammer Strength Plate-Loaded Decline Press Instructions",
+      "author": "Life Fitness / Hammer Strength",
+      "channelMatchesExpected": true,
+      "verificationEvidence": "YouTube oEmbed for watch?v=1YrEp_Dh7fE returned title \"Hammer Strength Plate-Loaded Decline Press Instructions\" by author_name \"Life Fitness / Hammer Strength\""
+    }
+  ]
+}
