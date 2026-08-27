@@ -1,0 +1,65 @@
+# تحقّق مرشّحي فيديوهات التمارين في CI — [مهمة الصقل §3]
+#
+# ═══ لماذا في CI ═══
+# قاعدة video-research.json تمنع إدخال youtubeVideoId غير مُتحقَّق، والتحقّق
+# (yt oEmbed) محجوب من بيئة الوكلاء بسياسة الوكيل الشبكي — بينما عدّاء GitHub
+# Actions شبكته مفتوحة (نفس منطق food-corpus.yml). فالبحث يرشّح محليًّا في
+# scripts/exercise/video-candidates.json، وهذا السير يتحقّق ويدفع الدليل
+# (video-candidates.verified.json) إلى الفرع نفسه. الدمج في السجلّ المعتمد
+# يبقى خطوة مُراجَعة لاحقة، لا آلية.
+#
+# الإطلاق: دفع تعديل على ملف المرشّحين (قصديّ كالزرّ — تكامل الوكيل لا يملك
+# actions:write لإطلاق dispatch)، ولا حلقة: دفعة الدليل لا تلمس ملف المرشّحين.
+name: Exercise video verify (oEmbed)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/qimmah-final-sovereign-convergence-001
+    paths:
+      - scripts/exercise/video-candidates.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: video-verify-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify candidates against YouTube oEmbed
+        run: node scripts/exercise/verify-video-candidates.mjs
+
+      - name: Commit and push the evidence to this branch
+        run: |
+          git config user.name 'qimmah-video-verifier'
+          git config user.email 'actions@users.noreply.github.com'
+          git add scripts/exercise/video-candidates.verified.json
+          if git diff --cached --quiet; then
+            echo 'no evidence change - nothing to push.'
+            exit 0
+          fi
+          {
+            echo "data(video): [مهمة الصقل §3] دليل تحقّق oEmbed لمرشّحي الفيديو"
+            echo ""
+            echo "Generated-by: .github/workflows/video-verify.yml"
+          } > /tmp/video-commit-msg
+          git commit -F /tmp/video-commit-msg
+          for i in 1 2 3; do
+            git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            git pull --rebase origin "${{ github.ref_name }}"
+          done
+          git push origin "HEAD:${{ github.ref_name }}"

@@ -1,0 +1,185 @@
+{
+  "_readme": "مرشّحون غير مُتحقَّقين — لا يدخلون video-research.json قبل تحقّق oEmbed في CI. أنتجها بحث [مهمة الصقل §3]. كل candidateVideoId مستخرج من رابط watch?v= ظهر فعليًا في نتيجة WebSearch بعنوانه المذكور في expectedTitle — لا تخمين. expectedChannel هو ما نسبته نتيجة البحث أو ما استُدلّ عليه من صيغة سلسلة العناوين المعتمدة في السجلّ (مبيَّن في whyThisVideo)، ويُحسم نهائيًا بـoEmbed. تحقّق oEmbed كان محجوبًا من بيئة البحث (EGRESS_BLOCKED على youtube.com — جُرِّب وفشل)، وكذلك muscleandstrength.com وpuregym.com. استُثني face-pull وarnold-press (HELD FOR FOUNDER DECISION). عدد استعلامات WebSearch: 42.",
+  "researchedAt": "2026-08-26",
+  "candidates": [
+    {
+      "exerciseId": "iso-lateral-chest-press",
+      "candidateVideoId": "RNSArdOW-rw",
+      "candidateUrl": "https://www.youtube.com/watch?v=RNSArdOW-rw",
+      "expectedChannel": "Life Fitness / Hammer Strength",
+      "expectedTitle": "Hammer Strength Plate-Loaded Bench Press Instructions",
+      "matchConfidence": "high",
+      "whyThisVideo": "فيديو التعليمات الرسمي لجهاز Hammer Strength Plate-Loaded (Iso-Lateral) Bench Press — نتيجة البحث وصفته صراحة ضمن «Official Hammer Strength Instruction Videos»، والعنوان يطابق حرفيًا صيغة القناة المعتمدة في السجلّ (قارن: TRC5LCYi6W0 «Hammer Strength Plate-Loaded Front Lat Pulldown Instructions»). السجلّ نفسه طلب لهذا التمرين مصدرًا لجهاز Hammer Strength تحديدًا.",
+      "disambiguation": "التطبيق يسمّيه «ضغط صدر أيزو-لاترال» (movementPattern: push، machine، مستوى مبتدئ) — أي جهاز الضغط الأفقي الأساسي، وجهاز Bench Press الرسمي هو نسخته المسطّحة تمييزًا عن Incline/Decline المعروضين لمداخل أخرى."
+    },
+    {
+      "exerciseId": "incline-chest-press-machine",
+      "candidateVideoId": "whaV86_J6HY",
+      "candidateUrl": "https://www.youtube.com/watch?v=whaV86_J6HY",
+      "expectedChannel": "Colossus Fitness",
+      "expectedTitle": "How To Properly Use The incline Chess Press Machine With Good Form (Hammer Strength)",
+      "matchConfidence": "medium",
+      "whyThisVideo": "نتيجة البحث نسبت الفيديو صراحة إلى Colossus Fitness (قناة معتمدة في السجلّ بـ11 فيديو، يونيو 2025). درس أداء كامل لجهاز ضغط الصدر العلوي بالآلة. الخطأ الإملائي «Chess» وارد في عنوان النتيجة كما ظهر. الثقة medium لأن نوع الجهاز الفرعي في الفيديو (selectorized أم plate-loaded) غير قابل للجزم قبل المعاينة.",
+      "disambiguation": "مدخلا التطبيق incline-chest-press-machine وiso-lateral-incline-press منفصلان ببدائل متطابقة؛ خُصّص فيديو التعليمات الرسمي plate-loaded للثاني، ودرس Colossus العام «جهاز ضغط صدر علوي» للأول. إن تبيّن عند المعاينة أن الفيديوهين لنفس الجهاز الحرفي، فذلك انعكاس لتقارب المدخلين في التطبيق نفسه — يُحسم بشريًا."
+    },
+    {
+      "exerciseId": "iso-lateral-incline-press",
+      "candidateVideoId": "xwK8Wd5F0Hk",
+      "candidateUrl": "https://www.youtube.com/watch?v=xwK8Wd5F0Hk",
+      "expectedChannel": "Life Fitness / Hammer Strength",
+      "expectedTitle": "Hammer Strength Plate-Loaded Incline Press Instructions",
+      "matchConfidence": "high",
+      "whyThisVideo": "فيديو التعليمات الرسمي لجهاز Iso-Lateral Incline Press — نتيجة البحث وصفته «the official Hammer Strength instructional video» (منشور 2011، نفس حقبة فيديوهات القناة المعتمدة في السجلّ). مطابقة اسمية مباشرة: مدخل التطبيق هو «ضغط علوي أيزو-لاترال» أي هذا الجهاز بعينه.",
+      "disambiguation": "استُبعد «Super Incline Instructions» (_GqJAVfJ0U0) لأنه جهاز أعلى ميلًا يجمع ضغط الكتف مع العلوي — والتطبيق يصنّف التمرين صدرًا أساسيًا."
+    },
+    {
+      "exerciseId": "chest-supported-row-machine",
+      "candidateVideoId": "BeTZjAneZpk",
+      "candidateUrl": "https://www.youtube.com/watch?v=BeTZjAneZpk",
+      "expectedChannel": "Life Fitness / Hammer Strength",
+      "expectedTitle": "Hammer Strength Plate-Loaded Row Instructions",
+      "matchConfidence": "high",
+      "whyThisVideo": "فيديو التعليمات الرسمي لجهاز Iso-Lateral Rowing — وصف النتيجة يذكر صراحة «angled seat and chest pad» أي مسند الصدر الذي يميّز مدخل التطبيق. العنوان على نفس صيغة سلسلة القناة المعتمدة في السجلّ، ويختلف عن wWLSErG8qGk (High Row) المعتمد أصلًا لمدخل iso-lateral-high-row فلا تكرار.",
+      "disambiguation": "التطبيق يفرّق بين chest-supported-row (دمبل + بنش) وchest-supported-row-machine (machine) — هذا المرشّح للجهاز حصرًا، وجهاز التجديف بمسند صدر أمامي هو بالضبط ما يعرضه الفيديو."
+    },
+    {
+      "exerciseId": "triceps-extension-machine",
+      "candidateVideoId": "_JoblP7fggo",
+      "candidateUrl": "https://www.youtube.com/watch?v=_JoblP7fggo",
+      "expectedChannel": "Hammer Strength",
+      "expectedTitle": "Hammer Strength Select Triceps Extension",
+      "matchConfidence": "medium",
+      "whyThisVideo": "العنوان يطابق حرفيًا صيغة قناة Hammer Strength الرسمية المعتمدة في السجلّ (قارن 7nazTC6EshM «Hammer Strength Select Hip and Glute») — عرض جهاز Select Triceps Extension: جلوس، وسادة ذراع، مفصل المرفق على محور الجهاز. الثقة medium لأن نسبة القناة استدلال من صيغة السلسلة لا نصّ صريح في نتيجة البحث.",
+      "disambiguation": "cues التطبيق: «Set the seat and pad so the joint lines up with the machine's pivot» — جهاز مدّ جلوس بمحور، وليس pushdown (رفضه السجلّ سابقًا وهو محق: IoAP0xQtROk جهاز pushdown). بدائل التطبيق (مدّ فوق الرأس) بدائل حركة لا وصف للجهاز نفسه."
+    },
+    {
+      "exerciseId": "decline-dumbbell-press",
+      "candidateVideoId": "Pf1nDoqx_1A",
+      "candidateUrl": "https://www.youtube.com/watch?v=Pf1nDoqx_1A",
+      "expectedChannel": "Bodybuilding.com",
+      "expectedTitle": "Decline Dumbbell Bench Press - Chest Exercise - Bodybuilding.com",
+      "matchConfidence": "high",
+      "whyThisVideo": "القناة مذكورة في العنوان نفسه وبنفس صيغة سلسلة Bodybuilding.com المعتمدة في السجلّ (9 فيديوهات بصيغة «X - Muscle Exercise - Bodybuilding.com»). مطابقة حركة تامة: بنش منخفض + دمبل. يتجاوز ملاحظة السجلّ («قنوات صغيرة غير موثوقة فقط») بقناة من أعلى المعتمدين."
+    },
+    {
+      "exerciseId": "incline-cable-fly",
+      "candidateVideoId": "Zj98QV_E7w8",
+      "candidateUrl": "https://www.youtube.com/watch?v=Zj98QV_E7w8",
+      "expectedChannel": "HASfit",
+      "expectedTitle": "Incline Cable Fly - HASfit Upper Chest Exercise Demonstration - Chest Fly - Cable Flys Pectoral Fly",
+      "matchConfidence": "medium",
+      "whyThisVideo": "القناة مذكورة في العنوان. HASfit خارج قائمة السجلّ لكنها جهة تدريب معروفة الاعتماد: قناة تعليمية قديمة كبيرة يقودها مدرّبان معتمدان (Coach Kozak & Claudia) بمكتبة عروض تمارين منهجية — سبب القبول المسجَّل وفق معيار المهمة. الحركة: تفتيح كيبل على بنش مائل — بالضبط ما رفض السجلّ الخلط بينه وبين البديلين المرفوضين.",
+      "disambiguation": "ملاحظة السجلّ رفضت مرشّحين لحركتين أخريين: low-to-high واقفًا (مستعمل أصلًا لـlow-cable-fly) وتفتيح دمبل مائل (أداة خاطئة). هذا المرشّح كيبل + بنش مائل، فيطابق «تفتيح كيبل مائل» تمييزًا عن كليهما."
+    },
+    {
+      "exerciseId": "svend-press",
+      "candidateVideoId": "Mooao_wZHv4",
+      "candidateUrl": "https://www.youtube.com/watch?v=Mooao_wZHv4",
+      "expectedChannel": "Mind Pump TV",
+      "expectedTitle": "Svend Press- We DON'T Usually Recommend this Exercise EXCEPT for Chest Focus Sessions",
+      "matchConfidence": "medium",
+      "whyThisVideo": "نتيجة البحث نسبت الفيديو صراحة إلى Mind Pump TV (قناة معتمدة في السجلّ). درس أداء للسفيند بريس (ضغط طبق موزون بعصر الصدر) يطابق مدخل التطبيق (plate، isolation). الثقة medium لسببين: صياغة العنوان تحفّظية («لا ننصح به عادة إلا لجلسات تركيز الصدر») وقد يهمّ فريق المنتج نبرةً، وأداة العرض داخل الفيديو (طبق أم دمبل) غير قابلة للجزم قبل المعاينة."
+    },
+    {
+      "exerciseId": "machine-fly",
+      "candidateVideoId": "sAeDw6xhFFw",
+      "candidateUrl": "https://www.youtube.com/watch?v=sAeDw6xhFFw",
+      "expectedChannel": "Hammer Strength",
+      "expectedTitle": "Hammer Strength Select Pectoral Fly",
+      "matchConfidence": "medium",
+      "whyThisVideo": "العنوان يطابق صيغة قناة Hammer Strength الرسمية المعتمدة في السجلّ («Hammer Strength Select X»). جهاز Select Pectoral Fly تفتيح بمقابض — يطابق cue التطبيق «seat height and handle position». الثقة medium لأن نسبة القناة استدلال صيغة لا نصّ صريح.",
+      "disambiguation": "التطبيق يفصل machine-fly عن pec-deck-machine (المدرج بديلًا له، وفيديوه المعتمد H4mVGHaK2f4) — فالمطلوب هنا جهاز تفتيح بمقابض وأذرع ممدودة لا وسادات مرفق، وSelect Pectoral Fly كذلك. هذا يجيب اقتراح السجلّ القديم بإعادة استخدام فيديو الـpec deck: لا حاجة، وُجد جهاز مغاير فعلًا."
+    },
+    {
+      "exerciseId": "knee-push-up",
+      "candidateVideoId": "PDr5B2jLUOw",
+      "candidateUrl": "https://www.youtube.com/watch?v=PDr5B2jLUOw",
+      "expectedChannel": "National Academy of Sports Medicine (NASM)",
+      "expectedTitle": "How to do a Modified Push-Up | Proper Form & Technique | NASM",
+      "matchConfidence": "high",
+      "whyThisVideo": "بالضبط ما توقّعته ملاحظة السجلّ: مدخل NASM للضغط المعدَّل من نفس سلسلة WDIpL0pjun0 (push-up) و0JUrOH--Kdk المعتمدين — القناة في العنوان والصيغة مطابقة حرفيًا لفيديوهات NASM المعتمدة. الضغط المعدَّل على الركبتين هو مسمّى NASM المعياري لتمرين knee push-up."
+    },
+    {
+      "exerciseId": "close-grip-pulldown",
+      "candidateVideoId": "ecRF8ERf2q4",
+      "candidateUrl": "https://www.youtube.com/watch?v=ecRF8ERf2q4",
+      "expectedChannel": "Bodybuilding.com",
+      "expectedTitle": "Close Grip Front Lat Pulldown - Back Exercise - Bodybuilding.com",
+      "matchConfidence": "high",
+      "whyThisVideo": "القناة في العنوان وبصيغة سلسلتها المعتمدة. مطابقة حركة مباشرة: سحب أمامي بقبضة ضيقة على الكيبل. يتجاوز مرفوضَي السجلّ (James Harrison وVivian Ngo — قناتان شخصيتان) بقناة من أعلى المعتمدين، وفق قيد المهمة: نفس المسار بقناة أعلى سمعة."
+    },
+    {
+      "exerciseId": "single-arm-cable-row",
+      "candidateVideoId": "CrylzZHfO1c",
+      "candidateUrl": "https://www.youtube.com/watch?v=CrylzZHfO1c",
+      "expectedChannel": "KAGED MUSCLE",
+      "expectedTitle": "Single Arm Seated Cable Row | How To Perform It Correctly",
+      "matchConfidence": "medium",
+      "whyThisVideo": "نتيجة البحث نسبت الفيديو صراحة إلى KAGED MUSCLE. القناة خارج قائمة السجلّ، وسبب القبول المسجَّل: علامة مكمّلات أسّسها المدرب المعروف Kris Gethin بمكتبة تمارين إنتاجية منهجية — نظير سابقة قبول السجلّ قنوات تجارية ذات مكتبات تدريب محترفة (Muscle & Strength وهي متجر). العنوان مطابق للحركة (تجديف كيبل جالسًا بذراع واحدة) وصيغته تعليمية «How To Perform It Correctly»."
+    },
+    {
+      "exerciseId": "neutral-grip-pulldown",
+      "candidateVideoId": "kVB6SlEyjQM",
+      "candidateUrl": "https://www.youtube.com/watch?v=kVB6SlEyjQM",
+      "expectedChannel": "Physique Development",
+      "expectedTitle": "How to: Neutral Grip Pulldown [Lats-focused] for Physique Development",
+      "matchConfidence": "medium",
+      "whyThisVideo": "نتيجة البحث نسبته إلى «Austin» — أوستن كارنت مؤسس Physique Development (قناة معتمدة في السجلّ بثلاثة فيديوهات)، والعبارة «for Physique Development» في العنوان نفسه. الثقة medium لاحتمال أن العبارة تعني الهدف التدريبي لا اسم القناة (2019 أقدم من فيديوهات PD المعتمدة) — يحسمه oEmbed فورًا.",
+      "disambiguation": "التطبيق يفصل neutral-grip-pulldown عن close-grip-pulldown؛ خُصّص فيديو Bodybuilding.com بالقبضة الضيقة الأمامية للثاني، وهذا الفيديو المعنون بالقبضة المحايدة صراحةً للأول."
+    },
+    {
+      "exerciseId": "single-arm-pushdown",
+      "candidateVideoId": "oxXEsQgIUrM",
+      "candidateUrl": "https://www.youtube.com/watch?v=oxXEsQgIUrM",
+      "expectedChannel": "Catalyst Athletics",
+      "expectedTitle": "Single-Arm Tricep Pushdown | Olympic Weightlifting Exercise Library",
+      "matchConfidence": "medium",
+      "whyThisVideo": "نتيجة البحث نسبته صراحة إلى مكتبة تمارين Catalyst Athletics — قناة معتمدة في السجلّ. مطابقة حركة تامة (دفع ترايسبس كيبل بذراع واحدة). الثقة medium لأن صيغة مكتبتهم عرض قصير مركّز لا درس مطوّل. لم يُعَد ترشيح RhkRr9eyOzQ (Hammer Fitness) الموقوف على سمعة القناة — هذه قناة أعلى اعتمادًا وفق قيد المهمة."
+    },
+    {
+      "exerciseId": "thoracic-rotation",
+      "candidateVideoId": "snzLuyYgbVI",
+      "candidateUrl": "https://www.youtube.com/watch?v=snzLuyYgbVI",
+      "expectedChannel": "Ask Doctor Jo",
+      "expectedTitle": "Thoracic Rotation in Quadruped - Ask Doctor Jo",
+      "matchConfidence": "medium",
+      "whyThisVideo": "القناة في العنوان. Ask Doctor Jo خارج قائمة السجلّ وسبب القبول المسجَّل: أخصائية علاج طبيعي مرخّصة (DPT) بقناة علاجية تعليمية كبيرة راسخة — نفس فئة Bob & Brad وE3 Rehab المعتمدتين، ولم يُعثر لهما على فيديو مطابق في نتائج البحث.",
+      "disambiguation": "الاسم يغطي عدّة دركات (open-book جانبية، quadruped، جالسة) كما حذّر السجلّ. حُسم من بيانات التطبيق: bodyweight منزلي، «8–10 لكل جهة»، وcue البداية «Start from a stable, balanced position and brace your torso» — يلائم الدرك الرباعي (يد خلف الرأس، تدوير لكل جهة) ولا يلائم الاستلقاء الجانبي. هذا استنتاج موثَّق لا نصّ صريح — إن حسم فريق المنتج تنويعة أخرى يسقط المرشّح."
+    },
+    {
+      "exerciseId": "child-pose",
+      "candidateVideoId": "l-mtV34Afok",
+      "candidateUrl": "https://www.youtube.com/watch?v=l-mtV34Afok",
+      "expectedChannel": "Howcast",
+      "expectedTitle": "How to Do a Child's Pose (Balasana) | Yoga - YouTube",
+      "matchConfidence": "medium",
+      "whyThisVideo": "نتيجة البحث نسبته صراحة: «The main Howcast video on Child's Pose» مع صفحة Howcast الموازية (howcast.com/videos/501359). Howcast خارج قائمة السجلّ وسبب القبول المسجَّل: ناشر تعليمي مؤسسي راسخ بسلسلة يوغا يقدّمها مدرّسون محترفون — لا قناة شخصية مجهولة. الحركة وضعية ثبات واسترخاء فلا غموض تنويعات."
+    },
+    {
+      "exerciseId": "decline-chest-press-machine",
+      "candidateVideoId": "1YrEp_Dh7fE",
+      "candidateUrl": "https://www.youtube.com/watch?v=1YrEp_Dh7fE",
+      "expectedChannel": "Life Fitness / Hammer Strength",
+      "expectedTitle": "Hammer Strength Plate-Loaded Decline Press Instructions",
+      "matchConfidence": "high",
+      "whyThisVideo": "فيديو التعليمات الرسمي لجهاز الضغط المنخفض — نفس السلسلة الرسمية المعتمدة في السجلّ (وصف النتيجة: «demonstrations of muscles worked, machine setup, correct exercise performance»). مدخل التطبيق «جهاز ضغط صدر سفلي» عام، وجهاز Hammer Strength Decline Press هو أشيع أجهزة هذا النمط في الصالات."
+    }
+  ],
+  "noCandidate": [
+    {
+      "exerciseId": "assisted-dip-machine",
+      "searched": "3 استعلامات: (assisted dip machine how to use — PureGym/Planet Fitness/LA Fitness) و(\"How To: Assisted Dip Machine\" ScottHermanFitness ثم muscularstrength) و(المعرّف 8NDyPgEy84E بعنوانه الحرفي)",
+      "whyNone": "أقرب مرشّح 8NDyPgEy84E بعنوان «How To: Assisted Dip Machine» — صيغة العنوان تطابق سلسلة ScottHermanFitness المعتمدة لكن لم تُنسب القناة في أي نتيجة رغم ثلاث محاولات، ونسبة قناة بالصيغة وحدها دون أي إسناد تخمين مرفوض. البقية إمّا Shorts أو جولات صالات شخصية من النوع الذي رفضه السجلّ نصًّا («small/unvetted gym-walkthrough channels») — ومنها D8RIzFsK8gA «(PLANET FITNESS)» وهي وسم مكان لا قناة رسمية. «لا فيديو» أفضل من نسبة غير مسنودة."
+    },
+    {
+      "exerciseId": "jm-press",
+      "searched": "3 استعلامات: (JM press — elitefts/Westside Barbell/Jeff Nippard) و(\"JM press\" tutorial Blakley) و(BarBend \"How to Do the JM Press\")",
+      "whyNone": "لم يظهر أي رابط watch منسوب لقناة قوة معتمدة. الوحيد المنسوب صراحةً: sQJzzZVqV3k «JM Press on Smith Machine | PhysiqueDevelopment.com» — قناة معتمدة لكن الأداة خاطئة: مدخل التطبيق barbell + bench وcue «Unrack the bar» (بار حر)، وتعليم نسخة Smith يخالف قيد المطابقة الدقيقة نصًّا. البقية (iwc4BmhDVVk، 8MdRd9j2EUg، 8EkJXrGz2DQ وغيرها) بلا نسبة قناة في أي نتيجة. اقتراح السجلّ (Barbell Medicine أو نظيرتها) لم يظهر في النتائج — يبقى المسار الموصى به لجولة قادمة، وصفحة ATHLEAN-X المقالية (learn.athleanx.com) تشير لوجود فيديو لديهم لم يظهر رابط watch له."
+    },
+    {
+      "exerciseId": "machine-rdl",
+      "searched": "استعلام مخصّص (plate loaded RDL machine / romanian deadlift machine tutorial) بعد حسم التنويعة من بيانات التطبيق، إضافة لما مسحته استعلامات الأجهزة الأخرى",
+      "whyNone": "غموض الاسم الذي علّقه السجلّ محسوم الآن من cues التطبيق: «Set the seat and pad so the joint lines up with the machine's pivot… finish standing tall» — جهاز مفصلة ورك مخصّص بمساند ومحور، لا Smith-RDL ولا كيبل. لكن لم يظهر لهذا الجهاز أي درس من قناة معتمدة: النتائج إمّا Smith machine RDL (تنويعة خاطئة: jqtqov03KSI، nmGzbW15qYo) أو نفس Hpnfqiik0i8 الذي رفضه السجلّ محقًّا (قناة Zumba). فيديو الجهاز الخاطئ يعلّم حركة خاطئة — يبقى بلا مرشّح، وقرار «أي جهاز تقصده المكتبة» يظل الأولى بالعرض على فريق المنتج كما طلب السجلّ."
+    }
+  ]
+}

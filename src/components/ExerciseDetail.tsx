@@ -244,14 +244,10 @@ function AboutTab({ ex, d, lang, onAddToPlan }: { ex: NonNullable<ReturnType<typ
         {safety || d.guidanceUnavailable}
       </p>
 
-      {/* أزرار — زر يوتيوب فقط عند توفّر رابط (لا فيديو مُضمّن ولا صور خارجية) */}
+      {/* أزرار — [مهمة الصقل §3]: رابط بحث يوتيوب أُزيل. المرجع الوحيد هو
+          `VideoBlock` أعلاه (فيديو واحد مُتحقَّق منه)، ومرجع موثَّق ورابط بحث
+          غير موثوق على نفس الشاشة يناقضان بعضهما. */}
       <div className="flex flex-wrap gap-2">
-        {ex.videoUrl && (
-          <a href={ex.videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost min-h-[44px] px-4 py-2.5 text-sm">
-            <Icon name="Play" className="h-4 w-4" />
-            {d.watchOnYouTube}
-          </a>
-        )}
         {onAddToPlan && (
           <button type="button" onClick={() => onAddToPlan(ex.id)} className="btn-primary min-h-[44px] px-4 py-2.5 text-sm">
             <Icon name="Plus" className="h-4 w-4" />

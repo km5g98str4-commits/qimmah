@@ -5,6 +5,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { libraryStrings, type LibraryStrings } from '@/i18n/dict/library'
 import { exercises } from '@/data/exercises'
+import { approvedVideoFor } from '@/lib/exerciseProductionMedia'
 import { ExerciseName } from './ExerciseName'
 import type { ExEnvironment, ExLevel, Muscle } from '@/types/workout'
 
@@ -119,15 +120,22 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
                       {e.equipment.join(' · ')} · {e.defaultSets}×{e.defaultReps}
                     </p>
                   </div>
-                  <a
-                    href={e.videoUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige"
-                    aria-label={t.watch}
-                  >
-                    <Icon name="Globe" className="h-4 w-4" />
-                  </a>
+                  {/* [مهمة الصقل §3]: الرابط للفيديو المُتحقَّق منه بعينه، لا لبحث
+                      يوتيوب — والتمرين بلا مرجع معتمد لا يعرض زرًّا يوهم بوجوده. */}
+                  {(() => {
+                    const ref = approvedVideoFor(e.id)
+                    return ref ? (
+                      <a
+                        href={ref.canonicalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="grid h-9 w-9 shrink-0 place-items-center rounded-lg border border-line text-ink-500 hover:bg-beige"
+                        aria-label={t.watch}
+                      >
+                        <Icon name="Play" className="h-4 w-4" />
+                      </a>
+                    ) : null
+                  })()}
                   <button
                     type="button"
                     onClick={() => onAdd(e.id)}

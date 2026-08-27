@@ -70,8 +70,12 @@ export interface Exercise {
   defaultSets: number
   defaultReps: string
   defaultRestSec: number
-  videoUrl: string
-  videoSource: VideoSource
+  /**
+   * [مهمة الصقل §3] فيديو مخصّص صريح فقط — لا قيمة افتراضية ولا رابط بحث أبدًا.
+   * مرجع الفيديو المعروض للمستخدم هو سجلّ الإنتاج المُتحقَّق (`approvedVideoFor`).
+   */
+  videoUrl?: string
+  videoSource?: VideoSource
   alternatives: string[]
   notesAr: string
   notesEn: string

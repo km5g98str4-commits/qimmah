@@ -6,12 +6,10 @@ import { getCommonMistakes, getSafetyNotes, getTechniqueTips } from '@/lib/exerc
 
 // مكتبة التمارين — ١٨٠+ تمرينًا تغطي كل المجموعات العضلية + كارديو + إحماء/مرونة.
 // P12: أجهزة الكتالوج المعتمد بمعرّفات قانونية (slug) + خريطة LEGACY_EXERCISE_ID_MAP للمعرّفات القديمة.
-// كل تمرين له رابط شرح غير فارغ. الروابط غالبًا «بحث يوتيوب موثوق» وليست بالضرورة رسمية —
-// لذلك نوضّح المصدر عبر videoSource ('youtube_search' أو 'trusted_video').
-
-function video(nameEn: string): string {
-  return `https://www.youtube.com/results?search_query=${encodeURIComponent(nameEn + ' exercise form')}`
-}
+// [مهمة الصقل §3] روابط «بحث يوتيوب» أُبيدت من طبقة البيانات: مرجع الفيديو الوحيد
+// هو السجلّ المُتحقَّق منه (`approvedVideoFor` في exerciseProductionMedia) —
+// نتائج البحث ليست مرجعًا، وفيديو خاطئ أسوأ من لا فيديو. `videoUrl` بقي حقلًا
+// اختياريًا لفيديو مخصّص صريح فقط، ولا تمرين في الكتالوج يحمله اليوم.
 
 // خريطة العضلات التفصيلية لكل تمرين (هوية كمال الأجسام).
 // primary = العضلات المحرّكة الأساسية، secondary = المساعِدة.
@@ -321,8 +319,8 @@ function ex(p: ExInput): Exercise {
     defaultSets: p.defaultSets ?? 3,
     defaultReps: p.defaultReps ?? '8–12',
     defaultRestSec: p.defaultRestSec ?? 90,
-    videoUrl: p.videoUrl ?? video(p.nameEn),
-    videoSource: hasCustomVideo ? 'trusted_video' : 'youtube_search',
+    videoUrl: p.videoUrl,
+    videoSource: hasCustomVideo ? 'trusted_video' : undefined,
     alternatives: p.alternatives ?? [],
     notesAr: p.notesAr ?? '',
     notesEn: p.notesEn ?? '',

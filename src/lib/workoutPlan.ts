@@ -1,6 +1,7 @@
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import type { Lang } from '@/lib/appPreferences'
 import { getExercise } from '@/data/exercises'
+import { approvedVideoFor } from '@/lib/exerciseProductionMedia'
 import { getTemplate } from '@/data/workoutTemplates'
 import { workoutDayNameAr, workoutDayNameEn } from '@/lib/workoutDayLabel'
 
@@ -81,15 +82,14 @@ export function planExerciseNameParts(pe: PlanExercise, lang: Lang): ExerciseNam
   return exerciseNameParts(ar, en, lang)
 }
 
-/** رابط الفيديو لعنصر الخطة (تخصيص ثم مكتبة). */
+/**
+ * رابط الفيديو لعنصر الخطة — تخصيص المستخدم الصريح ثم المرجع المُتحقَّق منه.
+ * [مهمة الصقل §3]: لا احتياط «بحث يوتيوب» — نتائج البحث ليست مرجعًا، والفراغ
+ * حالة صادقة تُخفي الزرّ بدل أن توهم بوجود شرح.
+ */
 export function planExerciseVideo(pe: PlanExercise): string {
   if (pe.videoUrl) return pe.videoUrl
-  return getExercise(pe.exerciseId)?.videoUrl ?? ''
-}
-
-/** (P12) رابط بحث يوتيوب عن أداء التمرين — احتياطي عند غياب videoUrl. */
-export function exerciseVideoSearchUrl(nameEn: string): string {
-  return `https://www.youtube.com/results?search_query=${encodeURIComponent(nameEn)}+form`
+  return approvedVideoFor(pe.exerciseId)?.canonicalUrl ?? ''
 }
 
 /**

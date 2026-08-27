@@ -1,12 +1,14 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { SessionStageRail } from '@/components/workout/SessionStageRail'
 import type { Lang } from '@/lib/appPreferences'
 import { warmupStrings } from '@/i18n/dict/warmup'
+import { exerciseVideoStrings } from '@/i18n/dict/exerciseVideo'
 import type { WarmupPlan } from '@/lib/warmupPlan'
 import { canonicalExerciseId } from '@/data/exercises'
 import { exerciseMediaManifest } from '@/data/exerciseMediaManifest.generated'
+import { approvedVideoFor, videoEmbedUrl } from '@/lib/exerciseProductionMedia'
 import { getCue } from '@/lib/coaching/cues'
 
 /**
@@ -49,7 +51,16 @@ interface WarmupScreenProps {
 export function WarmupScreen({ lang, plan, dayNameAr, dayNameEn, exerciseCount, onStart, onSkip, onDisable }: WarmupScreenProps) {
   const ar = lang !== 'en'
   const w = warmupStrings[lang] ?? warmupStrings.ar
+  const v = exerciseVideoStrings[lang] ?? exerciseVideoStrings.ar
   const startRef = useRef<HTMLButtonElement>(null)
+  /**
+   * فيديو الأداء لكل خطوة — [مهمة الصقل §3]: **فيديو واحد مُتحقَّق منه، لا بحث.**
+   * المرجع من سجلّ الإنتاج المعتمد حصرًا (`approvedVideoFor` — قيد المراجعة
+   * والمفقود كلاهما null صادق بلا زرّ)، والمشغّل لا يُحمَّل إلا بضغطة المستخدم
+   * (nocookie، لا autoplay). درجات نفس التمرين تتشارك حركته، فالزرّ يُعرض على
+   * أولى خطواته فقط — لا ثلاثة أزرار لنفس الفيديو.
+   */
+  const [playingStep, setPlayingStep] = useState<number | null>(null)
 
   // التركيز يبدأ على الفعل الأساسي — الشاشة مرحلة لا تحذير.
   useEffect(() => {
@@ -100,6 +111,9 @@ export function WarmupScreen({ lang, plan, dayNameAr, dayNameEn, exerciseCount, 
                على النصّ. لا صورة مستعارة ولا GIF مُعلَّم (§8 قرار مقفل ٨). */
             const cue = getCue(step.exerciseId, lang).steps[0]
             const showMedia = hasStillMedia(step.exerciseId)
+            const firstOfExercise = plan.steps.findIndex((s) => s.exerciseId === step.exerciseId) === i
+            const videoRef = firstOfExercise ? approvedVideoFor(step.exerciseId) : null
+            const stepName = ar ? step.nameAr : step.nameEn
             return (
               <li
                 key={`${step.exerciseId}-${step.label}-${i}`}
@@ -136,6 +150,37 @@ export function WarmupScreen({ lang, plan, dayNameAr, dayNameEn, exerciseCount, 
                   {cue && (
                     <span data-warmup-cue className="mt-1 block text-sm leading-relaxed text-ink-500">
                       {cue}
+                    </span>
+                  )}
+                  {videoRef && playingStep !== i && (
+                    <button
+                      type="button"
+                      data-testid="warmup-video-play"
+                      onClick={() => setPlayingStep(i)}
+                      aria-label={v.playAria(stepName)}
+                      aria-expanded={false}
+                      className="tap-target mt-1.5 inline-flex items-center gap-1.5 rounded-lg px-1 py-1 text-sm font-bold text-primary-c"
+                    >
+                      <Icon name="Play" className="h-4 w-4 shrink-0" aria-hidden="true" />
+                      {v.watchHowTo}
+                    </button>
+                  )}
+                  {videoRef && playingStep === i && (
+                    <span className="mt-2 block">
+                      <span className="block overflow-hidden rounded-2xl border border-line" style={{ aspectRatio: '16 / 9' }}>
+                        <iframe
+                          src={videoEmbedUrl(step.exerciseId) ?? undefined}
+                          title={v.watchHowTo}
+                          loading="lazy"
+                          referrerPolicy="strict-origin-when-cross-origin"
+                          allow="accelerometer; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="h-full w-full"
+                        />
+                      </span>
+                      <span className="mt-1.5 block text-[11px] leading-relaxed text-ink-400">
+                        {v.channelLabel}: <bdi>{videoRef.channel}</bdi> · {v.externalSourceNote}
+                      </span>
                     </span>
                   )}
                 </span>

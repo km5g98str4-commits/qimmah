@@ -29,7 +29,9 @@ export function validateWorkoutPlan(plan: WorkoutPlan): WorkoutIssue[] {
     d.exercises.forEach((pe) => {
       const ex = getExercise(pe.exerciseId)
       if (!ex) return
-      if (!ex.videoUrl) issues.push({ dayId: d.id, message: `تمرين بلا رابط شرح: ${ex.nameEn}` })
+      // [مهمة الصقل §3] فحص «بلا رابط شرح» أُزيل: كان لا يسقط أبدًا لأن طبقة
+      // البيانات كانت تولّد رابط بحث لكل تمرين، وبعد إبادة روابط البحث صار
+      // غياب الفيديو حالة سجلّ مراجعة (registry) لا عيبًا في خطة المستخدم.
       const m = ex.movementPattern
       if (label.includes('push') && !['push', 'isolation', 'core'].includes(m) && ex.primaryMuscle !== 'chest' && ex.primaryMuscle !== 'shoulders' && ex.primaryMuscle !== 'triceps') {
         issues.push({ dayId: d.id, message: `يوم دفع يحوي تمرينًا غير دفع: ${ex.nameEn}` })

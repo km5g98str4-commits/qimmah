@@ -119,6 +119,28 @@ try {
   check('ولا حقل وزن قبل الإحماء — الترتيب محفوظ',
     (await page.locator('input[inputmode="decimal"]').count()) === 0)
 
+  // ═══ ٣ب) الفيديو المُتحقَّق منه لكل خطوة — [مهمة الصقل §3] ═══
+  // لا مشغّل قبل الضغطة (خصوصية معلَنة)، والضغطة تركّب nocookie بعينه، ولا
+  // رابط بحث في الشاشة كلها. حالتان صادقتان: يومٌ خطواته بلا مرجع معتمد يُسمّى
+  // ولا يُدّعى عليه زرّ. (تُفحص السمة src لا تحميل المحتوى — مضيف التضمين
+  // محجوب في بيئة الوكلاء وتسمح به CSP الإنتاج على Pages.)
+  check('صفر iframe قبل أي ضغطة', (await page.locator('iframe').count()) === 0)
+  check('لا رابط بحث يوتيوب في شاشة الإحماء',
+    (await page.locator('a[href*="results?search_query"]').count()) === 0)
+  const vplay = page.locator('[data-testid="warmup-video-play"]').first()
+  if (await vplay.isVisible().catch(() => false)) {
+    await vplay.click({ force: true })
+    await settle(page, 800)
+    const frame = page.locator('iframe').first()
+    const fsrc = (await frame.getAttribute('src').catch(() => '')) ?? ''
+    check('ضغطة «شاهد طريقة الأداء» تركّب مشغّل nocookie بعينه',
+      fsrc.startsWith('https://www.youtube-nocookie.com/embed/'), fsrc || '(لا iframe)')
+    check('ولا autoplay في التضمين — الضغطة الأولى تكفي', !fsrc.includes('autoplay'))
+  } else {
+    check('خطوات هذا اليوم بلا مرجع معتمد — غياب الزرّ حالة صادقة معلَنة',
+      (await page.locator('iframe').count()) === 0, 'لا زرّ فيديو')
+  }
+
   // ═══ ٤) المخرج: «ابدأ الإحماء» ← الجلسة الحيّة ═══
   // محروس: بلا الإصلاح لا تُفتح الشاشة أصلًا، فيجب أن يسقط الفحص **باسمه**
   // لا بمهلة عارية — «السقوط غير المسمّى ليس إثباتًا» (§4.2).
