@@ -11,7 +11,8 @@ import type { Lang } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import type { PlanDay } from '@/types/workout'
-import { exerciseDisplayName, exerciseVideoSearchUrl, planExerciseVideo } from '@/lib/workoutPlan'
+import { exerciseDisplayName, planExerciseVideo } from '@/lib/workoutPlan'
+import { approvedVideoFor } from '@/lib/exerciseProductionMedia'
 import { canonicalExerciseId, detailedMuscleLabel, getAlternatives, getExercise } from '@/data/exercises'
 import { getMachineAlternatives } from '@/data/machineAlternatives'
 import { getRecord, progressionHint } from '@/lib/exerciseHistory'
@@ -58,23 +59,22 @@ interface ExState {
 const MAX_WEIGHT = 500
 const MAX_REPS = 100
 
+/**
+ * [WORKOUT-FLOW-001] مهلة الانتقال التلقائي بعد اكتمال كل جولات التمرين —
+ * قصيرة ومعلنة بشريط «انتهى X — التالي: Y»، وقابلة للإلغاء بزرّ البقاء.
+ * الإعلان قبل الفعل هو الفرق بين استمرارٍ سلس وقفزة مفاجئة.
+ */
+const AUTO_NEXT_MS = 4000
+
 /** أول رقم في نطاق التكرارات (مثال: «8–12» → «8»). */
 function lowerReps(reps: string): string {
   const m = foldDigits(String(reps)).match(/\d+/)
   return m ? m[0] : reps
 }
 
-// ⚠️ `\d` في JS أرقام ASCII حصرًا في كل الأوضاع — فكانت هذه الثلاث تعجز عن
+// ⚠️ `\d` في JS أرقام ASCII حصرًا في كل الأوضاع — فكانت هذه الدوالّ تعجز عن
 // قراءة «٨٥٫٥» وتعطي NaN فيظهر الحقل «غير صالح» أثناء جلسة تمرين حيّة.
 // الطيّ أولًا يجعل الصيغتين مقروءتين، والمخزَّن يبقى غربيًا قانونيًا.
-
-/** تعديل قيمة رقمية نصية بمقدار، مع قصّها بين صفر والحد الأقصى. */
-function adjust(value: string, delta: number, max: number): string {
-  const m = foldDigits(String(value)).match(/-?[\d.]+/)
-  const n = m ? Number(m[0]) : 0
-  const next = Math.min(max, Math.max(0, Math.round((n + delta) * 100) / 100))
-  return `${next}`
-}
 
 /**
  * مجموعة جاهزة للتخزين — الأرقام مطويّة غربيًّا.
@@ -121,8 +121,6 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   const [current, setCurrent] = useState(() =>
     resume ? Math.min(resume.current, Math.max(0, day.exercises.length - 1)) : 0,
   )
-  const [openGuide, setOpenGuide] = useState(false)
-  const [openAlt, setOpenAlt] = useState(false)
   const [openDetails, setOpenDetails] = useState(false)
   /**
    * [CTO-73] الشاشة ١ — طيّة «تفاصيل التمرين»: الرسم · العضلات · طريقة الجهاز ·
@@ -135,6 +133,13 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   const [altSlots, setAltSlots] = useState<Record<string, [string, string]>>({})
   const [savedFlash, setSavedFlash] = useState(false)
   const [confirmOpen, setConfirmOpen] = useState(false)
+  /**
+   * [WORKOUT-FLOW-001] الاستمرار التلقائي — اكتمال كل جولات التمرين يُعلن
+   * انتقالًا قريبًا («انتهى X — التالي: Y») ثم يمرّر نفس آلية زرّ «التمرين
+   * التالي». يُلغى بأي تراجع أو تنقّل يدوي — لا قفزات مفاجئة.
+   */
+  const [autoNext, setAutoNext] = useState<{ from: string; to: string } | null>(null)
+  const autoNextTimer = useRef<number | null>(null)
   const flashTimer = useRef<number | null>(null)
   /** حاوية المحتوى — تُعاد لأعلاها عند كل انتقال تمرين (الإصلاح ٣). */
   const mainRef = useRef<HTMLElement>(null)
@@ -234,6 +239,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 
   useEffect(() => () => {
     if (flashTimer.current) window.clearTimeout(flashTimer.current)
+    if (autoNextTimer.current) window.clearTimeout(autoNextTimer.current)
   }, [])
 
   /**
@@ -254,12 +260,15 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 
   // أعد ضبط اللوحات عند الانتقال بين التمارين
   useEffect(() => {
-    setOpenGuide(false)
-    setOpenAlt(false)
     setOpenDetails(false)
     // [CTO-73] الشاشة ١ — طيّة المرجع تتبع القاعدة نفسها: مرجعٌ فُتح لتمرين
     // لا يبقى مفتوحًا للتمرين التالي.
     setOpenRef(false)
+    // [WORKOUT-FLOW-001] أي تبديل تمرين — يدويًّا كان أو آليًّا — يلغي انتقالًا
+    // تلقائيًّا معلَّقًا: لا قفزة ثانية بعد انتقالٍ وقع.
+    if (autoNextTimer.current) window.clearTimeout(autoNextTimer.current)
+    autoNextTimer.current = null
+    setAutoNext(null)
     /**
      * [WORKOUT-CONTINUITY-001] الإصلاح ٣ — موضع التمرير يُعاد لأعلى التمرين الجديد.
      *
@@ -328,6 +337,34 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 
   const startRest = (sec: number) => setTimer({ left: sec > 0 ? sec : 60, running: true })
 
+  const isLast = current >= total - 1
+  const goNext = () => {
+    if (isLast) return setConfirmOpen(true)
+    setCurrent((c) => Math.min(total - 1, c + 1))
+    setTimer({ left: 0, running: false })
+  }
+  const goPrev = () => {
+    setCurrent((c) => Math.max(0, c - 1))
+    setTimer({ left: 0, running: false })
+  }
+
+  /** اسم العرض لعنصر الخطة رقم i — يحترم التبديل الجاري واللغة. */
+  const displayNameAt = (i: number) => {
+    const p = day.exercises[i]
+    if (!p) return ''
+    const e = getExercise(effExId(p.id, p.exerciseId))
+    const a = swap[p.id] ? e?.nameAr ?? '' : p.customNameAr || e?.nameAr || ''
+    const b = swap[p.id] ? e?.nameEn ?? '' : p.customNameEn || e?.nameEn || ''
+    return exerciseDisplayName(a, b, lang)
+  }
+
+  /** «خلّني هنا» أو أي تراجع — يلغي الانتقال التلقائي المعلَّق. */
+  const cancelAutoNext = () => {
+    if (autoNextTimer.current) window.clearTimeout(autoNextTimer.current)
+    autoNextTimer.current = null
+    setAutoNext(null)
+  }
+
   const markDone = (idx: number) => {
     const set = s.sets[idx]
     // امنع اعتماد جولة بقيم خارج النطاق
@@ -335,9 +372,29 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
     const willComplete = !set.completed
     flashAfterPersist.current = willComplete
     setSet(idx, { completed: willComplete })
-    if (willComplete) {
-      startRest(pe.restSec)
+    if (!willComplete) {
+      // التراجع عن جولة يلغي انتقالًا معلَّقًا — قفزة بعد تراجع أسوأ من قفزة.
+      cancelAutoNext()
+      return
     }
+    // [WORKOUT-FLOW-001] اكتمال-الكل بالقيمة المرقَّعة: `state` لم يُحدَّث بعد
+    // (تحديث React غير متزامن)، والجولات قد تُكمَل بلا ترتيب — فتُفحص القيمة
+    // الجديدة للجولة الحالية مع القيم القائمة للبقية.
+    const allDone = s.sets.every((x, i) => (i === idx ? true : x.completed))
+    if (allDone && !isLast) {
+      // انتهى هذا التمرين كاملًا: إعلانٌ قصير ثم نفس آلية زرّ «التمرين التالي».
+      // آخر تمرين لا يمرّ من هنا أبدًا — الإنهاء يبقى بتأكيده القائم، لا صامتًا.
+      setTimer({ left: 0, running: false })
+      setAutoNext({ from: displayNameAt(current), to: displayNameAt(current + 1) })
+      if (autoNextTimer.current) window.clearTimeout(autoNextTimer.current)
+      autoNextTimer.current = window.setTimeout(() => {
+        autoNextTimer.current = null
+        setAutoNext(null)
+        goNext()
+      }, AUTO_NEXT_MS)
+      return
+    }
+    startRest(pe.restSec)
   }
 
   const repeatLast = () => {
@@ -358,7 +415,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 
   const doSwap = (newId: string, persist: boolean) => {
     setSwap((prev) => ({ ...prev, [pe.id]: newId }))
-    setOpenAlt(false)
+    setOpenRef(false)
     if (persist && onSwapExercise) onSwapExercise(day.id, pe.id, newId)
     flash()
   }
@@ -393,17 +450,6 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
     return st?.sets.length > 0 && st.sets.every((x) => x.completed)
   }
   const doneCount = day.exercises.filter((p) => exDone(p.id)).length
-
-  const isLast = current >= total - 1
-  const goNext = () => {
-    if (isLast) return setConfirmOpen(true)
-    setCurrent((c) => Math.min(total - 1, c + 1))
-    setTimer({ left: 0, running: false })
-  }
-  const goPrev = () => {
-    setCurrent((c) => Math.max(0, c - 1))
-    setTimer({ left: 0, running: false })
-  }
 
   const doFinish = () => {
     setConfirmOpen(false)
@@ -442,10 +488,12 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   const nameEn = swap[pe.id] ? ex?.nameEn ?? '' : pe.customNameEn || ex?.nameEn || ''
   const muscles = ex ? muscleLabel(ex.primaryMuscle, lang) : ''
   const guide = exerciseGuidance(exId, lang)
-  // (P12) زر «شاهد الطريقة»: videoUrl إن وُجد، وإلا بحث يوتيوب عن أداء التمرين بالاسم الإنجليزي.
-  const videoUrl =
-    (swap[pe.id] ? ex?.videoUrl ?? '' : planExerciseVideo(pe)) ||
-    (ex?.nameEn ? exerciseVideoSearchUrl(ex.nameEn) : '')
+  // [مهمة الصقل §3] زرّ «شاهد الطريقة» للفيديو المُتحقَّق منه بعينه — لا بحث ولا
+  // احتياط بحث. `exId` يحلّ الاستبدال، فحالة التبديل تأخذ فيديو البديل نفسه،
+  // والفراغ حالة صادقة تُخفي الزرّ.
+  const videoUrl = swap[pe.id]
+    ? approvedVideoFor(exId)?.canonicalUrl ?? ''
+    : planExerciseVideo(pe)
   // (P12) وسوم الجهاز (التصنيف الفرعي ثنائي اللغة) للتمرين المعروض إن كان جهاز كتالوج.
   const machineInfo = findMachineInfo(exId)
   const alts = getAlternatives(exId).slice(0, 5)
@@ -455,8 +503,14 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
     { value: 'hard', label: t.hard },
   ]
 
-  // التالي في مؤقّت الراحة: جولة لم تكتمل، وإلا التمرين التالي
-  const nextSetNum = s.sets.find((x) => !x.completed)?.setNumber
+  // الوزن المستهدف على سطر الهويّة — آخر وزن مسجَّل، وإلا وزن البداية من الخطة.
+  const targetWeight = String(rec?.lastWeight ?? pe.startingWeight ?? '').trim()
+
+  // التالي في مؤقّت الراحة وزرّ الإكمال الكبير: أول جولة لم تكتمل.
+  const nextSetIdx = s.sets.findIndex((x) => !x.completed)
+  const nextSetNum = nextSetIdx >= 0 ? s.sets[nextSetIdx].setNumber : undefined
+  const nextSetInvalid =
+    nextSetIdx >= 0 && (weightInvalid(s.sets[nextSetIdx].weightKg) || repsInvalid(s.sets[nextSetIdx].actualReps))
   const nextEx = day.exercises[current + 1]
   const restNext = nextSetNum
     ? `${d.setSingular} ${nextSetNum}`
@@ -524,7 +578,13 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             سجّل الآن**. وكل ما هو **مرجع** لا أمرَ تنفيذ (الرسم · طريقة الجهاز
             · الفيديو · البدائل) نزل خلف طيّة واحدة بضغطة — لم يُحذف منه شيء. */}
 
-        {/* ١) هويّة التمرين — مرّة واحدة: الاسم والهدف في كتلة واحدة. */}
+        {/* [WORKOUT-FLOW-001] الوسائط في البطاقة الافتراضية — صورة التمرين أول
+            ما يُرى، خارج الطيّات: بطاقة أخفّ على نسق Hevy/Strong. */}
+        <div className="overflow-hidden rounded-2xl border border-line">
+          <ExerciseMedia exerciseId={exId} lang={lang} heightClass="h-32" hideChips />
+        </div>
+
+        {/* ١) هويّة التمرين — مرّة واحدة: الاسم والهدف والوزن في كتلة واحدة. */}
         <div className="card p-4">
           <div className="flex flex-wrap items-center gap-x-2">
             <ExerciseName
@@ -540,10 +600,16 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
               </span>
             )}
           </div>
-          {/* الهدف سطر داخل الهويّة لا بطاقة مستقلّة — هو وصفُ التمرين لا مهمّة ثانية. */}
-          <p className="mt-1.5 flex items-center gap-2 text-base font-bold text-ink-700">
+          {/* الهدف سطر داخل الهويّة لا بطاقة مستقلّة — هو وصفُ التمرين لا مهمّة ثانية.
+              والوزن المستهدف بجانبه ([WORKOUT-FLOW-001]): آخر وزن مسجَّل أو وزن البداية. */}
+          <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-base font-bold text-ink-700">
             <Icon name="Target" className="h-4 w-4 shrink-0 text-primary-c" />
-            {t.target}: {formatNumber(pe.sets, lang)} {t.setsDone} × {formatNumeralsIn(String(pe.reps), lang)}
+            <span>{t.target}: {formatNumber(pe.sets, lang)} {t.setsDone} × {formatNumeralsIn(String(pe.reps), lang)}</span>
+            {targetWeight && (
+              <span className="text-ink-500">
+                · {d.weightInline}: <span className="font-black text-ink-700">{formatNumeralsIn(targetWeight, lang)} {t.volumeUnit}</span>
+              </span>
+            )}
           </p>
 
           {/* ٢) السجلّ — سطر واحد. بلا سجلّ: دعوة خفيفة بدل بطاقتَي فراغ
@@ -574,70 +640,99 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
           {hint && <p className="mt-2 flex items-center gap-1.5 text-sm font-bold text-primary-c"><Icon name="TrendingUp" className="h-4 w-4" />{hint}</p>}
         </div>
 
-        {/* جولات التمرين الحالي */}
-        <div className="space-y-3">
-          {s.sets.map((st, i) => {
-            const wErr = weightInvalid(st.weightKg)
-            const rErr = repsInvalid(st.actualReps)
-            const invalid = wErr || rErr
-            return (
-              <div
-                key={i}
-                className={cn(
-                  'rounded-2xl border p-4 transition-colors',
-                  st.completed ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface',
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-base font-black text-ink-900">{d.setSingular} {formatNumber(st.setNumber, lang)}</span>
-                  <span className="text-sm font-bold text-ink-500">{t.target}: {formatNumeralsIn(String(st.targetReps), lang)}</span>
-                </div>
-
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <Stepper
-                    label={t.weightKg}
-                    value={st.weightKg}
-                    onChange={(v) => setSet(i, { weightKg: v })}
-                    onStep={(d) => setSet(i, { weightKg: adjust(st.weightKg, d, MAX_WEIGHT) })}
-                    step={2.5}
-                    mode="decimal"
-                    invalid={wErr}
-                  />
-                  <Stepper
-                    label={t.repsDone}
-                    value={st.actualReps}
-                    placeholder={lowerReps(pe.reps)}
-                    onChange={(v) => setSet(i, { actualReps: v })}
-                    onStep={(d) => setSet(i, { actualReps: adjust(st.actualReps, d, MAX_REPS) })}
-                    step={1}
-                    mode="numeric"
-                    invalid={rErr}
-                  />
-                </div>
-
-                {invalid && (
-                  <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-danger">
-                    <Icon name="AlertTriangle" className="h-3.5 w-3.5 shrink-0" />
-                    {wErr ? t.errWeight : t.errReps}
-                  </p>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => markDone(i)}
-                  aria-pressed={st.completed}
-                  disabled={!st.completed && invalid}
+        {/* ═══ [WORKOUT-FLOW-001] صفوف الجولات المدمجة ═══
+            بطاقة واحدة: صفّ عناوين ثم صفّ لكل جولة [الجولة | وزن | تكرار | تم]
+            بدل بطاقة كاملة لكل جولة — أهداف اللمس ≥44px وتسمية aria لكل حقل وزرّ. */}
+        <div className="card p-3">
+          <div data-set-cols className="grid grid-cols-[2.75rem_minmax(0,1fr)_minmax(0,1fr)_2.75rem] items-center gap-2 px-1 pb-1.5 text-xs font-bold text-ink-500">
+            <span className="text-center">{d.colSet}</span>
+            <span className="text-center">{d.colWeight}</span>
+            <span className="text-center">{d.colReps}</span>
+            <span className="text-center">{d.colDone}</span>
+          </div>
+          <div className="space-y-2">
+            {s.sets.map((st, i) => {
+              const wErr = weightInvalid(st.weightKg)
+              const rErr = repsInvalid(st.actualReps)
+              const invalid = wErr || rErr
+              return (
+                <div
+                  key={i}
+                  data-set-row
                   className={cn(
-                    'mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl py-3 text-base font-bold transition-colors',
-                    st.completed ? 'bg-primary text-white' : 'border border-line bg-beige text-ink-700 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-40',
+                    'grid grid-cols-[2.75rem_minmax(0,1fr)_minmax(0,1fr)_2.75rem] items-center gap-2 rounded-xl border p-1.5 transition-colors',
+                    st.completed ? 'border-primary-soft bg-primary-soft' : 'border-line bg-surface',
                   )}
                 >
-                  <Icon name={st.completed ? 'CheckCircle2' : 'Check'} className="h-5 w-5" strokeWidth={st.completed ? 2 : 3} />
-                  {st.completed ? t.setSaved : d.done}
-                </button>
-              </div>
-            )
-          })}
+                  <span className="text-center text-sm font-black text-ink-900">
+                    {formatNumber(st.setNumber, lang)}
+                  </span>
+                  <input
+                    className={cn(
+                      'h-11 w-full min-w-0 rounded-lg border bg-beige px-1 text-center text-base font-black text-ink-900 focus:outline-none',
+                      wErr ? 'border-danger focus:border-danger' : 'border-line focus:border-brand-500/50',
+                    )}
+                    type="text"
+                    inputMode="decimal"
+                    autoComplete="off"
+                    aria-label={`${d.setSingular} ${formatNumber(st.setNumber, lang)} — ${t.weightKg}`}
+                    aria-invalid={wErr}
+                    value={st.weightKg}
+                    onChange={(e) => setSet(i, { weightKg: e.target.value })}
+                  />
+                  <input
+                    className={cn(
+                      'h-11 w-full min-w-0 rounded-lg border bg-beige px-1 text-center text-base font-black text-ink-900 focus:outline-none',
+                      rErr ? 'border-danger focus:border-danger' : 'border-line focus:border-brand-500/50',
+                    )}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="off"
+                    aria-label={`${d.setSingular} ${formatNumber(st.setNumber, lang)} — ${t.repsDone}`}
+                    aria-invalid={rErr}
+                    value={st.actualReps}
+                    placeholder={lowerReps(pe.reps)}
+                    onChange={(e) => setSet(i, { actualReps: e.target.value })}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => markDone(i)}
+                    aria-pressed={st.completed}
+                    aria-label={st.completed ? t.setSaved : undefined}
+                    disabled={!st.completed && invalid}
+                    className={cn(
+                      'grid h-11 w-11 place-items-center justify-self-center rounded-xl border text-sm font-bold transition-colors',
+                      st.completed
+                        ? 'border-primary-soft bg-primary text-white'
+                        : 'border-line bg-beige text-ink-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40',
+                    )}
+                  >
+                    {st.completed ? <Icon name="CheckCircle2" className="h-5 w-5" /> : d.done}
+                  </button>
+                  {invalid && (
+                    <p className="col-span-full flex items-center gap-1.5 px-1 pb-1 text-xs font-bold text-danger">
+                      <Icon name="AlertTriangle" className="h-3.5 w-3.5 shrink-0" />
+                      {wErr ? t.errWeight : t.errReps}
+                    </p>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+          {/* [WORKOUT-FLOW-001] زرّ الإكمال الكبير — يعتمد الجولة التالية غير
+              المكتملة. نصّه مفتاح جديد عمدًا (لا «تم»/«التمرين التالي») كي لا
+              يلتبس بمراسي الأزرار القائمة في الحرّاس. */}
+          {nextSetNum !== undefined && (
+            <button
+              type="button"
+              onClick={() => markDone(nextSetIdx)}
+              disabled={nextSetInvalid}
+              className="btn-primary mt-3 min-h-[52px] w-full py-3.5 text-base disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              <Icon name="Check" className="h-5 w-5" strokeWidth={3} />
+              {d.completeSetCta(nextSetNum, lang)}
+            </button>
+          )}
         </div>
 
         {/* ═══ [CTO-73] المرجع خلف طيّة واحدة — نُقل ولم يُحذف ═══
@@ -713,82 +808,78 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
                     noMedia
                   />
                 )}
+
+                {/* [WORKOUT-FLOW-001] الدليل السريع — اندمج في طيّة المرجع بدل
+                    بطاقة أكورديون مستقلّة. لم يُحذف منه شيء. */}
+                <div className="border-t border-line pt-3">
+                  <p className="mb-2 flex items-center gap-2 text-xs font-black text-ink-700">
+                    <Icon name="Lightbulb" className="h-3.5 w-3.5 text-primary-c" />
+                    {t.techniquePoints}
+                  </p>
+                  <ul className="space-y-1.5">
+                    {guide.tips.slice(0, 3).map((tip, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-ink-700">
+                        <Icon name="Check" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary-c" strokeWidth={3} />
+                        {tip}
+                      </li>
+                    ))}
+                  </ul>
+                  {guide.mistakes.length > 0 && (
+                    <>
+                      <p className="mb-2 mt-3 text-xs font-black text-ink-700">{t.commonMistakes}</p>
+                      <ul className="space-y-1.5">
+                        {guide.mistakes.map((mk, i) => (
+                          <li key={i} className="flex items-start gap-2 text-xs text-ink-500">
+                            <Icon name="AlertTriangle" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-600" />
+                            {mk}
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+
+                {/* البدائل — الجهاز مشغول؟ اندمجت هنا كذلك (لغير أجهزة الكتالوج؛
+                    الأجهزة لها بطاقتا البديل أعلاه). */}
+                {!machineAlt && alts.length > 0 && (
+                  <div className="border-t border-line pt-3">
+                    <p className="mb-2 flex items-center gap-2 text-xs font-black text-ink-700">
+                      <Icon name="Layers" className="h-3.5 w-3.5 text-primary-c" />
+                      {t.altPrompt}
+                    </p>
+                    <ul className="space-y-2">
+                      {alts.map((a) => (
+                        <li key={a.id} className="rounded-xl border border-line bg-page p-3">
+                          <p className="text-sm font-bold text-ink-900">{exerciseDisplayName(a.nameAr, a.nameEn, lang)}</p>
+                          <p className="mt-0.5 text-xs text-ink-500">
+                            {muscleLabel(a.primaryMuscle, lang)} · {a.equipment.join(lang === 'en' ? ', ' : '، ')}
+                          </p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            <button type="button" onClick={() => doSwap(a.id, false)} className="btn-primary px-3 py-2 text-xs">
+                              <Icon name="Repeat" className="h-3.5 w-3.5" />{t.swapForToday}
+                            </button>
+                            {onSwapExercise && (
+                              <button type="button" onClick={() => doSwap(a.id, true)} className="btn-ghost px-3 py-2 text-xs">
+                                <Icon name="Check" className="h-3.5 w-3.5" />{t.saveToPlan}
+                              </button>
+                            )}
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* [WORKOUT-FLOW-001] تنويه السلامة — انتقل إلى طيّة المرجع:
+                    يُقرأ مع الشرح، لا شريطًا دائمًا يزاحم التسجيل في كل شاشة. */}
+                <p className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
+                  <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
+                  {t.safety}
+                </p>
               </div>
             </div>
           )}
         </div>
-
-        {/* شرح سريع */}
-        <div className="card overflow-hidden">
-          <button type="button" onClick={() => setOpenGuide((o) => !o)} className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-bold text-ink-900">
-            <span className="flex items-center gap-2"><Icon name="Lightbulb" className="h-4 w-4 text-primary-c" />{t.quickGuide}</span>
-            <Icon name={openGuide ? 'Minus' : 'Plus'} className="h-4 w-4 text-ink-400" />
-          </button>
-          {openGuide && (
-            <div className="border-t border-line px-4 py-4">
-              <p className="mb-2 text-xs font-black text-ink-700">{t.techniquePoints}</p>
-              <ul className="space-y-1.5">
-                {guide.tips.slice(0, 3).map((tip, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-ink-700">
-                    <Icon name="Check" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary-c" strokeWidth={3} />
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-              {guide.mistakes.length > 0 && (
-                <>
-                  <p className="mb-2 mt-3 text-xs font-black text-ink-700">{t.commonMistakes}</p>
-                  <ul className="space-y-1.5">
-                    {guide.mistakes.map((mk, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-ink-500">
-                        <Icon name="AlertTriangle" className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gold-600" />
-                        {mk}
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              {videoUrl && (
-                <a href={videoUrl} target="_blank" rel="noopener noreferrer" className="btn-ghost mt-3 w-full py-2.5 text-sm">
-                  <Icon name="Video" className="h-4 w-4 text-primary-c" />
-                  {t.videoLabel}
-                </a>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* بدائل — الجهاز مشغول؟ (لغير أجهزة الكتالوج فقط؛ الأجهزة لها بطاقتا البديل أعلاه) */}
-        {!machineAlt && alts.length > 0 && (
-          <div className="card overflow-hidden">
-            <button type="button" onClick={() => setOpenAlt((o) => !o)} className="flex w-full items-center justify-between px-4 py-3.5 text-sm font-bold text-ink-900">
-              <span className="flex items-center gap-2"><Icon name="Layers" className="h-4 w-4 text-primary-c" />{t.altPrompt}</span>
-              <Icon name={openAlt ? 'Minus' : 'Plus'} className="h-4 w-4 text-ink-400" />
-            </button>
-            {openAlt && (
-              <ul className="space-y-2 border-t border-line px-4 py-4">
-                {alts.map((a) => (
-                  <li key={a.id} className="rounded-xl border border-line bg-page p-3">
-                    <p className="text-sm font-bold text-ink-900">{exerciseDisplayName(a.nameAr, a.nameEn, lang)}</p>
-                    <p className="mt-0.5 text-xs text-ink-500">
-                      {muscleLabel(a.primaryMuscle, lang)} · {a.equipment.join(lang === 'en' ? ', ' : '، ')}
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <button type="button" onClick={() => doSwap(a.id, false)} className="btn-primary px-3 py-2 text-xs">
-                        <Icon name="Repeat" className="h-3.5 w-3.5" />{t.swapForToday}
-                      </button>
-                      {onSwapExercise && (
-                        <button type="button" onClick={() => doSwap(a.id, true)} className="btn-ghost px-3 py-2 text-xs">
-                          <Icon name="Check" className="h-3.5 w-3.5" />{t.saveToPlan}
-                        </button>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        )}
 
         {/* تفاصيل إضافية (اختيارية) */}
         <div className="card overflow-hidden">
@@ -817,10 +908,6 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             </div>
           )}
         </div>
-
-        <p className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
-          <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />{t.safety}
-        </p>
       </main>
 
       {/* إشعار حفظ الجولة */}
@@ -829,6 +916,26 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
           <span className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-glow">
             <Icon name="CheckCircle2" className="h-4 w-4" />{t.setSaved}
           </span>
+        </div>
+      )}
+
+      {/* [WORKOUT-FLOW-001] شريط الاستمرار التلقائي — «انتهى X — التالي: Y»:
+          إعلان قبل الانتقال، مع خيار البقاء. يشغل نفس موضع مؤقّت الراحة (لا
+          يتزامنان: اكتمال التمرين يوقف المؤقّت قبل الإعلان). */}
+      {autoNext && (
+        <div role="status" aria-live="polite" className="fixed inset-x-0 bottom-[4.75rem] z-20 border-t border-primary-soft bg-surface backdrop-blur">
+          <div className="container-page flex items-center justify-between gap-3 py-3">
+            <p className="min-w-0 truncate text-sm font-bold text-ink-900">
+              <bdi>{d.autoNextBody(autoNext.from, autoNext.to)}</bdi>
+            </p>
+            <button
+              type="button"
+              onClick={cancelAutoNext}
+              className="min-h-[44px] shrink-0 rounded-lg border border-line bg-surface px-3 py-2 text-xs font-bold text-ink-700"
+            >
+              {d.autoNextStay}
+            </button>
+          </div>
         </div>
       )}
 
@@ -902,46 +1009,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 // («ما فيه سجل سابق») في بطاقتين متجاورتين. **الوظيفة باقية** — آخر أداء وأفضل
 // أداء يُعرضان الآن في سطر السجلّ المضغوط داخل بطاقة الهويّة، وحين لا سجلّ يحلّ
 // محلّهما سطر دعوة واحد (`firstTimeHint`). لا معلومة فُقدت، والبطاقتان اندمجتا.
-
-interface StepperProps {
-  label: string
-  value: string
-  placeholder?: string
-  step: number
-  mode: 'decimal' | 'numeric'
-  invalid?: boolean
-  onChange: (v: string) => void
-  onStep: (delta: number) => void
-}
-
-function Stepper({ label, value, placeholder, step, mode, invalid, onChange, onStep }: StepperProps) {
-  return (
-    <div>
-      {/* [CTO-73] سلّم الخطوط — ١١px كان أصغر نصّ في الشاشة (ملاحظة الميدان ٥).
-          تسمية الحقل ليست زخرفًا: بلا قراءتها لا يُعرف أيّ رقم يُدخَل. رُفعت إلى ١٤px. */}
-      <p className="mb-1 text-center text-sm font-bold text-ink-500">{label}</p>
-      <div className="flex items-stretch gap-1.5">
-        <button type="button" onClick={() => onStep(-step)} aria-label={`${label} -${step}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
-          <Icon name="Minus" className="h-4 w-4" />
-        </button>
-        <input
-          className={cn(
-            'w-full min-w-0 rounded-lg border bg-beige px-1 text-center text-base font-black text-ink-900 focus:outline-none',
-            invalid ? 'border-danger focus:border-danger' : 'border-line focus:border-brand-500/50',
-          )}
-          type="text"
-          inputMode={mode}
-          autoComplete="off"
-          aria-label={label}
-          aria-invalid={invalid}
-          value={value}
-          placeholder={placeholder}
-          onChange={(e) => onChange(e.target.value)}
-        />
-        <button type="button" onClick={() => onStep(step)} aria-label={`${label} +${step}`} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg border border-line bg-surface text-ink-700 active:scale-95">
-          <Icon name="Plus" className="h-4 w-4" />
-        </button>
-      </div>
-    </div>
-  )
-}
+//
+// [WORKOUT-FLOW-001] و`Stepper` أُزيل معها: صفّ الجولة المدمج يسجّل بحقلين
+// مباشرين (وزن · تكرار) بدل ستّة عناصر لكل جولة. **الوظيفة باقية** — نفس
+// الحقلين بنفس التحقّق (`weightInvalid`/`repsInvalid`) وأهداف لمس ≥44px.

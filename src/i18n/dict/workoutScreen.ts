@@ -52,6 +52,22 @@ export interface WorkoutScreenStrings {
   done: string
   /** تسمية الجولة المفردة قبل رقمها: «الجولة 1» / "Set 1" (المفاتيح الجمعية في config/strings تبقى للاستخدامات الجمعية). */
   setSingular: string
+  /** [WORKOUT-FLOW-001] صفّ الجولات المدمج — عناوين الأعمدة الأربعة. */
+  colSet: string
+  colWeight: string
+  colReps: string
+  colDone: string
+  /**
+   * [WORKOUT-FLOW-001] زرّ الإكمال الكبير أسفل الصفوف — «أكمل الجولة n».
+   * نصّه مفتاح مستقل عمدًا (لا «تم»/«التمرين التالي») كي لا يلتبس بمراسي
+   * الأزرار القائمة في الحرّاس والرحلات.
+   */
+  completeSetCta: (n: number, lang: Lang) => string
+  /** الوزن المستهدف على سطر هويّة التمرين (آخر وزن مسجَّل أو وزن البداية). */
+  weightInline: string
+  /** شريط الاستمرار التلقائي: «انتهى X — التالي: Y» + زرّ البقاء. */
+  autoNextBody: (from: string, to: string) => string
+  autoNextStay: string
   /** إرشادات — العناوين. */
   guidanceSummary: string
   techniquePoints: string
@@ -141,6 +157,14 @@ const ar: WorkoutScreenStrings = {
   close: 'إغلاق',
   done: 'تم',
   setSingular: 'الجولة',
+  colSet: 'الجولة',
+  colWeight: 'الوزن',
+  colReps: 'التكرار',
+  colDone: 'تم؟',
+  completeSetCta: (n, lang) => `أكمل الجولة ${formatNumber(n, lang)}`,
+  weightInline: 'الوزن',
+  autoNextBody: (from, to) => `انتهى ${from} — التالي: ${to}`,
+  autoNextStay: 'خلّني هنا',
   guidanceSummary: 'نقاط التكنيك · أخطاء شائعة · تنبيه أمان',
   techniquePoints: 'نقاط التكنيك',
   commonMistakes: 'أخطاء شائعة',
@@ -208,6 +232,14 @@ const en: WorkoutScreenStrings = {
   close: 'Close',
   done: 'Done',
   setSingular: 'Set',
+  colSet: 'Set',
+  colWeight: 'Weight',
+  colReps: 'Reps',
+  colDone: 'Done?',
+  completeSetCta: (n, lang) => `Complete set ${formatNumber(n, lang)}`,
+  weightInline: 'Weight',
+  autoNextBody: (from, to) => `${from} done — next: ${to}`,
+  autoNextStay: 'Stay here',
   guidanceSummary: 'Technique cues · Common mistakes · Safety note',
   techniquePoints: 'Technique cues',
   commonMistakes: 'Common mistakes',
