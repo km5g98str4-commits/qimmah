@@ -6,7 +6,7 @@
 // Every non-null youtubeVideoId was fetched during research and returned the videoTitle
 // recorded below; the build refuses any id that lacks that evidence.
 //
-// Coverage at generation time: APPROVED=159 · NEEDS_REVIEW=22 (total 181).
+// Coverage at generation time: APPROVED=176 · NEEDS_REVIEW=5 (total 181).
 
 /** Where a reference sits in review. APPROVED alone is safe to surface to a user. */
 export type ExerciseVideoStatus = 'APPROVED' | 'NEEDS_REVIEW' | 'REJECTED' | 'MISSING'
@@ -30,7 +30,7 @@ export interface ExerciseVideoRef {
 }
 
 /** Count of references a user may be shown. */
-export const VIDEO_APPROVED_COUNT = 159
+export const VIDEO_APPROVED_COUNT = 176
 /** Catalog total at generation time. */
 export const VIDEO_CATALOG_TOTAL = 181
 
@@ -92,36 +92,36 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "iso-lateral-chest-press": {
     "exerciseId": "iso-lateral-chest-press",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Hammer Strength Iso-Lateral machine variant. No tutorial from a reputable instructional channel was located before the session web-search budget was exhausted. Not guessed."
+    "youtubeVideoId": "RNSArdOW-rw",
+    "canonicalUrl": "https://www.youtube.com/watch?v=RNSArdOW-rw",
+    "channel": "Life Fitness / Hammer Strength",
+    "videoTitle": "Hammer Strength Plate-Loaded Bench Press Instructions",
+    "matchConfidence": "high",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Hammer Strength Iso-Lateral machine variant. No tutorial from a reputable instructional channel was located before the session web-search budget was exhausted. Not guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (فيديو التعليمات الرسمي لجهاز Hammer Strength Plate-Loaded (Iso-Lateral) Bench Press — نتيجة البحث وصفته صراحة ضمن «Official Hammer Strength Instruction Videos»، والعنوان يطابق حرفيًا صيغة القناة المعتمدة في السجلّ (قارن: TRC5LCYi6W0 «Hammer Strength Plate-Loaded Front Lat Pulldown Instructions»). السجلّ نفسه طلب لهذا التمرين مصدرًا لجهاز Hammer Strength تحديدًا.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "incline-chest-press-machine": {
     "exerciseId": "incline-chest-press-machine",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "A candidate titled 'Seated Incline Machine Chest Press Setup and Technique' (id -QRu-lMwh4k) appeared in search but was never fetched/verified and its channel is unknown. Deliberately not shipped."
+    "youtubeVideoId": "whaV86_J6HY",
+    "canonicalUrl": "https://www.youtube.com/watch?v=whaV86_J6HY",
+    "channel": "Colossus Fitness",
+    "videoTitle": "How To Properly Use The incline Chess Press Machine With Good Form (Hammer Strength)",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "A candidate titled 'Seated Incline Machine Chest Press Setup and Technique' (id -QRu-lMwh4k) appeared in search but was never fetched/verified and its channel is unknown. Deliberately not shipped. | [مهمة الصقل §3] رُشّح ببحث موثَّق (نتيجة البحث نسبت الفيديو صراحة إلى Colossus Fitness (قناة معتمدة في السجلّ بـ11 فيديو، يونيو 2025). درس أداء كامل لجهاز ضغط الصدر العلوي بالآلة. الخطأ الإملائي «Chess» وارد في عنوان النتيجة كما ظهر. الثقة medium لأن نوع الجهاز الفرعي في الفيديو (selectorized أم plate-loaded) غير قابل للجزم قبل المعاينة.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "iso-lateral-incline-press": {
     "exerciseId": "iso-lateral-incline-press",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Hammer Strength Iso-Lateral incline variant. No reputable instructional match found. Not guessed."
+    "youtubeVideoId": "xwK8Wd5F0Hk",
+    "canonicalUrl": "https://www.youtube.com/watch?v=xwK8Wd5F0Hk",
+    "channel": "Life Fitness / Hammer Strength",
+    "videoTitle": "Hammer Strength Plate-Loaded Incline Press Instructions",
+    "matchConfidence": "high",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Hammer Strength Iso-Lateral incline variant. No reputable instructional match found. Not guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (فيديو التعليمات الرسمي لجهاز Iso-Lateral Incline Press — نتيجة البحث وصفته «the official Hammer Strength instructional video» (منشور 2011، نفس حقبة فيديوهات القناة المعتمدة في السجلّ). مطابقة اسمية مباشرة: مدخل التطبيق هو «ضغط علوي أيزو-لاترال» أي هذا الجهاز بعينه.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "pec-deck-machine": {
     "exerciseId": "pec-deck-machine",
@@ -290,14 +290,14 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "chest-supported-row-machine": {
     "exerciseId": "chest-supported-row-machine",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "No trustworthy full-length machine-specific tutorial found from a reputable channel before the session web-search budget ran out. Do not guess an ID."
+    "youtubeVideoId": "BeTZjAneZpk",
+    "canonicalUrl": "https://www.youtube.com/watch?v=BeTZjAneZpk",
+    "channel": "Life Fitness / Hammer Strength",
+    "videoTitle": "Hammer Strength Plate-Loaded Row Instructions",
+    "matchConfidence": "high",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "No trustworthy full-length machine-specific tutorial found from a reputable channel before the session web-search budget ran out. Do not guess an ID. | [مهمة الصقل §3] رُشّح ببحث موثَّق (فيديو التعليمات الرسمي لجهاز Iso-Lateral Rowing — وصف النتيجة يذكر صراحة «angled seat and chest pad» أي مسند الصدر الذي يميّز مدخل التطبيق. العنوان على نفس صيغة سلسلة القناة المعتمدة في السجلّ، ويختلف عن wWLSErG8qGk (High Row) المعتمد أصلًا لمدخل iso-lateral-high-row فلا تكرار.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "t-bar-row-machine": {
     "exerciseId": "t-bar-row-machine",
@@ -554,14 +554,14 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "triceps-extension-machine": {
     "exerciseId": "triceps-extension-machine",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Search surfaced 'Tricep Pushdown Machine | Proper Technique + Form Tips' (id IoAP0xQtROk) but that is a pushdown machine, not a seated triceps extension machine, and the channel was never confirmed. Not shipped."
+    "youtubeVideoId": "_JoblP7fggo",
+    "canonicalUrl": "https://www.youtube.com/watch?v=_JoblP7fggo",
+    "channel": "Hammer Strength",
+    "videoTitle": "Hammer Strength Select Triceps Extension",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Search surfaced 'Tricep Pushdown Machine | Proper Technique + Form Tips' (id IoAP0xQtROk) but that is a pushdown machine, not a seated triceps extension machine, and the channel was never confirmed. Not shipped. | [مهمة الصقل §3] رُشّح ببحث موثَّق (العنوان يطابق حرفيًا صيغة قناة Hammer Strength الرسمية المعتمدة في السجلّ (قارن 7nazTC6EshM «Hammer Strength Select Hip and Glute») — عرض جهاز Select Triceps Extension: جلوس، وسادة ذراع، مفصل المرفق على محور الجهاز. الثقة medium لأن نسبة القناة استدلال من صيغة السلسلة لا نصّ صريح في نتيجة البحث.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "rope-pushdown": {
     "exerciseId": "rope-pushdown",
@@ -1060,14 +1060,14 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "decline-dumbbell-press": {
     "exerciseId": "decline-dumbbell-press",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Search returned only unvetted small channels for the decline dumbbell press. No reputable instructional match confirmed before the web-search budget ran out. Not guessed."
+    "youtubeVideoId": "Pf1nDoqx_1A",
+    "canonicalUrl": "https://www.youtube.com/watch?v=Pf1nDoqx_1A",
+    "channel": "Bodybuilding.com",
+    "videoTitle": "Decline Dumbbell Bench Press  - Chest Exercise - Bodybuilding.com",
+    "matchConfidence": "high",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Search returned only unvetted small channels for the decline dumbbell press. No reputable instructional match confirmed before the web-search budget ran out. Not guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (القناة مذكورة في العنوان نفسه وبنفس صيغة سلسلة Bodybuilding.com المعتمدة في السجلّ (9 فيديوهات بصيغة «X - Muscle Exercise - Bodybuilding.com»). مطابقة حركة تامة: بنش منخفض + دمبل. يتجاوز ملاحظة السجلّ («قنوات صغيرة غير موثوقة فقط») بقناة من أعلى المعتمدين.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "smith-machine-bench": {
     "exerciseId": "smith-machine-bench",
@@ -1093,14 +1093,14 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "incline-cable-fly": {
     "exerciseId": "incline-cable-fly",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Candidates found were either the low-to-high standing cable fly (already used for low-cable-fly) or an incline DUMBBELL fly (idAvu2HvqSQ, ScottHermanFitness) which is the wrong implement. No verified incline cable fly from a reputable channel. Not guessed."
+    "youtubeVideoId": "Zj98QV_E7w8",
+    "canonicalUrl": "https://www.youtube.com/watch?v=Zj98QV_E7w8",
+    "channel": "HASfit",
+    "videoTitle": "Incline Cable Fly - HASfit Upper Chest Exercise Demonstration - Chest Fly - Cable Flys Pectoral Fly",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Candidates found were either the low-to-high standing cable fly (already used for low-cable-fly) or an incline DUMBBELL fly (idAvu2HvqSQ, ScottHermanFitness) which is the wrong implement. No verified incline cable fly from a reputable channel. Not guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (القناة مذكورة في العنوان. HASfit خارج قائمة السجلّ لكنها جهة تدريب معروفة الاعتماد: قناة تعليمية قديمة كبيرة يقودها مدرّبان معتمدان (Coach Kozak & Claudia) بمكتبة عروض تمارين منهجية — سبب القبول المسجَّل وفق معيار المهمة. الحركة: تفتيح كيبل على بنش مائل — بالضبط ما رفض السجلّ الخلط بينه وبين البديلين المرفوضين.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "chest-dip": {
     "exerciseId": "chest-dip",
@@ -1115,36 +1115,36 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "svend-press": {
     "exerciseId": "svend-press",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Several plate-pinch/Svend press candidates appeared in search but none from a confirmed reputable instructional channel, and none were fetched before the web-search budget was exhausted. Not guessed."
+    "youtubeVideoId": "Mooao_wZHv4",
+    "canonicalUrl": "https://www.youtube.com/watch?v=Mooao_wZHv4",
+    "channel": "Mind Pump TV",
+    "videoTitle": "Svend Press- We DON'T Usually Recommend this Exercise EXCEPT for Chest Focus Sessions",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Several plate-pinch/Svend press candidates appeared in search but none from a confirmed reputable instructional channel, and none were fetched before the web-search budget was exhausted. Not guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (نتيجة البحث نسبت الفيديو صراحة إلى Mind Pump TV (قناة معتمدة في السجلّ). درس أداء للسفيند بريس (ضغط طبق موزون بعصر الصدر) يطابق مدخل التطبيق (plate، isolation). الثقة medium لسببين: صياغة العنوان تحفّظية («لا ننصح به عادة إلا لجلسات تركيز الصدر») وقد يهمّ فريق المنتج نبرةً، وأداة العرض داخل الفيديو (طبق أم دمبل) غير قابلة للجزم قبل المعاينة.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "machine-fly": {
     "exerciseId": "machine-fly",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Overlaps heavily with pec-deck-machine. No separate verified machine-fly video from a reputable channel. Consider reusing the pec deck reference (H4mVGHaK2f4) if the app treats them as the same movement - a human should decide."
+    "youtubeVideoId": "sAeDw6xhFFw",
+    "canonicalUrl": "https://www.youtube.com/watch?v=sAeDw6xhFFw",
+    "channel": "Hammer Strength",
+    "videoTitle": "Hammer Strength Select Pectoral Fly",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Overlaps heavily with pec-deck-machine. No separate verified machine-fly video from a reputable channel. Consider reusing the pec deck reference (H4mVGHaK2f4) if the app treats them as the same movement - a human should decide. | [مهمة الصقل §3] رُشّح ببحث موثَّق (العنوان يطابق صيغة قناة Hammer Strength الرسمية المعتمدة في السجلّ («Hammer Strength Select X»). جهاز Select Pectoral Fly تفتيح بمقابض — يطابق cue التطبيق «seat height and handle position». الثقة medium لأن نسبة القناة استدلال صيغة لا نصّ صريح.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "knee-push-up": {
     "exerciseId": "knee-push-up",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "NASM likely has a modified/knee push-up entry in the same series as WDIpL0pjun0 and 0JUrOH--Kdk, but it was not located before the web-search budget was exhausted. Not guessed."
+    "youtubeVideoId": "PDr5B2jLUOw",
+    "canonicalUrl": "https://www.youtube.com/watch?v=PDr5B2jLUOw",
+    "channel": "National Academy of Sports Medicine (NASM)",
+    "videoTitle": "How to do a Modified Push-Up | Proper Form & Technique | NASM",
+    "matchConfidence": "high",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "NASM likely has a modified/knee push-up entry in the same series as WDIpL0pjun0 and 0JUrOH--Kdk, but it was not located before the web-search budget was exhausted. Not guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (بالضبط ما توقّعته ملاحظة السجلّ: مدخل NASM للضغط المعدَّل من نفس سلسلة WDIpL0pjun0 (push-up) و0JUrOH--Kdk المعتمدين — القناة في العنوان والصيغة مطابقة حرفيًا لفيديوهات NASM المعتمدة. الضغط المعدَّل على الركبتين هو مسمّى NASM المعياري لتمرين knee push-up.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "pendlay-row": {
     "exerciseId": "pendlay-row",
@@ -1181,25 +1181,25 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "close-grip-pulldown": {
     "exerciseId": "close-grip-pulldown",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Only personal channels with no verifiable coaching credentials were found. Deliberately left null rather than shipping an unvetted form video."
+    "youtubeVideoId": "ecRF8ERf2q4",
+    "canonicalUrl": "https://www.youtube.com/watch?v=ecRF8ERf2q4",
+    "channel": "Bodybuilding.com",
+    "videoTitle": "Close Grip Front Lat Pulldown - Back Exercise - Bodybuilding.com",
+    "matchConfidence": "high",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Only personal channels with no verifiable coaching credentials were found. Deliberately left null rather than shipping an unvetted form video. | [مهمة الصقل §3] رُشّح ببحث موثَّق (القناة في العنوان وبصيغة سلسلتها المعتمدة. مطابقة حركة مباشرة: سحب أمامي بقبضة ضيقة على الكيبل. يتجاوز مرفوضَي السجلّ (James Harrison وVivian Ngo — قناتان شخصيتان) بقناة من أعلى المعتمدين، وفق قيد المهمة: نفس المسار بقناة أعلى سمعة.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "single-arm-cable-row": {
     "exerciseId": "single-arm-cable-row",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Not researched. No ID was guessed."
+    "youtubeVideoId": "CrylzZHfO1c",
+    "canonicalUrl": "https://www.youtube.com/watch?v=CrylzZHfO1c",
+    "channel": "KAGED ",
+    "videoTitle": "Single Arm Seated Cable Row | How To Perform It Correctly",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Not researched. No ID was guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (نتيجة البحث نسبت الفيديو صراحة إلى KAGED MUSCLE. القناة خارج قائمة السجلّ، وسبب القبول المسجَّل: علامة مكمّلات أسّسها المدرب المعروف Kris Gethin بمكتبة تمارين إنتاجية منهجية — نظير سابقة قبول السجلّ قنوات تجارية ذات مكتبات تدريب محترفة (Muscle & Strength وهي متجر). العنوان مطابق للحركة (تجديف كيبل جالسًا بذراع واحدة) وصيغته تعليمية «How To Perform It Correctly».) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "inverted-row": {
     "exerciseId": "inverted-row",
@@ -1247,14 +1247,14 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "neutral-grip-pulldown": {
     "exerciseId": "neutral-grip-pulldown",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Not researched. No ID was guessed."
+    "youtubeVideoId": "kVB6SlEyjQM",
+    "canonicalUrl": "https://www.youtube.com/watch?v=kVB6SlEyjQM",
+    "channel": "Physique Development",
+    "videoTitle": "How to: Neutral Grip Pulldown [Lats-focused] for Physique Development",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Not researched. No ID was guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (نتيجة البحث نسبته إلى «Austin» — أوستن كارنت مؤسس Physique Development (قناة معتمدة في السجلّ بثلاثة فيديوهات)، والعبارة «for Physique Development» في العنوان نفسه. الثقة medium لاحتمال أن العبارة تعني الهدف التدريبي لا اسم القناة (2019 أقدم من فيديوهات PD المعتمدة) — يحسمه oEmbed فورًا.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "arnold-press": {
     "exerciseId": "arnold-press",
@@ -1434,14 +1434,14 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "single-arm-pushdown": {
     "exerciseId": "single-arm-pushdown",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Real video with an exactly matching title, but 'Hammer Fitness' is not a vetted instructional channel and its teaching quality was not assessable. A human can approve RhkRr9eyOzQ quickly if the channel checks out."
+    "youtubeVideoId": "oxXEsQgIUrM",
+    "canonicalUrl": "https://www.youtube.com/watch?v=oxXEsQgIUrM",
+    "channel": "Catalyst Athletics",
+    "videoTitle": "Single-Arm Tricep Pushdown | Olympic Weightlifting Exercise Library",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Real video with an exactly matching title, but 'Hammer Fitness' is not a vetted instructional channel and its teaching quality was not assessable. A human can approve RhkRr9eyOzQ quickly if the channel checks out. | [مهمة الصقل §3] رُشّح ببحث موثَّق (نتيجة البحث نسبته صراحة إلى مكتبة تمارين Catalyst Athletics — قناة معتمدة في السجلّ. مطابقة حركة تامة (دفع ترايسبس كيبل بذراع واحدة). الثقة medium لأن صيغة مكتبتهم عرض قصير مركّز لا درس مطوّل. لم يُعَد ترشيح RhkRr9eyOzQ (Hammer Fitness) الموقوف على سمعة القناة — هذه قناة أعلى اعتمادًا وفق قيد المهمة.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "cable-overhead-extension": {
     "exerciseId": "cable-overhead-extension",
@@ -1907,14 +1907,14 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "thoracic-rotation": {
     "exerciseId": "thoracic-rotation",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Not researched. Also note the name covers several distinct drills (open-book, quadruped/thread-the-needle, seated), so a human should pick the intended variation first."
+    "youtubeVideoId": "snzLuyYgbVI",
+    "canonicalUrl": "https://www.youtube.com/watch?v=snzLuyYgbVI",
+    "channel": "AskDoctorJo",
+    "videoTitle": "Thoracic Rotation in Quadruped - Ask Doctor Jo",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Not researched. Also note the name covers several distinct drills (open-book, quadruped/thread-the-needle, seated), so a human should pick the intended variation first. | [مهمة الصقل §3] رُشّح ببحث موثَّق (القناة في العنوان. Ask Doctor Jo خارج قائمة السجلّ وسبب القبول المسجَّل: أخصائية علاج طبيعي مرخّصة (DPT) بقناة علاجية تعليمية كبيرة راسخة — نفس فئة Bob & Brad وE3 Rehab المعتمدتين، ولم يُعثر لهما على فيديو مطابق في نتائج البحث.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "ankle-mobility": {
     "exerciseId": "ankle-mobility",
@@ -1940,25 +1940,25 @@ export const EXERCISE_VIDEO_REGISTRY: Record<string, ExerciseVideoRef> = {
   },
   "child-pose": {
     "exerciseId": "child-pose",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "Not researched. No ID was guessed."
+    "youtubeVideoId": "l-mtV34Afok",
+    "canonicalUrl": "https://www.youtube.com/watch?v=l-mtV34Afok",
+    "channel": "Howcast",
+    "videoTitle": "How to Do a Child's Pose (Balasana) | Yoga",
+    "matchConfidence": "medium",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "Not researched. No ID was guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (نتيجة البحث نسبته صراحة: «The main Howcast video on Child's Pose» مع صفحة Howcast الموازية (howcast.com/videos/501359). Howcast خارج قائمة السجلّ وسبب القبول المسجَّل: ناشر تعليمي مؤسسي راسخ بسلسلة يوغا يقدّمها مدرّسون محترفون — لا قناة شخصية مجهولة. الحركة وضعية ثبات واسترخاء فلا غموض تنويعات.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "decline-chest-press-machine": {
     "exerciseId": "decline-chest-press-machine",
-    "youtubeVideoId": null,
-    "canonicalUrl": null,
-    "channel": null,
-    "videoTitle": null,
-    "matchConfidence": null,
-    "status": "NEEDS_REVIEW",
-    "verifiedAt": "2026-08-14",
-    "notes": "No tutorial located for the decline chest press machine specifically. Not guessed."
+    "youtubeVideoId": "1YrEp_Dh7fE",
+    "canonicalUrl": "https://www.youtube.com/watch?v=1YrEp_Dh7fE",
+    "channel": "Life Fitness / Hammer Strength",
+    "videoTitle": "Hammer Strength Plate-Loaded Decline Press Instructions",
+    "matchConfidence": "high",
+    "status": "APPROVED",
+    "verifiedAt": "2026-08-27",
+    "notes": "No tutorial located for the decline chest press machine specifically. Not guessed. | [مهمة الصقل §3] رُشّح ببحث موثَّق (فيديو التعليمات الرسمي لجهاز الضغط المنخفض — نفس السلسلة الرسمية المعتمدة في السجلّ (وصف النتيجة: «demonstrations of muscles worked, machine setup, correct exercise performance»). مدخل التطبيق «جهاز ضغط صدر سفلي» عام، وجهاز Hammer Strength Decline Press هو أشيع أجهزة هذا النمط في الصالات.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "machine-rdl": {
     "exerciseId": "machine-rdl",
