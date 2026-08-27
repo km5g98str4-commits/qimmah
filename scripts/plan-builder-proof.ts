@@ -27,8 +27,11 @@ import {
   removeExercise,
   reorderExercise,
   saveTemplate,
+  seedPlanFromSplit,
+  seedRecipeForDayCount,
   validatePlan,
 } from '@/features/customPlan/builder'
+import { getTemplate } from '@/data/workoutTemplates'
 import { loadCustomPlanRecord, saveCustomPlan } from '@/features/customPlan/storage'
 import {
   WORKOUT_CALENDAR_KEY,
@@ -333,6 +336,135 @@ console.log('\n⑧ التوافق الخلفي: سجلّ customPlan قديم (ب
   const roundTrip = loadCustomPlanRecord(UID)
   check('إضافة الاسم لاحقًا تدور بلا كسر (حقل اختياري متوافق خلفيًّا)', roundTrip?.plan.nameAr === 'خطة محدّثة' && roundTrip.plan.days.length === 1)
   check('لا مفتاح تقويم أو هجرة كُتبا عرضًا أثناء الإثبات', ls.getItem(WORKOUT_CALENDAR_KEY) === null)
+}
+
+console.log('\n⑨ [H-1] التعبئة من التقسيمة: حتمية seedPlanFromSplit + سلامة المراجع + عقود العمليات الموصولة')
+{
+  /** خطة فارغة بعدد أيام محدّد (أيام custom بلا تمارين). */
+  const emptyPlan = (count: number): WorkoutPlan => {
+    let p = createManualPlan()
+    for (let i = 0; i < count; i++) {
+      const r = addDay(p, 'custom')
+      if (r.status !== 'ok') throw new Error('addDay failed in seed fixture')
+      p = r.plan
+    }
+    return p
+  }
+
+  // — الحتمية وسلامة المراجع لكل عدد أيام تعرفه الواجهة (٢–٦) —
+  for (const count of [2, 3, 4, 5, 6]) {
+    const base = emptyPlan(count)
+    const a = seedPlanFromSplit(base)
+    const b = seedPlanFromSplit(base)
+    check(
+      `حتمية count=${count}: استدعاءان على نفس الخطة ⇒ ناتج متطابق JSON وكل يوم معبّأ`,
+      a.status === 'ok' && b.status === 'ok' && JSON.stringify(a.plan) === JSON.stringify(b.plan) && a.plan.days.every((d) => d.exercises.length > 0),
+    )
+    check(
+      `سلامة مراجع count=${count}: كل تمرين مبذور في المكتبة والترقيم والمعرّفات سليمة`,
+      a.status === 'ok' && planReferenceViolations(a.plan).length === 0,
+    )
+  }
+
+  // — مصدر الوصفة أيام workoutTemplates القانونية حرفيًا (لا قوائم مخترعة) —
+  const idsOf = (templateId: string) => getTemplate(templateId)!.days.map((d) => d.exerciseIds)
+  check('وصفة ٣ أيام = أيام ppl-3 القانونية حرفيًا', JSON.stringify(seedRecipeForDayCount(3).map((r) => r.exerciseIds)) === JSON.stringify(idsOf('ppl-3')))
+  check('وصفة ٤ أيام = أيام upper-lower القانونية حرفيًا', JSON.stringify(seedRecipeForDayCount(4).map((r) => r.exerciseIds)) === JSON.stringify(idsOf('upper-lower')))
+  check('وصفة ٦ أيام = أيام ppl-6 القانونية حرفيًا', JSON.stringify(seedRecipeForDayCount(6).map((r) => r.exerciseIds)) === JSON.stringify(idsOf('ppl-6')))
+  check('وصفة ٥ أيام = علوي/سفلي + دفع/سحب/أرجل (هجين من يومَي upper-lower وppl-3 كاملًا)',
+    JSON.stringify(seedRecipeForDayCount(5).map((r) => r.exerciseIds)) === JSON.stringify([...idsOf('upper-lower').slice(0, 2), ...idsOf('ppl-3')]))
+  check('وصفة عدد شاذّ: صفر ⇒ فارغة · ٧ ⇒ دورة ppl-6 واليوم السابع دفع',
+    seedRecipeForDayCount(0).length === 0 && seedRecipeForDayCount(7).length === 7 && JSON.stringify(seedRecipeForDayCount(7)[6].exerciseIds) === JSON.stringify(idsOf('ppl-6')[0]))
+
+  // — الأيام الفارغة وحدها تُعبّأ: يوم المستخدم لا يُمسّ محتوًى ولا اسمًا —
+  let mixed = createManualPlan()
+  {
+    const r1 = addDay(mixed, 'custom', { ar: 'يومي الخاص', en: 'My Own Day' })
+    if (r1.status !== 'ok') throw new Error('fixture')
+    mixed = r1.plan
+    for (const ex of PUSH) {
+      const a = addExerciseFromLibrary(mixed, mixed.days[0].id, ex)
+      if (a.status !== 'ok') throw new Error('fixture')
+      mixed = a.plan
+    }
+    for (let i = 0; i < 2; i++) {
+      const r = addDay(mixed, 'custom')
+      if (r.status !== 'ok') throw new Error('fixture')
+      mixed = r.plan
+    }
+  }
+  const recipe3 = seedRecipeForDayCount(3)
+  // ضدّ الفراغ: لولا اختلاف الاسم قبل البذر لكان فحص «تبنّي الاسم القانوني» تحصيل حاصل.
+  check('ضدّ الفراغ: أسماء الأيام الفارغة قبل البذر تخالف أسماء الوصفة فعلًا',
+    mixed.days[1].nameAr !== recipe3[1].nameAr && mixed.days[2].nameAr !== recipe3[2].nameAr)
+  const seededMixed = seedPlanFromSplit(mixed)
+  check('اليوم غير الفارغ لا يُمسّ: تمارينه واسمه المخصّص كما هما بعد البذر',
+    seededMixed.status === 'ok' &&
+      seededMixed.plan.days[0].nameAr === 'يومي الخاص' &&
+      JSON.stringify(seededMixed.plan.days[0].exercises) === JSON.stringify(mixed.days[0].exercises))
+  check('الأيام الفارغة وحدها عُبّئت وتبنّت الاسم القانوني ومحتواه (صدق العنوان مع المحتوى)',
+    seededMixed.status === 'ok' &&
+      seededMixed.plan.days[1].nameAr === recipe3[1].nameAr &&
+      seededMixed.plan.days[2].nameAr === recipe3[2].nameAr &&
+      seededMixed.plan.days[1].exercises.map((e) => e.exerciseId).join() === recipe3[1].exerciseIds.join() &&
+      seededMixed.plan.days[2].exercises.map((e) => e.exerciseId).join() === recipe3[2].exerciseIds.join() &&
+      planReferenceViolations(seededMixed.plan).length === 0)
+
+  // — البذر لا يلمس بيانات القوالب (نسخ عميقة) والإعادة على خطة معبّأة لا تغيّر شيئًا —
+  if (seededMixed.status === 'ok') {
+    seededMixed.plan.days[1].exercises[0].sets = 99
+    check('تعديل الخطة المبذورة لا يتسرّب إلى workoutTemplates (نسخ عميقة)',
+      getTemplate('ppl-3')!.days[1].exerciseIds.length === recipe3[1].exerciseIds.length && seedRecipeForDayCount(3)[1].exerciseIds.join() === recipe3[1].exerciseIds.join())
+  }
+  {
+    const full = seedPlanFromSplit(emptyPlan(3))
+    const again = full.status === 'ok' ? seedPlanFromSplit(full.plan) : full
+    check('إعادة البذر على خطة معبّأة بالكامل ⇒ ok بلا أي تغيير (لا تعبئة فوق تعبئة)',
+      full.status === 'ok' && again.status === 'ok' && JSON.stringify(again.plan) === JSON.stringify(full.plan))
+  }
+
+  // — محاكاات الالتفاف (§4.2): كل كاشف يُهاجَم ليثبت أنه ليس تحصيل حاصل —
+  {
+    const a = seedPlanFromSplit(emptyPlan(3))
+    if (a.status !== 'ok') throw new Error('seed fixture')
+    // ① بذّار غير حتمي (قيمة واحدة تتغيّر بين استدعاءين) يكسر فحص المطابقة باسمه.
+    const tampered: WorkoutPlan = JSON.parse(JSON.stringify(a.plan))
+    tampered.days[0].exercises[0].reps = '99–99'
+    check('محاكاة التفاف الحتمية: تغيير قيمة واحدة في الناتج يكسر مطابقة JSON — الفحص يميّز فعلًا',
+      JSON.stringify(tampered) !== JSON.stringify(a.plan))
+    // ② بذّار يزرع معرّفًا من خارج المكتبة يسقط بفحص مسمّى في planReferenceViolations.
+    const forged: WorkoutPlan = JSON.parse(JSON.stringify(a.plan))
+    forged.days[0].exercises[0].exerciseId = 'ghost-machine'
+    check('محاكاة التفاف المراجع: معرّف خارج المكتبة يسقط باسمه unknown-exercise:ghost-machine',
+      planReferenceViolations(forged).includes('unknown-exercise:ghost-machine'))
+    // ③ بذّار «جشع» يملأ يوم المستخدم أيضًا — فحص «لا يُمسّ» أعلاه يكشفه.
+    const greedy: WorkoutPlan = JSON.parse(JSON.stringify(seededMixed.status === 'ok' ? seededMixed.plan : a.plan))
+    greedy.days[0] = { ...greedy.days[0], nameAr: recipe3[0].nameAr, nameEn: recipe3[0].nameEn }
+    check('محاكاة التفاف الجشع: بذّار يعيد تسمية يوم المستخدم يخالف ناتج البذر الحقيقي — فحص «لا يُمسّ» ليس زينة',
+      greedy.days[0].nameAr !== 'يومي الخاص' && (seededMixed.status !== 'ok' || seededMixed.plan.days[0].nameAr === 'يومي الخاص'))
+  }
+
+  // — عمليات المحرّك الموصولة للواجهة (H-2) باقية على عقودها فوق خطط مبذورة —
+  {
+    const seeded = seedPlanFromSplit(emptyPlan(3))
+    if (seeded.status !== 'ok') throw new Error('seed fixture')
+    const week = duplicateWeek(seeded.plan)
+    check('duplicateWeek فوق خطة مبذورة ٣ أيام ⇒ ٦ أيام بنسخ مطابقة وسلامة مراجع',
+      week.status === 'ok' && week.plan.days.length === 6 &&
+        week.plan.days[3].exercises.map((e) => e.exerciseId).join() === seeded.plan.days[0].exercises.map((e) => e.exerciseId).join() &&
+        planReferenceViolations(week.plan).length === 0)
+    const dup = duplicateDay(seeded.plan, seeded.plan.days[0].id)
+    check('duplicateDay فوق خطة مبذورة ⇒ نسخة ملحقة بمعرّفات جديدة وسلامة مراجع',
+      dup.status === 'ok' && dup.plan.days.length === 4 && dup.plan.days[3].id !== seeded.plan.days[0].id && planReferenceViolations(dup.plan).length === 0)
+    const copied = copyDayAs(seeded.plan, seeded.plan.days[0].id, seeded.plan.days[2].id)
+    check('copyDayAs فوق خطة مبذورة ⇒ الهدف يُستبدل محتواه ويبقى معرّفه واسمه',
+      copied.status === 'ok' && copied.plan.days[2].id === seeded.plan.days[2].id &&
+        copied.plan.days[2].exercises.map((e) => e.exerciseId).join() === seeded.plan.days[0].exercises.map((e) => e.exerciseId).join())
+    const overflow4 = seedPlanFromSplit(emptyPlan(4))
+    const overflow = overflow4.status === 'ok' ? duplicateWeek(overflow4.plan) : overflow4
+    check('رفض المحرّك يصل الواجهة برسالتيه الجاهزتين: duplicateWeek لأربعة أيام مبذورة ⇒ week-duplicate-overflow بنصّين غير فارغين',
+      overflow.status === 'rejected' && overflow.errors[0].code === 'week-duplicate-overflow' && overflow.errors[0].messageAr.length > 0 && overflow.errors[0].messageEn.length > 0)
+  }
 }
 
 console.log(`\n=== النتيجة: ${pass} ✓ / ${fail} ✗ ===`)

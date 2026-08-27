@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { ExerciseName } from '@/components/ExerciseName'
@@ -20,6 +20,16 @@ import {
   resizeDays,
   totalExercises,
 } from './defaults'
+import {
+  copyDayAs,
+  duplicateDay,
+  duplicateWeek,
+  estimateSessionMinutes,
+  seedPlanFromSplit,
+  seedRecipeForDayCount,
+  validatePlan,
+  type PlanResult,
+} from './builder'
 
 interface CustomPlanBuilderProps {
   lang: Lang
@@ -51,10 +61,19 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
   const [stepIndex, setStepIndex] = useState(0)
   const [activeDay, setActiveDay] = useState(0)
   const [pickerOpen, setPickerOpen] = useState(false)
+  // H-1: التعبئة اختيار صريح يستدعيه المستخدم (قرار مؤسس مقفل ٣) — لا تعبئة صامتة.
+  const [seedChosen, setSeedChosen] = useState(false)
+  // H-2: منتقي اليوم الهدف لنسخ اليوم، ورسالة رفض المحرّك (ثنائية اللغة، من عقده).
+  const [copyPickerOpen, setCopyPickerOpen] = useState(false)
+  const [engineNotice, setEngineNotice] = useState<string | null>(null)
 
   const step = STEPS[stepIndex]
   const total = STEPS.length
   const saveable = isPlanSaveable(plan)
+  // H-1: وصفة التعبئة تُعرض قبل التطبيق — المستخدم يرى ما سيحدث لكل يوم.
+  const seedRecipe = useMemo(() => seedRecipeForDayCount(plan.days.length), [plan.days.length])
+  // H-3ب: تحذيرات المحقّق الجاهزة ثنائية اللغة — تحذيرات لا موانع.
+  const planWarnings = useMemo(() => validatePlan(plan), [plan])
 
   // — عمليات على الأيام والتمارين —
   const setDayCount = (count: number) => {
@@ -77,11 +96,41 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
       exercises: day.exercises.map((pe) => (pe.id === peId ? { ...pe, ...partial } : pe)),
     }))
 
+  // H-2: تطبيق نتيجة عملية محرّك — نجاحها يحدّث الخطة، ورفضها يُعرض برسالته الجاهزة.
+  const applyEngineResult = (result: PlanResult): boolean => {
+    if (result.status === 'ok') {
+      setPlan(result.plan)
+      setEngineNotice(null)
+      return true
+    }
+    const e = result.errors[0]
+    setEngineNotice(lang === 'en' ? e.messageEn : e.messageAr)
+    return false
+  }
+
+  const duplicateActiveDay = () => {
+    if (!day) return
+    applyEngineResult(duplicateDay(plan, day.id))
+  }
+  const copyActiveDayTo = (targetDayId: string) => {
+    if (!day) return
+    if (applyEngineResult(copyDayAs(plan, day.id, targetDayId))) setCopyPickerOpen(false)
+  }
+  const duplicateWholeWeek = () => applyEngineResult(duplicateWeek(plan))
+
   // — تنقّل —
   const goNext = () => {
     if (step === 'review') {
       if (saveable) onSave(plan)
       return
+    }
+    // H-1: التعبئة تُطبَّق هنا فقط — بعد اختيار المستخدم البطاقة صراحةً في خطوة الأيام.
+    if (step === 'days' && seedChosen) {
+      const seeded = seedPlanFromSplit(plan)
+      if (seeded.status === 'ok') {
+        setPlan(seeded.plan)
+        setSeedChosen(false) // تطبيق واحد لكل اختيار — الرجوع والتقدّم لا يعيدان التعبئة خلسة.
+      }
     }
     setStepIndex((s) => Math.min(total - 1, s + 1))
   }
@@ -93,6 +142,8 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
   const nextLabel = step === 'review' ? d.save : d.next
 
   const day = plan.days[activeDay]
+  // H-3ب أثناء البناء: تحذير طول الجلسة لليوم النشط وحده (اليوم الفارغ له حالته المرئية أصلًا).
+  const activeDayWarnings = day ? planWarnings.filter((w) => w.subject === day.id && w.code === 'session-too-long') : []
 
   return (
     <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className="fixed inset-0 z-[70] flex flex-col bg-page text-ink-900">
@@ -130,18 +181,67 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
           {step === 'days' && (
             <Section title={d.daysTitle} hint={d.daysHint}>
               <DaysStepper value={plan.days.length} onChange={setDayCount} unit={d.daysUnit} lang={lang} />
-              <ul className="mt-6 space-y-2">
-                {plan.days.map((pd, i) => (
-                  <li
-                    key={pd.id}
-                    className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+
+              {/* H-1: بطاقة التعبئة من التقسيمة — اختيار صريح، والوصفة تُعرض تحتها قبل التطبيق */}
+              <button
+                type="button"
+                onClick={() => setSeedChosen((v) => !v)}
+                aria-pressed={seedChosen}
+                className={cn(
+                  'mt-4 w-full rounded-2xl border p-4 text-start transition-colors',
+                  seedChosen ? 'border-primary bg-primary-soft' : 'border-dashed border-line bg-surface',
+                )}
+              >
+                <span className="flex items-center gap-3">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary-soft text-primary-c">
+                    <Icon name="Sparkles" className="h-5 w-5" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-black text-ink-900">{d.seedCardTitle}</span>
+                    <span className="mt-0.5 block text-xs text-ink-500">{d.seedCardHint}</span>
+                  </span>
+                  <span
+                    className={cn(
+                      'grid h-6 w-6 shrink-0 place-items-center rounded-md border',
+                      seedChosen ? 'border-primary bg-primary text-white' : 'border-line bg-beige text-transparent',
+                    )}
                   >
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary-soft text-xs font-black text-primary-c">
-                      {i + 1}
-                    </span>
-                    <span className="text-sm font-bold text-ink-900">{lang === 'en' ? pd.nameEn : pd.nameAr}</span>
-                  </li>
-                ))}
+                    <Icon name="Check" className="h-4 w-4" />
+                  </span>
+                </span>
+                {seedChosen && (
+                  <span className="mt-2 block text-xs font-bold text-primary-c">{d.seedSelectedNote}</span>
+                )}
+              </button>
+
+              <ul className="mt-6 space-y-2">
+                {plan.days.map((pd, i) => {
+                  const recipe = seedRecipe[i]
+                  const willSeed = seedChosen && pd.exercises.length === 0 && recipe !== undefined
+                  return (
+                    <li
+                      key={pd.id}
+                      className="flex items-center gap-3 rounded-xl border border-line bg-surface px-4 py-3"
+                    >
+                      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-primary-soft text-xs font-black text-primary-c">
+                        {i + 1}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate text-sm font-bold text-ink-900">
+                        {willSeed ? (lang === 'en' ? recipe.nameEn : recipe.nameAr) : lang === 'en' ? pd.nameEn : pd.nameAr}
+                      </span>
+                      {willSeed && (
+                        <span className="shrink-0 text-[11px] font-bold text-primary-c">
+                          {recipe.exerciseIds.length} {d.exercisesUnit}
+                        </span>
+                      )}
+                      {pd.exercises.length > 0 && (
+                        <span className="shrink-0 text-[11px] font-bold text-ink-400">
+                          {pd.exercises.length} {d.exercisesUnit}
+                        </span>
+                      )}
+                    </li>
+                  )
+                })}
               </ul>
             </Section>
           )}
@@ -177,6 +277,79 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
                   </button>
                 ))}
               </div>
+
+              {/* H-2: عمليات المحرّك على اليوم النشط + H-3أ: شارة الدقائق الحيّة */}
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={duplicateActiveDay}
+                  disabled={day.exercises.length === 0 || plan.days.length >= MAX_DAYS}
+                  className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs font-bold text-ink-700 disabled:opacity-30"
+                >
+                  <Icon name="Repeat" className="h-4 w-4" />
+                  {d.duplicateDayAction}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCopyPickerOpen((v) => !v)}
+                  disabled={day.exercises.length === 0 || plan.days.length < 2}
+                  aria-expanded={copyPickerOpen}
+                  className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs font-bold text-ink-700 disabled:opacity-30"
+                >
+                  <Icon name="Layers" className="h-4 w-4" />
+                  {d.copyDayAction}
+                </button>
+                {(plan.days.length === 2 || plan.days.length === 3) && (
+                  <button
+                    type="button"
+                    onClick={duplicateWholeWeek}
+                    disabled={!saveable}
+                    title={d.duplicateWeekHint}
+                    className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-line bg-surface px-3 py-2 text-xs font-bold text-ink-700 disabled:opacity-30"
+                  >
+                    <Icon name="CalendarDays" className="h-4 w-4" />
+                    {d.duplicateWeekAction}
+                  </button>
+                )}
+                {day.exercises.length > 0 && (
+                  <span className="ms-auto flex items-center gap-1 text-[11px] font-bold text-ink-500">
+                    <Icon name="Clock" className="h-3.5 w-3.5" />
+                    ~{estimateSessionMinutes(day)} {d.minutesUnit}
+                  </span>
+                )}
+              </div>
+
+              {copyPickerOpen && (
+                <div className="mb-4 rounded-xl border border-line bg-surface p-3">
+                  <p className="text-xs font-bold text-ink-900">{d.copyDayTargetTitle}</p>
+                  <p className="mt-0.5 text-[11px] text-ink-400">{d.copyDayReplaceHint}</p>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {plan.days.map((pd, i) =>
+                      i === activeDay ? null : (
+                        <button
+                          key={pd.id}
+                          type="button"
+                          onClick={() => copyActiveDayTo(pd.id)}
+                          className="flex min-h-[44px] items-center gap-1.5 rounded-xl border border-line bg-beige px-3 py-2 text-xs font-bold text-ink-700"
+                        >
+                          <span>{d.dayTab} {i + 1}</span>
+                          <span className="truncate text-ink-400">{lang === 'en' ? pd.nameEn : pd.nameAr}</span>
+                          {pd.exercises.length > 0 && (
+                            <span className="text-ink-400">({pd.exercises.length})</span>
+                          )}
+                        </button>
+                      ),
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {engineNotice && (
+                <p className="mb-4 flex items-center gap-1.5 text-xs font-bold text-danger">
+                  <Icon name="AlertTriangle" className="h-4 w-4 shrink-0" />
+                  {engineNotice}
+                </p>
+              )}
 
               {/* اسم اليوم */}
               <label className="mb-1.5 block text-xs font-bold text-ink-500">{d.dayNameLabel}</label>
@@ -225,6 +398,18 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
                 <Icon name="Plus" className="h-5 w-5" />
                 {d.addExercise}
               </button>
+
+              {/* H-3ب: تحذيرات المحقّق الجاهزة لليوم النشط — تحذير لا مانع */}
+              {activeDayWarnings.length > 0 && (
+                <ul className="mt-3 space-y-1.5">
+                  {activeDayWarnings.map((w) => (
+                    <li key={`${w.code}-${w.subject}`} className="flex items-start gap-1.5 text-xs font-bold text-gold-600">
+                      <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0" />
+                      {lang === 'en' ? w.messageEn : w.messageAr}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </Section>
           )}
 
@@ -242,8 +427,17 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
                         {i + 1}
                       </span>
                       <p className="text-sm font-black text-ink-900">{lang === 'en' ? pd.nameEn : pd.nameAr}</p>
-                      <span className="ms-auto text-[11px] font-bold text-ink-400">
-                        {pd.exercises.length} {d.exercisesUnit}
+                      <span className="ms-auto flex shrink-0 items-center gap-2 text-[11px] font-bold text-ink-400">
+                        {/* H-3أ: شارة الدقائق لكل يوم — من المقدِّر المعتمد */}
+                        {pd.exercises.length > 0 && (
+                          <span className="flex items-center gap-1">
+                            <Icon name="Clock" className="h-3.5 w-3.5" />
+                            ~{estimateSessionMinutes(pd)} {d.minutesUnit}
+                          </span>
+                        )}
+                        <span>
+                          {pd.exercises.length} {d.exercisesUnit}
+                        </span>
                       </span>
                     </div>
                     {pd.exercises.length === 0 ? (
@@ -268,6 +462,24 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
                   </div>
                 ))}
               </div>
+
+              {/* H-3ب: كل تحذيرات validatePlan الجاهزة ثنائية اللغة — تحذيرات لا موانع */}
+              {planWarnings.length > 0 && (
+                <div className="mt-4 rounded-2xl border border-line bg-surface p-4">
+                  <p className="flex items-center gap-1.5 text-sm font-black text-ink-900">
+                    <Icon name="AlertTriangle" className="h-4 w-4 shrink-0 text-gold-600" />
+                    {d.warningsTitle}
+                  </p>
+                  <ul className="mt-2 space-y-1.5">
+                    {planWarnings.map((w) => (
+                      <li key={`${w.code}-${w.subject}`} className="text-xs text-ink-700">
+                        {lang === 'en' ? w.messageEn : w.messageAr}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
               {!saveable && (
                 <p className="mt-4 flex items-center gap-1.5 text-sm font-bold text-danger">
                   <Icon name="AlertTriangle" className="h-4 w-4 shrink-0" />
@@ -431,8 +643,8 @@ function ExerciseRow({
       </div>
 
       {/* مجموعات × تكرار */}
-      <div className="mt-3 flex items-center gap-2">
-        <div className="flex flex-1 items-center justify-between rounded-xl border border-line bg-beige px-2 py-1.5">
+      <div className="mt-3 space-y-2">
+        <div className="flex items-center justify-between rounded-xl border border-line bg-beige px-2 py-1.5">
           <span className="ps-1 text-[11px] font-bold text-ink-500">{d.setsLabel}</span>
           <div className="flex items-center gap-1">
             <button
@@ -440,7 +652,7 @@ function ExerciseRow({
               onClick={() => onSets(Math.max(1, pe.sets - 1))}
               disabled={pe.sets <= 1}
               aria-label={d.decrease}
-              className="grid h-8 w-8 place-items-center rounded-lg bg-surface text-ink-900 disabled:opacity-30"
+              className="grid h-11 w-11 place-items-center rounded-lg bg-surface text-ink-900 disabled:opacity-30"
             >
               <Icon name="Minus" className="h-4 w-4" />
             </button>
@@ -450,26 +662,33 @@ function ExerciseRow({
               onClick={() => onSets(Math.min(8, pe.sets + 1))}
               disabled={pe.sets >= 8}
               aria-label={d.increase}
-              className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-white disabled:opacity-30"
+              className="grid h-11 w-11 place-items-center rounded-lg bg-primary text-white disabled:opacity-30"
             >
               <Icon name="Plus" className="h-4 w-4" />
             </button>
           </div>
         </div>
-        <div className="flex flex-1 items-center justify-between gap-2 rounded-xl border border-line bg-beige px-2 py-1.5">
+        {/* H-5: وصفة التكرارات بنقرة واحدة — صفّ رقاقات بدل القائمة المنسدلة */}
+        <div className="rounded-xl border border-line bg-beige px-2 py-1.5">
           <span className="ps-1 text-[11px] font-bold text-ink-500">{d.repsLabel}</span>
-          <select
-            value={reps}
-            onChange={(e) => onReps(e.target.value)}
-            aria-label={d.repsLabel}
-            className="rounded-lg border border-line bg-surface px-2 py-1.5 text-sm font-black text-ink-900 focus:outline-none"
-          >
+          <div className="-mx-1 mt-1.5 flex gap-1.5 overflow-x-auto px-1 pb-1" role="group" aria-label={d.repsLabel}>
             {repOptions.map((r) => (
-              <option key={r} value={r}>
+              <button
+                key={r}
+                type="button"
+                onClick={() => onReps(r)}
+                aria-pressed={r === reps}
+                className={cn(
+                  'min-h-[44px] shrink-0 rounded-lg border px-3 py-2 text-xs font-black transition-colors',
+                  r === reps
+                    ? 'border-primary-soft bg-primary text-white'
+                    : 'border-line bg-surface text-ink-700 hover:text-ink-900',
+                )}
+              >
                 {r === REP_SECONDS_VALUE ? d.repsSecondsOption : r}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
       </div>
     </li>

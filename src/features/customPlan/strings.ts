@@ -29,6 +29,11 @@ export interface CustomPlanStrings {
   daysHint: string
   daysUnit: string
 
+  // — بطاقة التعبئة من التقسيمة (H-1) — اختيار صريح يستدعيه المستخدم، لا تعبئة صامتة —
+  seedCardTitle: string
+  seedCardHint: string
+  seedSelectedNote: string
+
   // — خطوة البناء —
   buildTitle: string
   buildHint: string
@@ -46,6 +51,18 @@ export interface CustomPlanStrings {
   repsSecondsOption: string
   removeExercise: string
   dayTab: string
+
+  // — عمليات اليوم (H-2): توصيل duplicateDay · copyDayAs · duplicateWeek —
+  duplicateDayAction: string
+  copyDayAction: string
+  copyDayTargetTitle: string
+  copyDayReplaceHint: string
+  duplicateWeekAction: string
+  duplicateWeekHint: string
+
+  // — الصدق البصري الحيّ (H-3): شارة الدقائق + تحذيرات المحقّق —
+  minutesUnit: string
+  warningsTitle: string
 
   // — خطوة المراجعة —
   reviewTitle: string
@@ -67,6 +84,13 @@ export interface CustomPlanStrings {
   add: string
   added: string
   close: string
+  /** زرّ التذييل اللاصق في المنتقي (H-4) — قبل أي إضافة. */
+  pickerDone: string
+  /** بعد إضافة واحدة/اثنتين/{n} — عدّاد جارٍ داخل الزرّ نفسه. */
+  pickerDoneOne: string
+  pickerDoneTwo: string
+  pickerDoneFew: string
+  pickerDoneMany: string
   /** عنوان قسم التمارين الحرة أسفل أجهزة الكتالوج (P12). */
   freeWeightsSection: string
   /** عنوان قسم أجهزة الإضافات (ذراعان/بطن) — غير أساسية، تُلحَق بالأيام (P12). */
@@ -105,6 +129,10 @@ const ar: CustomPlanStrings = {
   daysHint: 'اختر عدد الأيام ونجهّز لك بطاقة لكل يوم باسم مقترح.',
   daysUnit: 'أيام',
 
+  seedCardTitle: 'عبّي الأيام بتمارين مقترحة',
+  seedCardHint: 'وتقدر تعدّلها وتبدّلها مثل ما تبي.',
+  seedSelectedNote: 'بنعبّي الأيام الفارغة لما تكمّل — والتعديل كله بيدك.',
+
   buildTitle: 'ابنِ أيامك',
   buildHint: 'سمِّ كل يوم، وأضف تمارينه، ورتّبها مثل ما تبي.',
   dayNameLabel: 'اسم اليوم',
@@ -121,6 +149,16 @@ const ar: CustomPlanStrings = {
   repsSecondsOption: '30 ث',
   removeExercise: 'حذف التمرين',
   dayTab: 'اليوم',
+
+  duplicateDayAction: 'كرّر اليوم',
+  copyDayAction: 'انسخه ليوم آخر',
+  copyDayTargetTitle: 'انسخ تمارين هذا اليوم إلى:',
+  copyDayReplaceHint: 'اليوم اللي تختاره تتبدّل تمارينه بتمارين هذا اليوم.',
+  duplicateWeekAction: 'كرّر الأسبوع',
+  duplicateWeekHint: 'ضاعف أيامك بضغطة وحدة — كل يوم يجيه توأمه.',
+
+  minutesUnit: 'دقيقة',
+  warningsTitle: 'ملاحظات على جدولك',
 
   reviewTitle: 'راجع جدولك',
   reviewHint: 'تأكد من كل يوم وتمارينه قبل الحفظ.',
@@ -139,6 +177,11 @@ const ar: CustomPlanStrings = {
   add: 'إضافة',
   added: 'أُضيف',
   close: 'إغلاق',
+  pickerDone: 'تم',
+  pickerDoneOne: 'تم — أضفت تمرين واحد',
+  pickerDoneTwo: 'تم — أضفت تمرينين',
+  pickerDoneFew: 'تم — أضفت {n} تمارين',
+  pickerDoneMany: 'تم — أضفت {n} تمرين',
   freeWeightsSection: 'تمارين حرة (متقدّم)',
   accessoriesSection: 'إضافات (ذراعان وبطن)',
   muscleLabels: {
@@ -188,6 +231,10 @@ const en: CustomPlanStrings = {
   daysHint: "Pick the number of days and we'll set up a card for each with a suggested name.",
   daysUnit: 'days',
 
+  seedCardTitle: 'Fill the days with suggested exercises',
+  seedCardHint: 'You can tweak and swap them however you like.',
+  seedSelectedNote: "We'll fill the empty days when you continue — editing stays fully in your hands.",
+
   buildTitle: 'Build your days',
   buildHint: 'Name each day, add its exercises, and order them the way you want.',
   dayNameLabel: 'Day name',
@@ -204,6 +251,16 @@ const en: CustomPlanStrings = {
   repsSecondsOption: '30 s',
   removeExercise: 'Remove exercise',
   dayTab: 'Day',
+
+  duplicateDayAction: 'Duplicate day',
+  copyDayAction: 'Copy to another day',
+  copyDayTargetTitle: "Copy this day's exercises to:",
+  copyDayReplaceHint: "The day you pick gets its exercises replaced with this day's.",
+  duplicateWeekAction: 'Duplicate the week',
+  duplicateWeekHint: 'Double your days in one tap — every day gets its twin.',
+
+  minutesUnit: 'min',
+  warningsTitle: 'Notes on your plan',
 
   reviewTitle: 'Review your plan',
   reviewHint: 'Check each day and its exercises before saving.',
@@ -222,6 +279,11 @@ const en: CustomPlanStrings = {
   add: 'Add',
   added: 'Added',
   close: 'Close',
+  pickerDone: 'Done',
+  pickerDoneOne: 'Done — added 1 exercise',
+  pickerDoneTwo: 'Done — added 2 exercises',
+  pickerDoneFew: 'Done — added {n} exercises',
+  pickerDoneMany: 'Done — added {n} exercises',
   freeWeightsSection: 'Free weights (advanced)',
   accessoriesSection: 'Accessories (arms & abs)',
   muscleLabels: {

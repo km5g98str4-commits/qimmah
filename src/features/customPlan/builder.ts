@@ -13,6 +13,7 @@
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import type { TrainingLevel } from '@/types/profile'
 import { getExercise } from '@/data/exercises'
+import { getTemplate } from '@/data/workoutTemplates'
 import { muscleGroups } from '@/data/muscleGroups'
 import { createPlanExercise } from '@/lib/workoutPlan'
 import { estimateSessionMinutes } from '@/lib/workoutStats'
@@ -586,4 +587,75 @@ export function validatePlan(plan: WorkoutPlan, options: PlanValidationOptions =
   })
 
   return warnings
+}
+
+// ── 7) التعبئة من التقسيمة (H-1) — مساعد نقيّ جديد، لا يغيّر سلوك ما فوقه ─────
+
+/** يوم واحد في وصفة التعبئة: اسم قانوني ثنائي اللغة + معرّفات تمارين من workoutTemplates حصرًا. */
+export interface SeedDayRecipe {
+  nameAr: string
+  nameEn: string
+  exerciseIds: string[]
+}
+
+/**
+ * وصفة التعبئة الحتمية حسب عدد الأيام — كل يوم يُشتقّ حرفيًا من يوم قانوني في
+ * `workoutTemplates` (لا قوائم مخترعة هنا):
+ *   • ٢ ⇒ علوي/سفلي (يوما upper-lower الأوّلان).
+ *   • ٣ ⇒ دفع/سحب/أرجل (ppl-3 كاملًا).
+ *   • ٤ ⇒ علوي/سفلي مرّتين (upper-lower كاملًا).
+ *   • ٥ ⇒ علوي/سفلي + دفع/سحب/أرجل (الهجين الخماسي المعروف).
+ *   • ٦ ⇒ دفع/سحب/أرجل المزدوجة (ppl-6 كاملًا).
+ *   • ١ ⇒ يوم جسم كامل واحد. وفوق الستة تُدوَّر دورة ppl-6 (اليوم السابع = دفع).
+ * دالة نقيّة حتمية: نفس العدد ⇒ نفس الوصفة دائمًا، والنسخ عميقة فلا يتسرّب تعديل
+ * لاحق إلى بيانات القوالب.
+ */
+export function seedRecipeForDayCount(count: number): SeedDayRecipe[] {
+  const day = (templateId: string, index: number): SeedDayRecipe | null => {
+    const d = getTemplate(templateId)?.days[index]
+    return d ? { nameAr: d.nameAr, nameEn: d.nameEn, exerciseIds: [...d.exerciseIds] } : null
+  }
+  const pick = (pairs: Array<[string, number]>): SeedDayRecipe[] =>
+    pairs.map(([t, i]) => day(t, i)).filter((r): r is SeedDayRecipe => r !== null)
+
+  if (!Number.isInteger(count) || count <= 0) return []
+  if (count === 1) return pick([['full-body', 0]])
+  if (count === 2) return pick([['upper-lower', 0], ['upper-lower', 1]])
+  if (count === 3) return pick([['ppl-3', 0], ['ppl-3', 1], ['ppl-3', 2]])
+  if (count === 4) return pick([['upper-lower', 0], ['upper-lower', 1], ['upper-lower', 2], ['upper-lower', 3]])
+  if (count === 5) return pick([['upper-lower', 0], ['upper-lower', 1], ['ppl-3', 0], ['ppl-3', 1], ['ppl-3', 2]])
+  const six = pick([['ppl-6', 0], ['ppl-6', 1], ['ppl-6', 2], ['ppl-6', 3], ['ppl-6', 4], ['ppl-6', 5]])
+  if (!six.length) return []
+  return Array.from({ length: count }, (_, i) => {
+    const r = six[i % six.length]
+    return { nameAr: r.nameAr, nameEn: r.nameEn, exerciseIds: [...r.exerciseIds] }
+  })
+}
+
+/**
+ * يعبّئ **الأيام الفارغة وحدها** بتمارين الوصفة القانونية (قرار المؤسس المقفل ٣:
+ * التعبئة اختيار صريح من المستخدم — هذه الدالة لا تُستدعى إلا بعد اختياره، ولا
+ * تكتب تخزينًا). يوم يحمل تمارين مستخدم لا يُمسّ — لا محتواه ولا اسمه. اليوم
+ * الفارغ المُعبَّأ يتبنّى اسم يومه القانوني كي يطابق العنوانُ المحتوى (صدق
+ * المعروض). تمرّ كل إضافة عبر `addExerciseFromLibrary` فتبقى سلامة المراجع
+ * والترقيم والحدود على عقودها، وأي رفض يصعد كما هو (رسائله ثنائية اللغة).
+ */
+export function seedPlanFromSplit(plan: WorkoutPlan): PlanResult {
+  const recipe = seedRecipeForDayCount(plan.days.length)
+  let next: WorkoutPlan = plan
+  for (let i = 0; i < plan.days.length; i++) {
+    const target = next.days[i]
+    const r = recipe[i]
+    if (!r || target.exercises.length > 0) continue
+    next = {
+      ...next,
+      days: next.days.map((d, di) => (di === i ? { ...d, nameAr: r.nameAr, nameEn: r.nameEn } : d)),
+    }
+    for (const exerciseId of r.exerciseIds) {
+      const added = addExerciseFromLibrary(next, target.id, exerciseId)
+      if (added.status !== 'ok') return added
+      next = added.plan
+    }
+  }
+  return { status: 'ok', plan: next }
 }

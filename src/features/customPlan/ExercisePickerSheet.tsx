@@ -32,6 +32,26 @@ const MUSCLE_ORDER: MuscleFilter[] = [
   'cardio',
 ]
 
+// H-4ب: مكنز البحث الحرّ — مرادفات رموز المعدّات بالعربية والإنجليزية، كي يجد
+// «دمبل» و«كيبل» و«جهاز» أصحابها ولو غابت الكلمة عن اسم التمرين نفسه.
+// مادة مطابقة لا نصوص واجهة — لا تُعرض للمستخدم إطلاقًا.
+const EQUIPMENT_SEARCH_TERMS: Record<string, string> = {
+  band: 'حبل مقاومة مطاط resistance band',
+  barbell: 'بار باربل bar',
+  bench: 'بنش مقعد',
+  bodyweight: 'وزن الجسم بدون معدات وزن جسم',
+  cable: 'كيبل كابل كيبلات',
+  dumbbell: 'دمبل دمبلز دنبل dumbbells',
+  'ez-bar': 'اي زي بار ez bar',
+  kettlebell: 'كيتل بل كيتلبل',
+  machine: 'جهاز مكينة أجهزة',
+  plate: 'بليت قرص طارة',
+  rope: 'حبل',
+  smith: 'سميث جهاز سميث',
+}
+const equipmentSearchText = (e: Exercise): string =>
+  e.equipment.map((t) => `${t} ${EQUIPMENT_SEARCH_TERMS[t] ?? ''}`).join(' ')
+
 // أي مجموعة كتالوج تخدم كل رقاقة عضلة؟ (عضلات الأرجل التفصيلية → مجموعة «الأرجل»، البطن → abs).
 const GROUP_FOR_MUSCLE: Partial<Record<Muscle, MachineGroupKey>> = {
   chest: 'chest',
@@ -92,7 +112,8 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
         if (!ex) continue
         if (muscle !== 'all' && ex.primaryMuscle !== (muscle as Muscle)) continue
         if (query) {
-          const haystack = `${ex.nameAr} ${ex.nameEn} ${item.nameAr} ${item.nameEn} ${(item.aliasesEn ?? []).join(' ')}`.toLowerCase()
+          // H-4ب: الأسماء البديلة + رموز المعدّات ومرادفاتها ضمن مكنز البحث.
+          const haystack = `${ex.nameAr} ${ex.nameEn} ${item.nameAr} ${item.nameEn} ${(item.aliasesEn ?? []).join(' ')} ${equipmentSearchText(ex)}`.toLowerCase()
           if (!haystack.includes(query)) continue
         }
         const subTitle = lang === 'en' ? item.subGroup.en : item.subGroup.ar
@@ -117,7 +138,8 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
     return exercises.filter((e) => {
       if (machineCatalogIdSet.has(e.id)) return false
       if (muscle !== 'all' && e.primaryMuscle !== (muscle as Muscle)) return false
-      if (query && !`${e.nameAr} ${e.nameEn}`.toLowerCase().includes(query)) return false
+      // H-4ب: رموز المعدّات ومرادفاتها ضمن مكنز البحث الحرّ.
+      if (query && !`${e.nameAr} ${e.nameEn} ${equipmentSearchText(e)}`.toLowerCase().includes(query)) return false
       return true
     })
   }, [muscle, query])
@@ -129,6 +151,17 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
     onAdd(id)
     setJustAdded((prev) => ({ ...prev, [id]: (prev[id] ?? 0) + 1 }))
   }
+
+  // H-4أ: عدّاد جارٍ لكل إضافات هذه الجلسة — يظهر داخل زرّ «تم» في التذييل اللاصق.
+  const addedCount = Object.values(justAdded).reduce((sum, n) => sum + n, 0)
+  const doneLabel =
+    addedCount === 0
+      ? d.pickerDone
+      : addedCount === 1
+        ? d.pickerDoneOne
+        : addedCount === 2
+          ? d.pickerDoneTwo
+          : (addedCount <= 10 ? d.pickerDoneFew : d.pickerDoneMany).replace('{n}', String(addedCount))
 
   const renderRow = (e: Exercise, machineName?: { nameAr: string; nameEn: string }) => {
     const added = (justAdded[e.id] ?? 0) > 0
@@ -249,6 +282,21 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
               )}
             </div>
           )}
+        </div>
+
+        {/* H-4أ: تذييل لاصق — زرّ «تم» يحمل العدّاد الجاري ويغلق المنتقي بنقرة واحدة */}
+        <div
+          className="shrink-0 border-t border-line bg-surface p-3"
+          style={{ paddingBottom: 'max(0.75rem, var(--safe-bottom))' }}
+        >
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex min-h-[44px] w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3 text-sm font-black text-white active:scale-[0.99]"
+          >
+            <Icon name="Check" className="h-5 w-5" />
+            {doneLabel}
+          </button>
         </div>
       </div>
     </div>
