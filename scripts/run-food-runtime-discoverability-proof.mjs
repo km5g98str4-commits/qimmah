@@ -25,6 +25,7 @@
  * التشغيل: node scripts/run-food-runtime-discoverability-proof.mjs
  */
 import { readFile, readdir, access } from 'node:fs/promises'
+import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
 import { loadTsModule, ROOT } from './food-production/lib/loadTs.mjs'
 
@@ -37,6 +38,21 @@ const counter = (label, held, detail = '') => checks.push({ label: `⟲ ${label}
 const exists = async (p) => { try { await access(p); return true } catch { return false } }
 const DIST = resolve(ROOT, 'dist/food')
 const PUB = resolve(ROOT, 'public/food')
+
+// ═════ ضمان أصول البحث ═════
+// حزم البحث (`search/`) **مولَّدة ولا تُلتزَم** (.gitignore)، ومسار البناء
+// الحقيقي يولّدها عبر `ensure-search-assets.mjs`. لكن هذا الإثبات في البوّابة
+// قد يجري في بيئة نظيفة (CI يبني بـ`vite build` لا `npm run build`، فلا
+// يمرّ الضامن)، فلا يوجد `search/` تحت dist ولا public. فنولّدها هنا من
+// الشرائح المُلتزَمة (حتمية، مبصومة، تُتخطّى إن كانت حديثة) — فيبقى الإثبات
+// مكتفيًا بذاته في أي بيئة. الغياب الكامل للشرائح يبقى حالة صادقة يعلنها
+// الضامن ويقيسها التدهور إلى ٥٩٤ أدناه.
+if (!(await exists(resolve(DIST, 'search/directory.json'))) && !(await exists(resolve(PUB, 'search/directory.json')))) {
+  try {
+    execFileSync(process.execPath, [resolve(ROOT, 'scripts/food-production/ensure-search-assets.mjs')], { cwd: ROOT, stdio: 'inherit' })
+  } catch { /* لا شرائح ⇒ الضامن يعلن الغياب ويمضي؛ التدهور أدناه يقيسه */ }
+}
+
 const FOOD = (await exists(resolve(DIST, 'search/directory.json'))) ? DIST : PUB
 const STREAM = FOOD === DIST ? 'CODE_PROVEN (dist/food — مخرج build الحقيقي)' : 'CODE_PROVEN (public/food — مصدر مولَّد)'
 console.log(`مصدر الأصول: ${FOOD === DIST ? 'dist/food' : 'public/food'} · التيار: ${STREAM}\n`)
