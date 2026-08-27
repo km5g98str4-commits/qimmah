@@ -1,0 +1,199 @@
+<!DOCTYPE html><html lang="en" dir="ltr"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="yWKnCQK8XlP57Xlqnjqktu5olKxcPU9yoUJEL7iL">
+
+    <title>Burgerizzr</title>
+
+    <link rel="shortcut icon" href="https://www.burgerizzr.com/favicon.png">
+
+    
+    
+    <link rel="stylesheet" href="https://www.burgerizzr.com/assets/css/site.css?v=1787215646">
+</head>
+<body>
+    
+    <nav class="nav nav--home">
+    <a href="https://www.burgerizzr.com"><img src="https://burgerizzr-public.s3.eu-south-1.amazonaws.com/assets/images/logo/logo-burgerizzr.png" style="height:46px" alt="Burgerizzr" class="nav__logo"></a>
+    <button class="nav__hamburger" onclick="toggleMobileNav(this)" aria-label="Menu">
+        <span></span><span></span><span></span>
+    </button>
+    <div class="nav__links" id="navLinks">
+        <a href="https://www.burgerizzr.com" class="nav__link nav__link--active">Home</a>
+        <a href="https://www.burgerizzr.com/about" class="nav__link ">About</a>
+        <a href="https://www.burgerizzr.com/menu" class="nav__link ">Menu</a>
+        <a href="https://www.burgerizzr.com/franchise" class="nav__link  ">Franchise</a>
+        <div class="dropdown">
+            <a href="https://www.burgerizzr.com/investors" class="nav__link nav__link--caret  ">
+                Investors <span>▼</span>
+            </a>
+            <div class="dropdown-menu">
+                <a href="https://www.burgerizzr.com/investors">Overview</a>
+                <a href="https://www.burgerizzr.com/reports">Reports</a>
+                <a href="https://www.burgerizzr.com/announcements">Announcements</a>
+                <a href="https://www.burgerizzr.com/corporate-governance">Policy &amp; Procedures</a>
+                <a href="https://www.burgerizzr.com/contact-ir">Contact IR</a>
+            </div>
+        </div>
+        <a href="https://www.burgerizzr.com/career" class="nav__link ">Careers</a>
+        <a href="https://www.burgerizzr.com/csr" class="nav__link ">CSR</a>
+        <a href="https://www.burgerizzr.com/contact" class="nav__link ">Contact</a>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;">
+        <a href="https://www.burgerizzr.com/language/ar" class="nav__lang-btn">العربية</a>
+            </div>
+</nav>
+
+<script>
+function toggleMobileNav(btn) {
+    var links = document.getElementById('navLinks');
+    links.classList.toggle('nav__links--open');
+}
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('#navLinks .nav__link').forEach(function(link) {
+        link.addEventListener('click', function() {
+            document.getElementById('navLinks').classList.remove('nav__links--open');
+        });
+    });
+});
+</script>
+
+    <div style="font-family: var(--font); color: var(--dark); background: #fffcf2; min-height: 100vh;">
+
+  <!-- HERO -->
+  <section class="m-hero" style="display: grid; grid-template-columns: 1fr 1fr; min-height: 720px; padding: 0 64px; align-items: center; gap: 40px;">
+    <div>
+      <div style="display: inline-block; background: var(--red); color: #fff; padding: 5px 16px; font-size: 12px; font-weight: 700; letter-spacing: 2.5px; margin-bottom: 28px; text-transform: uppercase;">Since 2009 · Saudi Arabia</div>
+      <h1 style="font-size: 100px; font-weight: 700; line-height: 0.95; margin: 0 0 28px; text-transform: uppercase;">
+        Fresh<br><span style="color: var(--red);">Matters</span>
+      </h1>
+      <p style="font-size: 19px; line-height: 1.8; color: #666; max-width: 420px; margin-bottom: 40px;">
+        Saudi Arabia's leading fresh burger chain — delivering a high quality experience at a competitive price across 120+ branches.
+      </p>
+    </div>
+    <div class="m-hero__img-wrap" style="height: 720px; display: flex; align-items: center; justify-content: center; overflow: visible; position: relative;">
+      <img src="https://i.ibb.co/tw7BRTS7/classic-beef.png" style="width: 110%; max-height: 100%; object-fit: contain; transform: scale(1.15); filter: drop-shadow(0 24px 48px rgba(0,0,0,0.18));" alt="Burgerizzr">
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="m-stats" style="background: var(--red); padding: 44px 64px; display: grid; grid-template-columns: repeat(4,1fr); gap: 20px;">
+        <div style="text-align: center; color: #fff;">
+      <div class="m-stats__num" style="font-size: 52px; font-weight: 700; line-height: 1;">120+</div>
+      <div style="font-size: 12px; font-weight: 600; opacity: 0.8; margin-top: 8px; letter-spacing: 2px; text-transform: uppercase;">Branches</div>
+    </div>
+        <div style="text-align: center; color: #fff;">
+      <div class="m-stats__num" style="font-size: 52px; font-weight: 700; line-height: 1;">25</div>
+      <div style="font-size: 12px; font-weight: 600; opacity: 0.8; margin-top: 8px; letter-spacing: 2px; text-transform: uppercase;">Cities</div>
+    </div>
+        <div style="text-align: center; color: #fff;">
+      <div class="m-stats__num" style="font-size: 52px; font-weight: 700; line-height: 1;">60+</div>
+      <div style="font-size: 12px; font-weight: 600; opacity: 0.8; margin-top: 8px; letter-spacing: 2px; text-transform: uppercase;">Menu Items</div>
+    </div>
+        <div style="text-align: center; color: #fff;">
+      <div class="m-stats__num" style="font-size: 52px; font-weight: 700; line-height: 1;">15K+</div>
+      <div style="font-size: 12px; font-weight: 600; opacity: 0.8; margin-top: 8px; letter-spacing: 2px; text-transform: uppercase;">Happy Customers Daily</div>
+    </div>
+      </section>
+
+  <!-- MENU -->
+  <section class="m-menu" style="padding: 88px 64px;">
+    <div class="m-menu__header" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 44px;">
+      <div>
+        <div style="color: var(--red); font-weight: 700; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 10px;">Our Menu</div>
+        <h2 style="font-size: 52px; font-weight: 700; margin: 0; text-transform: uppercase; line-height: 1;">Fresh Every Day</h2>
+      </div>
+      <a href="/menu" style="color: var(--red); font-weight: 700; font-size: 13px; text-decoration: none; letter-spacing: 1;">View Full Menu →</a>
+    </div>
+    <div class="m-menu__grid" style="display: grid; grid-template-columns: repeat(4,1fr); gap: 24px;">
+            <div class="menu-card">
+        <div style="height: 210px; overflow: hidden; position: relative;">
+          <img src="https://iili.io/dDZbw6Q.png" class="menu-card__img" style="width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 10px;" alt="DBL DBL Box">
+          <span style="position: absolute; top: 12px; left: 12px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 10px; letter-spacing: 1.5px; text-transform: uppercase;">Best Seller</span>
+        </div>
+        <div style="padding: 18px 20px 22px;">
+          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 8px; text-transform: uppercase;">DBL DBL Box</h3>
+          <p style="font-size: 13px; color: #777; margin: 0; line-height: 1.6;">Double meat and double melted cheese — two 214g fresh Angus beef patties with curly fries, double sauce, and crispy fried onions.</p>
+        </div>
+      </div>
+            <div class="menu-card">
+        <div style="height: 210px; overflow: hidden; position: relative;">
+          <img src="https://iili.io/KhU5nBj.png" class="menu-card__img" style="width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 10px;" alt="Bozhaira">
+          <span style="position: absolute; top: 12px; left: 12px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 10px; letter-spacing: 1.5px; text-transform: uppercase;">Fan Favorite</span>
+        </div>
+        <div style="padding: 18px 20px 22px;">
+          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 8px; text-transform: uppercase;">Bozhaira</h3>
+          <p style="font-size: 13px; color: #777; margin: 0; line-height: 1.6;">Fresh fried chicken with Hasawi lime sauce, cheese, lettuce, crispy onions, served with 2 tenders, fries, and tasty sour spices.</p>
+        </div>
+      </div>
+            <div class="menu-card">
+        <div style="height: 210px; overflow: hidden; position: relative;">
+          <img src="https://iili.io/Km4IJpe.png" class="menu-card__img" style="width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 10px;" alt="BBQ Burgerizzr Box">
+          <span style="position: absolute; top: 12px; left: 12px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 10px; letter-spacing: 1.5px; text-transform: uppercase;">Family &amp; Sharing</span>
+        </div>
+        <div style="padding: 18px 20px 22px;">
+          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 8px; text-transform: uppercase;">BBQ Burgerizzr Box</h3>
+          <p style="font-size: 13px; color: #777; margin: 0; line-height: 1.6;">All the ingredients for the burger, ready to enjoy the grill. You just grill it and the rest is ready for you.</p>
+        </div>
+      </div>
+            <div class="menu-card">
+        <div style="height: 210px; overflow: hidden; position: relative;">
+          <img src="https://burgerizzr-public.s3.eu-south-1.amazonaws.com/assets/images/gallery/res-shot-new.jpg" class="menu-card__img" style="width: 100%; height: 100%; object-fit: contain; object-position: center; padding: 10px;" alt="Dine In">
+          <span style="position: absolute; top: 12px; left: 12px; background: var(--red); color: #fff; font-size: 10px; font-weight: 700; padding: 4px 10px; letter-spacing: 1.5px; text-transform: uppercase;">Dine In</span>
+        </div>
+        <div style="padding: 18px 20px 22px;">
+          <h3 style="font-size: 20px; font-weight: 600; margin: 0 0 8px; text-transform: uppercase;">Dine In</h3>
+          <p style="font-size: 13px; color: #777; margin: 0; line-height: 1.6;">Experience our restaurants across Saudi Arabia — watch your meal being prepared fresh, every single time.</p>
+        </div>
+      </div>
+          </div>
+  </section>
+
+  <!-- WHY CHOOSE US -->
+  <section class="m-quality" style="padding: 88px 64px; background: #FAFAFA;">
+    <div style="text-align: center; margin-bottom: 56px;">
+      <div style="color: var(--red); font-weight: 700; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px;">Why Choose Us</div>
+      <h2 style="font-size: 52px; font-weight: 700; margin: 0 0 20px; text-transform: uppercase; line-height: 1;">Best Quality<br><span style="color: var(--red);">Ingredients</span></h2>
+      <p style="font-size: 15px; color: #777; line-height: 1.8; max-width: 560px; margin: 0 auto;">We never compromise on what goes into your meal. Every ingredient is sourced for freshness, every burger is made to order.</p>
+    </div>
+    <div class="m-quality__img-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+      <img src="https://www.burgerizzr.com/assets/images/dp-01732.jpg" style="width: 100%; border-radius: 8px;" alt="">
+      <img src="https://www.burgerizzr.com/assets/images/dp-01544.jpg" style="width: 100%; border-radius: 8px;" alt="">
+    </div>
+  </section>
+
+  <!-- APP -->
+  <section class="m-app" style="background: var(--dark); padding: 80px 64px; display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 60px;">
+    <div>
+      <div style="color: var(--red); font-weight: 700; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 14px;">Mobile App</div>
+      <h2 style="font-size: 52px; color: #fff; font-weight: 700; margin: 0 0 20px; text-transform: uppercase; line-height: 1.05;">Satisfy Your<br>Cravings Faster</h2>
+      <p style="color: #999; font-size: 15px; line-height: 1.8; margin-bottom: 36px;">Order from 120+ branches across Saudi Arabia. Download the Burgerizzr app today.</p>
+      <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+        <button style="padding: 13px 28px; background: #fff; color: var(--dark); border: none; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 1;">App Store</button>
+        <button style="padding: 13px 28px; background: var(--red); color: #fff; border: none; font-size: 14px; font-weight: 700; cursor: pointer; letter-spacing: 1;">Google Play</button>
+      </div>
+    </div>
+    <div class="m-app__img" style="display: flex; justify-content: center;">
+      <img src="https://burgerizzr-public.s3.eu-south-1.amazonaws.com/assets/images/app/app-screens1.png" style="max-width: 380px; width: 100%;" alt="App">
+    </div>
+  </section>
+
+</div>
+
+    <footer class="footer">
+    <a href="https://www.burgerizzr.com"><img src="https://burgerizzr-public.s3.eu-south-1.amazonaws.com/assets/images/logo/logo-burgerizzr.png" class="footer__logo" alt="Burgerizzr"></a>
+    <p class="footer__copy">© 2026 Burgerizzr. All rights reserved.</p>
+    <div class="footer__links">
+        <a href="https://www.burgerizzr.com/terms">Terms</a>
+        <a href="https://www.burgerizzr.com/privacy">Privacy</a>
+        <a href="https://www.burgerizzr.com/contact">Contact</a>
+    </div>
+</footer>
+
+    
+            <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async="" defer=""></script>
+    
+    
+
+</body></html>
