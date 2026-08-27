@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- قِمّة — حزمة تشغيل staging 6/6
+-- قِمّة — حزمة تشغيل staging 6/7
 -- ═══════════════════════════════════════════════════════════════════════════
 -- ⚠️ **الترتيب مُلزَم.** الحزم تُلصَق ١ ثم ٢ ثم ٣ … ولا تُقفز واحدة: بعض
 --    الهجرات تعيد تعريف دوالّ سابقة، وعكس الترتيب يجعل الأقدم يكتب فوق
@@ -9,10 +9,12 @@
 -- ⛔ **ولا تلصق `scripts/db/lib/supabase-shim.sql`** — ذاك لبيئتنا المحلّية،
 --    وتشغيله هنا يسقط بـ`permission denied to alter role`.
 --
--- تحتوي (3):
+-- تحتوي (5):
 --   · 20260824120004_activation_hardening.sql
 --   · 20260824120005_campaign_is_not_a_credential.sql
 --   · 20260824120006_gateway_network_limit.sql
+--   · 20260826120001_founder_code_batches.sql
+--   · 20260826120002_founder_snapshot_signed_in_today.sql
 -- ═══════════════════════════════════════════════════════════════════════════
 
 create schema if not exists supabase_migrations;
@@ -1041,49 +1043,241 @@ comment on function public.gate_admit(text, text, int) is
 end
 $qimmah_mig_20260824120006_wrap$;
 
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 20260826120001_founder_code_batches.sql
+-- ───────────────────────────────────────────────────────────────────────────
+do $qimmah_mig_20260826120001_wrap$
+begin
+  if exists (select 1 from supabase_migrations.schema_migrations where version = '20260826120001') then
+    raise notice 'تخطٍّ: 20260826120001_founder_code_batches.sql مسجَّلة سلفًا';
+    return;
+  end if;
+
+  execute $qimmah_mig_20260826120001$
+-- ============================================================================
+-- [ADMIN-CONV] عرض الحملات — الوسم يُقرأ مجمّعًا، لا كودًا كودًا
+-- ============================================================================
+-- بعد `20260824120005` صارت الحملة **وسمًا فوق أكواد فردية مولَّدة** (حكم
+-- المؤسس: «حملة = RAMADAN، وتُولَّد تحتها أكواد قوية»). فسؤال المؤسس التشغيلي
+-- تغيّر شكله: لم يعد «ما حال هذا الكود؟» بل **«ما حال هذه الحملة؟»** — كم صدر
+-- تحتها، كم استُهلك، كم بقي حيًّا، وكم عُطِّل. وصفحة الأكواد تجيب كودًا كودًا،
+-- فخمسمئة صفّ لا تُقرأ حملةً.
+--
+-- ═══ لماذا قراءة تجميع لا جدول حملات ═══
+-- نفس قرار `20260824120005` حرفيًّا: **الحملة موجودة أصلًا** — هي
+-- `access_codes.label`. جدول `campaigns` كان سيصنع سلطة ثانية لمفهوم قائم.
+-- فالتجميع هنا `group by label` على الجدول الواحد، والحالة تُشتقّ بوقت
+-- القاعدة كما في `founder_code_page` — لا عمود مخزَّن يشيخ.
+--
+-- ═══ عقد الإرجاع ═══
+-- لكل وسم أربعة أعداد: صادر (كل ما أُنشئ) · مستبدَل (استُنفدت استخداماته) ·
+-- متبقٍ (مفعَّل وغير مستنفَد وغير منتهٍ) · معطَّل. **ولا بصمة ولا كود خام** —
+-- نفس قاعدة صفحة الأكواد. والوسم `null` صفّ مستقل لا يُطوى: أكواد بلا حملة
+-- حقيقةٌ تُعرض باسمها («بلا وسم») لا تُخفى.
+-- ============================================================================
+
+create or replace function public.founder_code_batches(p_limit int default 100)
+returns table (
+  label            text,
+  codes_issued     bigint,
+  codes_redeemed   bigint,
+  codes_remaining  bigint,
+  codes_disabled   bigint,
+  last_issued_at   timestamptz
+)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+  perform private.require_admin();
+  return query
+    select c.label,
+           count(*),
+           count(*) filter (where c.redemption_count >= c.max_redemptions),
+           -- «متبقٍ» = ما يستطيع مستخدم استهلاكه الآن فعلًا: مفعَّل، وغير
+           -- مستنفَد، وغير منتهٍ. الشروط الثلاثة معًا — شرطان يكذبان.
+           count(*) filter (where c.enabled
+                              and c.redemption_count < c.max_redemptions
+                              and (c.expires_at is null or c.expires_at > now())),
+           count(*) filter (where not c.enabled),
+           max(c.created_at)
+      from public.access_codes c
+     group by c.label
+     order by max(c.created_at) desc
+     limit greatest(1, least(coalesce(p_limit, 100), 500));
+end;
+$$;
+
+-- نفس نمط بقيّة القراءات: `anon` لا ينفّذ، و`authenticated` ينفّذ ثم يُردّ من
+-- داخل الجسم إن لم يكن إداريًّا — طبقتان لا واحدة.
+revoke all on function public.founder_code_batches(int) from public, anon;
+grant execute on function public.founder_code_batches(int) to authenticated;
+
+comment on function public.founder_code_batches(int) is
+  'الحملات مجمّعة بالوسم: صادر/مستبدَل/متبقٍ/معطَّل. لا بصمة ولا كود خام.';
+
+  $qimmah_mig_20260826120001$;
+
+  insert into supabase_migrations.schema_migrations (version, name)
+  values ('20260826120001', '20260826120001_founder_code_batches.sql');
+end
+$qimmah_mig_20260826120001_wrap$;
+
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 20260826120002_founder_snapshot_signed_in_today.sql
+-- ───────────────────────────────────────────────────────────────────────────
+do $qimmah_mig_20260826120002_wrap$
+begin
+  if exists (select 1 from supabase_migrations.schema_migrations where version = '20260826120002') then
+    raise notice 'تخطٍّ: 20260826120002_founder_snapshot_signed_in_today.sql مسجَّلة سلفًا';
+    return;
+  end if;
+
+  execute $qimmah_mig_20260826120002$
+-- ============================================================================
+-- [ADMIN-CONV] «من دخل اليوم؟» — مفتاح واحد جديد في لقطة اللوحة
+-- ============================================================================
+-- اللقطة تجيب «سجّلوا دخول ٧ أيام / ٣٠ يومًا» ولا تجيب **اليوم** — وهو أول
+-- سؤال يسأله مؤسس يفتح لوحته صباحًا. والمصدر موجود في الدالة نفسها أصلًا:
+-- `riyadh_start` محسوبة لعدّ «حسابات اليوم»، و`auth.users.last_sign_in_at`
+-- مقروء لعدّ الأسبوع. فالإضافة مفتاح واحد يقرن الاثنين.
+--
+-- ⚠️ **ولا عدّاد محذوفين هنا عمدًا**: حذف الحساب يمحو صفّه من `auth.users`
+-- و`profiles` معًا، فلا مصدر يُعدّ منه — واختراع رقم من فرق لقطات هو بالضبط
+-- «رقم لا نعرف من أين جاء». بناء سجلّ حذف بلا PII قرار مؤسس مرفوع في
+-- `docs/product/ADMIN-DASHBOARD-DECISIONS.md`.
+--
+-- ═══ لماذا الجسد منسوخ كاملًا لا مرقوعًا ═══
+-- نفس عقد المستودع (رأس `20260824120002` يشرحه): `test:migration-order` يشترط
+-- أن يطابق جسمُ كل دالّة حيّة **آخر ملفٍ يعرّفها نصًّا**. فالملف الأخير يحمل
+-- النسخة النهائية كاملة، واختصارها رقعةً ديناميكية يجعل الحيّ لا يطابق أي ملف.
+--
+-- ⇐ منقولة حرفيًّا من `20260824120002_founder_operations_reads.sql`، والزيادة
+--    الوحيدة مفتاح `signedInToday` في كتلة `activity`.
+-- ============================================================================
+
+create or replace function public.founder_executive_snapshot()
+returns jsonb
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  out_json     jsonb;
+  riyadh_start timestamptz;
+  total_users  bigint;
+begin
+  perform private.require_admin();
+
+  -- منتصف ليل الرياض: الحسابات «اليوم» تُقاس بيوم المستخدم لا بـUTC.
+  riyadh_start := date_trunc('day', now() at time zone 'Asia/Riyadh') at time zone 'Asia/Riyadh';
+
+  select count(*) into total_users from public.profiles;
+
+  select jsonb_build_object(
+    'as_of', to_char(now() at time zone 'utc', 'YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
+
+    -- ── الحسابات: المقام كامل بحكم مُشغّل handle_new_user ──
+    'users', jsonb_build_object(
+      'total',    total_users,
+      'newToday', (select count(*) from public.profiles p where p.created_at >= riyadh_start),
+      'new7d',    (select count(*) from public.profiles p where p.created_at >= now() - interval '7 days'),
+      'new30d',   (select count(*) from public.profiles p where p.created_at >= now() - interval '30 days'),
+      'verified', (select count(*) from auth.users u where u.email_confirmed_at is not null),
+      'growthSeries', coalesce((
+        select jsonb_agg(jsonb_build_object('date', d.day, 'value', d.n) order by d.day)
+          from (
+            select to_char(date_trunc('day', p.created_at at time zone 'Asia/Riyadh'), 'YYYY-MM-DD') as day,
+                   count(*) as n
+              from public.profiles p
+             where p.created_at >= now() - interval '90 days'
+             group by 1
+          ) d
+      ), '[]'::jsonb)
+    ),
+
+    -- ── الدخول: من جدول المصادقة. «سجّلوا دخول» لا «نشطون» (الجلسة تُجدَّد) ──
+    'activity', jsonb_build_object(
+      -- [ADMIN-CONV] «اليوم» بيوم الرياض نفسه الذي تُعدّ به الحسابات الجديدة —
+      -- مقياسان بنافذتين مختلفتين في شاشة واحدة يقرآن تناقضًا وهميًّا.
+      'signedInToday', (select count(*) from auth.users u where u.last_sign_in_at >= riyadh_start),
+      'signedIn7d',  (select count(*) from auth.users u where u.last_sign_in_at >= now() - interval '7 days'),
+      'signedIn30d', (select count(*) from auth.users u where u.last_sign_in_at >= now() - interval '30 days'),
+      'dormant30d',  (select count(*) from auth.users u
+                       where u.last_sign_in_at is null or u.last_sign_in_at < now() - interval '30 days')
+    ),
+
+    -- ── الاستحقاق: الحالة تُشتقّ بوقت القاعدة، ولا تُقرأ من عمود مخزَّن ──
+    'entitlement', jsonb_build_object(
+      'premiumActive', (select count(*) from public.entitlements e
+                         where private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                               = 'premiumActive'),
+      'trialActive',   (select count(*) from public.entitlements e
+                         where private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                               = 'trialActive'),
+      'trialExpired',  (select count(*) from public.entitlements e
+                         where private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                               = 'trialExpired'),
+      -- المعاينة = حساب بلا أي استحقاق فعّال. يُشتقّ من المقام الكامل.
+      'previewOnly',   greatest(total_users - (
+                         select count(*) from public.entitlements e
+                          where private.derive_state(e.entitlement_type, e.no_expiry, e.expires_at, e.revoked_at)
+                                in ('premiumActive','trialActive','specialAccessActive')), 0),
+      'revokedActive', (select count(*) from public.revocation_ledger r where r.lifted_at is null)
+    ),
+
+    -- ── التجارة: أوامر سلة والأكواد ──
+    'commerce', jsonb_build_object(
+      'ordersSeen',   (select count(distinct s.provider_order_id) from public.salla_webhook_events s
+                        where s.provider_order_id is not null),
+      'ordersPaid',   (select count(*) from public.purchase_ledger l),
+      'ordersFailed', (select count(*) from public.salla_webhook_events s
+                        where s.classification in ('failed','rejected')),
+      'codesIssued',  (select count(*) from public.access_codes c),
+      'codesRedeemed',(select count(*) from public.code_redemption_ledger g),
+      'codesUnused',  (select count(*) from public.access_codes c
+                        where c.enabled and c.redemption_count = 0
+                          and (c.expires_at is null or c.expires_at > now())),
+      -- ── [ADMIN-R4] حالة الـwebhook والمنح اليدوية ──
+      'webhookProcessed', (select count(*) from public.salla_webhook_events s
+                            where s.classification = 'processed'),
+      'webhookPending',   (select count(*) from public.salla_webhook_events s
+                            where s.classification in ('received','verified')),
+      'grantsManual',     (select count(*) from public.entitlements e where e.source = 'manual')
+      -- ⚠️ **`webhookRetried` غير موجود هنا عمدًا**: لا عمود محاولات في الجدول.
+      --    الحدث المُعاد يصل ببصمة مطابقة فيُصنَّف `duplicate` — وذلك ليس
+      --    «إعادة محاولة». إخراج عدد التكرارات باسم «أُعيدت محاولتها» كذبٌ
+      --    بالتسمية، والواجهة تُبقيه «غير مقيس» ولا تراه صفرًا.
+    )
+  ) into out_json;
+
+  return out_json;
+end;
+$$;
+
+-- الصلاحيات تُعاد **صراحةً** مع كل إعادة تعريف (عرف 20260822120003): البيان
+-- المكرّر أرخص من افتراض غير مفحوص عن قاعدةٍ لم تُطبَّق عليها السوابق بترتيبها.
+revoke all on function public.founder_executive_snapshot() from public, anon;
+grant execute on function public.founder_executive_snapshot() to authenticated;
+
+  $qimmah_mig_20260826120002$;
+
+  insert into supabase_migrations.schema_migrations (version, name)
+  values ('20260826120002', '20260826120002_founder_snapshot_signed_in_today.sql');
+end
+$qimmah_mig_20260826120002_wrap$;
+
 -- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
 select
-  '6/6'                                                     as bundle,
+  '6/7'                                                     as bundle,
   count(*) filter (where m.version is not null)                   as registered,
-  3                                                  as expected,
-  case when count(*) filter (where m.version is not null) = 3
+  5                                                  as expected,
+  case when count(*) filter (where m.version is not null) = 5
        then 'OK' else 'INCOMPLETE' end                            as status
-from (values ('20260824120004'), ('20260824120005'), ('20260824120006')) as v(version)
+from (values ('20260824120004'), ('20260824120005'), ('20260824120006'), ('20260826120001'), ('20260826120002')) as v(version)
 left join supabase_migrations.schema_migrations m on m.version = v.version;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- الحزمة الأخيرة — بذرة الملح ثم التحقّق
--- ═══════════════════════════════════════════════════════════════════════════
---
--- ⚠️ **بذرة الملح خطوة لا تنشئها أي هجرة — لأنها سرّ.** وبدونها ترفع كل
---    دالّة كتابة `identity_pepper: no active version` عند أول مستخدم حقيقي.
---    ولا تُعاد إن كانت مبذورة: استبدال ملح قائم يُبطل **كل** بصمة مسجَّلة
---    (التجارب والأكواد والمشتريات). و`on conflict do nothing` يضمن ذلك.
-insert into private.identity_pepper (version, pepper)
-values (1, encode(extensions.gen_random_bytes(32), 'hex'))
-on conflict (version) do nothing;
-
--- ── التحقّق: من الكتالوج الحيّ لا من عدّ الملفات ──────────────────────────
--- عدُّ الملفات يقول «طُبِّق». الكتالوج يقول «يعمل».
-select
-  (select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where n.nspname = 'public' and c.relkind = 'r')                            as tables,
-  (select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity)       as with_rls,
-  (select count(*) from pg_policies where schemaname = 'public')               as policies,
-  (select count(*) from information_schema.role_table_grants
-    where grantee = 'anon' and table_schema = 'public'
-      and privilege_type in ('INSERT','UPDATE','DELETE'))                      as anon_writes,
-  (select count(*) from private.identity_pepper)                               as pepper,
-  (select count(*) from information_schema.role_routine_grants
-    where grantee = 'authenticated' and routine_schema = 'public'
-      and routine_name in ('my_entitlement','start_trial','redeem_access_code_v2',
-                           'claim_pending_grants','submit_missing_food','delete_own_account'))
-                                                                               as client_rpcs,
-  (select count(*) from information_schema.role_routine_grants
-    where grantee in ('anon','authenticated') and routine_schema = 'public'
-      and routine_name = 'redeem_access_code')                                 as legacy_open,
-  (select count(*) from supabase_migrations.schema_migrations)                 as migrations;
-
--- المتوقَّع: tables = with_rls · policies > 0 · anon_writes = 0 · pepper = 1
---            client_rpcs = 6 · legacy_open = 0 · migrations = 33
