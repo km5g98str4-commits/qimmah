@@ -9,9 +9,11 @@
 -- ⛔ **ولا تلصق `scripts/db/lib/supabase-shim.sql`** — ذاك لبيئتنا المحلّية،
 --    وتشغيله هنا يسقط بـ`permission denied to alter role`.
 --
--- تحتوي (2):
+-- تحتوي (4):
 --   · 20260826120003_founder_user_detail_history.sql
 --   · 20260826120004_founder_pending_orders.sql
+--   · 20260827120001_trial_ledger_canonical_race_guard.sql
+--   · 20260827120002_canonical_identity_trailing_dot.sql
 -- ═══════════════════════════════════════════════════════════════════════════
 
 create schema if not exists supabase_migrations;
@@ -290,14 +292,159 @@ comment on function public.founder_pending_orders(int) is
 end
 $qimmah_mig_20260826120004_wrap$;
 
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 20260827120001_trial_ledger_canonical_race_guard.sql
+-- ───────────────────────────────────────────────────────────────────────────
+do $qimmah_mig_20260827120001_wrap$
+begin
+  if exists (select 1 from supabase_migrations.schema_migrations where version = '20260827120001') then
+    raise notice 'تخطٍّ: 20260827120001_trial_ledger_canonical_race_guard.sql مسجَّلة سلفًا';
+    return;
+  end if;
+
+  execute $qimmah_mig_20260827120001$
+-- ═══════════════════════════════════════════════════════════════════════════
+-- [RED-TEAM] سدّ سباق TOCTOU في حارس البصمة القانونية للتجربة (F-4)
+-- ═══════════════════════════════════════════════════════════════════════════
+--
+-- ═══ الثقب مقيسٌ لا مُتوهَّم ═══
+-- `start_trial` (منذ 20260824120004) يمنع مزرعة التجارب بالأسماء المستعارة
+-- عبر فحصٍ **غير قافلٍ**:  `exists (select 1 from trial_ledger where
+-- canonical_hash = ...)`. والعمود `canonical_hash` **بلا قيد فرادة**، فالفحص
+-- شرطٌ يُقرأ لا قفلٌ يُمسك.
+--
+-- على عنقود Postgres حقيقي متعدّد الاتصالات: حسابان بنفس صندوق Gmail
+-- (`me@gmail.com` و`me+farm@gmail.com`) يناديان `start_trial` **في آنٍ واحد**.
+-- كلاهما يقرأ الجدول فارغًا من بصمته القانونية (لم تُثبَّت أخرى بعد)، فيُدرج
+-- كلٌّ صفَّه (بصمة خام مختلفة، **بصمة قانونية واحدة**)، ويفوز الاثنان.
+-- مقيس: **٥ من ٨** جولات تسابق منحت الصندوق الواحد تجربتين — أي أن حارس F-4،
+-- الذي يصمد تسلسليًّا، يُلتفّ عليه بالتزامن. والوسم `+` بريدٌ يصل ويُؤكَّد فعلًا،
+-- فالاستغلال لا يتوقّف على شذوذٍ في مزوّد الهوية — يتوقّف على توقيتٍ يملكه المهاجم.
+--
+-- ═══ العلاج: يُدرِج القفلَ الذي كان الفحص يفترضه ═══
+-- قيد فرادة جزئي على `canonical_hash` يجعل الإدراج الثاني بنفس البصمة القانونية
+-- **يصطدم** بالأوّل: تحت READ COMMITTED ينتظر الثاني إثباتَ الأوّل ثم يسقط
+-- بـ`unique_violation` (23505)، فتُلغى معاملته ولا يُمنح. النتيجة: **فائزٌ واحد
+-- لا اثنان** — نفس نمط الفرادة الذي يحرس به هذا المخطّط الشراء المكرّر
+-- (`purchase_ledger`) والكودَ المكرّر (`access_codes.code_hash`). لا منطق جديد،
+-- ولا مسار خدمة يتغيّر: مجرّد القفل الذي كان مفترَضًا صار قائمًا.
+--
+-- ⚠️ حدوده المعلَنة:
+--   • الفهرس جزئيّ `where canonical_hash is not null`: الصفوف بلا بصمة قانونية
+--     (بريدٌ بلا `@`، أو صفوف سابقة لـ20260824120004) تبقى محروسةً بالبصمة
+--     الخام (المفتاح الأوّل للجدول) كما كانت — والقيم NULL المتعدّدة مسموحة.
+--   • **لا يدمج أبرياء:** بصمةٌ قانونية واحدة تعني صندوقًا واحدًا بالتعريف
+--     (نقاط/وسم Gmail، أو وسم `+` لأي نطاق). ونقطتان خارج Gmail تعطيان بصمتين
+--     قانونيتين مختلفتين ⇒ مفتاحين مختلفين ⇒ تجربتان مسموحتان — يحرسه التأكيد
+--     المضادّ في scripts/attack/canonical-trial-race-attack.mjs.
+--   • الفهرس غير الفريد `trial_ledger_canonical_hash` (20260824120004) يبقى؛
+--     حذفه يعني تحرير هجرة مطبَّقة، ونتركه — كلفة كتابةٍ ضئيلة، والمخطِّط يستعمل
+--     الفريد. توحيدهما دَينٌ موثّق لا شرطُ صحّة.
+--
+-- idempotent: `create unique index if not exists`، ومحروسٌ بوجود العمود.
+--
+-- ⚠️ **مشروطٌ بوجود `canonical_hash`** — لا افتراضًا أنه دائمًا هناك: بيئات
+-- الإثبات المضادّ (entitlements-proof) تُعيد بناء حالة **ما قبل F-4** باستثناء
+-- 20260824120004 (منشئةِ العمود) وتطبيق ما بعدها. فالحارس هنا يجعل هذه الهجرة
+-- **لا-عمليّة** في تلك البيئة — وهو صحيحٌ دلاليًّا: قفلُ البصمة القانونية لا
+-- معنى له قبل وجود البصمة القانونية. وفي أي تطبيق كامل العمود موجود دائمًا
+-- (تسلسل الهجرات يضمنه)، فيُنشأ الفهرس دائمًا حيث يلزم.
+-- ═══════════════════════════════════════════════════════════════════════════
+
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+     where table_schema = 'public' and table_name = 'trial_ledger'
+       and column_name = 'canonical_hash'
+  ) then
+    create unique index if not exists trial_ledger_canonical_unique
+      on public.trial_ledger (canonical_hash)
+      where canonical_hash is not null;
+
+    comment on index public.trial_ledger_canonical_unique is
+      'فرادة البصمة القانونية — تجربة واحدة لكل صندوق. تحوّل فحص start_trial غير القافل إلى قفل إدراج، فيسقط سباق الأسماء المستعارة المتزامن (F-4 TOCTOU).';
+  end if;
+end
+$$;
+
+  $qimmah_mig_20260827120001$;
+
+  insert into supabase_migrations.schema_migrations (version, name)
+  values ('20260827120001', '20260827120001_trial_ledger_canonical_race_guard.sql');
+end
+$qimmah_mig_20260827120001_wrap$;
+
+
+-- ───────────────────────────────────────────────────────────────────────────
+-- 20260827120002_canonical_identity_trailing_dot.sql
+-- ───────────────────────────────────────────────────────────────────────────
+do $qimmah_mig_20260827120002_wrap$
+begin
+  if exists (select 1 from supabase_migrations.schema_migrations where version = '20260827120002') then
+    raise notice 'تخطٍّ: 20260827120002_canonical_identity_trailing_dot.sql مسجَّلة سلفًا';
+    return;
+  end if;
+
+  execute $qimmah_mig_20260827120002$
+-- ============================================================================
+-- [COMMISSIONING · RED-TEAM F-4-LOW] تطبيع النقطة اللاحقة في النطاق
+-- ============================================================================
+-- كشف الهجوم العدائي ثغرة تطبيع منخفضة: `foo@gmail.com.` (نقطة لاحقة في
+-- النطاق) يُنتج بصمة قانونية **مختلفة** عن `foo@gmail.com`، فيفتح تجربة ٧٢
+-- ساعة ثانية للصندوق نفسه. والأمر ليس خاصًّا بجيميل: `a@x.com.` كذلك يخالف
+-- `a@x.com`. مقيس قبل الإصلاح على عنقود حقيقي:
+--   canonical_identity('foo@gmail.com.') = 'foo@gmail.com.'  ≠  'foo@gmail.com'
+--
+-- ═══ لماذا آمن بنيويًّا ═══
+-- النقطة اللاحقة لا تميّز وجهتين حقيقيّتين: DNS يساوي `x.com` و`x.com.` (الأخيرة
+-- اسم مؤهَّل كاملًا ينتهي بالجذر). فقصّها **لا يدمج** بريدين مختلفين، بل يمنع
+-- تشظّي الصندوق الواحد إلى بصمتين. والتعديل الوحيد: `rtrim(النطاق, '.')` في
+-- موضعَي النطاق (فحص جيميل وإعادة التركيب) — وما عداه يبقى حرفيًّا كما كان.
+--
+-- ═══ لماذا هجرة منفصلة لا تعديلٌ للسابقة ═══
+-- الهجرة السابقة (20260824120004) مسجَّلة/مُطبَّقة، فتعديلها يكسر حتمية
+-- التطبيق. الصيغة المعتمدة: إعادة تعريف كاملة الجسد في هجرة جديدة، فتصير هي
+-- آخر مُعرِّف (يقارنه test:migration-order بالجسد الحيّ).
+-- ============================================================================
+
+create or replace function private.canonical_identity(p_email text)
+returns text
+language sql
+immutable
+set search_path = ''
+as $$
+  -- النطاق مُطبَّعًا: النقطة اللاحقة تُقصّ (نفس الوجهة في DNS)، فلا تفتح تجربة ثانية.
+  select case
+    when p_email is null or btrim(p_email) = '' then null
+    when position('@' in lower(btrim(p_email))) = 0 then lower(btrim(p_email))
+    when rtrim(split_part(lower(btrim(p_email)), '@', 2), '.') in ('gmail.com', 'googlemail.com')
+      then replace(split_part(split_part(lower(btrim(p_email)), '@', 1), '+', 1), '.', '')
+           || '@gmail.com'
+    else split_part(split_part(lower(btrim(p_email)), '@', 1), '+', 1)
+         || '@' || rtrim(split_part(lower(btrim(p_email)), '@', 2), '.')
+  end;
+$$;
+
+comment on function private.canonical_identity(text) is
+  'بصمة الهوية القانونية: تطبيع جيميل (نقاط/وسم +) والوسم + عمومًا وقصّ النقطة اللاحقة في النطاق. تجربة واحدة لكل صندوق. [F-4-LOW: النقطة اللاحقة].';
+
+  $qimmah_mig_20260827120002$;
+
+  insert into supabase_migrations.schema_migrations (version, name)
+  values ('20260827120002', '20260827120002_canonical_identity_trailing_dot.sql');
+end
+$qimmah_mig_20260827120002_wrap$;
+
 -- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
 select
   '7/7'                                                     as bundle,
   count(*) filter (where m.version is not null)                   as registered,
-  2                                                  as expected,
-  case when count(*) filter (where m.version is not null) = 2
+  4                                                  as expected,
+  case when count(*) filter (where m.version is not null) = 4
        then 'OK' else 'INCOMPLETE' end                            as status
-from (values ('20260826120003'), ('20260826120004')) as v(version)
+from (values ('20260826120003'), ('20260826120004'), ('20260827120001'), ('20260827120002')) as v(version)
 left join supabase_migrations.schema_migrations m on m.version = v.version;
 
 -- ═══════════════════════════════════════════════════════════════════════════
@@ -335,4 +482,4 @@ select
   (select count(*) from supabase_migrations.schema_migrations)                 as migrations;
 
 -- المتوقَّع: tables = with_rls · policies > 0 · anon_writes = 0 · pepper = 1
---            client_rpcs = 6 · legacy_open = 0 · migrations = 37
+--            client_rpcs = 6 · legacy_open = 0 · migrations = 39

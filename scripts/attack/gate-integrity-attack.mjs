@@ -57,9 +57,20 @@ for (const k of ['test:attack-forgery', 'test:attack-commerce', 'test:attack-web
   check(`${k} داخل test:gate`, gateSet.has(k))
   check(`  ومُعرَّف في package.json`, typeof pkg.scripts[k] === 'string')
 }
-// وترتيبها في الذيل كما يوجب الأمر
+// وترتيبها في الذيل كما يوجب الأمر — **بلا عدد سحري**: كل خطوة من أوّل هجوم
+// حتى النهاية يجب أن تكون هجومًا. أقوى من `>= length - 6` (الذي كان يتعفّن
+// مع كل طقم هجوم جديد): إضافة طقم سابع مشروع (test:attack-trial-race) تبقيه
+// أخضر ما دام الذيل متّصلًا، وأيّ خطوة غير-هجومية دُسّت بينها تُسقطه.
 const firstAttack = gateSteps.findIndex((s) => s.startsWith('test:attack-'))
-check('أطقم الهجوم مُسلسَلة في **ذيل** البوّابة', firstAttack >= gateSteps.length - 6)
+const contiguousTail = (steps) => {
+  const i = steps.findIndex((s) => s.startsWith('test:attack-'))
+  return i >= 0 && steps.slice(i).every((s) => s.startsWith('test:attack-'))
+}
+check('أطقم الهجوم مُسلسَلة في **ذيل** البوّابة — كل ما بعد أوّل هجوم هجومٌ', contiguousTail(gateSteps),
+  contiguousTail(gateSteps) ? `${gateSteps.length - firstAttack} طقمًا في الذيل` : gateSteps.slice(firstAttack).filter((s) => !s.startsWith('test:attack-')).join(' · '))
+// ⟲ محاكاة التفاف (§4.2): خطوة غير-هجومية مدسوسة بين الأطقم تُسقط الفحص باسمها.
+const spliced = [...gateSteps.slice(0, firstAttack + 1), 'test:typecheck', ...gateSteps.slice(firstAttack + 1)]
+check('⟲ ولو دُسّت خطوة غير-هجومية في الذيل لالتُقطت', !contiguousTail(spliced))
 
 // ج) الأطقم التي تحتاج متصفّحًا خارج البوّابة عمدًا (§4.0) — تُسمّى لا تُنسى
 const browserOutside = ['test:e2e:preview-gate', 'test:e2e:onboarding'].filter((k) => !gateSet.has(k))
