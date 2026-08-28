@@ -1,0 +1,14 @@
+{
+  "$comment": "مصدر واحد لهوية قِمّة على الويب — [FOUNDER-QA-002]. كل رابط مطلق يشير إلى قِمّة نفسها (canonical · og:url · sitemap · robots) يجب أن يستعمل `origin` أدناه، ويحرس ذلك `npm run test:canonical-url`. تبديل النطاق عند الإطلاق = تعديل هذا الملف ثم تشغيل `node scripts/apply-canonical-host.mjs`.",
+  "origin": "https://qimmah-8qp.pages.dev",
+  "status": "live",
+  "verifiedAt": "2026-08-28",
+  "evidence": "curl https://qimmah-8qp.pages.dev/ ⇒ 200 · <meta name=\"qimmah-build\">",
+  "plannedOrigin": {
+    "origin": "https://qimmah.app",
+    "status": "not-resolving",
+    "verifiedAt": "2026-08-28",
+    "evidence": "DoH A-record query ⇒ Status 3 (NXDOMAIN) لـqimmah.app و www.qimmah.app",
+    "$comment": "النطاق المقصود عند الإطلاق. لا يُستعمل في أي رابط منشور قبل أن يُسجَّل ويُربط بمشروع Cloudflare Pages ويعود 200 — رابط قانوني أو sitemap يشير إلى مضيف غير موجود أسوأ من غيابه."
+  }
+}

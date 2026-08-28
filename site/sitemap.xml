@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://qimmah.app/</loc>
+    <loc>https://qimmah-8qp.pages.dev/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://qimmah.app/support.html</loc>
+    <loc>https://qimmah-8qp.pages.dev/support.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://qimmah.app/privacy.html</loc>
+    <loc>https://qimmah-8qp.pages.dev/privacy.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
   <url>
-    <loc>https://qimmah.app/terms.html</loc>
+    <loc>https://qimmah-8qp.pages.dev/terms.html</loc>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
   </url>
