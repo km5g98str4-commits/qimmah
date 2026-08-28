@@ -21,6 +21,8 @@ import { runMigration } from '@/lib/dataOwnership'
 import { recordLedgerDay } from '@/lib/nutritionHistory'
 import { assertPaid } from '@/lib/access/guard'
 import { writeJson, type WriteResult } from '@/lib/safeStorage'
+// سقف الهدف الشخصي — **مستورد لا معاد تعريفه**. مصدره الوحيد المقدِّر نفسه.
+import { WATER_MAX_LITERS } from '@/lib/calculators'
 
 export const NUTRITION_V2_KEY = 'qimmah:nutrition:v2'
 export type MealSlot = 'breakfast' | 'lunch' | 'dinner' | 'snack'
@@ -240,11 +242,125 @@ export function updateFoodInDay(food: LoggedFood): DayLog {
   return persist({ ...day, date: getDayStamp(), foods: day.foods.map((f) => (f.id === food.id ? food : f)) })
 }
 
-/** يضيف ماءً (مل) لليوم الحالي — يُثبّت التاريخ ويُراكم على المسجّل سابقًا. */
-export function addWaterToDay(ml: number): DayLog {
+// ═══════════════════════════════════════════════════════════════════════════
+// سياسة «مضاعفات الهدف» لتسجيل الماء — WATER_TIER_POLICY
+// ═══════════════════════════════════════════════════════════════════════════
+// المشكلة: ضغطات متكرّرة على «+كوب» كانت تكتب ١٥–٢٠ لترًا بصمت. لا سقف تراكمي
+// ولا تأكيد ولا ملاحظة.
+//
+// **الأرقام لا تُخترع.** الأساس مشتقّ من رقمين قائمين لا من ثابت جديد:
+//   • `WATER_MAX_LITERS` (٤٫٠ لتر) — أعلى هدف شخصي يسمح به المقدِّر، مصدَّر من
+//     `calculators.ts` ومستورد هنا (لا نسخة ثانية منه).
+//   • هدف المستخدم الشخصي (`targetMl`) حين يعرفه المستدعي.
+// والأساس = **الأكبر منهما**، لأن من هدفه ٢٫٥ لتر لا يصحّ أن يُسأل عند ٣٫٧٥
+// لترًا وهي كمية عادية تمامًا. وإغفال `targetMl` يعطي الأساس **الأصغر** (٤ لتر)
+// أي الحدّ **الأشدّ** — فالنسيان يشدّ الحارس ولا يفتحه.
+//
+//   • فوق ١٫٥× الأساس (≥ ٦ لتر) ⇒ `elevated` — تأكيد هادئ «فوق هدفك».
+//   • فوق ٣× الأساس   (≥ ١٢ لتر) ⇒ `extreme`  — تأكيد صريح أقوى.
+//
+// ⚠️ **ليست حدًّا طبيًّا ولا تشخيصًا ولا نصيحة علاجية.** هي حاجز ضدّ الضغطة
+// الخاطئة المتكرّرة، ونبرتها ملاحظة «فوق هدفك» لا إنذار (§6 · قواعد الكتابة).
+//
+// ═══ لماذا يقف الحارس هنا بالذات ═══
+// `addWaterToDay` هو **الكاتب الواحد**: بطاقة الرئيسية ولوحة التغذية والمسجّل
+// التلقائي أثناء التمرين كلّهم يمرّون منه. فالحارس هنا يشملهم بلا أن يتذكّره
+// كل زرّ.
+//
+// ═══ إعفاء المسجّل التلقائي ═══
+// الكاتب **لا يرسم نوافذ**؛ لا يستطيع أن يسأل بنفسه. لذلك الافتراض
+// `source: 'auto'` — يُحاسَب ويُسجَّل بلا نافذة — والسطح التفاعلي **يعلن نفسه**
+// بـ`source: 'user'`. ونقطة الإعلان واحدة لا ثلاث: `useNutritionToday().addWater`
+// في `nutritionTracking.ts` تضعها لكل سطوح المستخدم، فلا يقدر زرّ أن ينساها.
+// المستدعي الوحيد الذي يُغفلها فعلًا هو `addTodayWaterMl` (ترطيب التمرين) —
+// وهو **بالضبط** الطرف المُعفى المطلوب. يحرس ذلك `test:water-guard` ببندين
+// مسمّيين (سلوكي + بنيوي).
+
+/** مضاعف الطبقة «فوق الهدف» من الأساس. */
+export const WATER_ELEVATED_MULTIPLE = 1.5
+/** مضاعف الطبقة «كمية كبيرة جدًّا» من الأساس. */
+export const WATER_EXTREME_MULTIPLE = 3
+
+export type WaterTier = 'normal' | 'elevated' | 'extreme'
+
+const TIER_RANK: Record<WaterTier, number> = { normal: 0, elevated: 1, extreme: 2 }
+
+/** أساس السياسة (مل) = الأكبر بين سقف المقدِّر والهدف الشخصي. */
+export function waterTierBaseMl(targetMl?: number): number {
+  const ceilingMl = Math.round(WATER_MAX_LITERS * 1000)
+  const personal = Number.isFinite(targetMl) ? Math.round(targetMl as number) : 0
+  return Math.max(ceilingMl, personal > 0 ? personal : 0)
+}
+
+/** حدّا الطبقتين (مل) — مشتقّان من الأساس وحده. */
+export function waterTierThresholds(targetMl?: number): { elevatedMl: number; extremeMl: number } {
+  const base = waterTierBaseMl(targetMl)
+  return {
+    elevatedMl: Math.round(base * WATER_ELEVATED_MULTIPLE),
+    extremeMl: Math.round(base * WATER_EXTREME_MULTIPLE),
+  }
+}
+
+/** تصنيف المجموع المتوقَّع. الحدّ نفسه **ليس** تجاوزًا — التجاوز فوقه. */
+export function classifyWaterTotal(projectedMl: number, targetMl?: number): WaterTier {
+  const { elevatedMl, extremeMl } = waterTierThresholds(targetMl)
+  if (projectedMl > extremeMl) return 'extreme'
+  if (projectedMl > elevatedMl) return 'elevated'
+  return 'normal'
+}
+
+/** الباقي لهدف الماء (مل) — مصدر واحد لحساب «الباقي» في كل سطح. */
+export function waterRemainingMl(consumedMl: number, targetMl: number): number {
+  if (!Number.isFinite(targetMl) || targetMl <= 0) return 0
+  return Math.max(0, Math.round(targetMl) - Math.round(Math.max(0, consumedMl)))
+}
+
+/**
+ * رفض مسمّى: الكتابة **لم تقع** لأنها تحتاج تأكيد المستخدم أوّلًا.
+ * ليست فشل تخزين (`NutritionStorageError`) ولا منع وصول — بابها ثالث مستقلّ.
+ */
+export class WaterConfirmationRequired extends Error {
+  readonly tier: Exclude<WaterTier, 'normal'>
+  readonly projectedMl: number
+  readonly currentMl: number
+  readonly deltaMl: number
+
+  constructor(tier: Exclude<WaterTier, 'normal'>, projectedMl: number, currentMl: number, deltaMl: number) {
+    super(`WaterConfirmationRequired: ${tier} (${projectedMl}ml)`)
+    this.name = 'WaterConfirmationRequired'
+    this.tier = tier
+    this.projectedMl = projectedMl
+    this.currentMl = currentMl
+    this.deltaMl = deltaMl
+  }
+}
+
+export interface AddWaterOptions {
+  /** هدف اليوم بالمل — يرفع الأساس لمن هدفه أعلى من سقف المقدِّر. */
+  targetMl?: number
+  /** الطبقة التي أقرّها المستخدم في نافذة التأكيد (لا بدّ أن تساوي المطلوبة أو تفوقها). */
+  acknowledgedTier?: WaterTier
+  /** `'user'` = فعل تفاعلي يقبل نافذة تأكيد · `'auto'` (الافتراض) = مسجّل غير تفاعلي. */
+  source?: 'user' | 'auto'
+}
+
+/**
+ * يضيف ماءً (مل) لليوم الحالي — يُثبّت التاريخ ويُراكم على المسجّل سابقًا.
+ * القيمة السالبة (تراجع/تصفير) **لا تُبوَّب أبدًا**، والمجموع لا ينزل تحت الصفر.
+ * @throws {WaterConfirmationRequired} لفعل تفاعلي يتجاوز طبقةً لم تُقَرّ بعد.
+ */
+export function addWaterToDay(ml: number, options: AddWaterOptions = {}): DayLog {
   assertPaid('nutrition.water')
   const day = loadNutritionDay()
-  return persist({ ...day, date: getDayStamp(), waterMl: Math.max(0, day.waterMl + Math.round(ml)) })
+  const delta = Number.isFinite(ml) ? Math.round(ml) : 0
+  const projected = Math.max(0, day.waterMl + delta)
+  if (delta > 0 && options.source === 'user') {
+    const tier = classifyWaterTotal(projected, options.targetMl)
+    if (tier !== 'normal' && TIER_RANK[options.acknowledgedTier ?? 'normal'] < TIER_RANK[tier]) {
+      throw new WaterConfirmationRequired(tier, projected, day.waterMl, delta)
+    }
+  }
+  return persist({ ...day, date: getDayStamp(), waterMl: projected })
 }
 
 export type CalStatus = 'under' | 'onTrack' | 'over' | 'unknown'
@@ -307,7 +423,7 @@ export function buildNutritionV2Model(customization: Customization, lang: Lang):
   const fatConsumed = day.foods.reduce((s, f) => s + (f.fat ?? 0), 0)
   const calRemaining = Math.max(0, calTarget - calConsumed)
   const proRemaining = Math.max(0, proTarget - proConsumed)
-  const waterRemaining = Math.max(0, waterTarget - day.waterMl)
+  const waterRemaining = waterRemainingMl(day.waterMl, waterTarget)
   const anyLogged = day.foods.length > 0
 
   const calStatus: CalStatus = calTarget <= 0 ? 'unknown' : calConsumed > calTarget * 1.05 ? 'over' : calConsumed >= calTarget * 0.85 ? 'onTrack' : 'under'

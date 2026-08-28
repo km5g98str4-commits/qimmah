@@ -1,0 +1,31 @@
+{
+  "_comment": "مسح نقطة-زمن لمكتبة خارجية يملكها المؤسس، خارج المستودع. CI لا يستطيع إعادة قياسه ولا يحاول. أُعيد قياسه يدويًا بقراءة manifests/production_queue.json و PRODUCTION_STANDARD.md فقط — لم يُنسخ أي ملف ثنائي.",
+  "surveyedAt": "2026-08-28",
+  "path": "/Users/ziyad/Documents/Saudi Training/QIMMAH_Exercise_Image_Library",
+  "readOnly": ["manifests/production_queue.json", "PRODUCTION_STANDARD.md"],
+  "pipeline": {
+    "nature": "AI_GENERATION",
+    "evidence": [
+      "PRODUCTION_STANDARD.md §Locked visual identity: مرجع هوية إلزامي 00_reference/athlete_identity_anchor.png ورياضي واحد بنفس الوجه بالضبط في كل صورة",
+      "PRODUCTION_STANDARD.md §Required asset layout: «Generate one native two-panel source» ثم يُشقّ بـprocess_composite.py",
+      "PRODUCTION_STANDARD.md §Visual QA gate: «Extra/missing fingers or limbs» — عيبٌ لا يقع إلا في التوليد",
+      "production_queue.json: حقل generationAttempt في كل صفّ، وqaResult ∈ approved/pending_detailed_review/not_started"
+    ],
+    "satisfiesRealPhotography": false,
+    "note": "«photorealistic» في المواصفة تصف الأسلوب البصري المطلوب من المولّد، لا مصدرًا فوتوغرافيًا. الرتبة ١ في سلّم المصادر (فوتوغرافيا حقيقية) لا تتحقّق بهذه المكتبة مهما بلغت جودتها."
+  },
+  "counts": {
+    "queueRows": 181,
+    "statusApproved": 9,
+    "statusGeneratedPendingQa": 36,
+    "statusQueued": 136,
+    "rowsWithImageFilesOnDisk": 45,
+    "rowsWithNoImagePathAtAll": 136,
+    "mapsToCatalogByExactEnglishName": 74,
+    "mapsToCatalogByWordOrderInsensitiveName": 78,
+    "distinctCatalogIdsReachable": 77,
+    "rowsWithFilesThatMapToCatalog": 21,
+    "approvedRowsThatMapToCatalog": 7
+  },
+  "method": "المطابقة على nameEn في src/data/exercises.ts بعد تطبيع الحروف الصغيرة وإزالة غير الأبجدي-الرقمي؛ والمطابقة الثانية تتجاهل ترتيب الكلمات (مجموعة الكلمات نفسها)."
+}

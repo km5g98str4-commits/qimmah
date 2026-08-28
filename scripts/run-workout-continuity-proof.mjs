@@ -228,8 +228,14 @@ const ASSERTS = [
   {
     id: 'الصورة تُعرض فقط بإطار معروف الحقوق — لا صورة مستعارة لتمرين بلا وسائط',
     file: 'warm',
+    /**
+     * [FOUNDER-QA-001] رُبِط بمقصده المُعلَن بعد أن صار الإحماء نوع محتوى مستقلًّا.
+     * كان يثبّت **آلية** الوسائط القديمة بالاسم (`status === 'stills'`)، والآليّة
+     * تبدّلت. والمقصد («صورة بإطار معروف الحقوق لا صورة مستعارة») صار مضمونًا
+     * **أشدّ** لا أرخى: الصور الآن لخطوات الحركة وحدها وبموافقة `approvedImageFor`.
+     */
     run: (code) =>
-      /status === 'stills'/.test(code) && /showMedia \? \(/.test(code),
+      /approvedImageFor\(/.test(code) && /const imageSrc = warmupImageFor\(step\)/.test(code) && /imageSrc \? \(/.test(code),
   },
   {
     id: 'شاشة الإحماء تقول ماذا بعدها — بعدد تمارين اليوم لا برقم مكتوب بيد',
@@ -381,8 +387,8 @@ const TAMPERS = [
   {
     id: 'عرض صورة لكل خطوة بلا فحص الحقوق (صورة مستعارة لتمرين بلا وسائط)',
     file: 'warm',
-    apply: (c) => c.replace(/const showMedia = hasStillMedia\(step\.exerciseId\)/, 'const showMedia = true')
-      .replace(/status === 'stills'/, 'status !== undefined'),
+    // الالتفاف الحديث: صورة مستعارة تُحقن مباشرةً بدل المرور بفحص الحقوق.
+    apply: (c) => c.replace(/const imageSrc = warmupImageFor\(step\)/, "const imageSrc = '/borrowed.jpg'"),
     breaks: ['الصورة تُعرض فقط بإطار معروف الحقوق — لا صورة مستعارة لتمرين بلا وسائط'],
   },
   {

@@ -22,7 +22,9 @@ import {
   subscribeNutritionDay,
   NUTRITION_V2_KEY,
   NutritionStorageError,
+  WaterConfirmationRequired,
   type LoggedFood as CanonicalFood,
+  type WaterTier,
 } from './nutritionV2Model'
 
 /** @deprecated مفتاح v1 — لم يعد يُكتب؛ يُحذف عبر هجرة nutrition-unify-v1-to-v2. */
@@ -172,6 +174,28 @@ function nextLogId(): string {
   return `log-${logSeq}-${Math.round(performance.now())}`
 }
 
+// ── عقد تسجيل الماء في الواجهة ───────────────────────────────────────────────
+// `addWater` كانت تعيد `boolean`؛ صارت نتيجة **مسمّاة** لأن الفشل صار بابين لا
+// بابًا واحدًا: تعذّر حفظ، أو كتابة موقوفة تنتظر تأكيد المستخدم. الـ`boolean`
+// كان سيبتلع الفرق ويعرض «ما قدرنا نحفظ» لكتابة لم تُرفض أصلًا (§5: الصدق قبل
+// الطمأنينة — والرسالة الخاطئة كذبة بحسن نيّة).
+export interface AddWaterCallOptions {
+  /** هدف اليوم بالمل — يرفع أساس سياسة الطبقات لمن هدفه أعلى من سقف المقدِّر. */
+  targetMl?: number
+  /** الطبقة التي أقرّها المستخدم في نافذة التأكيد. */
+  acknowledgedTier?: WaterTier
+}
+
+export type WaterAddOutcome =
+  | { ok: true }
+  | { ok: false; reason: 'storage' }
+  | { ok: false; reason: 'confirm'; tier: Exclude<WaterTier, 'normal'>; projectedMl: number }
+
+export type AddWaterFn = (ml: number, opts?: AddWaterCallOptions) => WaterAddOutcome
+
+const WATER_OK: WaterAddOutcome = { ok: true }
+const WATER_STORAGE_FAILED: WaterAddOutcome = { ok: false, reason: 'storage' }
+
 /** هوك تتبّع التغذية اليومي — مشترك في المصدر القانوني مباشرة. */
 export function useNutritionToday() {
   const demo = useIsDemo()
@@ -224,20 +248,40 @@ export function useNutritionToday() {
     [demo],
   )
 
-  const addWater = useCallback(
-    (ml: number) => {
+  const addWater: AddWaterFn = useCallback(
+    (ml: number, opts: AddWaterCallOptions = {}) => {
       if (demo) {
         const prev = snapshot(true)
         demoCache = { ...prev, waterMl: Math.max(0, prev.waterMl + ml) }
         notify()
-        return true
+        return WATER_OK
       }
-      const saved = storageWrite(() => { addWaterToDay(ml) }) // المصدر القانوني الواحد — يُشعرنا عبر الاشتراك
-      if (!saved) return false
+      let needsConfirm: WaterConfirmationRequired | null = null
+      const saved = storageWrite(() => {
+        try {
+          // ═══ نقطة الإعلان الوحيدة ═══
+          // `source: 'user'` تُكتب **هنا** لا في الأزرار: بطاقة الرئيسية ولوحة
+          // ماء التغذية كلتاهما تستهلكان هذا الهوك، فلا يقدر زرّ أن ينسى الحارس.
+          // والمسجّل التلقائي أثناء التمرين لا يمرّ من هنا — فيبقى معفى من
+          // النافذة بحكم الافتراض `'auto'` مع بقاء محاسبته كاملة.
+          addWaterToDay(ml, { ...opts, source: 'user' })
+        } catch (error) {
+          if (error instanceof WaterConfirmationRequired) {
+            needsConfirm = error
+            return
+          }
+          throw error
+        }
+      })
+      if (needsConfirm) {
+        const pending = needsConfirm as WaterConfirmationRequired
+        return { ok: false, reason: 'confirm', tier: pending.tier, projectedMl: pending.projectedMl }
+      }
+      if (!saved) return WATER_STORAGE_FAILED
       // [CTO-70] البند ١ — أول انتصار: تسجيل ماء حقيقي يُنهي الانتصار الأول.
       // هنا لا في البطاقة: الضغطة نيّة، والإنجاز ما وقع — ويُحتسب من أي سطح.
       if (ml > 0) completeFirstWin('water')
-      return true
+      return WATER_OK
     },
     [demo],
   )

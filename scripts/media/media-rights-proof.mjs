@@ -17,6 +17,7 @@ import { createServer } from 'node:http'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, extname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { MEDIA_KINDS, deriveRightsStatus } from './media-kinds.mjs'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const PUBLIC = resolve(ROOT, 'public')
@@ -27,6 +28,9 @@ const FREE_DB_REF = 'b0eed061e1c832b3ed815fbaa4b45b3cdc14df49'
 const ROOT_DATASET_REF = '5994bea047eee4d39a2c0872be3dd8fdd258ba31'
 
 const sha256 = (bytes) => createHash('sha256').update(bytes).digest('hex')
+
+// مفردات النوع والحقوق من مصدر واحد — يستهلكها هذا الخاتم وحارسُه
+// scripts/media/media-provenance-proof.mjs معًا.
 
 function magic(bytes) {
   if (bytes.length >= 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff) return 'image/jpeg'
@@ -60,6 +64,8 @@ function exerciseEntries() {
         upstreamRootEvidenceUrl: `https://github.com/wrkout/exercises.json/blob/${ROOT_DATASET_REF}/LICENSE.md`,
         license: 'Unlicense / public-domain dedication',
         verdict: 'CLEARLY-LICENSED',
+        // فوتوغرافيا لشخص حقيقي — هذه وحدها تستحق اسم «صورة».
+        mediaKind: 'REAL_PHOTO',
         attributionRequired: false,
         risk: 'clean',
       })
@@ -92,6 +98,8 @@ function machineEntries() {
       evidenceReadmeUrl: 'docs/content/MEDIA-RIGHTS.md',
       license: INHOUSE_LICENSE,
       verdict: 'IN-HOUSE',
+      // مخطّط متجهي — لا يدّعي فوتوغرافيا ولا يُصنَّف صورة أبدًا.
+      mediaKind: 'IN_HOUSE_DIAGRAM',
       attributionRequired: false,
       risk: 'clean',
       note: `Original branded schematic generated deterministically by ${INHOUSE_GENERATOR}; no third-party photo, watermark, or restricted material.`,
@@ -120,6 +128,8 @@ function illustrationEntries() {
       evidenceReadmeUrl: 'docs/content/MEDIA-RIGHTS.md',
       license: INHOUSE_LICENSE,
       verdict: 'IN-HOUSE',
+      // رسم حركة متجهي — لا يدّعي فوتوغرافيا ولا يُصنَّف صورة أبدًا.
+      mediaKind: 'IN_HOUSE_ILLUSTRATION',
       attributionRequired: false,
       risk: 'clean',
       note: `Original branded movement illustration generated deterministically by ${ILLUS_GENERATOR}; no third-party photo, watermark, or restricted material.`,
@@ -138,6 +148,15 @@ function liveInventory() {
     entry.sha256 = sha256(bytes)
     entry.magicMime = mime
     entry.extension = extname(entry.localPath).toLowerCase()
+    // النوع والحقوق يُشتقّان هنا لا يُكتبان يدويًا في السجلّ — القيمة المكتوبة بيد تشيخ.
+    entry.rightsStatus = deriveRightsStatus(entry)
+    if (!MEDIA_KINDS.includes(entry.mediaKind)) {
+      throw new Error(`${entry.id}: mediaKind must be one of ${MEDIA_KINDS.join('|')}, got ${entry.mediaKind}`)
+    }
+    // صورة SVG لا تكون فوتوغرافيا أبدًا — تناقض الشكل مع الوسم يسقط هنا باسمه.
+    if (entry.mediaKind === 'REAL_PHOTO' && mime === 'image/svg+xml') {
+      throw new Error(`${entry.id}: labelled REAL_PHOTO but the bytes are a vector (${mime})`)
+    }
   }
   return entries.sort((a, b) => a.id.localeCompare(b.id))
 }
@@ -234,7 +253,7 @@ for (let i = 0; i < live.length; i++) {
   const actual = live[i]
   const expected = reviewed[i]
   if (actual.id !== expected.id) throw new Error(`unreviewed/missing asset: live=${actual.id}, manifest=${expected.id}`)
-  for (const key of ['localPath', 'upstreamUrl', 'sourceId', 'evidenceUrl', 'license', 'verdict', 'sha256', 'magicMime']) {
+  for (const key of ['localPath', 'upstreamUrl', 'sourceId', 'evidenceUrl', 'license', 'verdict', 'sha256', 'magicMime', 'mediaKind', 'rightsStatus']) {
     if (actual[key] !== expected[key]) throw new Error(`${actual.id}: manifest drift in ${key}`)
   }
 }

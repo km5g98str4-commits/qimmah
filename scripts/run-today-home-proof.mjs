@@ -124,7 +124,20 @@ check('مقاييس التمرين من النموذج لا من حساب في �
 console.log('\n⑬ الترطيب يعيد استعمال المنطق القائم')
 check('الرئيسية تستعمل هوك التغذية الحيّ نفسه', today.includes("useNutritionToday } from '@/lib/nutritionTracking'"))
 check('لا متجر ماء ثانٍ في مكوّن الماء', !code(water).includes('localStorage') && !code(water).includes('addWaterToDay'))
-check('فشل الحفظ يُعرض ولا يُبتلع', water.includes('setFailed(!onAdd(CUP_ML))') && water.includes('d.waterSaveError'))
+// [FOUNDER-QA/P1] كان هذا الفحص يثبّت الحرف `setFailed(!onAdd(CUP_ML))`. نزل
+// حارس الكمية إلى الكاتب الواحد (`addWaterToDay`)، فصار `onAdd` يعيد **نتيجة
+// مسمّاة** بثلاثة أبواب: نجاح · تعذّر حفظ · كتابة موقوفة تنتظر تأكيدًا. الـ
+// `boolean` كان سيبتلع الفرق ويعرض «ما قدرنا نحفظ» لكتابة لم تُرفض أصلًا.
+// المعنى نفسه محفوظ **ومشدود**: الكتلة تُستخرج بحدودها (لا رضا من مواضع متفرّقة
+// — §4.2)، والأبواب الثلاثة تُفرَّق، وتعذّر الحفظ وحده يرفع الراية.
+const settleBlock = water.match(/const settle = \(outcome: WaterAddOutcome\) => \{[^]*?\n {2}\}/)?.[0] ?? ''
+check(
+  'فشل الحفظ يُعرض ولا يُبتلع',
+  settleBlock.includes('if (outcome.ok)') &&
+    settleBlock.includes("outcome.reason === 'confirm'") &&
+    settleBlock.includes('setFailed(true)') &&
+    water.includes('d.waterSaveError'),
+)
 check('بلا هدف يُعرض المسجَّل فعلًا (الضغطة لها أثر مرئي)', water.includes('d.waterLoggedOnly('))
 
 console.log('\n⑭ الوصولية والقياسات')

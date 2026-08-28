@@ -1,32 +1,42 @@
 import { useEffect, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
-import { ExerciseMedia } from '@/components/ExerciseMedia'
 import { SessionStageRail } from '@/components/workout/SessionStageRail'
 import type { Lang } from '@/lib/appPreferences'
 import { warmupStrings } from '@/i18n/dict/warmup'
 import { exerciseVideoStrings } from '@/i18n/dict/exerciseVideo'
-import type { WarmupPlan } from '@/lib/warmupPlan'
-import { canonicalExerciseId } from '@/data/exercises'
-import { exerciseMediaManifest } from '@/data/exerciseMediaManifest.generated'
-import { approvedVideoFor, videoEmbedUrl } from '@/lib/exerciseProductionMedia'
+import type { WarmupPlan, WarmupStep } from '@/lib/warmupPlan'
+import { approvedImageFor, approvedVideoFor, videoEmbedUrl } from '@/lib/exerciseProductionMedia'
 import { getCue } from '@/lib/coaching/cues'
 
 /**
- * هل لهذا التمرين إطارٌ حقيقي مُلتزَم في المستودع؟ [WORKOUT-CONTINUITY-001] الإصلاح ٤.
+ * وسائط خطوة الإحماء — [FOUNDER-QA] الإصلاح P0، وهذه هي نصف الإصلاح.
  *
- * القراءة من السجلّ المُولَّد لا من وجود الملف: `status === 'stills'` تعني إطارَي
- * بداية/نهاية **مفحوصَي المقاس ومعروفَي الحقوق** (yuhonas/free-exercise-db · Unlicense).
- * و`placeholder-only` (بطاقات الأجهزة) و`missing` تُعامَلان سواءً: لا صورة.
- * صورةٌ خاطئة أسوأ من لا صورة — وهذا ما يجعل سطر التعليمة أدناه **مطلبًا لا زينة**.
+ * بلاغ المؤسس: بطاقة إحماء تحمل اسم **«جهاز ضغط الصدر»** وصورة الجهاز. الاسم
+ * أُصلح في الباني (`warmupPlan.ts`) بتصدير حركات مرونة حقيقية؛ والصورة تُصلَح هنا
+ * بقاعدة واحدة قاطعة: **الوسائط لحركات المرونة وحدها.**
+ *
+ *   • خطوة `mobility` ⇒ صورتها هي صورة الحركة نفسها من سجلّ الإنتاج المعتمد.
+ *   • خطوة `ramp`/`light` ⇒ **لا صورة ولا فيديو**، مهما كان للتمرين وسيط معتمد.
+ *     صورة جهاز تحت عنوان «إحماء قصير» تقول للمستخدم إن الجهاز هو الإحماء — وهو
+ *     بالضبط العطل المُبلَّغ. الوسيط سيصله على بطاقة التمرين بعد دقيقة، في موضعه.
+ *
+ * والقراءة من `exerciseProductionMedia` حصرًا (`APPROVED` فقط): ما لم يُراجَع لا
+ * يُعرض، و`null` جوابٌ صادق يُرسَم بلا صورة — لا ببديل ولا بسلسلة احتياط. صورةٌ
+ * خاطئة أسوأ من لا صورة (§5)، والوسائط المُعلَّمة لا تعود (§8 قرار مقفل ٨).
  */
-function hasStillMedia(exerciseId: string): boolean {
-  const entry =
-    exerciseMediaManifest[exerciseId] ?? exerciseMediaManifest[canonicalExerciseId(exerciseId)]
-  return entry?.status === 'stills'
+function warmupImageFor(step: WarmupStep): string | null {
+  if (step.kind !== 'mobility') return null
+  return approvedImageFor(step.exerciseId)?.start ?? null
+}
+
+/** نفس القاعدة للفيديو: مرجع أداء يُعرض لحركة المرونة، لا لجهاز تحت عنوان إحماء. */
+function warmupVideoFor(step: WarmupStep) {
+  if (step.kind !== 'mobility') return null
+  return approvedVideoFor(step.exerciseId)
 }
 
 /**
- * شاشة الإحماء — [SOVEREIGN-TODAY-001] المهمّة ١.
+ * شاشة الإحماء — [SOVEREIGN-TODAY-001] المهمّة ١ · [FOUNDER-QA] الإصلاح P0.
  *
  * **أول مرحلة في الجلسة، لا بطاقة داخلها.** المسار صار يُقرأ:
  * «إحماء ← التمارين ← الإنهاء»، والمؤشّر أعلى الشاشة يقول أين نحن.
@@ -104,29 +114,30 @@ export function WarmupScreen({ lang, plan, dayNameAr, dayNameEn, exerciseCount, 
           {plan.steps.map((step, i) => {
             /* [WORKOUT-CONTINUITY-001] الإصلاح ٤ — الإحماء كان اسمًا ورقمًا وبس.
                قياس: صفر صورة وصفر تعليمة على كل خطوة. الآن سطران يقولان **كيف**:
-                 • سطر نوع الخطوة — من قاموس هذه الحارة، يشرح مقصد البار/النسبة/الخفيفة.
+                 • سطر نوع الخطوة — من قاموس هذه الحارة، يشرح مقصد المرونة/البار/النسبة.
                  • سطر الإعداد المؤلَّف لهذا التمرين بعينه (`getCue`، تغطية ١٨١/١٨١
                    بالعربية والإنجليزية) — تعليمة حقيقية لا نصّ عام.
-               والصورة تُعرض **فقط** حين يكون لها إطار معروف الحقوق؛ وما عداه يعتمد
-               على النصّ. لا صورة مستعارة ولا GIF مُعلَّم (§8 قرار مقفل ٨). */
+               [FOUNDER-QA] والصورة صارت لحركات المرونة وحدها (`warmupImageFor`):
+               لا صورة جهاز تحت عنوان إحماء، ولا بديل حين لا يوجد وسيط معتمد. */
             const cue = getCue(step.exerciseId, lang).steps[0]
-            const showMedia = hasStillMedia(step.exerciseId)
+            const imageSrc = warmupImageFor(step)
             const firstOfExercise = plan.steps.findIndex((s) => s.exerciseId === step.exerciseId) === i
-            const videoRef = firstOfExercise ? approvedVideoFor(step.exerciseId) : null
+            const videoRef = firstOfExercise ? warmupVideoFor(step) : null
             const stepName = ar ? step.nameAr : step.nameEn
             return (
               <li
                 key={`${step.exerciseId}-${step.label}-${i}`}
+                data-warmup-step={step.kind}
                 className="flex items-start gap-3 rounded-2xl border border-line bg-surface px-3.5 py-3"
               >
-                {showMedia ? (
+                {imageSrc ? (
                   <span className="w-14 shrink-0 overflow-hidden rounded-xl border border-line">
-                    <ExerciseMedia
-                      exerciseId={step.exerciseId}
-                      lang={lang}
-                      variant="thumb"
-                      heightClass="h-14"
-                      hideChips
+                    <img
+                      src={imageSrc}
+                      alt={w.mobilityImageAlt(stepName)}
+                      loading="lazy"
+                      decoding="async"
+                      className="h-14 w-14 object-cover"
                     />
                   </span>
                 ) : (
@@ -135,14 +146,27 @@ export function WarmupScreen({ lang, plan, dayNameAr, dayNameEn, exerciseCount, 
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
+                  {/* [FOUNDER-QA] هويّة الخطوة قبل اسمها: خطوة القوّة **تسخين على**
+                      التمرين لا التمرين نفسه. حركة المرونة اسمها هو نشاطها فلا تحتاج
+                      ترويسة. الاسم في `bdi` مستقلّ — لا يُدسّ في قالب يكسر الاتجاه. */}
+                  {step.kind !== 'mobility' && (
+                    <span
+                      data-warmup-owner
+                      className="block text-[11px] font-black leading-tight tracking-wide text-ink-400"
+                    >
+                      {w.setOfPrefix}
+                    </span>
+                  )}
                   <bdi className="block truncate text-base font-bold leading-snug">
                     {ar ? step.nameAr : step.nameEn}
                   </bdi>
                   <span className="block text-sm font-bold text-ink-500 tabular-nums">
-                    {showMedia ? `${w.stepLabel[step.label]} · ` : ''}
-                    {step.kind === 'ramp' && step.weightKg !== undefined
-                      ? w.loadLine(step.weightKg, step.reps)
-                      : w.lightLine(step.reps)}
+                    {imageSrc ? `${w.stepLabel[step.label]} · ` : ''}
+                    {step.kind === 'mobility'
+                      ? w.mobilityLine(step.seconds)
+                      : step.weightKg !== undefined
+                        ? w.loadLine(step.weightKg, step.reps)
+                        : w.lightLine(step.reps)}
                   </span>
                   <span data-warmup-cue className="mt-1.5 block text-sm leading-relaxed text-ink-700">
                     {w.stepCue[step.label]}

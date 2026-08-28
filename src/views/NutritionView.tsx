@@ -4,7 +4,9 @@ import { ProgressBar } from '@/components/ProgressBar'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
 import { AllergyNotice } from '@/components/AllergyNotice'
 import { useCustomization } from '@/lib/customizationContext'
-import { MEAL_SLOTS, useNutritionToday, type LoggedFood, type MealSlot } from '@/lib/nutritionTracking'
+import { MEAL_SLOTS, useNutritionToday, type AddWaterFn, type LoggedFood, type MealSlot } from '@/lib/nutritionTracking'
+import type { WaterTier } from '@/lib/nutritionV2Model'
+import { waterGuardStrings } from '@/i18n/dict/waterGuard'
 import { inRange, NUM_LIMITS, numLimitMessage, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
@@ -46,7 +48,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const { customization } = useCustomization()
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
-  const { state, totals, addWater, removeLog, updateLogQuantity } = useNutritionToday()
+  const { state, totals, addWater, resetWater, removeLog, updateLogQuantity } = useNutritionToday()
   const np = customization.nutritionPlan
 
   /**
@@ -206,7 +208,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
         )}
 
         {/* الماء */}
-        <WaterPanel lang={lang} waterMl={state.waterMl} targetMl={targetWaterMl} onAdd={addWater} focusRequested={focusWater} onFocusHandled={() => setFocusWater(false)} />
+        <WaterPanel lang={lang} waterMl={state.waterMl} targetMl={targetWaterMl} onAdd={addWater} onReset={resetWater} focusRequested={focusWater} onFocusHandled={() => setFocusWater(false)} />
 
         <p className="mt-6 flex items-start gap-2 text-[11px] text-ink-400">
           <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -476,13 +478,24 @@ function MealCard({
 }
 
 
-/** لوحة الماء — +250/+500 + إدخال كمية مخصّصة (50–3000 مل). */
-function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = false, onFocusHandled }: { lang: Lang; waterMl: number; targetMl: number; onAdd: (ml: number) => boolean; focusRequested?: boolean; onFocusHandled?: () => void }) {
+/**
+ * لوحة الماء — +250/+500 + إدخال كمية مخصّصة (50–3000 مل).
+ *
+ * ═══ الحارس ليس هنا ═══
+ * سياسة الطبقات (`WATER_TIER_POLICY`) تعيش في الكاتب الواحد `addWaterToDay`؛
+ * هذه اللوحة **تعرض** نتيجته المسمّاة فقط: نجاح · تعذّر حفظ · أو كتابة موقوفة
+ * تنتظر تأكيدًا. فلو نُسِخت اللوحة غدًا لسطح ثالث لَبقي الحارس قائمًا.
+ */
+function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, onReset, focusRequested = false, onFocusHandled }: { lang: Lang; waterMl: number; targetMl: number; onAdd: AddWaterFn; onReset: () => boolean; focusRequested?: boolean; onFocusHandled?: () => void }) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
+  const w = waterGuardStrings[lang]
   const { guard } = useAccess()
   const [ml, setMl] = useState('')
   const [saveError, setSaveError] = useState(false)
+  const [resetError, setResetError] = useState(false)
+  const [askReset, setAskReset] = useState(false)
+  const [pending, setPending] = useState<{ tier: Exclude<WaterTier, 'normal'>; projectedMl: number; deltaMl: number; onSaved?: () => void } | null>(null)
   // وصول نيّة «ماء»: تُظهر اللوحة وتضع التركيز على أوّل إجراء — بلا كتابة.
   const presetRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
@@ -491,12 +504,22 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
     presetRef.current?.focus({ preventScroll: true })
     onFocusHandled?.()
   }, [focusRequested, onFocusHandled])
-  const onAdd = guard('nutrition.water', (amountMl: number, onSaved?: () => void) => {
-    if (rawAdd(amountMl)) {
+  const liters = (value: number) =>
+    formatNumber(Math.max(0, value) / 1000, lang, { minimumFractionDigits: 1, maximumFractionDigits: 1 })
+  const onAdd = guard('nutrition.water', (amountMl: number, onSaved?: () => void, acknowledgedTier?: WaterTier) => {
+    const outcome = rawAdd(amountMl, { targetMl, acknowledgedTier })
+    if (outcome.ok) {
       setSaveError(false)
+      setPending(null)
       onSaved?.()
       return
     }
+    if (outcome.reason === 'confirm') {
+      setSaveError(false)
+      setPending({ tier: outcome.tier, projectedMl: outcome.projectedMl, deltaMl: amountMl, onSaved })
+      return
+    }
+    setPending(null)
     setSaveError(true)
   })
   const { min, max } = NUM_LIMITS.waterMl
@@ -509,6 +532,13 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
   const addPreset = (amountMl: number) => {
     onAdd(amountMl)
   }
+  // الباقي — نفس حساب النموذج، مصدرًا واحدًا للرقم المعروض.
+  const remainingMl = targetMl > 0 ? Math.max(0, Math.round(targetMl) - Math.round(Math.max(0, waterMl))) : 0
+  const doReset = () => {
+    setAskReset(false)
+    setPending(null)
+    setResetError(!onReset())
+  }
 
   return (
     <div className="mt-4 card p-5">
@@ -519,6 +549,11 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
         </span>
         <span className="text-sm font-black text-primary-c">{formatNumber(Number((waterMl / 1000).toFixed(2)), lang)} / {formatNumber(Number((targetMl / 1000).toFixed(1)), lang)} {d.litersUnit}</span>
       </div>
+      {targetMl > 0 && (
+        <p data-testid="water-remaining" className="mt-1 text-xs font-bold text-ink-500">
+          {remainingMl > 0 ? w.litersRemaining(liters(remainingMl)) : w.litersTargetMet}
+        </p>
+      )}
       <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
       <div className="mt-3 flex flex-wrap gap-2">
         {/* الوسم للقيادة الآلية: نصّ الزرّ يمرّ بـ`formatNumeralsIn` فيصير «+٢٥٠ مل»
@@ -546,7 +581,42 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, focusRequested = f
         <button type="button" onClick={submit} disabled={!valid} className="btn-primary min-h-[44px] px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{t.customWaterAdd}</button>
       </div>
       {ml !== '' && !valid && <p id="custom-water-msg" role="alert" className="mt-1.5 text-[11px] font-bold text-danger">{numLimitMessage('waterMl', lang)}</p>}
+
+      {/* تأكيد الكمية غير المعتادة — الكتابة **لم تقع**؛ نعرض ما سيصير إليه اليوم. */}
+      {pending && (
+        <div data-testid="water-confirm" role="group" aria-live="polite" className="mt-3 rounded-xl border border-line bg-page px-3 py-2.5">
+          <p className="text-sm font-black text-ink-900">{pending.tier === 'extreme' ? w.confirmExtremeTitle : w.confirmElevatedTitle}</p>
+          <p className="mt-1 text-xs text-ink-700">
+            {pending.tier === 'extreme' ? w.confirmExtremeBody(liters(pending.projectedMl)) : w.confirmElevatedBody(liters(pending.projectedMl), liters(targetMl))}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="button" data-testid="water-confirm-yes" onClick={() => onAdd(pending.deltaMl, pending.onSaved, pending.tier)} className="btn-primary min-h-[44px] px-3 py-2 text-xs">
+              {pending.tier === 'extreme' ? w.confirmExtremeYes : w.confirmYes}
+            </button>
+            <button type="button" data-testid="water-confirm-no" onClick={() => setPending(null)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{w.confirmNo}</button>
+          </div>
+        </div>
+      )}
+
+      {/* تصفير ماء اليوم (طلب المؤسس ٤) — `resetWater` كان مبنيًّا بلا راسم. */}
+      {waterMl > 0 && !askReset && (
+        <button type="button" data-testid="water-reset" onClick={() => { setResetError(false); setAskReset(true) }} className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 text-xs font-bold text-ink-500 underline-offset-4 hover:underline">
+          <Icon name="RotateCcw" className="h-3.5 w-3.5" />
+          {w.resetWater}
+        </button>
+      )}
+      {askReset && (
+        <div data-testid="water-reset-confirm" role="group" aria-live="polite" className="mt-3 rounded-xl border border-line bg-page px-3 py-2.5">
+          <p className="text-xs text-ink-700">{w.resetConfirmBody(liters(waterMl))}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="button" data-testid="water-reset-yes" onClick={doReset} className="btn-primary min-h-[44px] px-3 py-2 text-xs">{w.resetConfirmYes}</button>
+            <button type="button" onClick={() => setAskReset(false)} className="btn-ghost min-h-[44px] px-3 py-2 text-xs">{w.resetCancel}</button>
+          </div>
+        </div>
+      )}
+
       {saveError && <p role="alert" className="v2-error-panel mt-2 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
+      {resetError && <p role="alert" className="v2-error-panel mt-2 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{w.resetFailed}</p>}
     </div>
   )
 }

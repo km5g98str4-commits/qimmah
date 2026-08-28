@@ -43,29 +43,44 @@ const day = (id: string, exercises: PlanExercise[]): PlanDay => ({
   exercises,
 })
 
-console.log('\n① سلّم البار — الخطوات كلّها من تمرين اليوم نفسه، وكلّها تحت وزن العمل')
+// [FOUNDER-QA] بعد إصلاح P0 صار الإحماء صنفين: حركات مرونة من الكتالوج، ثم
+// خطوات مشتقّة من تمارين اليوم. التأكيدات أدناه كانت مكتوبة على `plan.steps`
+// كلّها حين كان الصنف واحدًا، فصارت تُسقط الباني الصحيح. **حُصرت في خطوات
+// القوّة** — وهي مقصدها الأصلي — ولم تُرخَ: مقصد كلٍّ منها كما هو، وأُضيف
+// تأكيد صريح أن خطوات المرونة موجودة فعلًا كي لا يتحوّل الحصر إلى ثغرة
+// تمرّ منها خطة بلا مرونة أصلًا (§4.2: قائمة فارغة تُرضي `every` بلا استحقاق).
+const strengthOf = (plan: ReturnType<typeof buildWarmupPlan>) => plan.steps.filter((s) => s.kind !== 'mobility')
+const mobilityOf = (plan: ReturnType<typeof buildWarmupPlan>) => plan.steps.filter((s) => s.kind === 'mobility')
+
+console.log('\n① سلّم البار — خطوات القوّة كلّها من تمرين اليوم نفسه، وكلّها تحت وزن العمل')
 {
   const d = day('d-barbell', [pe('barbell-bench-press', 1, { startingWeight: '80' })])
   const plan = buildWarmupPlan(d, { plateConfig: config })
-  check('يبني خطوات إحماء لحديد البار بوزن عمل معروف', plan.steps.length > 0)
-  check('كل خطوة تشير إلى تمرين موجود في اليوم — لا حركة مخترعة', plan.steps.every((s) => d.exercises.some((x) => x.exerciseId === s.exerciseId)))
-  check('لا خطوة تبلغ وزن العمل أو تتجاوزه (الإحماء أخفّ دائمًا)', plan.steps.every((s) => (s.weightKg ?? 0) < 80))
-  check('مجموعة العمل مستبعدة — هي أول مجموعة في الجلسة لا خطوة إحماء', plan.steps.every((s) => s.kind === 'ramp'))
-  check('عدد الخطوات لا يتجاوز السقف المعلَن', plan.steps.length <= WARMUP_MAX_STEPS)
+  const strength = strengthOf(plan)
+  check('يبني خطوات إحماء لحديد البار بوزن عمل معروف', strength.length > 0)
+  check('كل خطوة قوّة تشير إلى تمرين موجود في اليوم — لا حركة مخترعة', strength.every((s) => d.exercises.some((x) => x.exerciseId === s.exerciseId)))
+  check('لا خطوة تبلغ وزن العمل أو تتجاوزه (الإحماء أخفّ دائمًا)', plan.steps.every((s) => (s.kind === 'mobility' ? true : (s.weightKg ?? 0) < 80)))
+  check('مجموعة العمل مستبعدة — هي أول مجموعة في الجلسة لا خطوة إحماء', strength.every((s) => s.kind === 'ramp'))
+  check('عدد خطوات القوّة لا يتجاوز السقف المعلَن', strength.length <= WARMUP_MAX_STEPS)
   const seconds = plan.steps.reduce((n, s) => n + s.seconds, 0)
-  check('المدّة مشتقّة من الخطوات لا مكتوبة بيد', plan.estMinutes === Math.max(1, Math.round(seconds / 60)))
-  check('ثواني خطوة السلّم هي الثابت المعلَن', plan.steps.every((s) => s.seconds === WARMUP_RAMP_SECONDS))
+  check('المدّة مشتقّة من الخطوات كلّها لا مكتوبة بيد', plan.estMinutes === Math.max(1, Math.round(seconds / 60)))
+  check('ثواني خطوة السلّم هي الثابت المعلَن', strength.every((s) => s.seconds === WARMUP_RAMP_SECONDS))
+  // الحصر أعلاه لا يجوز أن يمرّ على خطة بلا مرونة — هذا ما يمنع تحوّله إلى ثغرة.
+  check('وخطوات المرونة موجودة فعلًا قبلها — الحصر ليس ثغرة', mobilityOf(plan).length > 0)
 }
 
-console.log('\n② بلا وزن عمل معروف ⇒ مجموعة خفيفة من نفس التمرين، لا سلّم مخترع')
+console.log('\n② بلا وزن عمل معروف ⇒ مجموعة تسخين على نفس التمرين، لا سلّم مخترع')
 {
   const d = day('d-bodyweight', [pe('push-up', 1, { reps: '10–20' }), pe('pull-up', 2, { reps: '6–10' })])
   const plan = buildWarmupPlan(d, { plateConfig: config, workingKgFor: () => Number.NaN })
-  check('يبني خطوات خفيفة', plan.steps.length === 2)
-  check('كلّها من نوع «خفيفة» بلا وزن مقترح', plan.steps.every((s) => s.kind === 'light' && s.weightKg === undefined))
-  check('التكرارات من نطاق الخطة نفسه (١٠ و٦)', plan.steps[0].reps === 10 && plan.steps[1].reps === 6)
-  check('المعرّفات من اليوم حصرًا', plan.sourceExerciseIds.join(',') === 'push-up,pull-up')
-  check('ثواني المجموعة الخفيفة هي الثابت المعلَن', plan.steps.every((s) => s.seconds === WARMUP_LIGHT_SECONDS))
+  const strength = strengthOf(plan)
+  check('يبني خطوتَي تسخين — واحدة لكل تمرين مصدر', strength.length === 2)
+  check('كلّها من نوع «خفيفة» بلا وزن مقترح', strength.every((s) => s.kind === 'light' && s.weightKg === undefined))
+  check('التكرارات من نطاق الخطة نفسه (١٠ و٦)', strength[0].kind !== 'mobility' && strength[1].kind !== 'mobility' && strength[0].reps === 10 && strength[1].reps === 6)
+  check('معرّفات المصدر من اليوم حصرًا', plan.sourceExerciseIds.join(',') === 'push-up,pull-up')
+  check('ثواني المجموعة الخفيفة هي الثابت المعلَن', strength.every((s) => s.seconds === WARMUP_LIGHT_SECONDS))
+  check('وخطوات المرونة موجودة فعلًا قبلها — الحصر ليس ثغرة', mobilityOf(plan).length > 0)
+  check('ولا واحدة من حركات المرونة من تمارين اليوم', mobilityOf(plan).every((s) => !d.exercises.some((x) => x.exerciseId === s.exerciseId)))
 }
 
 console.log('\n③ يوم بلا تمارين ⇒ لا إحماء ولا وعد به')

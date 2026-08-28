@@ -1,4 +1,5 @@
 import type { WorkoutTemplate } from '@/types/workout'
+import { getBuiltInTemplate } from '@/data/workoutTemplatesBuiltIn'
 
 // برامج التمرين المعتمدة (النهائية) — أجهزة فقط، بمعرّفات الكتالوج القانونية حصريًا.
 // أربعة برامج: علوي/سفلي، جسم كامل، تقسيمة أرنولد، ودفع/سحب/أرجل (بنسختَي ٣ و٦ أيام لنفس البرنامج).
@@ -101,6 +102,18 @@ export const templateMap: Record<string, WorkoutTemplate> = Object.fromEntries(
   workoutTemplates.map((t) => [t.id, t]),
 )
 
+/**
+ * الوصول ببرنامج واحد. يسقط إلى **البرامج الجاهزة** ([FOUNDER-QA-P0]،
+ * `workoutTemplatesBuiltIn.ts`) حين لا يكون المعرّف من هذه القائمة.
+ *
+ * إضافة محضة: معرّفات هذه القائمة تُحلّ كما كانت تمامًا (`templateMap` أولًا)،
+ * فلا يتغيّر سلوك أي مستهلك قائم. الجديد وحده أن `getTemplate('builtin-…')`
+ * صار يُرجع برنامجًا بدل `undefined` — وهو ما يجعل الطبقة الجاهزة قابلة
+ * للاستهلاك من `planGenerator`/`workoutPlan` دون لمسهما.
+ *
+ * قائمة `workoutTemplates` المعروضة **لم تتغيّر**: وصل البرامج الجاهزة بالواجهة
+ * قرار منسّق لا أثر جانبي لهذا الملف.
+ */
 export function getTemplate(id: string): WorkoutTemplate | undefined {
-  return templateMap[id]
+  return templateMap[id] ?? getBuiltInTemplate(id)
 }
