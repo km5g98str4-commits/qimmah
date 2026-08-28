@@ -123,6 +123,30 @@ const strayLoc = ['site/sitemap.xml', 'public/sitemap.xml']
   .flatMap((f) => sitemapEntries(f).filter((u) => !u.startsWith(origin)).map((u) => `${f}:${u}`))
 check('كل مدخل خريطة على المضيف المعتمد', strayLoc.length === 0, strayLoc.join(' · ') || 'نظيف')
 
+console.log('\n⑥ أوراق المراجعة ترسل المؤسس إلى المرشّح الحالي')
+/**
+ * أربعة نطاقات فرعية حيّة تخدم أربعة بناءات مختلفة في آنٍ واحد — وهذا طبيعي في
+ * Pages (كل فرع نطاقه). الخطر ليس وجودها بل **ورقةُ مراجعة تُرسل المؤسس إلى
+ * الأقدم منها**، فيراجع بناءً ليس المرشّح ويظنّ العطل قائمًا أو مُغلقًا خطأً.
+ * ولا تُحذف الأوراق: تُختم بلافتة تسمّي المرشّح الحالي (§: الميت يُسمّى).
+ */
+const QA_DOCS = [
+  'docs/execution/qimmah-sovereign-closure/FOUNDER-QA-10-MINUTES.md',
+  'docs/execution/qimmah-final-launch/COMMISSIONING.md',
+  'docs/execution/qimmah-final-launch/EXTERNAL-BLOCKERS.md',
+]
+const rcUrl = canonical.releaseCandidate?.url ?? ''
+check('رابط المرشّح معلَن في المصدر الواحد بدليله',
+  /^https:\/\/[a-z0-9.-]+\//.test(rcUrl) && typeof canonical.releaseCandidate?.evidence === 'string', rcUrl)
+const unstamped = QA_DOCS.filter((f) => {
+  const t = read(f)
+  // ورقةٌ تذكر نطاقًا فرعيًّا آخر يجب أن تحمل لافتة تسمّي المرشّح الحالي.
+  const mentionsOther = /https:\/\/(?!claude-founder-qa-final-001)[a-z0-9-]+\.qimmah-8qp\.pages\.dev/.test(t)
+  return mentionsOther && !t.includes(rcUrl)
+})
+check('كل ورقة تذكر نطاقًا متجاوَزًا تحمل رابط المرشّح الحالي',
+  unstamped.length === 0, unstamped.length === 0 ? `${QA_DOCS.length} أوراق` : unstamped.join(' · '))
+
 console.log('\n⟲ التأكيدات المضادّة — الحارس ليس فارغًا')
 // ⟲-١ عودة المضيف الميت إلى ملف واحد تُلتقط بنفس الفحص.
 const revived = read('index.html').replace(origin, 'https://qimmah.app')
@@ -152,6 +176,13 @@ check('⟲ قائمة المضيفات المعروفة تسمّي الميتي�
 check('⟲ إعادة مدخل `.html` إلى الخريطة تُسقط ⑤ بفحصه المسمّى',
   /<loc>[^<]+\.html<\/loc>/.test(`${read('site/sitemap.xml')}\n<loc>${origin}/privacy.html</loc>`) &&
   !/<loc>[^<]+\.html<\/loc>/.test(read('site/sitemap.xml')))
+// ⟲-٧ ورقةٌ تذكر نطاقًا متجاوَزًا بلا لافتة المرشّح تُلتقط باسمها.
+{
+  const forged = `# ورقة\nافتح https://codex-qimmah-sovereign-closu.qimmah-8qp.pages.dev/ وراجع.`
+  const other = /https:\/\/(?!claude-founder-qa-final-001)[a-z0-9-]+\.qimmah-8qp\.pages\.dev/.test(forged)
+  check('⟲ ورقة بلا لافتة المرشّح تُسقط ⑥ بفحصه المسمّى',
+    other && !forged.includes(rcUrl) && unstamped.length === 0)
+}
 // ⟲-٤ وتفريغ قائمة الملفات يجعل ② خضراء زورًا — فيحرسها الفحص المُضاف في ②.
 check('⟲ تفريغ قائمة الملفات كان سيجعل ② خضراء بلا معنى — ولذلك تُفحص التغطية',
   CANONICAL_FILES.length >= mustCover.length && mustCover.every((f) => declared.has(f)))

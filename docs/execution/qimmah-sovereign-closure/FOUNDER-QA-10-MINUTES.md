@@ -1,5 +1,14 @@
 # مراجعة المؤسس — عشر دقائق
 
+> # ⚠️ الرابط في هذه الورقة **متجاوَز** — [LAUNCH-SURFACE] · ٢٠٢٦-٠٨-٢٩
+>
+> **رابط المرشّح الواحد الآن:**
+> https://claude-founder-qa-final-001.qimmah-8qp.pages.dev/
+>
+> الرابط المذكور أدناه يخدم بناءً **أقدم** ويظلّ حيًّا كأثر تراجع لا كسطحٍ يُراجَع.
+> **التحقّق في ثانيتين:** افتح الرابط واقرأ سطر الهوية في تذييل «الإعدادات» —
+> أو `curl -s <URL> | grep qimmah-build`. المصدر الواحد: `site/canonical-host.json`.
+
 **الرابط:** https://codex-qimmah-sovereign-closu.qimmah-8qp.pages.dev/
 **تحقّق أوّلًا** أن الفوتر (أو `view-source` → `qimmah-env`) يقول **`founder_preview`**.
 إن قال `production` فتوقّف وأبلغني: النشرة ليست النشرة المقصودة.

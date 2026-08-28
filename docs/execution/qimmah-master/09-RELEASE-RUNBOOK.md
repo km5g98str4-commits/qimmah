@@ -90,7 +90,7 @@ Current CI state is recorded in `07-STATE.md`, not here.
 | host | **Cloudflare Pages**, project `qimmah` (`wrangler.toml`) |
 | production | auto-deploys from **`main`** |
 | production URL | https://qimmah-8qp.pages.dev |
-| preview | branch deploys on sub-domains, e.g. `https://codex-qimmah-sovereign-closu.qimmah-8qp.pages.dev/` |
+| preview | branch deploys on sub-domains, e.g. `https://claude-founder-qa-final-001.qimmah-8qp.pages.dev/` (المرشّح الحالي — المصدر الواحد `site/canonical-host.json`) |
 | owner command | `wrangler pages deploy dist` (project + output dir read from `wrangler.toml`) |
 | verify the deployed build | the footer / `view-source` → `qimmah-env` and `BUILD_LABEL` (commit hash) |
 
