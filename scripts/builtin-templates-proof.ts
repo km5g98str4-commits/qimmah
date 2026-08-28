@@ -35,6 +35,8 @@ import { getExercise } from '@/data/exercises'
 import { isDayOrdered, isCompoundExercise, orderDayExerciseIds } from '@/lib/workoutOrder'
 import type { WorkoutTemplate } from '@/types/workout'
 
+declare const __SOURCES__: Record<string, string>
+
 let passed = 0
 let failed = 0
 function check(name: string, ok: boolean, detail = ''): boolean {
@@ -318,6 +320,35 @@ counter(
     threw = String(e)
   }
   check('طقم فارغ: صفر أعطال وبلا استثناء', threw === '' && validateBuiltInTemplates([]).length === 0, threw)
+}
+
+// م) **المدخل الحيّ** — [FOUNDER-QA-005].
+//
+// برنامجٌ صحيحٌ لا يصل شاشةً ليس منتجًا. البرامج بقيت بعد بنائها تُقرأ من
+// `getTemplate` وحدها، فكانت **قدرةً ميتة**: مئات الفحوص خضراء على شيء لا
+// يراه أحد. فيُثبَت هنا أنها تُعرض فعلًا في الشاشة الحيّة الوحيدة التي
+// تعرض القوالب، وأن `getTemplate` يحلّها — والاثنان معًا لا أحدهما.
+{
+  const step = __SOURCES__['src/components/customizer/steps/StepWorkoutTemplate.tsx']
+  const registry = __SOURCES__['src/data/workoutTemplates.ts']
+  const listsBuiltIn =
+    /import \{ builtInWorkoutTemplates \} from '@\/data\/workoutTemplatesBuiltIn'/.test(step) &&
+    /\[\.\.\.workoutTemplates, \.\.\.builtInWorkoutTemplates\]/.test(step) &&
+    /templateCards\.map\(/.test(step)
+  check('الشاشة الحيّة تعرض البرامج الجاهزة مع القائمة القديمة', listsBuiltIn)
+  check('  ولا تُرسم القائمة القديمة وحدها بعد اليوم', !/\{workoutTemplates\.map\(/.test(step))
+  check('و`getTemplate` يحلّ معرّفًا جاهزًا (فالاختيار يُنتج خطة)',
+    /getBuiltInTemplate\(id\)/.test(registry))
+  // كل معرّف معروض يجب أن يُحلّ فعلًا — عرضُ بطاقةٍ لا تفتح خطةً أسوأ من إخفائها.
+  const unresolved = BUILT_IN_TEMPLATE_IDS.filter((id) => !getTemplate(id))
+  check('كل برنامج معروض يُحلّ إلى خطة فعلًا', unresolved.length === 0, unresolved.join(','))
+
+  // ⟲ التأكيدات المضادّة — الفحص ليس فارغًا.
+  check('⟲ عودة الشاشة إلى القائمة القديمة وحدها تُلتقط باسمها',
+    /\{workoutTemplates\.map\(/.test(`${step}\n {workoutTemplates.map((tpl) => {`) &&
+    !/\{workoutTemplates\.map\(/.test(step))
+  check('⟲ ونزع الاستيراد يُسقط الفحص نفسه',
+    !/builtInWorkoutTemplates/.test(step.replace(/builtInWorkoutTemplates/g, 'X')))
 }
 
 console.log(`\n${failed === 0 ? '✅' : '❌'} البرامج الجاهزة — نجح ${passed} · فشل ${failed}`)

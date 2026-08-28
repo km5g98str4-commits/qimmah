@@ -7,6 +7,7 @@ import { ExerciseLibraryPicker } from '@/components/ExerciseLibraryPicker'
 import type { WizardCtx } from '../stepProps'
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import { workoutTemplates } from '@/data/workoutTemplates'
+import { builtInWorkoutTemplates } from '@/data/workoutTemplatesBuiltIn'
 import { createPlanExercise, generatePlanFromTemplate, planExerciseName } from '@/lib/workoutPlan'
 import { analyzeWorkoutBalance } from '@/lib/workoutValidation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
@@ -24,6 +25,20 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
   const setPlan = (p: WorkoutPlan) => ctx.update({ workoutPlan: p })
   const [pendingTemplate, setPendingTemplate] = useState<string | null>(null)
   const [pickerDayId, setPickerDayId] = useState<string | null>(null)
+
+  /**
+   * [FOUNDER-QA-005] البرامج الجاهزة تصل الشاشة.
+   *
+   * المؤسس: «لا تدع المنتج يخترع قوائم تمارين عشوائية — اشحن قوالب بداية
+   * حتمية عالية الجودة». والقوالب بُنيت وحُرست (`test:builtin-templates`
+   * ٣٤١/٠) لكنها كانت تُقرأ من `getTemplate` فقط — **بلا مدخل حيّ**، أي أنها
+   * لا تصل مستخدمًا (§«جاهز للإطلاق»: الميزة تصل المستخدم وتعمل).
+   *
+   * الترتيب مقصود: القوالب القائمة أولًا (سلوك من يعرفها لا يتبدّل)، ثم
+   * الثمانية الجاهزة بترتيب أمر المؤسس. و`generatePlanFromTemplate` يبلغها
+   * أصلًا لأن `getTemplate` يحلّها — فلا تغيير في مسار الاختيار نفسه.
+   */
+  const templateCards = [...workoutTemplates, ...builtInWorkoutTemplates]
 
   const hasContent = plan.days.some((d) => d.exercises.length > 0)
   const balanceWarnings = analyzeWorkoutBalance(plan)
@@ -109,7 +124,7 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
 
       {/* بطاقات القوالب */}
       <div className="grid gap-3 sm:grid-cols-2">
-        {workoutTemplates.map((tpl) => {
+        {templateCards.map((tpl) => {
           const active = tpl.id === plan.templateId
           return (
             <button

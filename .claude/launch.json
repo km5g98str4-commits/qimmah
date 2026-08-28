@@ -6,6 +6,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
       "port": 5173
+    },
+    {
+      "name": "dev-founder-preview",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "VITE_APP_ENV=founder_preview npm run dev -- --port 5174"],
+      "port": 5174
     }
   ]
 }

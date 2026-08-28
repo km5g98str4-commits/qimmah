@@ -3,7 +3,7 @@
 import { build } from 'esbuild'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { dirname, resolve, join } from 'node:path'
-import { writeFileSync, mkdtempSync } from 'node:fs'
+import { writeFileSync, mkdtempSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
@@ -25,6 +25,9 @@ globalThis.CustomEvent = class CustomEvent { constructor(type) { this.type = typ
 if (typeof globalThis.performance === 'undefined') globalThis.performance = { now: () => 0 };
 `
 
+const __SRC_FILES__ = ['src/components/customizer/steps/StepWorkoutTemplate.tsx', 'src/data/workoutTemplates.ts']
+const __SOURCES__ = Object.fromEntries(__SRC_FILES__.map((p) => [p, readFileSync(join(root, p), 'utf8')]))
+
 const result = await build({
   entryPoints: [resolve(root, 'scripts/builtin-templates-proof.ts')],
   bundle: true,
@@ -33,7 +36,8 @@ const result = await build({
   write: false,
   banner: { js: banner },
   alias: { '@': resolve(root, 'src') },
-  define: { 'import.meta.env': JSON.stringify({ MODE: 'test', DEV: false, PROD: false }) },
+  define: {
+    __SOURCES__: JSON.stringify(__SOURCES__), 'import.meta.env': JSON.stringify({ MODE: 'test', DEV: false, PROD: false }) },
   logLevel: 'warning',
 })
 
