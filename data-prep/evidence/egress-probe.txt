@@ -1,0 +1,19 @@
+# Egress probe — evidence for why DATASET A cannot reach 500 verified products
+# Captured: 2026-08-28T18:59:16Z
+# Method: curl -o /dev/null -w '%{http_code}' -m 12 https://<host>/   (000 = CONNECT refused by proxy)
+
+world.openfoodfacts.org          HTTP:000  BLOCKED
+static.openfoodfacts.org         HTTP:000  BLOCKED
+world.openfoodfacts.net          HTTP:000  BLOCKED
+www.almarai.com                  HTTP:000  BLOCKED
+sfda.gov.sa                      HTTP:000  BLOCKED
+panda.com.sa                     HTTP:000  BLOCKED
+www.carrefourksa.com             HTTP:000  BLOCKED
+fdc.nal.usda.gov                 HTTP:000  BLOCKED
+en.wikipedia.org                 HTTP:000  BLOCKED
+registry.npmjs.org               HTTP:200  reachable
+pypi.org                         HTTP:200  reachable
+
+# WebFetch tool result for world.openfoodfacts.org:
+#   {"error_type":"EGRESS_BLOCKED","domain":"world.openfoodfacts.org","message":"Access to world.openfoodfacts.org is blocked by the network egress proxy."}
+# Agent-proxy log: gateway answered 403 to CONNECT (policy denial) for world.openfoodfacts.org:443
