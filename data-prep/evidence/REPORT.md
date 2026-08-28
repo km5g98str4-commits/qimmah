@@ -44,16 +44,19 @@ Checked the trunk before writing anything. Four things already existed and chang
 | Metric | Value |
 |---|---|
 | `PROGRAM_COUNT` | **8** |
-| `WORKOUT_DAY_VARIANTS` | **19** distinct (Programs 4 and 7 reuse variants by design) |
-| `CANONICAL_EXERCISES` | **46** — 22 programmed + 24 substitution-only |
-| `MACHINE_ONLY_VALIDATION` | **PASS** — equipment across all 46 ids: `machine` 35, `cable` 11. Zero barbell/dumbbell/kettlebell/bench/bodyweight. |
-| `CATALOG_IDS_MATCHED` | **46 / 46** |
+| `CANONICAL_SESSIONS` | **16** — the single place an exercise array lives |
+| `WORKOUT_DAY_VARIANTS` | **19** labels over those 16 sessions |
+| `DECLARED_ALIASES` | **3** (`cs-lower-a`, `cs-lower-b`, `cs-beginner-fullbody-a`) |
+| `CANONICAL_EXERCISES` | **47** — 22 programmed + 25 substitution-only |
+| `MACHINE_ONLY_VALIDATION` | **PASS** — equipment across all 47 ids: `machine` 35, `cable` 12. Zero barbell/dumbbell/kettlebell/bench/bodyweight. |
+| `CATALOG_IDS_MATCHED` | **47 / 47** |
 | `CATALOG_IDS_UNRESOLVED` | **3** (listed below) |
-| `MEDIA_VERIFIED` | **23** (real start/end stills, licence + source recorded) |
+| `MEDIA_VERIFIED` | **24** (real start/end stills, licence + source recorded) |
 | `MEDIA_UNRESOLVED` | **23** (20 `placeholder-only`, 3 `missing`) |
 | `YOUTUBE_VERIFIED` | **0** |
-| `SUBSTITUTION_MAPPINGS` | **44** unique base→substitute pairs |
-| Total ordered exercise records | **125** |
+| `SUBSTITUTION_MAPPINGS` | **45** unique base→substitute pairs |
+| `IMPORT_ASSERTIONS` | **5** importer-facing rules shipped in the dataset |
+| Unique exercise records | **107** across the 16 canonical sessions (**125** as delivered per variant label) |
 
 **`YOUTUBE_VERIFIED = 0` is a real finding, not a gap in effort.** Every `videoUrl` in
 `exercises.ts` is a *YouTube search URL* (`videoSource: 'youtube_search'`), not a specific
@@ -76,11 +79,29 @@ rather than invented provenance) already implemented in the repo.
 
 ### The session invariant ("1 of 1" must never recur)
 
-Each variant stores **N distinct ordered records** with `order` running exactly `1..N`,
-plus `exercise_count`, plus a denormalised `resolved_days[].exercise_ids_in_order` on every
-program. The validator fails on: fewer than 2 records, a broken `1..N` sequence, a repeated
-exercise within a day, or a resolved day disagreeing with its variant. An 8-exercise
-template cannot collapse to one record without failing a named check.
+Each **canonical session** stores **N distinct ordered records** with `order` running exactly
+`1..N`, plus `exercise_count`; every variant carries a count echo and every program a
+denormalised `resolved_days[].exercise_ids_in_order`. The validator fails on: fewer than 2
+records, a broken `1..N` sequence, a repeated exercise within a session, a variant echo that
+has drifted from its session, or a resolved day disagreeing with its session.
+
+Beyond the validator, the dataset now ships **`import_assertions[]`** — five rules an
+*importer* must run, chief among them `SESSION_RECORD_COUNT`
+(`actual_exercise_count === declared_exercise_count`, re-checked after every normalisation,
+mapping, serialisation and persistence step, aborting loudly on mismatch). That is the
+backstop for a collapse caused outside this dataset: the audit shows the one genuinely
+lossy shape (`keyBy` a constant per session) yielding `actual=1 declared=9` → import aborts,
+nothing persisted.
+
+### Aliasing — one workout, two vocabularies
+
+Three sessions surface under two labels each: Upper/Lower's *Lower A / Lower B* are the same
+physical workouts as PPL's *Legs A / Legs B*, and P6's *Full Body A* is the same session as
+P8's *Machines A* (their requested orders differed; Q19 normalisation made them identical).
+The exercise array lives once on the canonical session, so the two labels cannot drift apart.
+The builder refuses to alias two variants whose sequence, prescription tier or warm-up differ,
+and the validator treats a **declared** shared reference as valid while failing any
+**undeclared** duplicate session via `NO_UNDECLARED_DUPLICATE_SESSION`.
 
 ### Prescriptions, warm-ups, substitutions
 
@@ -198,11 +219,14 @@ become the rule*).
 ```
 $ node data-prep/scripts/validate-programs.mjs
 PASS — DATASET B
-  programs=8 variants=19 exercise_records=125
-  canonical_exercises=46 warmups=3
+  programs=8 canonical_sessions=16 variants=19 declared_aliases=3
+  exercise_records=107 canonical_exercises=47 warmups=3
 
 $ node data-prep/scripts/validate-programs.mjs --attack
-PASS — 17/17 bypass attempts rejected by a named check.
+PASS — 25/25 bypass attempts rejected by a named check.
+
+$ node data-prep/scripts/audit-final-review.mjs
+STRUCTURAL PROOF: 11/11 original checks pass · +1 new check this wave · total 12/12
 
 $ node data-prep/scripts/validate-food.mjs
 PASS — DATASET A
@@ -237,14 +261,15 @@ relabelling the dataset as imported.
 
 **DATASET B**, in this order:
 
-1. Review `order_deviations[]` (12 days) and decide F-2: adopt the Q19 order, or change the
-   law. **Everything downstream depends on this answer.**
+1. ~~Decide F-2.~~ **Decided: `KEEP_Q19`.** Q19 order is canonical at runtime;
+   `requested_order` is retained as provenance/debug only. No change to `workoutOrder.ts`.
 2. Land the 3 unresolved catalog ids as a product decision: add an assisted pull-up and a
    rotary torso machine to `exercises.ts`, or accept the programs without them.
-3. Import `canonical_exercises` metadata first (no new ids — all 46 already exist).
+3. Import `canonical_exercises` metadata first (no new ids — all 47 already exist).
 4. Import `warmups` as a *separate* entity from working exercises.
-5. Import `workout_variants` as ordered child records — **one row per exercise, never a
-   flattened day**.
+5. Import `canonical_sessions` as ordered child records — **one row per exercise, never a
+   flattened day** — then `workout_variants` as label rows referencing them. Run
+   `import_assertions[]` after each step.
 6. Import `programs` last, referencing variants.
 7. Gate: re-run `validate-programs.mjs`, then `npm run test:workout-order` and
    `npm run test:catalog` after `npm ci`.
@@ -273,8 +298,10 @@ relabelling the dataset as imported.
   product, or copied from another flavour.** Missing is `null`.
 - **No soft drink or energy drink was included** despite being top of the mandatory list —
   only foreign-market packs were reachable (F-3).
-- **No application code was modified**, including the `cable-rear-delt-fly` muscle-map bug
-  (F-1), which is raised for its owning lane instead.
+- **One targeted application change was made, on explicit instruction**: an explicit
+  `muscleDetailById` entry for `cable-rear-delt-fly` in `src/data/exercises.ts` (F-1).
+  No broad muscle-metadata sweep was performed — 76 other exercises remain on the coarse
+  fallback by design, since only this one contradicted its own movement.
 - **The two validators were not added to `test:gate`** — these are review materials, not
   production code; wiring them into the gate is the coordinator's call if the data is
   adopted.

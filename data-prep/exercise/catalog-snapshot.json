@@ -5326,10 +5326,11 @@
       "primaryMuscle": "shoulders",
       "secondaryMuscles": [],
       "primaryMusclesDetailed": [
-        "side_delts",
-        "front_delts"
+        "rear_delts"
       ],
-      "secondaryMusclesDetailed": [],
+      "secondaryMusclesDetailed": [
+        "upper_back"
+      ],
       "equipment": [
         "cable"
       ],

@@ -45,7 +45,8 @@
   ],
   "order_deviations": [
     {
-      "variant_id": "upper-a",
+      "canonical_session_id": "cs-upper-a",
+      "surfaced_as_variant": "upper-a",
       "requested_order": [
         "incline-chest-press-machine",
         "chest-press-machine",
@@ -71,7 +72,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "upper-b",
+      "canonical_session_id": "cs-upper-b",
+      "surfaced_as_variant": "upper-b",
       "requested_order": [
         "chest-press-machine",
         "incline-chest-press-machine",
@@ -97,7 +99,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "lower-b",
+      "canonical_session_id": "cs-lower-b",
+      "surfaced_as_variant": "lower-b",
       "requested_order": [
         "leg-press-machine",
         "hack-squat-machine",
@@ -117,7 +120,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "fb-a",
+      "canonical_session_id": "cs-fullbody-a",
+      "surfaced_as_variant": "fb-a",
       "requested_order": [
         "chest-press-machine",
         "lat-pulldown-machine",
@@ -139,7 +143,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "fb-b",
+      "canonical_session_id": "cs-fullbody-b",
+      "surfaced_as_variant": "fb-b",
       "requested_order": [
         "incline-chest-press-machine",
         "hack-squat-machine",
@@ -161,7 +166,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "fb-c",
+      "canonical_session_id": "cs-fullbody-c",
+      "surfaced_as_variant": "fb-c",
       "requested_order": [
         "chest-press-machine",
         "leg-press-machine",
@@ -183,7 +189,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "push-a",
+      "canonical_session_id": "cs-push-a",
+      "surfaced_as_variant": "push-a",
       "requested_order": [
         "incline-chest-press-machine",
         "chest-press-machine",
@@ -203,7 +210,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "legs-b",
+      "canonical_session_id": "cs-lower-b",
+      "surfaced_as_variant": "legs-b",
       "requested_order": [
         "leg-press-machine",
         "hack-squat-machine",
@@ -223,7 +231,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "beg-fb-a",
+      "canonical_session_id": "cs-beginner-fullbody-a",
+      "surfaced_as_variant": "beg-fb-a",
       "requested_order": [
         "chest-press-machine",
         "lat-pulldown-machine",
@@ -243,7 +252,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "beg-fb-b",
+      "canonical_session_id": "cs-beginner-fullbody-b",
+      "surfaced_as_variant": "beg-fb-b",
       "requested_order": [
         "incline-chest-press-machine",
         "hack-squat-machine",
@@ -263,7 +273,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "machines-a",
+      "canonical_session_id": "cs-beginner-fullbody-a",
+      "surfaced_as_variant": "machines-a",
       "requested_order": [
         "leg-press-machine",
         "chest-press-machine",
@@ -283,7 +294,8 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     },
     {
-      "variant_id": "machines-b",
+      "canonical_session_id": "cs-beginner-machines-b",
+      "surfaced_as_variant": "machines-b",
       "requested_order": [
         "hack-squat-machine",
         "incline-chest-press-machine",
@@ -303,6 +315,144 @@
       "reason": "Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`."
     }
   ],
+  "import_assertions": [
+    {
+      "id": "SESSION_RECORD_COUNT",
+      "rule": "actual_exercise_count === declared_exercise_count",
+      "applies_to": "every canonical session, re-checked after EVERY normalisation, mapping, serialisation or persistence step",
+      "declared_field": "canonical_sessions[<id>].exercise_count (echoed on workout_variants[<id>].exercise_count and programs[].resolved_days[].exercise_count)",
+      "on_failure": "ABORT the import loudly and persist nothing. Never write a session whose record count changed.",
+      "rationale": "A workout that arrives with 8 records and lands with 1 is the historical \"exercise 1 of 1\" failure. Counting is the only step that catches it regardless of which transform lost the records."
+    },
+    {
+      "id": "EXERCISE_ID_UNIQUE_WITHIN_SESSION",
+      "rule": "new Set(session.exercises.map(e => e.exercise_id)).size === session.exercises.length",
+      "applies_to": "every canonical session",
+      "on_failure": "ABORT. A repeated id makes any keyBy(exercise_id) lossy, which is exactly how a session collapses."
+    },
+    {
+      "id": "ORDER_IS_1_TO_N",
+      "rule": "session.exercises.map(e => e.order) deep-equals [1..N] with no gaps, duplicates or reordering",
+      "applies_to": "every canonical session",
+      "on_failure": "ABORT. Non-unique order makes keyBy(order) lossy and destroys the \"exercise i of N\" display."
+    },
+    {
+      "id": "SCHEDULE_VARIANT_RESOLVES",
+      "rule": "for every programs[].schedule[] entry with type === \"workout\", variant_id MUST resolve to a real workout_variants key — zero exceptions, no sentinels",
+      "applies_to": "every program schedule entry",
+      "on_failure": "ABORT. A placeholder id reaching an import path is an unresolvable session."
+    },
+    {
+      "id": "VARIANT_RESOLVES_TO_CANONICAL_SESSION",
+      "rule": "every workout_variants[<id>].canonical_session_id resolves, and its exercise_count echo equals the canonical session count",
+      "applies_to": "every variant, including declared aliases",
+      "on_failure": "ABORT. An alias whose echo disagrees with its session means the two have drifted."
+    }
+  ],
+  "aliasing": {
+    "policy": "Two programs may surface the same physical workout under different user-facing labels. The exercise array lives once, on the canonical session; variants carry only the label and a reference. Shared references are intentional and valid — they are NOT duplicate-content failures.",
+    "declared_aliases": [
+      {
+        "canonical_session_id": "cs-lower-a",
+        "surfaced_by": [
+          {
+            "variant_id": "lower-a",
+            "name_en": "Lower A",
+            "name_ar": "سفلي أ"
+          },
+          {
+            "variant_id": "legs-a",
+            "name_en": "Legs A",
+            "name_ar": "أرجل أ"
+          }
+        ],
+        "requested_orders": {
+          "lower-a": [
+            "hack-squat-machine",
+            "leg-press-machine",
+            "seated-leg-curl",
+            "leg-extension-machine",
+            "seated-calf-raise-machine",
+            "ab-crunch-machine"
+          ],
+          "legs-a": [
+            "hack-squat-machine",
+            "leg-press-machine",
+            "seated-leg-curl",
+            "leg-extension-machine",
+            "seated-calf-raise-machine",
+            "ab-crunch-machine"
+          ]
+        }
+      },
+      {
+        "canonical_session_id": "cs-lower-b",
+        "surfaced_by": [
+          {
+            "variant_id": "lower-b",
+            "name_en": "Lower B",
+            "name_ar": "سفلي ب"
+          },
+          {
+            "variant_id": "legs-b",
+            "name_en": "Legs B",
+            "name_ar": "أرجل ب"
+          }
+        ],
+        "requested_orders": {
+          "lower-b": [
+            "leg-press-machine",
+            "hack-squat-machine",
+            "lying-leg-curl",
+            "leg-extension-machine",
+            "glute-machine",
+            "standing-calf-raise-machine"
+          ],
+          "legs-b": [
+            "leg-press-machine",
+            "hack-squat-machine",
+            "lying-leg-curl",
+            "leg-extension-machine",
+            "glute-machine",
+            "standing-calf-raise-machine"
+          ]
+        }
+      },
+      {
+        "canonical_session_id": "cs-beginner-fullbody-a",
+        "surfaced_by": [
+          {
+            "variant_id": "beg-fb-a",
+            "name_en": "Full Body A",
+            "name_ar": "جسم كامل أ"
+          },
+          {
+            "variant_id": "machines-a",
+            "name_en": "Machines A",
+            "name_ar": "أجهزة أ"
+          }
+        ],
+        "requested_orders": {
+          "beg-fb-a": [
+            "chest-press-machine",
+            "lat-pulldown-machine",
+            "leg-press-machine",
+            "seated-row-machine",
+            "seated-leg-curl",
+            "lateral-raise-machine"
+          ],
+          "machines-a": [
+            "leg-press-machine",
+            "chest-press-machine",
+            "lat-pulldown-machine",
+            "seated-leg-curl",
+            "seated-row-machine",
+            "lateral-raise-machine"
+          ]
+        }
+      }
+    ]
+  },
   "warmups": {
     "warmup-upper": {
       "id": "warmup-upper",
@@ -1027,6 +1177,58 @@
         "youtube_verified": false,
         "youtube_url": null,
         "youtube_search_url": "https://www.youtube.com/results?search_query=Cable%20Pull-Through%20exercise%20form"
+      }
+    },
+    {
+      "exercise_id": "cable-rear-delt-fly",
+      "name_en": "Cable Rear Delt Fly",
+      "name_ar": "رفرفة خلفي كيبل",
+      "equipment": [
+        "cable"
+      ],
+      "primary_muscle": "shoulders",
+      "secondary_muscles": [],
+      "primary_muscles_detailed": [
+        "rear_delts"
+      ],
+      "secondary_muscles_detailed": [
+        "upper_back"
+      ],
+      "movement_pattern": "isolation",
+      "level": "intermediate",
+      "order_rank": 500,
+      "in_approved_machine_catalog": false,
+      "used_in_programs": false,
+      "used_as_substitution_only": true,
+      "instructions_ar": [
+        "ركّز على الأكتاف طوال الحركة.",
+        "ركّز على العضلة المستهدفة طوال المدى.",
+        "تحكّم في النزول ولا تستخدم الزخم."
+      ],
+      "instructions_en": null,
+      "common_mistakes_ar": [
+        "استخدام الزخم بدل العضلة.",
+        "وزن ثقيل يقصّر مدى الحركة.",
+        "النزول السريع غير المتحكّم."
+      ],
+      "common_mistakes_en": null,
+      "safety_notes_ar": [
+        "تجنّب الأوزان المبالغ فيها على المفصل الصغير.",
+        "أوقف التمرين عند أي ألم حاد.",
+        "إذا كان لديك إصابة سابقة، استشر مختصًا قبل التمرين."
+      ],
+      "media": {
+        "image_status": "stills",
+        "image_start": "/exercise-images/cable-rear-delt-fly/0.jpg",
+        "image_end": "/exercise-images/cable-rear-delt-fly/1.jpg",
+        "image_source": "yuhonas/free-exercise-db",
+        "image_license": "Unlicense / public-domain dedication",
+        "image_attribution": null,
+        "gif": null,
+        "video_asset": null,
+        "youtube_verified": false,
+        "youtube_url": null,
+        "youtube_search_url": "https://www.youtube.com/results?search_query=Cable%20Rear%20Delt%20Fly%20exercise%20form"
       }
     },
     {
@@ -3118,15 +3320,29 @@
       }
     }
   ],
-  "workout_variants": {
-    "upper-a": {
-      "id": "upper-a",
-      "name_en": "Upper A",
-      "name_ar": "علوي أ",
-      "warmup_id": "warmup-upper",
+  "canonical_sessions": {
+    "cs-upper-a": {
+      "id": "cs-upper-a",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-upper",
       "exercise_count": 9,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "upper-a"
+      ],
+      "alias_requested_orders": {
+        "upper-a": [
+          "incline-chest-press-machine",
+          "chest-press-machine",
+          "pec-deck-machine",
+          "lat-pulldown-machine",
+          "seated-row-machine",
+          "shoulder-press-machine",
+          "lateral-raise-machine",
+          "preacher-curl-machine",
+          "cable-triceps-pushdown"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -3470,14 +3686,34 @@
         }
       ]
     },
-    "lower-a": {
-      "id": "lower-a",
-      "name_en": "Lower A",
-      "name_ar": "سفلي أ",
-      "warmup_id": "warmup-lower",
+    "cs-lower-a": {
+      "id": "cs-lower-a",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-lower",
       "exercise_count": 6,
       "order_matches_request": true,
+      "surfaced_by_variants": [
+        "lower-a",
+        "legs-a"
+      ],
+      "alias_requested_orders": {
+        "lower-a": [
+          "hack-squat-machine",
+          "leg-press-machine",
+          "seated-leg-curl",
+          "leg-extension-machine",
+          "seated-calf-raise-machine",
+          "ab-crunch-machine"
+        ],
+        "legs-a": [
+          "hack-squat-machine",
+          "leg-press-machine",
+          "seated-leg-curl",
+          "leg-extension-machine",
+          "seated-calf-raise-machine",
+          "ab-crunch-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -3680,14 +3916,28 @@
         }
       ]
     },
-    "upper-b": {
-      "id": "upper-b",
-      "name_en": "Upper B",
-      "name_ar": "علوي ب",
-      "warmup_id": "warmup-upper",
+    "cs-upper-b": {
+      "id": "cs-upper-b",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-upper",
       "exercise_count": 9,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "upper-b"
+      ],
+      "alias_requested_orders": {
+        "upper-b": [
+          "chest-press-machine",
+          "incline-chest-press-machine",
+          "lat-pulldown-machine",
+          "chest-supported-row-machine",
+          "pec-deck-machine",
+          "shoulder-press-machine",
+          "lateral-raise-machine",
+          "preacher-curl-machine",
+          "triceps-extension-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -4024,14 +4274,34 @@
         }
       ]
     },
-    "lower-b": {
-      "id": "lower-b",
-      "name_en": "Lower B",
-      "name_ar": "سفلي ب",
-      "warmup_id": "warmup-lower",
+    "cs-lower-b": {
+      "id": "cs-lower-b",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-lower",
       "exercise_count": 6,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "lower-b",
+        "legs-b"
+      ],
+      "alias_requested_orders": {
+        "lower-b": [
+          "leg-press-machine",
+          "hack-squat-machine",
+          "lying-leg-curl",
+          "leg-extension-machine",
+          "glute-machine",
+          "standing-calf-raise-machine"
+        ],
+        "legs-b": [
+          "leg-press-machine",
+          "hack-squat-machine",
+          "lying-leg-curl",
+          "leg-extension-machine",
+          "glute-machine",
+          "standing-calf-raise-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -4256,14 +4526,26 @@
         }
       ]
     },
-    "fb-a": {
-      "id": "fb-a",
-      "name_en": "Full Body A",
-      "name_ar": "جسم كامل أ",
-      "warmup_id": "warmup-full",
+    "cs-fullbody-a": {
+      "id": "cs-fullbody-a",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-full",
       "exercise_count": 7,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "fb-a"
+      ],
+      "alias_requested_orders": {
+        "fb-a": [
+          "chest-press-machine",
+          "lat-pulldown-machine",
+          "leg-press-machine",
+          "seated-row-machine",
+          "seated-leg-curl",
+          "lateral-raise-machine",
+          "seated-calf-raise-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -4540,14 +4822,26 @@
         }
       ]
     },
-    "fb-b": {
-      "id": "fb-b",
-      "name_en": "Full Body B",
-      "name_ar": "جسم كامل ب",
-      "warmup_id": "warmup-full",
+    "cs-fullbody-b": {
+      "id": "cs-fullbody-b",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-full",
       "exercise_count": 7,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "fb-b"
+      ],
+      "alias_requested_orders": {
+        "fb-b": [
+          "incline-chest-press-machine",
+          "hack-squat-machine",
+          "chest-supported-row-machine",
+          "shoulder-press-machine",
+          "leg-extension-machine",
+          "lat-pulldown-machine",
+          "preacher-curl-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -4802,14 +5096,26 @@
         }
       ]
     },
-    "fb-c": {
-      "id": "fb-c",
-      "name_en": "Full Body C",
-      "name_ar": "جسم كامل ج",
-      "warmup_id": "warmup-full",
+    "cs-fullbody-c": {
+      "id": "cs-fullbody-c",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-full",
       "exercise_count": 7,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "fb-c"
+      ],
+      "alias_requested_orders": {
+        "fb-c": [
+          "chest-press-machine",
+          "leg-press-machine",
+          "lat-pulldown-machine",
+          "seated-leg-curl",
+          "pec-deck-machine",
+          "lateral-raise-machine",
+          "cable-triceps-pushdown"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -5086,14 +5392,25 @@
         }
       ]
     },
-    "push-a": {
-      "id": "push-a",
-      "name_en": "Push A",
-      "name_ar": "دفع أ",
-      "warmup_id": "warmup-upper",
+    "cs-push-a": {
+      "id": "cs-push-a",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-upper",
       "exercise_count": 6,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "push-a"
+      ],
+      "alias_requested_orders": {
+        "push-a": [
+          "incline-chest-press-machine",
+          "chest-press-machine",
+          "pec-deck-machine",
+          "shoulder-press-machine",
+          "lateral-raise-machine",
+          "cable-triceps-pushdown"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -5312,14 +5629,25 @@
         }
       ]
     },
-    "pull-a": {
-      "id": "pull-a",
-      "name_en": "Pull A",
-      "name_ar": "سحب أ",
-      "warmup_id": "warmup-upper",
+    "cs-pull-a": {
+      "id": "cs-pull-a",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-upper",
       "exercise_count": 6,
       "order_matches_request": true,
+      "surfaced_by_variants": [
+        "pull-a"
+      ],
+      "alias_requested_orders": {
+        "pull-a": [
+          "lat-pulldown-machine",
+          "seated-row-machine",
+          "chest-supported-row-machine",
+          "reverse-pec-deck",
+          "preacher-curl-machine",
+          "cable-biceps-curl"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -5486,6 +5814,13 @@
               "equipment": [
                 "cable"
               ]
+            },
+            {
+              "exercise_id": "cable-rear-delt-fly",
+              "name_en": "Cable Rear Delt Fly",
+              "equipment": [
+                "cable"
+              ]
             }
           ],
           "substitution_note": null
@@ -5566,224 +5901,25 @@
         }
       ]
     },
-    "legs-a": {
-      "id": "legs-a",
-      "name_en": "Legs A",
-      "name_ar": "أرجل أ",
-      "warmup_id": "warmup-lower",
+    "cs-push-b": {
+      "id": "cs-push-b",
       "prescription_tier": "standard",
-      "exercise_count": 6,
-      "order_matches_request": true,
-      "exercises": [
-        {
-          "order": 1,
-          "exercise_id": "hack-squat-machine",
-          "catalog_name_en": "Hack Squat Machine",
-          "catalog_name_ar": "هاك سكوات جهاز",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "quads",
-          "movement_pattern": "squat",
-          "role": "primary_compound",
-          "sets": 3,
-          "rep_range": "8–12",
-          "rest_sec_min": 90,
-          "rest_sec_max": 120,
-          "required": true,
-          "optional": false,
-          "requested_order": 1,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "leg-press-machine",
-              "name_en": "Leg Press Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "belt-squat",
-              "name_en": "Belt Squat",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 2,
-          "exercise_id": "leg-press-machine",
-          "catalog_name_en": "Leg Press Machine",
-          "catalog_name_ar": "جهاز دفع الأرجل",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "quads",
-          "movement_pattern": "squat",
-          "role": "secondary_compound",
-          "sets": 3,
-          "rep_range": "10–12",
-          "rest_sec_min": 75,
-          "rest_sec_max": 90,
-          "required": true,
-          "optional": false,
-          "requested_order": 2,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "hack-squat-machine",
-              "name_en": "Hack Squat Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "leg-press-narrow",
-              "name_en": "Narrow-Stance Leg Press",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "belt-squat",
-              "name_en": "Belt Squat",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 3,
-          "exercise_id": "seated-leg-curl",
-          "catalog_name_en": "Seated Leg Curl",
-          "catalog_name_ar": "ثني أرجل جالس",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "hamstrings",
-          "movement_pattern": "isolation",
-          "role": "isolation",
-          "sets": 3,
-          "rep_range": "12–15",
-          "rest_sec_min": 45,
-          "rest_sec_max": 60,
-          "required": true,
-          "optional": false,
-          "requested_order": 3,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "lying-leg-curl",
-              "name_en": "Lying Leg Curl",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "standing-leg-curl",
-              "name_en": "Standing Leg Curl",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 4,
-          "exercise_id": "leg-extension-machine",
-          "catalog_name_en": "Leg Extension Machine",
-          "catalog_name_ar": "جهاز مد الأرجل",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "quads",
-          "movement_pattern": "isolation",
-          "role": "isolation",
-          "sets": 3,
-          "rep_range": "12–15",
-          "rest_sec_min": 45,
-          "rest_sec_max": 60,
-          "required": true,
-          "optional": false,
-          "requested_order": 4,
-          "in_approved_machine_catalog": true,
-          "substitutions": [],
-          "substitution_note": "No same-function (open-chain knee-extension) machine or cable station exists in the Qimmah catalog. Left empty deliberately — a leg press is a compound and is NOT an equivalent isolation substitute."
-        },
-        {
-          "order": 5,
-          "exercise_id": "seated-calf-raise-machine",
-          "catalog_name_en": "Seated Calf Raise Machine",
-          "catalog_name_ar": "رفع بطات جالس",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "calves",
-          "movement_pattern": "isolation",
-          "role": "finisher_calves",
-          "sets": 3,
-          "rep_range": "12–20",
-          "rest_sec_min": 45,
-          "rest_sec_max": 60,
-          "required": true,
-          "optional": false,
-          "requested_order": 5,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "standing-calf-raise-machine",
-              "name_en": "Standing Calf Raise Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "leg-press-calf-raise",
-              "name_en": "Leg Press Calf Raise",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 6,
-          "exercise_id": "ab-crunch-machine",
-          "catalog_name_en": "Ab Crunch Machine",
-          "catalog_name_ar": "جهاز طحن البطن",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "core",
-          "movement_pattern": "core",
-          "role": "finisher_core",
-          "sets": 2,
-          "rep_range": "12–20",
-          "rest_sec_min": 45,
-          "rest_sec_max": 45,
-          "required": false,
-          "optional": true,
-          "requested_order": 6,
-          "in_approved_machine_catalog": true,
-          "substitutions": [],
-          "substitution_note": "No same-function (loaded spinal-flexion) machine or cable station exists in the Qimmah catalog. cable-woodchop is rotation, not flexion, so it is NOT offered as a substitute."
-        }
-      ]
-    },
-    "push-b": {
-      "id": "push-b",
-      "name_en": "Push B",
-      "name_ar": "دفع ب",
       "warmup_id": "warmup-upper",
-      "prescription_tier": "standard",
       "exercise_count": 6,
       "order_matches_request": true,
+      "surfaced_by_variants": [
+        "push-b"
+      ],
+      "alias_requested_orders": {
+        "push-b": [
+          "chest-press-machine",
+          "incline-chest-press-machine",
+          "shoulder-press-machine",
+          "pec-deck-machine",
+          "lateral-raise-machine",
+          "triceps-extension-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -5995,14 +6131,25 @@
         }
       ]
     },
-    "pull-b": {
-      "id": "pull-b",
-      "name_en": "Pull B",
-      "name_ar": "سحب ب",
-      "warmup_id": "warmup-upper",
+    "cs-pull-b": {
+      "id": "cs-pull-b",
       "prescription_tier": "standard",
+      "warmup_id": "warmup-upper",
       "exercise_count": 6,
       "order_matches_request": true,
+      "surfaced_by_variants": [
+        "pull-b"
+      ],
+      "alias_requested_orders": {
+        "pull-b": [
+          "lat-pulldown-machine",
+          "chest-supported-row-machine",
+          "seated-row-machine",
+          "reverse-pec-deck",
+          "preacher-curl-machine",
+          "cable-biceps-curl"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -6169,6 +6316,13 @@
               "equipment": [
                 "cable"
               ]
+            },
+            {
+              "exercise_id": "cable-rear-delt-fly",
+              "name_en": "Cable Rear Delt Fly",
+              "equipment": [
+                "cable"
+              ]
             }
           ],
           "substitution_note": null
@@ -6249,246 +6403,27 @@
         }
       ]
     },
-    "legs-b": {
-      "id": "legs-b",
-      "name_en": "Legs B",
-      "name_ar": "أرجل ب",
-      "warmup_id": "warmup-lower",
+    "cs-upper-compact": {
+      "id": "cs-upper-compact",
       "prescription_tier": "standard",
-      "exercise_count": 6,
-      "order_matches_request": false,
-      "exercises": [
-        {
-          "order": 1,
-          "exercise_id": "leg-press-machine",
-          "catalog_name_en": "Leg Press Machine",
-          "catalog_name_ar": "جهاز دفع الأرجل",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "quads",
-          "movement_pattern": "squat",
-          "role": "primary_compound",
-          "sets": 3,
-          "rep_range": "8–12",
-          "rest_sec_min": 90,
-          "rest_sec_max": 120,
-          "required": true,
-          "optional": false,
-          "requested_order": 1,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "hack-squat-machine",
-              "name_en": "Hack Squat Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "leg-press-narrow",
-              "name_en": "Narrow-Stance Leg Press",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "belt-squat",
-              "name_en": "Belt Squat",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 2,
-          "exercise_id": "hack-squat-machine",
-          "catalog_name_en": "Hack Squat Machine",
-          "catalog_name_ar": "هاك سكوات جهاز",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "quads",
-          "movement_pattern": "squat",
-          "role": "secondary_compound",
-          "sets": 3,
-          "rep_range": "10–12",
-          "rest_sec_min": 75,
-          "rest_sec_max": 90,
-          "required": true,
-          "optional": false,
-          "requested_order": 2,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "leg-press-machine",
-              "name_en": "Leg Press Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "belt-squat",
-              "name_en": "Belt Squat",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 3,
-          "exercise_id": "glute-machine",
-          "catalog_name_en": "Glute Machine",
-          "catalog_name_ar": "جهاز الألوية",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "glutes",
-          "movement_pattern": "hinge",
-          "role": "secondary_compound",
-          "sets": 3,
-          "rep_range": "10–12",
-          "rest_sec_min": 75,
-          "rest_sec_max": 90,
-          "required": true,
-          "optional": false,
-          "requested_order": 5,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "glute-kickback-machine",
-              "name_en": "Glute Kickback Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "standing-hip-extension-machine",
-              "name_en": "Standing Hip Extension Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "cable-pull-through",
-              "name_en": "Cable Pull-Through",
-              "equipment": [
-                "cable"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 4,
-          "exercise_id": "lying-leg-curl",
-          "catalog_name_en": "Lying Leg Curl",
-          "catalog_name_ar": "ثني أرجل مستلقي",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "hamstrings",
-          "movement_pattern": "isolation",
-          "role": "isolation",
-          "sets": 3,
-          "rep_range": "12–15",
-          "rest_sec_min": 45,
-          "rest_sec_max": 60,
-          "required": true,
-          "optional": false,
-          "requested_order": 3,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "seated-leg-curl",
-              "name_en": "Seated Leg Curl",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "standing-leg-curl",
-              "name_en": "Standing Leg Curl",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 5,
-          "exercise_id": "leg-extension-machine",
-          "catalog_name_en": "Leg Extension Machine",
-          "catalog_name_ar": "جهاز مد الأرجل",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "quads",
-          "movement_pattern": "isolation",
-          "role": "isolation",
-          "sets": 3,
-          "rep_range": "12–15",
-          "rest_sec_min": 45,
-          "rest_sec_max": 60,
-          "required": true,
-          "optional": false,
-          "requested_order": 4,
-          "in_approved_machine_catalog": true,
-          "substitutions": [],
-          "substitution_note": "No same-function (open-chain knee-extension) machine or cable station exists in the Qimmah catalog. Left empty deliberately — a leg press is a compound and is NOT an equivalent isolation substitute."
-        },
-        {
-          "order": 6,
-          "exercise_id": "standing-calf-raise-machine",
-          "catalog_name_en": "Standing Calf Raise Machine",
-          "catalog_name_ar": "رفع بطات واقف",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "calves",
-          "movement_pattern": "isolation",
-          "role": "finisher_calves",
-          "sets": 3,
-          "rep_range": "12–20",
-          "rest_sec_min": 45,
-          "rest_sec_max": 60,
-          "required": true,
-          "optional": false,
-          "requested_order": 6,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "seated-calf-raise-machine",
-              "name_en": "Seated Calf Raise Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "leg-press-calf-raise",
-              "name_en": "Leg Press Calf Raise",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        }
-      ]
-    },
-    "ulf-upper": {
-      "id": "ulf-upper",
-      "name_en": "Upper",
-      "name_ar": "علوي",
       "warmup_id": "warmup-upper",
-      "prescription_tier": "standard",
       "exercise_count": 8,
       "order_matches_request": true,
+      "surfaced_by_variants": [
+        "ulf-upper"
+      ],
+      "alias_requested_orders": {
+        "ulf-upper": [
+          "incline-chest-press-machine",
+          "chest-press-machine",
+          "lat-pulldown-machine",
+          "seated-row-machine",
+          "shoulder-press-machine",
+          "lateral-raise-machine",
+          "preacher-curl-machine",
+          "cable-triceps-pushdown"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -6795,14 +6730,34 @@
         }
       ]
     },
-    "beg-fb-a": {
-      "id": "beg-fb-a",
-      "name_en": "Full Body A",
-      "name_ar": "جسم كامل أ",
-      "warmup_id": "warmup-full",
+    "cs-beginner-fullbody-a": {
+      "id": "cs-beginner-fullbody-a",
       "prescription_tier": "beginner",
+      "warmup_id": "warmup-full",
       "exercise_count": 6,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "beg-fb-a",
+        "machines-a"
+      ],
+      "alias_requested_orders": {
+        "beg-fb-a": [
+          "chest-press-machine",
+          "lat-pulldown-machine",
+          "leg-press-machine",
+          "seated-row-machine",
+          "seated-leg-curl",
+          "lateral-raise-machine"
+        ],
+        "machines-a": [
+          "leg-press-machine",
+          "chest-press-machine",
+          "lat-pulldown-machine",
+          "seated-leg-curl",
+          "seated-row-machine",
+          "lateral-raise-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -7042,14 +6997,25 @@
         }
       ]
     },
-    "beg-fb-b": {
-      "id": "beg-fb-b",
-      "name_en": "Full Body B",
-      "name_ar": "جسم كامل ب",
-      "warmup_id": "warmup-full",
+    "cs-beginner-fullbody-b": {
+      "id": "cs-beginner-fullbody-b",
       "prescription_tier": "beginner",
+      "warmup_id": "warmup-full",
       "exercise_count": 6,
       "order_matches_request": false,
+      "surfaced_by_variants": [
+        "beg-fb-b"
+      ],
+      "alias_requested_orders": {
+        "beg-fb-b": [
+          "incline-chest-press-machine",
+          "hack-squat-machine",
+          "lat-pulldown-machine",
+          "shoulder-press-machine",
+          "leg-extension-machine",
+          "seated-row-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -7267,261 +7233,25 @@
         }
       ]
     },
-    "machines-a": {
-      "id": "machines-a",
-      "name_en": "Machines A",
-      "name_ar": "أجهزة أ",
-      "warmup_id": "warmup-full",
+    "cs-beginner-machines-b": {
+      "id": "cs-beginner-machines-b",
       "prescription_tier": "beginner",
+      "warmup_id": "warmup-full",
       "exercise_count": 6,
       "order_matches_request": false,
-      "exercises": [
-        {
-          "order": 1,
-          "exercise_id": "leg-press-machine",
-          "catalog_name_en": "Leg Press Machine",
-          "catalog_name_ar": "جهاز دفع الأرجل",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "quads",
-          "movement_pattern": "squat",
-          "role": "primary_compound",
-          "sets": 3,
-          "rep_range": "10–12",
-          "rest_sec_min": 90,
-          "rest_sec_max": 120,
-          "required": true,
-          "optional": false,
-          "requested_order": 1,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "hack-squat-machine",
-              "name_en": "Hack Squat Machine",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "leg-press-narrow",
-              "name_en": "Narrow-Stance Leg Press",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "belt-squat",
-              "name_en": "Belt Squat",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 2,
-          "exercise_id": "chest-press-machine",
-          "catalog_name_en": "Chest Press Machine",
-          "catalog_name_ar": "جهاز ضغط الصدر",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "chest",
-          "movement_pattern": "push",
-          "role": "secondary_compound",
-          "sets": 2,
-          "rep_range": "10–12",
-          "rest_sec_min": 75,
-          "rest_sec_max": 90,
-          "required": true,
-          "optional": false,
-          "requested_order": 2,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "iso-lateral-chest-press",
-              "name_en": "Iso-Lateral Chest Press",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "incline-chest-press-machine",
-              "name_en": "Incline Chest Press Machine",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 3,
-          "exercise_id": "lat-pulldown-machine",
-          "catalog_name_en": "Lat Pulldown Machine (Seated/Lever)",
-          "catalog_name_ar": "جهاز سحب علوي",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "back",
-          "movement_pattern": "pull",
-          "role": "secondary_compound",
-          "sets": 2,
-          "rep_range": "10–12",
-          "rest_sec_min": 75,
-          "rest_sec_max": 90,
-          "required": true,
-          "optional": false,
-          "requested_order": 3,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "iso-lateral-pulldown",
-              "name_en": "Iso-Lateral Pulldown",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "wide-grip-lat-pulldown",
-              "name_en": "Wide-Grip Lat Pulldown",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "neutral-grip-pulldown",
-              "name_en": "Neutral-Grip Pulldown",
-              "equipment": [
-                "cable"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 4,
-          "exercise_id": "seated-row-machine",
-          "catalog_name_en": "Seated Row Machine",
-          "catalog_name_ar": "جهاز تجديف جالس",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "back",
-          "movement_pattern": "pull",
-          "role": "secondary_compound",
-          "sets": 2,
-          "rep_range": "10–12",
-          "rest_sec_min": 75,
-          "rest_sec_max": 90,
-          "required": true,
-          "optional": false,
-          "requested_order": 5,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "seated-cable-row",
-              "name_en": "Seated Cable Row",
-              "equipment": [
-                "cable"
-              ]
-            },
-            {
-              "exercise_id": "iso-lateral-high-row",
-              "name_en": "Iso-Lateral High Row",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "chest-supported-row-machine",
-              "name_en": "Chest-Supported Row Machine",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 5,
-          "exercise_id": "seated-leg-curl",
-          "catalog_name_en": "Seated Leg Curl",
-          "catalog_name_ar": "ثني أرجل جالس",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "hamstrings",
-          "movement_pattern": "isolation",
-          "role": "isolation",
-          "sets": 2,
-          "rep_range": "12–15",
-          "rest_sec_min": 45,
-          "rest_sec_max": 60,
-          "required": true,
-          "optional": false,
-          "requested_order": 4,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "lying-leg-curl",
-              "name_en": "Lying Leg Curl",
-              "equipment": [
-                "machine"
-              ]
-            },
-            {
-              "exercise_id": "standing-leg-curl",
-              "name_en": "Standing Leg Curl",
-              "equipment": [
-                "machine"
-              ]
-            }
-          ],
-          "substitution_note": null
-        },
-        {
-          "order": 6,
-          "exercise_id": "lateral-raise-machine",
-          "catalog_name_en": "Lateral Raise Machine",
-          "catalog_name_ar": "جهاز رفرفة جانبية",
-          "equipment": [
-            "machine"
-          ],
-          "primary_muscle": "shoulders",
-          "movement_pattern": "isolation",
-          "role": "isolation",
-          "sets": 2,
-          "rep_range": "12–15",
-          "rest_sec_min": 45,
-          "rest_sec_max": 60,
-          "required": true,
-          "optional": false,
-          "requested_order": 6,
-          "in_approved_machine_catalog": true,
-          "substitutions": [
-            {
-              "exercise_id": "cable-lateral-raise",
-              "name_en": "Cable Lateral Raise",
-              "equipment": [
-                "cable"
-              ]
-            }
-          ],
-          "substitution_note": null
-        }
-      ]
-    },
-    "machines-b": {
-      "id": "machines-b",
-      "name_en": "Machines B",
-      "name_ar": "أجهزة ب",
-      "warmup_id": "warmup-full",
-      "prescription_tier": "beginner",
-      "exercise_count": 6,
-      "order_matches_request": false,
+      "surfaced_by_variants": [
+        "machines-b"
+      ],
+      "alias_requested_orders": {
+        "machines-b": [
+          "hack-squat-machine",
+          "incline-chest-press-machine",
+          "lat-pulldown-machine",
+          "leg-extension-machine",
+          "shoulder-press-machine",
+          "preacher-curl-machine"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -7732,14 +7462,25 @@
         }
       ]
     },
-    "machines-c": {
-      "id": "machines-c",
-      "name_en": "Machines C",
-      "name_ar": "أجهزة ج",
-      "warmup_id": "warmup-full",
+    "cs-beginner-machines-c": {
+      "id": "cs-beginner-machines-c",
       "prescription_tier": "beginner",
+      "warmup_id": "warmup-full",
       "exercise_count": 6,
       "order_matches_request": true,
+      "surfaced_by_variants": [
+        "machines-c"
+      ],
+      "alias_requested_orders": {
+        "machines-c": [
+          "leg-press-machine",
+          "chest-press-machine",
+          "seated-row-machine",
+          "seated-leg-curl",
+          "pec-deck-machine",
+          "cable-triceps-pushdown"
+        ]
+      },
       "exercises": [
         {
           "order": 1,
@@ -7987,6 +7728,229 @@
       ]
     }
   },
+  "workout_variants": {
+    "upper-a": {
+      "id": "upper-a",
+      "canonical_session_id": "cs-upper-a",
+      "name_en": "Upper A",
+      "name_ar": "علوي أ",
+      "warmup_id": "warmup-upper",
+      "prescription_tier": "standard",
+      "exercise_count": 9,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "lower-a": {
+      "id": "lower-a",
+      "canonical_session_id": "cs-lower-a",
+      "name_en": "Lower A",
+      "name_ar": "سفلي أ",
+      "warmup_id": "warmup-lower",
+      "prescription_tier": "standard",
+      "exercise_count": 6,
+      "is_alias": true,
+      "shares_session_with": [
+        "legs-a"
+      ]
+    },
+    "upper-b": {
+      "id": "upper-b",
+      "canonical_session_id": "cs-upper-b",
+      "name_en": "Upper B",
+      "name_ar": "علوي ب",
+      "warmup_id": "warmup-upper",
+      "prescription_tier": "standard",
+      "exercise_count": 9,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "lower-b": {
+      "id": "lower-b",
+      "canonical_session_id": "cs-lower-b",
+      "name_en": "Lower B",
+      "name_ar": "سفلي ب",
+      "warmup_id": "warmup-lower",
+      "prescription_tier": "standard",
+      "exercise_count": 6,
+      "is_alias": true,
+      "shares_session_with": [
+        "legs-b"
+      ]
+    },
+    "fb-a": {
+      "id": "fb-a",
+      "canonical_session_id": "cs-fullbody-a",
+      "name_en": "Full Body A",
+      "name_ar": "جسم كامل أ",
+      "warmup_id": "warmup-full",
+      "prescription_tier": "standard",
+      "exercise_count": 7,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "fb-b": {
+      "id": "fb-b",
+      "canonical_session_id": "cs-fullbody-b",
+      "name_en": "Full Body B",
+      "name_ar": "جسم كامل ب",
+      "warmup_id": "warmup-full",
+      "prescription_tier": "standard",
+      "exercise_count": 7,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "fb-c": {
+      "id": "fb-c",
+      "canonical_session_id": "cs-fullbody-c",
+      "name_en": "Full Body C",
+      "name_ar": "جسم كامل ج",
+      "warmup_id": "warmup-full",
+      "prescription_tier": "standard",
+      "exercise_count": 7,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "push-a": {
+      "id": "push-a",
+      "canonical_session_id": "cs-push-a",
+      "name_en": "Push A",
+      "name_ar": "دفع أ",
+      "warmup_id": "warmup-upper",
+      "prescription_tier": "standard",
+      "exercise_count": 6,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "pull-a": {
+      "id": "pull-a",
+      "canonical_session_id": "cs-pull-a",
+      "name_en": "Pull A",
+      "name_ar": "سحب أ",
+      "warmup_id": "warmup-upper",
+      "prescription_tier": "standard",
+      "exercise_count": 6,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "legs-a": {
+      "id": "legs-a",
+      "canonical_session_id": "cs-lower-a",
+      "name_en": "Legs A",
+      "name_ar": "أرجل أ",
+      "warmup_id": "warmup-lower",
+      "prescription_tier": "standard",
+      "exercise_count": 6,
+      "is_alias": true,
+      "shares_session_with": [
+        "lower-a"
+      ]
+    },
+    "push-b": {
+      "id": "push-b",
+      "canonical_session_id": "cs-push-b",
+      "name_en": "Push B",
+      "name_ar": "دفع ب",
+      "warmup_id": "warmup-upper",
+      "prescription_tier": "standard",
+      "exercise_count": 6,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "pull-b": {
+      "id": "pull-b",
+      "canonical_session_id": "cs-pull-b",
+      "name_en": "Pull B",
+      "name_ar": "سحب ب",
+      "warmup_id": "warmup-upper",
+      "prescription_tier": "standard",
+      "exercise_count": 6,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "legs-b": {
+      "id": "legs-b",
+      "canonical_session_id": "cs-lower-b",
+      "name_en": "Legs B",
+      "name_ar": "أرجل ب",
+      "warmup_id": "warmup-lower",
+      "prescription_tier": "standard",
+      "exercise_count": 6,
+      "is_alias": true,
+      "shares_session_with": [
+        "lower-b"
+      ]
+    },
+    "ulf-upper": {
+      "id": "ulf-upper",
+      "canonical_session_id": "cs-upper-compact",
+      "name_en": "Upper",
+      "name_ar": "علوي",
+      "warmup_id": "warmup-upper",
+      "prescription_tier": "standard",
+      "exercise_count": 8,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "beg-fb-a": {
+      "id": "beg-fb-a",
+      "canonical_session_id": "cs-beginner-fullbody-a",
+      "name_en": "Full Body A",
+      "name_ar": "جسم كامل أ",
+      "warmup_id": "warmup-full",
+      "prescription_tier": "beginner",
+      "exercise_count": 6,
+      "is_alias": true,
+      "shares_session_with": [
+        "machines-a"
+      ]
+    },
+    "beg-fb-b": {
+      "id": "beg-fb-b",
+      "canonical_session_id": "cs-beginner-fullbody-b",
+      "name_en": "Full Body B",
+      "name_ar": "جسم كامل ب",
+      "warmup_id": "warmup-full",
+      "prescription_tier": "beginner",
+      "exercise_count": 6,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "machines-a": {
+      "id": "machines-a",
+      "canonical_session_id": "cs-beginner-fullbody-a",
+      "name_en": "Machines A",
+      "name_ar": "أجهزة أ",
+      "warmup_id": "warmup-full",
+      "prescription_tier": "beginner",
+      "exercise_count": 6,
+      "is_alias": true,
+      "shares_session_with": [
+        "beg-fb-a"
+      ]
+    },
+    "machines-b": {
+      "id": "machines-b",
+      "canonical_session_id": "cs-beginner-machines-b",
+      "name_en": "Machines B",
+      "name_ar": "أجهزة ب",
+      "warmup_id": "warmup-full",
+      "prescription_tier": "beginner",
+      "exercise_count": 6,
+      "is_alias": false,
+      "shares_session_with": []
+    },
+    "machines-c": {
+      "id": "machines-c",
+      "canonical_session_id": "cs-beginner-machines-c",
+      "name_en": "Machines C",
+      "name_ar": "أجهزة ج",
+      "warmup_id": "warmup-full",
+      "prescription_tier": "beginner",
+      "exercise_count": 6,
+      "is_alias": false,
+      "shares_session_with": []
+    }
+  },
   "programs": [
     {
       "id": "ul-4day-machines",
@@ -8043,6 +8007,7 @@
       "resolved_days": [
         {
           "variant_id": "upper-a",
+          "canonical_session_id": "cs-upper-a",
           "exercise_count": 9,
           "exercise_ids_in_order": [
             "incline-chest-press-machine",
@@ -8058,6 +8023,7 @@
         },
         {
           "variant_id": "lower-a",
+          "canonical_session_id": "cs-lower-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "hack-squat-machine",
@@ -8070,6 +8036,7 @@
         },
         {
           "variant_id": "upper-b",
+          "canonical_session_id": "cs-upper-b",
           "exercise_count": 9,
           "exercise_ids_in_order": [
             "chest-press-machine",
@@ -8085,6 +8052,7 @@
         },
         {
           "variant_id": "lower-b",
+          "canonical_session_id": "cs-lower-b",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "leg-press-machine",
@@ -8150,6 +8118,7 @@
       "resolved_days": [
         {
           "variant_id": "fb-a",
+          "canonical_session_id": "cs-fullbody-a",
           "exercise_count": 7,
           "exercise_ids_in_order": [
             "leg-press-machine",
@@ -8163,6 +8132,7 @@
         },
         {
           "variant_id": "fb-b",
+          "canonical_session_id": "cs-fullbody-b",
           "exercise_count": 7,
           "exercise_ids_in_order": [
             "hack-squat-machine",
@@ -8176,6 +8146,7 @@
         },
         {
           "variant_id": "fb-c",
+          "canonical_session_id": "cs-fullbody-c",
           "exercise_count": 7,
           "exercise_ids_in_order": [
             "leg-press-machine",
@@ -8245,6 +8216,7 @@
       "resolved_days": [
         {
           "variant_id": "push-a",
+          "canonical_session_id": "cs-push-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "incline-chest-press-machine",
@@ -8257,6 +8229,7 @@
         },
         {
           "variant_id": "pull-a",
+          "canonical_session_id": "cs-pull-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "lat-pulldown-machine",
@@ -8269,6 +8242,7 @@
         },
         {
           "variant_id": "legs-a",
+          "canonical_session_id": "cs-lower-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "hack-squat-machine",
@@ -8281,6 +8255,7 @@
         },
         {
           "variant_id": "push-b",
+          "canonical_session_id": "cs-push-b",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "chest-press-machine",
@@ -8293,6 +8268,7 @@
         },
         {
           "variant_id": "pull-b",
+          "canonical_session_id": "cs-pull-b",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "lat-pulldown-machine",
@@ -8305,6 +8281,7 @@
         },
         {
           "variant_id": "legs-b",
+          "canonical_session_id": "cs-lower-b",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "leg-press-machine",
@@ -8370,6 +8347,7 @@
       "resolved_days": [
         {
           "variant_id": "push-a",
+          "canonical_session_id": "cs-push-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "incline-chest-press-machine",
@@ -8382,6 +8360,7 @@
         },
         {
           "variant_id": "pull-a",
+          "canonical_session_id": "cs-pull-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "lat-pulldown-machine",
@@ -8394,6 +8373,7 @@
         },
         {
           "variant_id": "legs-a",
+          "canonical_session_id": "cs-lower-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "hack-squat-machine",
@@ -8459,6 +8439,7 @@
       "resolved_days": [
         {
           "variant_id": "ulf-upper",
+          "canonical_session_id": "cs-upper-compact",
           "exercise_count": 8,
           "exercise_ids_in_order": [
             "incline-chest-press-machine",
@@ -8473,6 +8454,7 @@
         },
         {
           "variant_id": "lower-a",
+          "canonical_session_id": "cs-lower-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "hack-squat-machine",
@@ -8485,6 +8467,7 @@
         },
         {
           "variant_id": "fb-a",
+          "canonical_session_id": "cs-fullbody-a",
           "exercise_count": 7,
           "exercise_ids_in_order": [
             "leg-press-machine",
@@ -8550,6 +8533,7 @@
       "resolved_days": [
         {
           "variant_id": "beg-fb-a",
+          "canonical_session_id": "cs-beginner-fullbody-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "leg-press-machine",
@@ -8562,6 +8546,7 @@
         },
         {
           "variant_id": "beg-fb-b",
+          "canonical_session_id": "cs-beginner-fullbody-b",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "hack-squat-machine",
@@ -8589,13 +8574,15 @@
           "upper-b",
           "lower-b"
         ],
-        "note_en": "Three sessions per week drawn in order from a repeating four-session cycle, so week 1 runs Upper A / Lower A / Upper B and week 2 resumes at Lower B / Upper A / Lower A."
+        "cycle_weeks": 4,
+        "schedule_shows": "week_1",
+        "note_en": "Three sessions a week drawn in order from a repeating four-session cycle. Because 3 does not divide 4, the week pattern repeats every four weeks; weeks_preview enumerates the full cycle."
       },
       "schedule": [
         {
           "day": 1,
           "type": "workout",
-          "variant_id": "rotating"
+          "variant_id": "upper-a"
         },
         {
           "day": 2,
@@ -8605,7 +8592,7 @@
         {
           "day": 3,
           "type": "workout",
-          "variant_id": "rotating"
+          "variant_id": "lower-a"
         },
         {
           "day": 4,
@@ -8615,7 +8602,7 @@
         {
           "day": 5,
           "type": "workout",
-          "variant_id": "rotating"
+          "variant_id": "upper-b"
         },
         {
           "day": 6,
@@ -8652,6 +8639,14 @@
             "lower-b",
             "upper-a"
           ]
+        },
+        {
+          "week": 4,
+          "variant_ids": [
+            "lower-a",
+            "upper-b",
+            "lower-b"
+          ]
         }
       ],
       "workout_variant_ids": [
@@ -8664,6 +8659,7 @@
       "resolved_days": [
         {
           "variant_id": "upper-a",
+          "canonical_session_id": "cs-upper-a",
           "exercise_count": 9,
           "exercise_ids_in_order": [
             "incline-chest-press-machine",
@@ -8679,6 +8675,7 @@
         },
         {
           "variant_id": "lower-a",
+          "canonical_session_id": "cs-lower-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "hack-squat-machine",
@@ -8691,6 +8688,7 @@
         },
         {
           "variant_id": "upper-b",
+          "canonical_session_id": "cs-upper-b",
           "exercise_count": 9,
           "exercise_ids_in_order": [
             "chest-press-machine",
@@ -8706,6 +8704,7 @@
         },
         {
           "variant_id": "lower-b",
+          "canonical_session_id": "cs-lower-b",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "leg-press-machine",
@@ -8771,6 +8770,7 @@
       "resolved_days": [
         {
           "variant_id": "machines-a",
+          "canonical_session_id": "cs-beginner-fullbody-a",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "leg-press-machine",
@@ -8783,6 +8783,7 @@
         },
         {
           "variant_id": "machines-b",
+          "canonical_session_id": "cs-beginner-machines-b",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "hack-squat-machine",
@@ -8795,6 +8796,7 @@
         },
         {
           "variant_id": "machines-c",
+          "canonical_session_id": "cs-beginner-machines-c",
           "exercise_count": 6,
           "exercise_ids_in_order": [
             "leg-press-machine",

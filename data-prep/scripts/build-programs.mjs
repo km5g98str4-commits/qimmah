@@ -103,10 +103,10 @@ const SUBS = {
   'chest-supported-row-machine': ['seated-row-machine', 't-bar-row-machine', 'seated-cable-row'],
   'shoulder-press-machine': ['cable-shoulder-press'],
   'lateral-raise-machine': ['cable-lateral-raise'],
-  // cable-rear-delt-fly is deliberately NOT listed: despite its name the catalog maps it
-  // to side_delts+front_delts, so it fails the rear-delt function match. Raised as a
-  // catalog finding rather than silently used. See data-prep/evidence/FINDINGS.md.
-  'reverse-pec-deck': ['rear-delt-row-machine', 'face-pull'],
+  // cable-rear-delt-fly was withheld while the catalog left it on the coarse shoulders
+  // fallback (side_delts+front_delts), which failed the rear-delt function match.
+  // exercises.ts now maps it explicitly to rear_delts, so it is restored. See FINDINGS.md F-1.
+  'reverse-pec-deck': ['rear-delt-row-machine', 'face-pull', 'cable-rear-delt-fly'],
   'preacher-curl-machine': ['cable-biceps-curl', 'machine-curl'],
   'cable-biceps-curl': ['preacher-curl-machine', 'machine-curl'],
   'triceps-extension-machine': ['cable-triceps-pushdown', 'rope-pushdown'],
@@ -127,6 +127,26 @@ const SUB_NOTES = {
 }
 
 // ---------------------------------------------------------------- day variants
+// Canonical session id per variant. Two variants sharing an id are a DECLARED ALIAS:
+// the same physical workout surfaced under two program vocabularies. The exercise array
+// lives once, on the canonical session — variants carry only the user-facing label.
+const CANONICAL_OF = {
+  'upper-a': 'cs-upper-a',
+  'upper-b': 'cs-upper-b',
+  'lower-a': 'cs-lower-a',   'legs-a': 'cs-lower-a',        // Upper/Lower "Lower A" === PPL "Legs A"
+  'lower-b': 'cs-lower-b',   'legs-b': 'cs-lower-b',        // Upper/Lower "Lower B" === PPL "Legs B"
+  'fb-a': 'cs-fullbody-a', 'fb-b': 'cs-fullbody-b', 'fb-c': 'cs-fullbody-c',
+  'push-a': 'cs-push-a', 'push-b': 'cs-push-b',
+  'pull-a': 'cs-pull-a', 'pull-b': 'cs-pull-b',
+  'ulf-upper': 'cs-upper-compact',
+  // Q19 normalisation made these two identical (their requested orders differed).
+  // Declared as an alias rather than left as two arrays that can drift apart.
+  'beg-fb-a': 'cs-beginner-fullbody-a', 'machines-a': 'cs-beginner-fullbody-a',
+  'beg-fb-b': 'cs-beginner-fullbody-b',
+  'machines-b': 'cs-beginner-machines-b',
+  'machines-c': 'cs-beginner-machines-c',
+}
+
 const V = {
   'upper-a': { name_en: 'Upper A', name_ar: 'علوي أ', warmup: 'warmup-upper', tier: 'standard', requested: ['incline-chest-press-machine', 'chest-press-machine', 'pec-deck-machine', 'lat-pulldown-machine', 'seated-row-machine', 'shoulder-press-machine', 'lateral-raise-machine', 'preacher-curl-machine', 'cable-triceps-pushdown'] },
   'lower-a': { name_en: 'Lower A', name_ar: 'سفلي أ', warmup: 'warmup-lower', tier: 'standard', requested: ['hack-squat-machine', 'leg-press-machine', 'seated-leg-curl', 'leg-extension-machine', 'seated-calf-raise-machine', 'ab-crunch-machine'] },
@@ -166,9 +186,17 @@ const PROGRAMS = [
   { id: 'fullbody-2day-beginner', order: 6, name_en: 'Full Body Beginner — 2 Days', name_ar: 'جسم كامل للمبتدئ — يومان', level: 'beginner', days_per_week: 2,
     schedule: [W(1, 'beg-fb-a'), R(2), R(3), W(4, 'beg-fb-b'), R(5), R(6), R(7)] },
   { id: 'ul-rotating-3day-machines', order: 7, name_en: 'Upper / Lower Rotating — 3 Days', name_ar: 'علوي / سفلي بالتناوب — ٣ أيام', level: 'intermediate', days_per_week: 3,
-    rotation: { kind: 'rotating_sequence', sequence: ['upper-a', 'lower-a', 'upper-b', 'lower-b'], note_en: 'Three sessions per week drawn in order from a repeating four-session cycle, so week 1 runs Upper A / Lower A / Upper B and week 2 resumes at Lower B / Upper A / Lower A.' },
-    schedule: [W(1, 'rotating'), R(2), W(3, 'rotating'), R(4), W(5, 'rotating'), R(6), R(7)],
-    weeks_preview: [{ week: 1, variant_ids: ['upper-a', 'lower-a', 'upper-b'] }, { week: 2, variant_ids: ['lower-b', 'upper-a', 'lower-a'] }, { week: 3, variant_ids: ['upper-b', 'lower-b', 'upper-a'] }] },
+    // schedule[] carries WEEK 1 with real, resolvable variant ids. There is no sentinel:
+    // no import path can meet a variant id that does not exist. Subsequent weeks are
+    // governed by rotation.sequence below and enumerated in weeks_preview.
+    rotation: { kind: 'rotating_sequence', sequence: ['upper-a', 'lower-a', 'upper-b', 'lower-b'], cycle_weeks: 4, schedule_shows: 'week_1', note_en: 'Three sessions a week drawn in order from a repeating four-session cycle. Because 3 does not divide 4, the week pattern repeats every four weeks; weeks_preview enumerates the full cycle.' },
+    schedule: [W(1, 'upper-a'), R(2), W(3, 'lower-a'), R(4), W(5, 'upper-b'), R(6), R(7)],
+    weeks_preview: [
+      { week: 1, variant_ids: ['upper-a', 'lower-a', 'upper-b'] },
+      { week: 2, variant_ids: ['lower-b', 'upper-a', 'lower-a'] },
+      { week: 3, variant_ids: ['upper-b', 'lower-b', 'upper-a'] },
+      { week: 4, variant_ids: ['lower-a', 'upper-b', 'lower-b'] },
+    ] },
   { id: 'beginner-machines-3day', order: 8, name_en: 'Beginner Machines — 3 Days', name_ar: 'أجهزة للمبتدئين — ٣ أيام', level: 'beginner', days_per_week: 3,
     schedule: [W(1, 'machines-a'), R(2), W(3, 'machines-b'), R(4), W(5, 'machines-c'), R(6), R(7)] },
 ]
@@ -176,23 +204,21 @@ const PROGRAMS = [
 // ---------------------------------------------------------------- build
 const orderDeviations = []
 
-function buildVariant(vid, def) {
-  // Canonical Q19 order: stable sort by catalog-derived rank.
-  const ranked = def.requested.map((id, i) => ({ id, i, rank: ex(id).orderRank }))
-  const ordered = [...ranked].sort((a, b) => a.rank - b.rank || a.i - b.i)
-  const canonical = ordered.map((x) => x.id)
-  const changed = canonical.some((id, i) => id !== def.requested[i])
-  if (changed) {
-    orderDeviations.push({ variant_id: vid, requested_order: def.requested, canonical_order: canonical,
-      reason: 'Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`.' })
-  }
+/** Q19 canonical order for a requested list: stable sort by catalog-derived rank. */
+function q19(requested) {
+  return requested
+    .map((id, i) => ({ id, i, rank: ex(id).orderRank }))
+    .sort((a, b) => a.rank - b.rank || a.i - b.i)
+    .map((x) => x.id)
+}
 
+function buildExercises(canonical, requested, tier) {
   let compoundSeen = 0
-  const exercises = canonical.map((id, idx) => {
+  return canonical.map((id, idx) => {
     const e = ex(id)
     const role = roleOf(id, e.orderRank < 500 ? compoundSeen : -1)
     if (e.orderRank < 500) compoundSeen += 1
-    const rx = RX[def.tier][role]
+    const rx = RX[tier][role]
     const isLast = idx === canonical.length - 1
     // Optional = end-of-day accessory a time-pressed trainee may drop without
     // gutting the session: core finishers, and the closing arm isolation on 8+ lift days.
@@ -212,38 +238,99 @@ function buildVariant(vid, def) {
       rest_sec_max: rx.rest_sec_max,
       required: !optional,
       optional,
-      requested_order: def.requested.indexOf(id) + 1,
+      // Provenance/debug only — the brief's original position. Runtime order is `order`.
+      requested_order: requested.indexOf(id) + 1,
       in_approved_machine_catalog: catalogIds.has(id),
       substitutions: (SUBS[id] ?? []).map((s) => ({ exercise_id: s, name_en: ex(s).nameEn, equipment: ex(s).equipment })),
       substitution_note: SUB_NOTES[id] ?? null,
     }
   })
+}
 
-  return {
-    id: vid, name_en: def.name_en, name_ar: def.name_ar,
+// One canonical session per unique canonical id. The exercise array lives HERE and
+// nowhere else, so two programs surfacing the same workout cannot drift apart.
+const canonicalSessions = {}
+const variants = {}
+
+for (const [vid, def] of Object.entries(V)) {
+  const csid = CANONICAL_OF[vid]
+  if (!csid) throw new Error(`variant '${vid}' has no canonical session mapping`)
+  const canonical = q19(def.requested)
+  const changed = canonical.some((id, i) => id !== def.requested[i])
+  if (changed) {
+    orderDeviations.push({
+      canonical_session_id: csid,
+      surfaced_as_variant: vid,
+      requested_order: def.requested,
+      canonical_order: canonical,
+      reason: 'Q19 ordering law (src/lib/workoutOrder.ts): compounds precede isolation; calves and core close the session. Enforced by `npm run test:workout-order`.',
+    })
+  }
+
+  if (!canonicalSessions[csid]) {
+    canonicalSessions[csid] = {
+      id: csid,
+      prescription_tier: def.tier,
+      warmup_id: def.warmup,
+      exercise_count: canonical.length,
+      order_matches_request: !changed,
+      surfaced_by_variants: [vid],
+      alias_requested_orders: { [vid]: def.requested },
+      exercises: buildExercises(canonical, def.requested, def.tier),
+    }
+  } else {
+    // Aliasing must never hide a real difference: assert the second variant resolves to
+    // exactly the same session before letting it share the definition.
+    const cs = canonicalSessions[csid]
+    const same = JSON.stringify(canonical) === JSON.stringify(cs.exercises.map((e) => e.exercise_id))
+    if (!same) throw new Error(`alias mismatch: '${vid}' → '${csid}' resolves to a different exercise sequence; refusing to alias`)
+    if (cs.prescription_tier !== def.tier) throw new Error(`alias mismatch: '${vid}' → '${csid}' differs in prescription tier`)
+    if (cs.warmup_id !== def.warmup) throw new Error(`alias mismatch: '${vid}' → '${csid}' differs in warm-up`)
+    cs.surfaced_by_variants.push(vid)
+    cs.alias_requested_orders[vid] = def.requested
+  }
+
+  // A variant is a LABEL + REFERENCE. It carries no exercise array of its own.
+  variants[vid] = {
+    id: vid,
+    canonical_session_id: csid,
+    name_en: def.name_en,
+    name_ar: def.name_ar,
     warmup_id: def.warmup,
     prescription_tier: def.tier,
-    exercise_count: exercises.length,
-    order_matches_request: !changed,
-    exercises,
+    // Echo of the canonical session's count, asserted equal by the validator — this is
+    // the importer-facing "did anything collapse?" tripwire, not a second source of truth.
+    exercise_count: canonical.length,
   }
 }
 
-const variants = Object.fromEntries(Object.entries(V).map(([vid, def]) => [vid, buildVariant(vid, def)]))
+// Mark declared aliases explicitly so the structural proof reads shared references as
+// intentional rather than as duplicate-content drift.
+for (const cs of Object.values(canonicalSessions)) {
+  for (const vid of cs.surfaced_by_variants) {
+    variants[vid].is_alias = cs.surfaced_by_variants.length > 1
+    variants[vid].shares_session_with = cs.surfaced_by_variants.filter((v) => v !== vid)
+  }
+}
 
-// Programs carry fully resolved days as well as ids, so an importer cannot collapse
-// a session into a single record (the "1 of 1" failure).
 const programs = PROGRAMS.map((p) => {
-  const usedIds = p.rotation ? p.rotation.sequence : [...new Set(p.schedule.filter((s) => s.type === 'workout').map((s) => s.variant_id))]
+  const scheduled = [...new Set(p.schedule.filter((s) => s.type === 'workout').map((s) => s.variant_id))]
+  const usedIds = p.rotation ? [...new Set([...p.rotation.sequence, ...scheduled])] : scheduled
   return {
     ...p,
     workout_variant_ids: usedIds,
-    workout_day_count: p.rotation ? p.rotation.sequence.length : p.schedule.filter((s) => s.type === 'workout').length,
-    resolved_days: usedIds.map((vid) => ({
-      variant_id: vid,
-      exercise_count: variants[vid].exercise_count,
-      exercise_ids_in_order: variants[vid].exercises.map((e) => e.exercise_id),
-    })),
+    workout_day_count: p.rotation ? p.rotation.sequence.length : scheduled.length,
+    // Derived echo for import verification: an importer can compare what it produced
+    // against this without ever becoming a second editable copy of the session.
+    resolved_days: usedIds.map((vid) => {
+      const cs = canonicalSessions[variants[vid].canonical_session_id]
+      return {
+        variant_id: vid,
+        canonical_session_id: cs.id,
+        exercise_count: cs.exercise_count,
+        exercise_ids_in_order: cs.exercises.map((e) => e.exercise_id),
+      }
+    }),
   }
 })
 
@@ -326,12 +413,60 @@ const dataset = {
     { requested_en: 'Leg Press Calf Raise', reason: 'Exists in exercises.ts as leg-press-calf-raise but is NOT in the approved machine catalog (src/data/machineCatalog.ts lists only seated and standing calf raise). Used only as a declared substitution, never as a programmed exercise.', nearest_catalog_id: 'leg-press-calf-raise' },
   ],
   order_deviations: orderDeviations,
+  // Assertions an IMPORTER must run, not just this repo's validator. Each one is the
+  // guard against a specific way a multi-exercise session silently becomes "1 of 1".
+  import_assertions: [
+    {
+      id: 'SESSION_RECORD_COUNT',
+      rule: 'actual_exercise_count === declared_exercise_count',
+      applies_to: 'every canonical session, re-checked after EVERY normalisation, mapping, serialisation or persistence step',
+      declared_field: 'canonical_sessions[<id>].exercise_count (echoed on workout_variants[<id>].exercise_count and programs[].resolved_days[].exercise_count)',
+      on_failure: 'ABORT the import loudly and persist nothing. Never write a session whose record count changed.',
+      rationale: 'A workout that arrives with 8 records and lands with 1 is the historical "exercise 1 of 1" failure. Counting is the only step that catches it regardless of which transform lost the records.',
+    },
+    {
+      id: 'EXERCISE_ID_UNIQUE_WITHIN_SESSION',
+      rule: 'new Set(session.exercises.map(e => e.exercise_id)).size === session.exercises.length',
+      applies_to: 'every canonical session',
+      on_failure: 'ABORT. A repeated id makes any keyBy(exercise_id) lossy, which is exactly how a session collapses.',
+    },
+    {
+      id: 'ORDER_IS_1_TO_N',
+      rule: 'session.exercises.map(e => e.order) deep-equals [1..N] with no gaps, duplicates or reordering',
+      applies_to: 'every canonical session',
+      on_failure: 'ABORT. Non-unique order makes keyBy(order) lossy and destroys the "exercise i of N" display.',
+    },
+    {
+      id: 'SCHEDULE_VARIANT_RESOLVES',
+      rule: 'for every programs[].schedule[] entry with type === "workout", variant_id MUST resolve to a real workout_variants key — zero exceptions, no sentinels',
+      applies_to: 'every program schedule entry',
+      on_failure: 'ABORT. A placeholder id reaching an import path is an unresolvable session.',
+    },
+    {
+      id: 'VARIANT_RESOLVES_TO_CANONICAL_SESSION',
+      rule: 'every workout_variants[<id>].canonical_session_id resolves, and its exercise_count echo equals the canonical session count',
+      applies_to: 'every variant, including declared aliases',
+      on_failure: 'ABORT. An alias whose echo disagrees with its session means the two have drifted.',
+    },
+  ],
+  aliasing: {
+    policy: 'Two programs may surface the same physical workout under different user-facing labels. The exercise array lives once, on the canonical session; variants carry only the label and a reference. Shared references are intentional and valid — they are NOT duplicate-content failures.',
+    declared_aliases: Object.values(canonicalSessions)
+      .filter((cs) => cs.surfaced_by_variants.length > 1)
+      .map((cs) => ({
+        canonical_session_id: cs.id,
+        surfaced_by: cs.surfaced_by_variants.map((vid) => ({ variant_id: vid, name_en: variants[vid].name_en, name_ar: variants[vid].name_ar })),
+        requested_orders: cs.alias_requested_orders,
+      })),
+  },
   warmups: WARMUPS,
   warmup_exercises: warmupExercises,
   canonical_exercises: canonicalExercises,
+  canonical_sessions: canonicalSessions,
   workout_variants: variants,
   programs,
 }
 
 writeFileSync(join(ROOT, 'data-prep/exercise/QIM_MACHINE_WORKOUT_PROGRAMS.json'), JSON.stringify(dataset, null, 2))
-console.log(`programs=${programs.length} variants=${Object.keys(variants).length} canonical_exercises=${canonicalExercises.length} order_deviations=${orderDeviations.length}`)
+const aliasCount = Object.values(canonicalSessions).filter((c) => c.surfaced_by_variants.length > 1).length
+console.log(`programs=${programs.length} canonical_sessions=${Object.keys(canonicalSessions).length} variants=${Object.keys(variants).length} declared_aliases=${aliasCount} canonical_exercises=${canonicalExercises.length} order_deviations=${orderDeviations.length}`)

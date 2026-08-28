@@ -67,6 +67,9 @@ const muscleDetailById: Record<string, MuscleDetail> = {
   'cable-lateral-raise': { primary: ['side_delts'], secondary: ['traps'] },
   'rear-delt-fly': { primary: ['rear_delts'], secondary: ['upper_back'] },
   'reverse-pec-deck': { primary: ['rear_delts'], secondary: ['upper_back'] },
+  // كان غائبًا عن هذه الخريطة فيرث الافتراضي العام للأكتاف (كتف جانبي/أمامي) —
+  // وهو يناقض الحركة واسمها. يُعيَّن صراحةً كنظيريه أعلاه: رفرفة خلفي = كتف خلفي.
+  'cable-rear-delt-fly': { primary: ['rear_delts'], secondary: ['upper_back'] },
   'front-raise': { primary: ['front_delts'], secondary: ['side_delts'] },
   'face-pull': { primary: ['rear_delts'], secondary: ['traps', 'upper_back'] },
 
