@@ -1,6 +1,6 @@
 {
   "_note": "تعارضات مرفوعة لا مدموجة — العدد الكامل في _total، والقائمة كاملةً تُولَّد بإعادة تشغيل الخطّ.",
-  "_total": 2014,
+  "_total": 1997,
   "_sample_size": 200,
   "sample": [
     {
@@ -381,24 +381,6 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "|7up zero sugar|",
-      "gtins": [
-        "00012000022760",
-        "00012000022869"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "mountain dew|mountain dew|",
-      "gtins": [
-        "00012000002977",
-        "00012000045271"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
       "key": "mountain dew|mountain dew|100ml",
       "gtins": [
         "00012000051692",
@@ -426,28 +408,10 @@
     },
     {
       "reason": "same_key_distinct_gtin",
-      "key": "|mirinda orange|",
-      "gtins": [
-        "00012000005459",
-        "00012000057519"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
       "key": "|7up zero sugar|",
       "gtins": [
-        "00012000022760",
+        "00012000022869",
         "00012000060090"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|7up|",
-      "gtins": [
-        "00012000051845",
-        "00012000108402"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     },
@@ -466,15 +430,6 @@
       "gtins": [
         "00012000005459",
         "00012000802850"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "|mirinda citrus|",
-      "gtins": [
-        "00012000804670",
-        "00012000804717"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     },
@@ -889,15 +844,6 @@
       "gtins": [
         "00037600106184",
         "00037600223348"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "pringles|original|28g",
-      "gtins": [
-        "00038000138416",
-        "00038000845246"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     },
@@ -1825,6 +1771,60 @@
       "gtins": [
         "00829696000534",
         "00829696001005"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "magic spoon|protein cereal|38g",
+      "gtins": [
+        "00810104460286",
+        "00850002887440"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "iq bar|peanut butter chip|45g",
+      "gtins": [
+        "00850004554005",
+        "00850004554623"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "vital proteins|collagen peptides|20g",
+      "gtins": [
+        "00850232005089",
+        "00850232005096"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "skinny pop|original popcorn|28g",
+      "gtins": [
+        "00816925022252",
+        "00850251004001"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "skinny pop|original popcorn|28g",
+      "gtins": [
+        "00816925022252",
+        "00850251004254"
+      ],
+      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
+    },
+    {
+      "reason": "same_key_distinct_gtin",
+      "key": "siete|grain free tortilla chips|28g",
+      "gtins": [
+        "00851769007003",
+        "00851769007010"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     }

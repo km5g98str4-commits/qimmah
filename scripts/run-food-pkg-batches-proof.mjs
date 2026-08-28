@@ -121,7 +121,26 @@ function validatePack(pack, shardIndex) {
     if (!macros && it.nutrition_status !== 'incomplete_flagged') v.push(`incomplete_not_flagged:${id}`)
 
     if (it.carried_from_product_id) {
-      const src = shardIndex.get(it.carried_from_product_id)
+      /**
+       * ⚠️ **الخلافة المشروعة — [FOUNDER-QA-007].**
+       *
+       * بعد تشغيل خطّ الإنتاج يحلّ السجلّ المنسَّق **محلّ** توأمه من OFF بنفس
+       * الباركود (وهذا هو المقصود: الاسم العربي يدخل الكتالوج). فيصير المصدر
+       * المذكور غير موجود بمعرّفه القديم — لا لأنه لم يوجد قطّ، بل لأن هذا
+       * السجلّ نفسه ورثه. فالإثبات يجب أن يمرّ **قبل التشغيل وبعده**، وإلّا
+       * صار حارسًا يسقط كلّما نجح ما يحرسه.
+       *
+       * والخلافة تُقبل **بشرط مسمّى**: أن يحمل السجلّ الوارث نفس الباركود.
+       * ادّعاءُ نقلٍ عن سجلّ لم يوجد أصلًا يبقى ساقطًا بـ
+       * `carried_from_missing_in_catalog` — ويحرسه تأكيد مضادّ.
+       */
+      let src = shardIndex.get(it.carried_from_product_id)
+      if (!src && cls.ok) {
+        const heir = shardIndex.get(`qimmah_curated:${cls.gtin14}`)
+        const citedGtin = String(it.carried_from_product_id).split(':')[1] ?? ''
+        // الوارث يُقبل مصدرًا فقط إن كان المذكور يحمل نفس الباركود.
+        if (heir && (citedGtin === cls.gtin14 || citedGtin === cls.gtin14.replace(/^0+/, ''))) src = heir
+      }
       if (!src) v.push(`carried_from_missing_in_catalog:${id}:${it.carried_from_product_id}`)
       else {
         // ⟢ التأكيد المركزي: مطابقة حرفية رقمًا برقم ⟣
@@ -186,9 +205,26 @@ const set001 = new Set((pkg001?.items ?? []).map((i) => g14(i.barcode)).filter(B
 const overlap = items.map((i) => g14(i.barcode)).filter((x) => x && set001.has(x))
 check('لا تقاطع باركود بين PKG-001 وPKG-002', overlap.length === 0, overlap.slice(0, 4).join(','))
 
-// الفجوة التي تسدّها الدفعة — مقيسة لا موصوفة.
-const arabicGapClosed = items.filter((i) => byProductId.has(i.carried_from_product_id) && !byProductId.get(i.carried_from_product_id).name_ar).length
-check('كل سجلّ يسدّ فجوة اسم عربي فعلية في الكتالوج', arabicGapClosed === items.length, `${arabicGapClosed}/${items.length}`)
+/**
+ * الفجوة التي تسدّها الدفعة — مقيسة لا موصوفة، و**بحالتين لا بحالة**.
+ *
+ * [FOUNDER-QA-007] قبل تشغيل الخطّ: التوأم من OFF موجود **بلا اسم عربي**،
+ * فالفجوة ظاهرة. بعد التشغيل: السجلّ المنسَّق ورثه **ومعه الاسم العربي**،
+ * فالفجوة **مسدودة** لا غائبة. الفحص الذي يعرف حالةً واحدة يسقط عند نجاح
+ * ما يحرسه — فيقيس الحالتين، ويبقى ساقطًا حين لا فجوة أصلًا.
+ */
+const gapState = items.map((i) => {
+  const cls = G.classifyGtin(i.barcode)
+  const twin = byProductId.get(i.carried_from_product_id)
+  if (twin) return twin.name_ar ? 'no-gap' : 'gap-open'
+  const heir = cls.ok ? byProductId.get(`qimmah_curated:${cls.gtin14}`) : undefined
+  if (heir && heir.name_ar) return 'gap-closed'
+  return 'unresolved'
+})
+const gapOk = gapState.filter((x) => x === 'gap-open' || x === 'gap-closed').length
+const noGap = gapState.filter((x) => x === 'no-gap').length
+check('كل سجلّ يسدّ فجوة اسم عربي فعلية في الكتالوج', gapOk === items.length,
+  `${gapOk}/${items.length} (فجوة قائمة أو مسدودة) · بلا فجوة ${noGap} · غير محسوم ${gapState.filter((x) => x === 'unresolved').length}`)
 
 // ─────────────────── الطبقة ٤: وصل الاستيعاب ───────────────────
 
@@ -321,8 +357,17 @@ let contested = 0, wonByCurated = 0, carriedArabic = 0, conflicts = 0
 for (const it of items) {
   const cls = G.classifyGtin(it.barcode)
   if (!cls.ok) continue
-  const off = byProductId.get(`openfoodfacts:${cls.gtin14}`)
-  if (!off) continue
+  /**
+   * [FOUNDER-QA-007] الطرف المنافس قد يكون قد اختفى بالخلافة. فإن غاب، يُبنى
+   * من الوارث نفسه **بنزع الاسم العربي** — أي إعادةُ حالةِ ما قبل الدفعة
+   * حرفيًّا من بياناتها. فقانون الترجيح يُختبر في الحالتين بنفس المدخل.
+   */
+  let off = byProductId.get(`openfoodfacts:${cls.gtin14}`)
+  if (!off) {
+    const heir = byProductId.get(`qimmah_curated:${cls.gtin14}`)
+    if (!heir) continue
+    off = { ...heir, product_id: `openfoodfacts:${cls.gtin14}`, source: 'openfoodfacts', name_ar: null, brand_ar: null, confidence: 0.75 }
+  }
   contested += 1
   const n = it.per_100g_or_100ml
   const curated = {

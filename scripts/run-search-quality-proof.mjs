@@ -216,15 +216,34 @@ for (const [ar, en] of SCRIPT_GAP) {
 }
 ok(`الجسر يعمل على كل المجموعات المقيسة: ${bridged}/${SCRIPT_GAP.length}`, bridged === SCRIPT_GAP.length, `${bridged}/${SCRIPT_GAP.length}`)
 
-// ⟲ الجسر **محمول فعلًا**: بلا صيغته يعود «اندومي» صفرًا من الكتالوج.
+/**
+ * ⟲ الجسر **محمول فعلًا**.
+ *
+ * ⚠️ **رُبِط بمقصده بعد أن تحسّنت البيانات — [FOUNDER-QA-007].** كان مكتوبًا
+ * «خامًا ⇒ **صفر**»، وكان صادقًا يوم كُتب. ثم أضافت حزمة `PKG-002` أسماء عربية
+ * لمنتجات كانت بلا اسم عربي، فصار الخام يبلغ بعضها — **وهذا نجاح لا انحدار**.
+ * فالمقصد ليس «الخام صفر» بل «الجسر يزيد الوصول فعلًا»؛ وتثبيت الصفر كان
+ * يجعل الحارس يسقط كلّما **تحسّن** الكتالوج، فيُعلّمنا تعطيله.
+ *
+ * والقياس يبقى بأسنانه: الجسر يجب أن يزيد **زيادة موجبة مقيسة**، ويبقى
+ * الالتفاف الحقيقي (نزع الجسر) خسارةً تُسمّى.
+ */
 {
   const { normalizeProductKey } = await loadTsModule('src/lib/text/foodNormalize.ts')
   const rawHits = await catalog.searchRanked(normalizeProductKey('اندومي'), { limit: 12, deep: true })
   const bridgedHits = await catalog.searchRanked('indomie', { limit: 12, deep: true })
   counter(
-    'نزعُ الجسر يعيد العطل: «اندومي» خامًا ⇒ صفر من الكتالوج، و`indomie` ⇒ سجلات',
-    rawHits.length === 0 && bridgedHits.length > 0,
-    `خام ${rawHits.length} · مجسَّر ${bridgedHits.length}`,
+    'نزعُ الجسر يخسر وصولًا مقيسًا: «اندومي» خامًا أقلّ ممّا يبلغه `indomie`',
+    bridgedHits.length > rawHits.length && bridgedHits.length > 0,
+    `خام ${rawHits.length} · مجسَّر ${bridgedHits.length} · الفارق ${bridgedHits.length - rawHits.length}`,
+  )
+  // وحالة ما زالت صفرًا بلا الجسر — كي لا يصير الفحص «أكبر بواحد» ويكفي.
+  const zeroCase = await catalog.searchRanked(normalizeProductKey('بربيكان'), { limit: 12, deep: true })
+  const zeroBridged = await catalog.searchRanked('barbican', { limit: 12, deep: true })
+  counter(
+    'وحالةٌ بلا اسم عربي في الكتالوج تبقى صفرًا خامًا — فالجسر ليس تجميلًا',
+    zeroCase.length === 0 && zeroBridged.length > 0,
+    `خام ${zeroCase.length} · مجسَّر ${zeroBridged.length}`,
   )
 }
 

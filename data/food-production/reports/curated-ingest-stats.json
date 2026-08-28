@@ -1,6 +1,18 @@
 {
-  "input": 55,
+  "input": 242,
   "rejected": {},
-  "accepted": 55,
-  "flags": {}
+  "accepted": 242,
+  "flags": {},
+  "by_batch": {
+    "PKG-001": {
+      "input": 55,
+      "accepted": 55,
+      "rejected": 0
+    },
+    "PKG-002": {
+      "input": 187,
+      "accepted": 187,
+      "rejected": 0
+    }
+  }
 }
