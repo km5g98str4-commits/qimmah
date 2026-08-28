@@ -52,11 +52,23 @@ for (const rel of CANONICAL_FILES) {
 check('كل رابط مطلق في الملفات المنشورة على المضيف المعتمد',
   strays.length === 0, strays.length === 0 ? `${CANONICAL_FILES.length} ملفات` : strays.join(' · '))
 
-// والملفات المُعلَنة تغطّي فعلًا ما يحمل روابط — قائمةٌ ناقصة تجعل ② خضراء بلا معنى.
+/**
+ * والملفات المُعلَنة تغطّي فعلًا ما يحمل روابط — قائمةٌ ناقصة تجعل ② خضراء بلا معنى.
+ *
+ * ⚠️ **هذا الفحص سقط في مهمّته أوّل مرّة، وهذه هي الواقعة:** كانت `mustCover`
+ * تسمّي ملفات `site/` وحدها — وهي حزمة **غير منشورة** — وتترك
+ * `public/robots.txt` و`public/sitemap.xml`، وهما **الوحيدان المخدومان فعلًا**
+ * مع التطبيق. فبقي `robots.txt` منشورًا يحيل إلى خريطة موقع على مضيف لا يُحلّ،
+ * والحارس أخضر. القاعدة المستخلَصة: **التغطية تُقاس بما يُخدَم لا بما يُشبه**.
+ */
 const declared = new Set(CANONICAL_FILES)
-const mustCover = ['index.html', 'site/index.html', 'site/sitemap.xml', 'site/robots.txt']
+const SERVED = ['index.html', 'public/robots.txt', 'public/sitemap.xml']
+const DORMANT = ['site/index.html', 'site/sitemap.xml', 'site/robots.txt']
+const mustCover = [...SERVED, ...DORMANT]
 check('  والقائمة تغطّي الأسطح التي تحمل الهوية فعلًا',
   mustCover.every((f) => declared.has(f)), mustCover.join(' · '))
+check('  ومنها **المخدومة مع التطبيق** لا الخاملة وحدها',
+  SERVED.every((f) => declared.has(f)), SERVED.join(' · '))
 
 console.log('\n③ النطاق المخطَّط مفصول حتى يُسجَّل')
 const planned = canonical.plannedOrigin
@@ -83,6 +95,34 @@ check('وثائق الإطلاق لا ترسل القارئ إلى `qimmah-site.
 check('  ومع ذلك تسمّيه صراحةً مشروعًا لا وجود له — لا تحذفه بصمت',
   docFiles.every((f) => read(f).includes('qimmah-site.pages.dev')))
 
+console.log('\n⑤ لا ادّعاء يشير إلى ٤٠٤')
+/**
+ * خريطة الموقع تَعِد الزاحف بروابط. وكانت `site/sitemap.xml` تُعلن أربعة، **ثلاثة
+ * منها `.html` لا تُخدَم من أي مضيف** (الحزمة غير منشورة). ووعدٌ بأربعة يُسلَّم
+ * منه واحد ليس خطأ صياغة بل ادّعاء كاذب في ملف موجَّه للآلة.
+ * القاعدة هنا **بنيوية لا شبكية**: لا مدخل خريطة ينتهي بـ`.html` ما دامت
+ * `siteBundle.deployed` كاذبة — فالفحص يبقى صادقًا بلا إنترنت.
+ */
+const siteBundle = canonical.siteBundle
+check('حالة حزمة `site/` معلَنة بدليلها',
+  !!siteBundle && typeof siteBundle.deployed === 'boolean' && typeof siteBundle.evidence === 'string',
+  siteBundle ? `deployed=${siteBundle.deployed}` : 'غائب')
+const sitemapEntries = (rel) => [...read(rel).matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])
+if (siteBundle && siteBundle.deployed === false) {
+  const dotHtml = ['site/sitemap.xml', 'public/sitemap.xml']
+    .flatMap((f) => sitemapEntries(f).filter((u) => /\.html$/.test(u)).map((u) => `${f}:${u}`))
+  check('خريطة الموقع لا تُعلن صفحات حزمةٍ غير منشورة',
+    dotHtml.length === 0, dotHtml.length === 0 ? 'صفر مدخل `.html`' : dotHtml.join(' · '))
+  // والنصّ القانوني يُشار إليه حيث يعيش فعلًا — مسار التطبيق المُهشّم.
+  const legalCanon = read('site/privacy.html').match(/<link rel="canonical" href="([^"]+)"/)?.[1] ?? ''
+  check('  والصفحة القانونية الخاملة تشير إلى موضع النصّ الحيّ',
+    legalCanon.includes('/#/privacy'), legalCanon)
+}
+// وكل مدخل خريطة على المضيف المعتمد لا على غيره.
+const strayLoc = ['site/sitemap.xml', 'public/sitemap.xml']
+  .flatMap((f) => sitemapEntries(f).filter((u) => !u.startsWith(origin)).map((u) => `${f}:${u}`))
+check('كل مدخل خريطة على المضيف المعتمد', strayLoc.length === 0, strayLoc.join(' · ') || 'نظيف')
+
 console.log('\n⟲ التأكيدات المضادّة — الحارس ليس فارغًا')
 // ⟲-١ عودة المضيف الميت إلى ملف واحد تُلتقط بنفس الفحص.
 const revived = read('index.html').replace(origin, 'https://qimmah.app')
@@ -100,6 +140,18 @@ check('⟲ رابط قابل للنقر إلى المشروع الميت يُس�
 check('⟲ قائمة المضيفات المعروفة تسمّي الميتين لا تتجاهلهما',
   KNOWN_HOSTS.includes('https://qimmah.app') && KNOWN_HOSTS.includes('https://qimmah-site.pages.dev'),
   `${KNOWN_HOSTS.length} مضيفات`)
+// ⟲-٥ **محاكاة الواقعة نفسها**: قائمةٌ تحرس الخامل وتترك المخدوم.
+//     لولا فحص «المخدومة» لمرّت هذه خضراء — وهي ما وقع فعلًا.
+{
+  const narrow = new Set(DORMANT)
+  check('⟲ قائمةٌ تسمّي الخامل وتترك المخدوم تُلتقط بفحص «المخدومة»',
+    !SERVED.every((f) => narrow.has(f)) && SERVED.every((f) => declared.has(f)),
+    `الناقص في المحاكاة: ${SERVED.filter((f) => !narrow.has(f)).join(' · ')}`)
+}
+// ⟲-٦ وعودة مدخل `.html` إلى خريطة حزمةٍ غير منشورة تُلتقط باسمها.
+check('⟲ إعادة مدخل `.html` إلى الخريطة تُسقط ⑤ بفحصه المسمّى',
+  /<loc>[^<]+\.html<\/loc>/.test(`${read('site/sitemap.xml')}\n<loc>${origin}/privacy.html</loc>`) &&
+  !/<loc>[^<]+\.html<\/loc>/.test(read('site/sitemap.xml')))
 // ⟲-٤ وتفريغ قائمة الملفات يجعل ② خضراء زورًا — فيحرسها الفحص المُضاف في ②.
 check('⟲ تفريغ قائمة الملفات كان سيجعل ② خضراء بلا معنى — ولذلك تُفحص التغطية',
   CANONICAL_FILES.length >= mustCover.length && mustCover.every((f) => declared.has(f)))

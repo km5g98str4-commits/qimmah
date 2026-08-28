@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://qimmah.app/sitemap.xml
+Sitemap: https://qimmah-8qp.pages.dev/sitemap.xml

@@ -12,6 +12,17 @@
     "evidence": "curl ⇒ 200 · <meta name=\"qimmah-build\" content=\"v1.0.0·96e34b1\"> · <meta name=\"qimmah-env\" content=\"founder_preview\">",
     "$comment": "رابط المرشّح الواحد لمراجعة المؤسس. **معاينة لا إنتاج**: `qimmah-env` يجب أن يقرأ `founder_preview` قبل مشاركته — لو قرأ `production` فهو بناء يحمل سلطة كتابة إنتاجية (DEC-002). ويتحدّث تلقائيًّا مع كل دفعة على الفرع، فالرابط ثابت والبناء يتقدّم."
   },
+  "siteBundle": {
+    "deployed": false,
+    "verifiedAt": "2026-08-28",
+    "evidence": "curl https://qimmah-8qp.pages.dev/privacy.html ⇒ 404 · wrangler pages project list ⇒ مشروع واحد (qimmah)",
+    "legalContentLivesAt": [
+      "/#/privacy",
+      "/#/terms",
+      "/#/contact"
+    ],
+    "$comment": "حزمة `site/` (٦ صفحات) لا مشروع Pages لها ولا تُخدَم من أي مضيف. لذلك روابطها القانونية تشير إلى **حيث يعيش النصّ فعلًا**: مسارات التطبيق المُهشّمة. لا تُعلَن هذه الحزمة سطحًا نشطًا، وتبقى في المستودع حتى يقرّر المؤسس نشرها أو الاكتفاء بصفحات التطبيق."
+  },
   "plannedOrigin": {
     "origin": "https://qimmah.app",
     "status": "not-resolving",

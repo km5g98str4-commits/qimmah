@@ -21,7 +21,15 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 
 /** الملفات التي تحمل روابط قِمّة المطلقة. مُعلَنة صراحةً لا مُكتشَفة بالمسح: */
 export const CANONICAL_FILES = [
+  // ═══ السطح المخدوم فعلًا (يُبنى مع التطبيق ويُرفع مع `dist`) ═══
+  // ⚠️ **هذان الملفان كانا خارج القائمة، وهما الوحيدان اللذان يقرأهما محرّك بحث
+  // حقيقي اليوم.** فمرّ `robots.txt` منشورًا وهو يحيل إلى خريطة موقع على مضيف
+  // **لا يُحلّ** (`qimmah.app`) — والحارس أخضر، لأن القائمة لم تكن تعرفهما.
+  // الدرس: قائمة استثناء ضيّقة تجعل الحارس يحرس ما لا يُخدَم ويترك ما يُخدَم.
   'index.html',
+  'public/robots.txt',
+  'public/sitemap.xml',
+  // ═══ حزمة `site/` — **غير منشورة** (انظر `siteBundle` في canonical-host.json) ═══
   'site/index.html',
   'site/privacy.html',
   'site/terms.html',

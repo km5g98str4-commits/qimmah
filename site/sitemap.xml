@@ -1,23 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  حزمة `site/` **غير منشورة** اليوم (لا مشروع Pages لها) — انظر `siteBundle` في
+  `site/canonical-host.json`. وحتى تُنشر، الرابط الوحيد الذي يعيد ٢٠٠ على المضيف
+  المعتمد هو الجذر. والصفحات القانونية تصل المستخدم من داخل التطبيق
+  (`/#/privacy` · `/#/terms` · `/#/contact`) — ومقاطع `#` يتجاهلها الزاحف فلا
+  تصلح مدخلات خريطة مستقلّة. إعلانُ `/(privacy|terms|support).html` هنا كان
+  يَعِد الزاحف بأربعة روابط، **ثلاثة منها ٤٠٤**.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://qimmah-8qp.pages.dev/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>https://qimmah-8qp.pages.dev/support.html</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://qimmah-8qp.pages.dev/privacy.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://qimmah-8qp.pages.dev/terms.html</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
   </url>
 </urlset>
