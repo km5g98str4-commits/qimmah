@@ -8,6 +8,15 @@
 //      «١ من ١». السبب سقف الأسبوع الأول (١٥ من ٤٥ دقيقة) في `applyEasyIfActive`،
 //      وهو قرار مؤسس مقفل — لكنه كان **صامتًا**، وزرّ البدء يَعِد «٤ تمارين» قبله.
 //      فالقراءة الوحيدة المتاحة للمستخدم أن التطبيق نسي تمرينه.
+//
+//      ⚠️ **تجاوَزه [FOUNDER-QA-001].** هذا الحارس عالج الصمت وأبقى الاقتطاع،
+//      لأن السقف كان يُقرأ قرارًا مقفلًا. ثم حسم المؤسس بعد تجربته: «يوم علوي
+//      يجب أن يحتوي الجلسة كاملة — سبعة إلى تسعة تمارين… أصلح نموذج الحالة/
+//      الجلسة نفسه لا العدّاد». فرُفع السقف التلقائي، وبقي التبليغ لسببه الوحيد
+//      الباقي: **اختيار المستخدم**. التأكيدات أدناه رُبطت بمقاصدها المُعلَنة
+//      (اقتطاعٌ يحمل سيرته · تنويهٌ من القاموس · وعدُ زرٍّ يطابق التسليم)،
+//      لا بأسماء دوالّ ولا بمفاتيح وضعٍ لم يعد له وجود. وحارس عدم عودة السقف
+//      نفسه في `run-session-integrity-proof.mjs`.
 //   ٢) مؤشّر المراحل «إحماء ← التمارين ← الإنهاء» كان داخل `WarmupScreen` وحدها،
 //      فيختفي عند أول ضغطة. قياس: `[data-session-rail]` على شاشة واحدة من سبع.
 //   ٣) موضع التمرير لا يُعاد عند تبديل التمرين: `scrollTop` بعد «التمرين التالي»
@@ -125,7 +134,7 @@ const ASSERTS = [
     id: 'الاقتطاع يُرجِع سيرته (كم من كم ولماذا) لا يومًا مبتورًا بلا خبر',
     file: 'view',
     run: (code) => {
-      const i = code.indexOf('const applyEasyIfActive =')
+      const i = code.indexOf('const applySessionScope =')
       if (i < 0) return false
       const body = code.slice(i, code.indexOf('\n  }', i))
       // لا يكفي ذكر `trimmed`: لا بدّ من العدد الأصلي **والسبب** معًا في المُرجَع.
@@ -143,10 +152,15 @@ const ASSERTS = [
   {
     id: 'وضع الجلسة يعرض التنويه ولا يبتلعه — نصّ من القاموس لا نصّ صلب',
     file: 'mode',
+    // [FOUNDER-QA-001] كان يشترط سجلَّي نصّ: «أسبوعك الأول» و«باختيارك». الأول
+    // زال بزوال سببه، والمقصد المُعلَن («نصّ من القاموس لا نصّ صلب») باقٍ كما هو:
+    // النصّ يأتي من `d.` ولا يُكتب في الواجهة.
     run: (code) =>
       /data-session-trimmed=\{/.test(code) &&
-      /d\.trimmedFirstWeekBody\(/.test(code) &&
-      /d\.trimmedEasyBody\(/.test(code),
+      /d\.trimmedEasyTitle/.test(code) &&
+      /d\.trimmedEasyBody\(/.test(code) &&
+      // ولا نصّ صلب يلتفّ على القاموس داخل كتلة التنويه.
+      !/data-session-trimmed[\s\S]{0,400}?['\`][^'\`]*(?:أسبوعك|نسخة أخفّ|Lighter)/.test(code),
   },
   {
     id: 'زرّ «ابدأ تمرين اليوم» يَعِد بالعدد المُسلَّم لا بعدد الخطة',
@@ -266,7 +280,9 @@ const ASSERTS = [
       const warmAr = warm.slice(warm.indexOf('const AR:'), warm.indexOf('const EN:'))
       if (!screenEn || !warmEn || !screenAr || !warmAr) return false
       const has = (blob, keys) => keys.every((k) => blob.includes(k))
-      const screenKeys = ['trimmedFirstWeekTitle:', 'trimmedFirstWeekBody:', 'trimmedEasyTitle:', 'trimmedEasyBody:', 'startTrimmedCount:']
+      // [FOUNDER-QA-001] مفتاحا «الأسبوع الأول» حُذفا مع وضعهما — وإبقاؤهما
+      //  هنا كان سيطلب نصًّا يَعِد بوضع لا وجود له.
+      const screenKeys = ['trimmedEasyTitle:', 'trimmedEasyBody:', 'startTrimmedCount:']
       const warmKeys = ['stepCue: {', 'afterWarmup:']
       return has(screenAr, screenKeys) && has(screenEn, screenKeys) && has(warmAr, warmKeys) && has(warmEn, warmKeys)
     },

@@ -23,9 +23,6 @@ export interface WorkoutScreenStrings {
    * «١ من ١». الوعد والتسليم من رقم واحد الآن، والفرق يُقال لا يُخفى.
    */
   startTrimmedCount: (kept: number, full: number, lang: Lang) => string
-  /** تنويه اقتطاع الجلسة داخل وضع التمرين — سقف الأسبوع الأول. */
-  trimmedFirstWeekTitle: string
-  trimmedFirstWeekBody: (kept: number, full: number, lang: Lang) => string
   /** تنويه اقتطاع الجلسة — النسخة الأخفّ التي اختارها المستخدم بنفسه. */
   trimmedEasyTitle: string
   trimmedEasyBody: (kept: number, full: number, lang: Lang) => string
@@ -134,9 +131,6 @@ const ar: WorkoutScreenStrings = {
   exercisesUnit: 'تمارين',
   startTrimmedCount: (kept, full, lang) =>
     `${formatNumber(kept, lang)} من ${formatNumber(full, lang)} تمارين`,
-  trimmedFirstWeekTitle: 'بدايتك أخفّ — وباقي التمارين محفوظة لك',
-  trimmedFirstWeekBody: (kept, full, lang) =>
-    `أسبوعك الأول جلساته أقصر عن قصد. اليوم ${formatNumber(kept, lang)} من ${formatNumber(full, lang)} تمارين خطتك، والباقي يرجع لك بعده. خطتك ما تغيّرت.`,
   trimmedEasyTitle: 'نسخة أخفّ اليوم — باختيارك',
   trimmedEasyBody: (kept, full, lang) =>
     `اخترت تخفيف جلسة اليوم، فأخذنا أوائل تمارينها: ${formatNumber(kept, lang)} من ${formatNumber(full, lang)}. خطتك ما تغيّرت، وبكرة ترجع كاملة.`,
@@ -209,9 +203,6 @@ const en: WorkoutScreenStrings = {
   exercisesUnit: 'exercises',
   startTrimmedCount: (kept, full, lang) =>
     `${formatNumber(kept, lang)} of ${formatNumber(full, lang)} exercises`,
-  trimmedFirstWeekTitle: 'Starting light — the rest is still yours',
-  trimmedFirstWeekBody: (kept, full, lang) =>
-    `Your first week runs shorter sessions on purpose. Today is ${formatNumber(kept, lang)} of your plan's ${formatNumber(full, lang)} exercises, and the rest comes back after it. Your plan hasn't changed.`,
   trimmedEasyTitle: 'Lighter version today — your call',
   trimmedEasyBody: (kept, full, lang) =>
     `You chose to lighten today's session, so we kept the first exercises of it: ${formatNumber(kept, lang)} of ${formatNumber(full, lang)}. Your plan hasn't changed, and tomorrow comes back full.`,

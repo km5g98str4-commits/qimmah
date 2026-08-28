@@ -44,7 +44,7 @@ interface WorkoutModeProps {
    * في اليوم أصلًا، ولماذا قُصّرت. غيابها هو العطل نفسه — الجلسة تُسلّم تمرينًا
    * واحدًا من أربعة بلا كلمة، فتبدو وكأنها «نسيت بقية التمرين».
    */
-  trimmed?: { fullCount: number; reason: 'firstWeek' | 'easy' }
+  trimmed?: { fullCount: number; reason: 'easy' }
 }
 
 interface ExState {
@@ -558,12 +558,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
           <p data-session-trimmed={trimmed.reason} className="flex items-start gap-2 rounded-xl border border-gold-400/40 bg-gold-200/40 p-3 text-xs leading-relaxed text-ink-700">
             <Icon name="Info" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
             <span>
-              <span className="block font-black">{trimmed.reason === 'easy' ? d.trimmedEasyTitle : d.trimmedFirstWeekTitle}</span>
-              <span className="mt-0.5 block">
-                {trimmed.reason === 'easy'
-                  ? d.trimmedEasyBody(total, trimmed.fullCount, lang)
-                  : d.trimmedFirstWeekBody(total, trimmed.fullCount, lang)}
-              </span>
+              <span className="block font-black">{d.trimmedEasyTitle}</span>
+              <span className="mt-0.5 block">{d.trimmedEasyBody(total, trimmed.fullCount, lang)}</span>
             </span>
           </p>
         )}

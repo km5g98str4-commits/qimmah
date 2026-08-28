@@ -33,18 +33,23 @@ import { buildWarmupPlan, type WarmupPlan } from '@/lib/warmupPlan'
 import { loadWarmupPref, saveWarmupPref } from '@/lib/strength/warmup'
 import { takeWorkoutIntent } from '@/lib/workoutIntent'
 import { estimateDurationMin } from '@/lib/workoutStats'
-import { cappedSessionMinutes, easyExerciseCount, easyMinutesFor, isEasyToday } from '@/lib/easySession'
-import { journeyDayIndex } from '@/lib/tracking/signals'
+import { isEasyToday, sessionExerciseCount } from '@/lib/easySession'
 import { evaluateAchievements, registerWorkoutPRs } from '@/features/achievements/engine'
 import { weeklyAdherenceStreak } from '@/lib/streaks'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import type { PlanDay } from '@/types/workout'
 import { useAccess } from '@/lib/access/useAccess'
 
-/** ما اقتُطع من جلسة اليوم ولماذا — يسافر من موضع الاقتطاع إلى موضع الإخبار. */
+/**
+ * ما اقتُطع من جلسة اليوم ولماذا — يسافر من موضع الاقتطاع إلى موضع الإخبار.
+ *
+ * [FOUNDER-QA-001] `reason` صار قيمةً واحدة لا اثنتين: لم يبق سبب اقتطاع غير
+ * اختيار المستخدم. إبقاء `'firstWeek'` في النوع بعد رفع السقف كان سيترك فرعًا
+ * لا يُبلَغ ونصًّا يَعِد بوضعٍ لا وجود له — وهو تعطيل صامت بصورة أخرى (§4).
+ */
 interface TrimmedInfo {
   fullCount: number
-  reason: 'firstWeek' | 'easy'
+  reason: 'easy'
 }
 
 interface FinishSummary {
@@ -114,47 +119,44 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   const d = workoutScreenStrings[lang]
 
   /**
-   * [CTO-70] البند ٣ — النسخة المخفّفة ليوم واحد.
-   * تقتطع **أوائل** تمارين اليوم (لا عيّنة عشوائية) فما يُنجزه المستخدم بداية
-   * جلسته الحقيقية. والاقتطاع في الذاكرة فقط: `plan` المحفوظة لا تُمَس إطلاقًا،
-   * والعلم مختوم باليوم فينتهي وحده — لا تعديل خطة ولا كتابة دائمة.
-   */
-  /**
-   * [WORKOUT-CONTINUITY-001] الإصلاح ١ — الاقتطاع صار **يُبلَّغ** لا يقع صامتًا.
+   * نطاق الجلسة — [FOUNDER-QA-001]. **يوم الخطة هو الجلسة.**
    *
-   * ═══ ما قِيس ═══
-   * حساب جديد، خطة اليوم أربعة تمارين، مدّة معروضة ٤٥ دقيقة. سقف الأسبوع الأول
-   * ١٥ دقيقة ⇒ `easyExerciseCount(4, 45, 15)` = `round(4 × 15 / 45)` = **١**.
-   * فالزرّ يَعِد «٤ تمارين» والجلسة تفتح على «١ من ١» ثم تنتهي. لا الشاشة ولا
-   * الجلسة تذكر السبب — والقراءة الوحيدة المتاحة للمستخدم أن التطبيق **نسي**
-   * بقية تمرينه. وهو بلاغ المؤسس حرفيًّا.
+   * ═══ ما سبق هنا، ولماذا لم يكفِ ═══
+   * [WORKOUT-CONTINUITY-001] شخّص العطل بدقّة (يوم أربعة تمارين يفتح «١ من ١»)
+   * ثم اختار أن **يُبلّغ** الاقتطاع بدل أن يرفعه، لأن سقف الأسبوع الأول
+   * ([CTO-70] البند ٤) قرار مؤسس. والمؤسس بعد تجربته الأخيرة حسمها بنصّه:
+   * «يوم علوي يجب أن يحتوي الجلسة كاملة — سبعة إلى تسعة تمارين… أصلح نموذج
+   * الحالة/الجلسة نفسه لا العدّاد». فالسقف **الصامت مرفوع بأمره**، والتبليغ
+   * الذي بناه الإصلاح ١ يبقى — لكن لسبب واحد صار له وجود: اختيار المستخدم.
    *
-   * القرار (سقف الأسبوع الأول · [CTO-70] البند ٤) قرار مؤسس ولا يُعاد فتحه هنا،
-   * ولا تُمَسّ الخطة المحفوظة. الذي يتغيّر أن الدالّة صارت تُرجِع **ما اقتُطع
-   * ولماذا** بدل يومٍ مبتور بلا سيرة، فيحمله الزرّ والجلسة معًا.
+   * ═══ الحجم مقيسًا بالمولّد الحقيقي (لا بالتقدير) ═══
+   * | المدّة المختارة | يوم «علوي» في الخطة | ما كان يُفتح |
+   * |---|---|---|
+   * | ٤٥ د | ٥ تمارين | ٢ |
+   * | ٦٠ د | ٦ تمارين | ٢ |
+   * | ٧٥ د | ٧ تمارين | **١ — «١ من ١»** |
+   * | ٩٠ د | ٨ تمارين | **١ — «١ من ١»** |
+   *
+   * كلّما طالت الجلسة التي اختارها المستخدم اشتدّ الاقتطاع — لأن النسبة
+   * `السقف ÷ المدّة المُعلَنة` تصغر. وبتمرين واحد يصير `isLast` صحيحًا فورًا،
+   * فيُصنَّف اليوم منجزًا كاملًا وتنقلب الرئيسية إلى «خلّصت تمرين اليوم».
+   *
+   * ═══ القاعدة الآن ═══
+   * لا اقتطاع إلا باختيار صريح من المستخدم لهذا اليوم، وبأرضية
+   * `EASY_MIN_EXERCISES` — «أخفّ» جلسة أقصر لا تمرين واحد. ولطف الأسبوع الأول
+   * يبقى **عرضًا** (زرّ «ابدأ بنسخة أخفّ» في بطاقة العودة) لا اقتطاعًا صامتًا.
+   * والاقتطاع في الذاكرة فقط: `plan` المحفوظة لا تُمَسّ، والعلم مختوم باليوم.
    */
-  const applyEasyIfActive = (day: PlanDay): { day: PlanDay; trimmed?: TrimmedInfo } => {
+  const applySessionScope = (day: PlanDay): { day: PlanDay; trimmed?: TrimmedInfo } => {
     const fullMin = customization.profile.workoutDuration > 0 ? customization.profile.workoutDuration : 0
-    if (fullMin <= 0 || day.exercises.length === 0) return { day }
+    if (day.exercises.length === 0) return { day }
 
-    // [CTO-70] البند ٤ — سقف الأسبوع الأول (≤١٥ دقيقة)، ثم البند ٣ — التخفيف
-    // اليدوي. الأصغر منهما يفوز: من ضغط «ابدأ بنسخة أخفّ» في أسبوعه الأول
-    // يحصل على الأخفّ فعلًا لا على السقف وحده.
-    const easy = isEasyToday(userId)
-    const capMin = cappedSessionMinutes(fullMin, journeyDayIndex())
-    const targetMin = easy ? Math.min(capMin, easyMinutesFor(fullMin)) : capMin
-    if (targetMin >= fullMin) return { day }
-
-    const keep = easyExerciseCount(day.exercises.length, fullMin, targetMin)
+    const keep = sessionExerciseCount(day.exercises.length, fullMin, isEasyToday(userId))
     if (keep <= 0 || keep >= day.exercises.length) return { day }
     return {
       day: { ...day, exercises: day.exercises.slice(0, keep) },
-      // السبب يتبع الأصغر فعلًا: من اختار التخفيف يُقال له «باختيارك»، ومن
-      // اقتطعه السقف وحده يُقال له «أسبوعك الأول». نسبة السبب لغير صاحبه كذبة صغيرة.
-      trimmed: {
-        fullCount: day.exercises.length,
-        reason: easy && easyMinutesFor(fullMin) <= capMin ? 'easy' : 'firstWeek',
-      },
+      // سببٌ واحد لأنه لم يبق غيره: المستخدم اختار. ونسبة السبب لغير صاحبه كذبة صغيرة.
+      trimmed: { fullCount: day.exercises.length, reason: 'easy' },
     }
   }
 
@@ -163,7 +165,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
    * `useMemo` لأن `isEasyToday`/`journeyDayIndex` تقرآن التخزين في كل استدعاء.
    */
   const todayDelivery = useMemo(
-    () => (planDay ? applyEasyIfActive(planDay) : null),
+    () => (planDay ? applySessionScope(planDay) : null),
     // يتبع يوم الخطة وعدد تمارينه ومدّة الملف — وكلّها ما يدخل في الاقتطاع.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [planDay?.id, planDay?.exercises.length, customization.profile.workoutDuration, userId],
@@ -194,7 +196,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
   // بدل استثناء. الطبقة الثانية (`assertPaid` داخل `saveActiveWorkout`) هي التي
   // تصمد أمام الالتفاف؛ هذه تجعل الرفض مفهومًا لا مخيفًا.
   const startDay = guardPaid('workout.start', (rawDay: PlanDay) => {
-    const { day, trimmed: cut } = applyEasyIfActive(rawDay)
+    const { day, trimmed: cut } = applySessionScope(rawDay)
     const warmup = buildWarmupPlan(day)
     // بلا خطوات إحماء (يوم بلا تمارين) أو بتعطيل صريح من المستخدم ⇒ لا شاشة
     // فارغة تُعترض الطريق. والوعد في «اليوم» يختفي بنفس الشرط — مصدر واحد.

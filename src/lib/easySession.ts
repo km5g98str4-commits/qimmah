@@ -56,11 +56,30 @@ export function easyMinutesFor(fullMin: number): number {
  */
 /**
  * سقف دقائق الأسبوع الأول ([CTO-70] البند ٤ · ADV-21): **≤ ١٥ دقيقة** لكل جلسة
- * في الأيام السبعة الأولى. قرار محتوى لا آلية جديدة — نفس اقتطاع الجلسة أعلاه،
- * ولا كتابة في الخطة المحفوظة إطلاقًا.
+ * في الأيام السبعة الأولى.
+ *
+ * ⚠️ **صورته الصامتة مرفوعة بأمر المؤسس — [FOUNDER-QA-001].** كان يُطبَّق على
+ * كل حساب جديد بلا اختيار منه، فيقتطع تمارين اليوم بنسبة
+ * `السقف ÷ المدّة المُعلَنة`؛ وكلّما طالت الجلسة المختارة اشتدّ الاقتطاع حتى
+ * ينهار عند ٧٥–٩٠ دقيقة إلى **تمرين واحد** («١ من ١»).
+ * [WORKOUT-CONTINUITY-001] جعله **مُبلَّغًا** وأبقاه؛ ونصّ المؤسس بعده صريح:
+ * «يوم علوي يجب أن يحتوي الجلسة كاملة». فبقي الثابتان مصدرًا لسطر «أسبوعك
+ * الأول» ولحساب المخفّفة، ولم يبق لهما مسار اقتطاع تلقائي.
+ *
+ * **لطف الأسبوع الأوّل يبقى عرضًا**: «ابدأ بنسخة أخفّ» بالرقمين صريحين.
  */
 export const FIRST_WEEK_MAX_MIN = 15
 export const FIRST_WEEK_DAYS = 7
+
+/**
+ * أرضية النسخة المخفّفة — [FOUNDER-QA-001].
+ *
+ * «أخفّ» تعني جلسة أقصر، **لا تمرينًا واحدًا**. بلا أرضية كانت النسبة وحدها
+ * تحكم، فمن اختار ٩٠ دقيقة ثم ضغط «أخفّ» يهبط إلى تمرين واحد — نفس العطل
+ * بمدخل آخر. والأرضية تسري **إلى حدّ اليوم نفسه**: يوم من تمرينين يبقى
+ * تمرينين، فلا نضيف ما ليس في الخطة.
+ */
+export const EASY_MIN_EXERCISES = 3
 
 /**
  * صباح الخميس ([CTO-70] البند ٤) — نافذة السطر الاستباقي.
@@ -90,5 +109,27 @@ export function easyExerciseCount(total: number, fullMin: number, targetMin?: nu
   if (total <= 0) return 0
   const target = targetMin ?? easyMinutesFor(fullMin)
   if (target <= 0 || fullMin <= 0) return total
-  return Math.min(total, Math.max(1, Math.round((total * target) / fullMin)))
+  const byRatio = Math.round((total * target) / fullMin)
+  // الأرضية أوّلًا ثم سقف اليوم: لا تحت `EASY_MIN_EXERCISES`، ولا فوق ما في الخطة.
+  return Math.min(total, Math.max(EASY_MIN_EXERCISES, byRatio))
+}
+
+/**
+ * **سلطة واحدة لعدد تمارين الجلسة** — [FOUNDER-QA-001].
+ *
+ * الثابت الحاكم: **جلسة اليوم هي يوم الخطة كاملًا.** لا يقتطعها إلا اختيار
+ * صريح من المستخدم (زرّ «ابدأ بنسخة أخفّ»)، ولا ينزل الاقتطاع تحت الأرضية.
+ * كل مسار يبني جلسة يمرّ من هنا، فلا يعود بالإمكان أن يخترع مسارٌ ثانٍ
+ * اقتطاعًا صامتًا كما فعل سقف الأسبوع الأول.
+ *
+ * @param total عدد تمارين يوم الخطة.
+ * @param fullMin المدّة المُعلَنة في ملف المستخدم (ميزانيته لا تقدير جلسته).
+ * @param easyRequested هل فعّل المستخدم النسخة المخفّفة **لهذا اليوم** بنفسه؟
+ */
+export function sessionExerciseCount(total: number, fullMin: number, easyRequested: boolean): number {
+  if (total <= 0) return 0
+  if (!easyRequested || fullMin <= 0) return total
+  const target = easyMinutesFor(fullMin)
+  if (target <= 0 || target >= fullMin) return total
+  return easyExerciseCount(total, fullMin, target)
 }

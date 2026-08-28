@@ -58,8 +58,25 @@ const workoutView = code(read('src/views/WorkoutView.tsx'))
 const declaredUses = (workoutView.match(/profile\.workoutDuration/g) ?? []).length
 check('شاشة التمرين تستعمل المُعلَنة (سقف التخفيف) — وهو استعمال مشروع',
   declaredUses > 0, `${declaredUses} موضعًا`)
-check('  وتستعملها مع `cappedSessionMinutes` لا كعرض تقدير',
-  /cappedSessionMinutes/.test(workoutView))
+/**
+ * ⚠️ **رُبِط هذا الفحص بمقصده المُعلَن — [FOUNDER-QA-001]، ولم يُحدَّث رقمه.**
+ *
+ * كان مكتوبًا `/cappedSessionMinutes/` — أي أنه يفحص **اسم دالّة** بينما مقصده
+ * المكتوب فوقه هو «المُعلَنة تبقى ميزانيةً لا تقديرَ جلسة». وحين رُفع السقف
+ * الصامت (كان يفتح يوم ٧ تمارين بـ«١ من ١») سقط الفحص رغم أن مقصده **لم
+ * يُخرَق**: المُعلَنة ما زالت ميزانيةً، تدخل سلطة نطاق الجلسة الواحدة
+ * `sessionExerciseCount` ولا تُعرض رقمَ مدّة. فرُبِط بالمقصد:
+ *   ① تدخل السلطة الواحدة  ② ولا تُرسم قطّ كتقدير مدّة.
+ * تحديث الرقم وحده كان سيترك ثابتًا منسوخًا يشيخ في ملفّين (نفس درس
+ * `body-fields-proof.ts:68`).
+ */
+check('  وتدخل سلطة نطاق الجلسة الواحدة (ميزانية) لا كعرض تقدير',
+  /sessionExerciseCount\(/.test(workoutView))
+const DURATION_RENDER = /\{\s*(?:customization\.)?profile\.workoutDuration\s*\}|workoutDuration\}\s*(?:د|min)/
+check('  ولا تُرسم المُعلَنة رقمَ مدّة في الشاشة',
+  !DURATION_RENDER.test(workoutView))
+check('⟲ ورسمها تقديرًا يُلتقط بالنمط نفسه',
+  DURATION_RENDER.test(`${workoutView}\n<p>{profile.workoutDuration} د</p>`))
 
 console.log('\n④ التوأم الميت لا يُحتسب مسارًا حيًّا')
 const app = code(read('src/App.tsx'))
