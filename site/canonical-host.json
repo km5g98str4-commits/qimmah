@@ -4,6 +4,14 @@
   "status": "live",
   "verifiedAt": "2026-08-28",
   "evidence": "curl https://qimmah-8qp.pages.dev/ ⇒ 200 · <meta name=\"qimmah-build\">",
+  "releaseCandidate": {
+    "url": "https://claude-founder-qa-final-001.qimmah-8qp.pages.dev/",
+    "branch": "claude/founder-qa-final-001",
+    "env": "founder_preview",
+    "verifiedAt": "2026-08-28",
+    "evidence": "curl ⇒ 200 · <meta name=\"qimmah-build\" content=\"v1.0.0·96e34b1\"> · <meta name=\"qimmah-env\" content=\"founder_preview\">",
+    "$comment": "رابط المرشّح الواحد لمراجعة المؤسس. **معاينة لا إنتاج**: `qimmah-env` يجب أن يقرأ `founder_preview` قبل مشاركته — لو قرأ `production` فهو بناء يحمل سلطة كتابة إنتاجية (DEC-002). ويتحدّث تلقائيًّا مع كل دفعة على الفرع، فالرابط ثابت والبناء يتقدّم."
+  },
   "plannedOrigin": {
     "origin": "https://qimmah.app",
     "status": "not-resolving",
