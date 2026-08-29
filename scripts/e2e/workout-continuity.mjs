@@ -17,6 +17,8 @@ import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-
 const PORT = Number(process.env.PORT || 5407)
 const URL = `http://localhost:${PORT}`
 const settle = (page, ms = 700) => page.waitForTimeout(ms)
+/** الأرقام تُعرض عربية-هندية في الواجهة العربية — الوعد يُقارن بصيغته المعروضة. */
+const toArabicDigits = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[Number(d)])
 
 let pass = 0
 let fail = 0
@@ -287,7 +289,16 @@ try {
   // ══════════════════════════════════════════════════════════════════════════
   // ② الجلسة المقتطَعة — لا تُسلَّم مبتورة بلا خبر
   // ══════════════════════════════════════════════════════════════════════════
-  console.log('\n② الأسبوع الأول — الجلسة تُقصَّر، والتقصير يُقال لا يُخفى')
+  console.log('\n② الأسبوع الأول — الجلسة كاملة، والتخفيف اختيار لا اقتطاع صامت')
+  //
+  // كان هذا القسم يؤكّد **اقتطاعًا تلقائيًا** في الأسبوع الأول مع تنويهه
+  // ([WORKOUT-CONTINUITY-001]). ثم رُفع ذلك السقف بأمر المؤسس [FOUNDER-QA-001]
+  // لأنه هو نفسه مصدر عطل «١ من ١»: كان يقتطع بنسبة السقف÷المدّة حتى ينهار يوم
+  // كامل إلى تمرين واحد. و`TrimmedInfo.reason` فقد قيمة `'firstWeek'` من نوعه.
+  //
+  // فالقسم لم يُحذف بل **قُلب إلى حارس للقاعدة الجديدة**: لا اقتطاع بلا طلب،
+  // والوعد من رقم التسليم نفسه. ومسار التنويه يبقى محروسًا كما كان — لكن عبر
+  // مُشغّله الحقيقي (اختيار المستخدم) لا عبر وضعٍ لم يعد موجودًا.
   {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 2 })
     const page = await ctx.newPage()
@@ -305,8 +316,6 @@ try {
       const b = [...document.querySelectorAll('button')].find((x) => /ابدأ تمرين اليوم/.test(x.textContent || ''))
       return b ? b.innerText.replace(/\n+/g, ' ') : null
     })
-    check('زرّ البدء يَعِد بصيغة «كذا من كذا» لا بعدد الخطة وحده',
-      !!promise && /\d|[٠-٩]/.test(promise) && /من/.test(promise), `${promise} · الخطة: ${planned.join(',')}`)
 
     await tap(page, /ابدأ تمرين اليوم/)
     await settle(page, 900)
@@ -315,16 +324,70 @@ try {
     if (warmSeen) { await page.locator('[data-testid="warmup-start"]').click({ force: true }); await settle(page, 1000) }
 
     const shot = await snapshot(page)
-    const trimmedHappened = shot.ofIndicator && Number(shot.ofIndicator.split('/')[1]) < Math.max(...planned)
-    check('الجلسة فعلًا أقصر من يوم الخطة (شرط هذا القسم قائم)', !!trimmedHappened,
-      `${shot.ofIndicator} مقابل خطة ${planned.join(',')}`)
-    check('التنويه حاضر على الشاشة ويسمّي سببه',
-      !!shot.trimmedNotice && ['firstWeek', 'easy'].includes(shot.trimmedNotice.reason),
-      JSON.stringify(shot.trimmedNotice))
+    const deliveredFull = shot.ofIndicator ? Number(shot.ofIndicator.split('/')[1]) : null
+    const dayCount = Math.max(...planned)
+    check('الأسبوع الأول لا يقتطع الجلسة بلا طلب (حارس عطل «١ من ١»)',
+      deliveredFull !== null && deliveredFull === dayCount,
+      `${shot.ofIndicator} مقابل يوم الخطة ${dayCount} · الخطة ${planned.join(',')}`)
+    check('وعد الزرّ هو رقم التسليم نفسه — لا رقمان',
+      !!promise && !!deliveredFull && new RegExp(`(^|[^٠-٩\\d])${toArabicDigits(deliveredFull)}([^٠-٩\\d]|$)`).test(promise),
+      `${promise} · سُلّم ${deliveredFull}`)
+    check('لا تنويه اقتطاع حين لا اقتطاع (نصّ لا يَعِد بوضعٍ غير قائم)',
+      !shot.trimmedNotice, JSON.stringify(shot.trimmedNotice))
+    check('والمؤشّر حاضر هنا أيضًا', shot.railStage === 'exercises', JSON.stringify(shot))
+    await ctx.close()
+  }
+
+  // ══════════════════════════════════════════════════════════════════════════
+  // ③ التخفيف باختيار المستخدم — يقصّر فعلًا، ويقول كم سُلّم من كم
+  // ══════════════════════════════════════════════════════════════════════════
+  // التأكيد المضادّ للقسم ② : لولا هذا لكان «لا تنويه» يمرّ لأن التنويه مات لا
+  // لأن الاقتطاع لم يُطلَب. هنا يُطلب الاقتطاع صراحةً فيجب أن يظهر الاثنان معًا.
+  console.log('\n③ النسخة الأخفّ باختيار المستخدم — تقصر فعلًا والتنويه يسمّي سببه')
+  {
+    const ctx = await browser.newContext({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 2 })
+    const page = await ctx.newPage()
+    await onboard(page)
+    await arrangeToday(page, { backdate: false })
+    // نفس الحالة التي يكتبها زرّ «ابدأ بنسخة أخفّ» (`enableEasyToday`): ختم اليوم
+    // تحت مفتاح المالك. تُكتب هنا مباشرةً لأن الزرّ يعيش في بطاقة عودة قد لا
+    // تُعرض في كل جلسة — والمقصود فحص سلوك وقت التشغيل بعد الاختيار لا مكان الزرّ.
+    await page.evaluate(() => {
+      const d = new Date()
+      const stamp = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      for (const owner of ['guest', ...Object.keys(localStorage).map((k) => k.split(':').pop())]) {
+        if (owner) localStorage.setItem(`qimmah:easySession:v1:${owner}`, JSON.stringify({ date: stamp }))
+      }
+    })
+    await page.reload({ waitUntil: 'networkidle' })
+    await settle(page, 1400)
+    await page.evaluate(() => { window.location.hash = '#/workout' })
+    await settle(page, 1200)
+    await activateGate(page)
+
+    const planned = await page.evaluate(() => {
+      const c = JSON.parse(localStorage.getItem('qimmah:customization:v1') || 'null')
+      return (c?.workoutPlan?.days || []).map((d) => d.exercises.length)
+    })
+    await tap(page, /ابدأ تمرين اليوم/)
+    await settle(page, 900)
+    if (await activateGate(page)) { await settle(page, 600); await tap(page, /ابدأ تمرين اليوم/); await settle(page, 1200) }
+    const warmSeen = await page.locator('[data-warmup-screen]').isVisible().catch(() => false)
+    if (warmSeen) { await page.locator('[data-testid="warmup-start"]').click({ force: true }); await settle(page, 1000) }
+
+    const shot = await snapshot(page)
+    const delivered = shot.ofIndicator ? Number(shot.ofIndicator.split('/')[1]) : null
+    const dayCount = Math.max(...planned)
+    // الأرضية `EASY_MIN_EXERCISES` تمنع الهبوط إلى تمرين واحد — تُفحص صراحةً.
+    check('النسخة الأخفّ أقصر من يوم الخطة فعلًا', delivered !== null && delivered < dayCount,
+      `${shot.ofIndicator} مقابل يوم الخطة ${dayCount}`)
+    check('ولا تنهار إلى تمرين واحد (أرضية «أخفّ»)', delivered !== null && delivered >= Math.min(3, dayCount),
+      String(delivered))
+    check('التنويه حاضر وسببه اختيار المستخدم',
+      !!shot.trimmedNotice && shot.trimmedNotice.reason === 'easy', JSON.stringify(shot.trimmedNotice))
     check('ونصّه يذكر كم سُلّم من كم — لا عبارة عامّة',
       !!shot.trimmedNotice && /من/.test(shot.trimmedNotice.text) && /[٠-٩\d]/.test(shot.trimmedNotice.text),
       shot.trimmedNotice ? shot.trimmedNotice.text : 'لا تنويه')
-    check('والمؤشّر حاضر هنا أيضًا', shot.railStage === 'exercises', JSON.stringify(shot))
     await ctx.close()
   }
 } catch (e) {
