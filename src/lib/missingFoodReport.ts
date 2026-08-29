@@ -15,6 +15,7 @@
  * يقول «وصلنا» لا «بنضيفه» — وعدٌ لا نملك زمنه (§ الصدق قبل الطمأنينة).
  */
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabaseClient'
+import { callGateway } from '@/lib/access/gatewayClient'
 
 export type MissingFoodOutcome =
   /** وصل الطابور. */
@@ -55,19 +56,28 @@ export async function reportMissingFood(report: MissingFoodReport): Promise<Miss
     const session = await client.auth.getSession()
     if (!session?.data?.session) return 'not_authenticated'
 
-    const { data, error } = await client.rpc('submit_missing_food', {
+    /**
+     * [RED-TEAM-FINAL] **عبر البوّابة، لا إلى PostgREST مباشرةً.**
+     * `submit_missing_food` مبوَّبة في القاعدة منذ `20260827120004`، فالنداء
+     * المباشر يُرفض بـ`gate_stamp_invalid`. يحرس الوصلةَ
+     * `test:attack-gateway-coupling`.
+     */
+    const gw = await callGateway('submit_missing_food', {
       p_product_name: name,
       p_barcode: report.barcode ?? null,
       p_lang: report.lang,
-    })
-    if (error) {
+    }, session.data.session.access_token)
+    if (gw.outcome === 'rate_limited') return 'rate_limited'
+    if (gw.outcome === 'unauthenticated') return 'not_authenticated'
+    if (gw.outcome === 'misconfigured') return 'backend_unconfigured'
+    if (gw.outcome === 'rpc_error') {
       // دالّة غير منشورة بعد ⇒ عطلٌ في النشر لا في المستخدم، ويُقال كما هو.
-      const code = String((error as { code?: string }).code ?? '')
-      if (code === 'PGRST202' || code === '42883') return 'backend_unconfigured'
-      if (String(error.message ?? '').includes('not authenticated')) return 'not_authenticated'
+      if (gw.code === 'PGRST202' || gw.code === '42883') return 'backend_unconfigured'
+      if (gw.reason.includes('not authenticated')) return 'not_authenticated'
       return 'service_error'
     }
-    const outcome = (data as { outcome?: unknown } | null)?.outcome
+    if (gw.outcome !== 'ok') return 'service_error'
+    const outcome = (gw.result as { outcome?: unknown } | null)?.outcome
     if (outcome === 'queued') return 'queued'
     if (outcome === 'already_queued') return 'already_queued'
     if (outcome === 'rate_limited') return 'rate_limited'

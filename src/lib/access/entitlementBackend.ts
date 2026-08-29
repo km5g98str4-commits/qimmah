@@ -27,6 +27,7 @@
 //    الجهاز إلى الوراء لا يمدّ تجربةً انتهت.
 
 import { getSupabase, isSupabaseConfigured } from '@/lib/supabaseClient'
+import { callGateway, isGatewayFault } from './gatewayClient'
 import type { EntitlementStatus } from './paidActions'
 
 /** حالات الخادم كما تعيدها `private.derive_state` — نسخة حرفية من الـSQL. */
@@ -401,6 +402,7 @@ export async function redeemCodeOnServer(code: string): Promise<RedeemServerOutc
   const sessionResult = await withDeadline(supabase.auth.getSession())
   if (sessionResult === TIMED_OUT) return 'timeout'
   if (!sessionResult?.data?.session) return 'not_authenticated'
+  const token = sessionResult.data.session.access_token
 
   /**
    * ═══ [COMMISSIONING §5] لماذا `_v2` ═══
@@ -413,20 +415,24 @@ export async function redeemCodeOnServer(code: string): Promise<RedeemServerOutc
    * `PGRST202`، فنسقط إلى التوقيع القديم بدل أن نُفشل المستخدم على فرقٍ
    * في النشر لا يعنيه.
    */
-  const rpcResult = await withDeadline(supabase.rpc('redeem_access_code_v2', { p_code: code }))
-  if (rpcResult === TIMED_OUT) return 'timeout'
-  const { data, error } = rpcResult
-
-  if (error) {
-    const code404 = String((error as { code?: string }).code ?? '')
-    const missing = code404 === 'PGRST202' || code404 === '42883'
-      || (error.message ?? '').toLowerCase().includes('could not find the function')
-    if (!missing) return classifyRedeemError(error.message ?? '', code404)
-    const legacy = await withDeadline(supabase.rpc('redeem_access_code', { p_code: code }))
-    if (legacy === TIMED_OUT) return 'timeout'
-    if (legacy.error) return classifyRedeemError(legacy.error.message ?? '', String((legacy.error as { code?: string }).code ?? ''))
-    return typeof legacy.data === 'string' && statusForServerState(legacy.data) === 'active' ? 'success' : 'invalid'
-  }
+  /**
+   * [RED-TEAM-FINAL] **عبر البوّابة، لا إلى PostgREST مباشرةً.**
+   * القاعدة تشترط ختم `x-qimmah-gate` منذ `20260827120004`، ولا يسكّه إلا
+   * `qimmah-gateway`. والنداء المباشر يُرفض بـ`28000` فيُقرأ «سجّل دخولك».
+   *
+   * والارتداد إلى `redeem_access_code` القديمة **أُسقط ولم يُنقل**: التوقيع
+   * القديم منزوعٌ من `authenticated` منذ `20260824120004` (مقيس:
+   * `has_function_privilege('authenticated', …) = false`)، فالارتداد كان
+   * مسارًا ميتًا يعِد بإنقاذٍ لا يقع. وإسقاط وعدٍ كاذب ليس فقدان قدرة.
+   */
+  const gw = await withDeadline(callGateway('redeem_access_code', { p_code: code }, token))
+  if (gw === TIMED_OUT) return 'timeout'
+  if (gw.outcome === 'unreachable') return looksLikeNetworkFailure(gw.reason.toLowerCase()) ? 'offline' : 'service_error'
+  if (gw.outcome === 'rate_limited') return 'rate_limited'
+  if (gw.outcome === 'unauthenticated') return 'not_authenticated'
+  if (isGatewayFault(gw.outcome)) return 'service_error'
+  if (gw.outcome === 'rpc_error') return classifyRedeemError(gw.reason, gw.code)
+  const data = gw.result
 
   // `_v2` تُعيد `{ outcome, reason }`. والفشل قيمةٌ هنا، فيُصنَّف بنفس المُصنِّف
   // الذي يقرأ رسائل الأخطاء — مصدرٌ واحد للتسمية، لا جدولان يتباعدان.
@@ -446,6 +452,14 @@ export type TrialOutcome =
   | 'email_not_verified'
   | 'not_authenticated'
   | 'revoked'
+  /**
+   * [RED-TEAM-FINAL] حدّ البوّابة لكل عنوان شبكة (١٢/ساعة لبدء التجربة).
+   *
+   * **حالةٌ مشروعة لا عطل:** مكتبٌ أو جامعة أو مشغّل خلوي خلف NAT مشترك قد
+   * يبلغها بمستخدمين حقيقيين. وقولها «خلل عندنا» يكذب، وقولها «كودك/حسابك»
+   * يلوم بريئًا — فتُقال كما هي، والخطوة التالية صريحة (§6/٤).
+   */
+  | 'rate_limited'
   | AccessFailure
 
 /**
@@ -473,11 +487,17 @@ export async function startTrialOnServer(): Promise<TrialOutcome> {
   const sessionResult = await withDeadline(supabase.auth.getSession())
   if (sessionResult === TIMED_OUT) return 'timeout'
   if (!sessionResult?.data?.session) return 'not_authenticated'
+  const token = sessionResult.data.session.access_token
 
-  const rpcResult = await withDeadline(supabase.rpc('start_trial'))
-  if (rpcResult === TIMED_OUT) return 'timeout'
-  const { data, error } = rpcResult
-  if (error) return classifyTrialError(error.message ?? '', String((error as { code?: string }).code ?? ''))
+  // [RED-TEAM-FINAL] عبر البوّابة — انظر `redeemCodeOnServer` لسبب التحويل.
+  const gw = await withDeadline(callGateway('start_trial', {}, token))
+  if (gw === TIMED_OUT) return 'timeout'
+  if (gw.outcome === 'unreachable') return looksLikeNetworkFailure(gw.reason.toLowerCase()) ? 'offline' : 'service_error'
+  if (gw.outcome === 'rate_limited') return 'rate_limited'
+  if (gw.outcome === 'unauthenticated') return 'not_authenticated'
+  if (isGatewayFault(gw.outcome)) return 'service_error'
+  if (gw.outcome === 'rpc_error') return classifyTrialError(gw.reason, gw.code)
+  const data = gw.result
   return typeof data === 'string' && statusForServerState(data) === 'active' ? 'started' : 'already_claimed'
 }
 
@@ -504,11 +524,14 @@ export async function claimPendingGrantsOnServer(): Promise<ClaimOutcome> {
   if (sessionResult === TIMED_OUT) return 'unreachable'
   // بلا جلسة لا مطالبة **ولا إعادة محاولة**: الغياب هنا ليس عطلًا عابرًا.
   if (!sessionResult?.data?.session) return 'nothing_pending'
-  const rpcResult = await withDeadline(supabase.rpc('claim_pending_grants'))
-  if (rpcResult === TIMED_OUT) return 'unreachable'
-  const { data, error } = rpcResult
-  // ⚠️ **الخطأ ليس «لا شيء ينتظر»**: قد تكون المنحة موجودة ولم نبلغها.
-  if (error) return 'unreachable'
+  const token = sessionResult.data.session.access_token
+  // [RED-TEAM-FINAL] عبر البوّابة — انظر `redeemCodeOnServer` لسبب التحويل.
+  const gw = await withDeadline(callGateway('claim_pending_grants', {}, token))
+  if (gw === TIMED_OUT) return 'unreachable'
+  // ⚠️ **الخطأ ليس «لا شيء ينتظر»**: قد تكون المنحة موجودة ولم نبلغها. وكل ما
+  // ليس ردًّا ناجحًا من الـRPC يبقى `unreachable` — فالنيّة لا تُطفأ بالخطأ.
+  if (gw.outcome !== 'ok') return 'unreachable'
+  const data = gw.result
   return typeof data === 'string' && statusForServerState(data) === 'active'
     ? 'granted' : 'nothing_pending'
 }

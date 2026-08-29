@@ -108,7 +108,9 @@ stop: that build carries production write authority (DEC-002).
 
 ## 5. Supabase
 
-- **24 migrations** in `supabase/migrations/`, `20260713120001` … `20260816120004`.
+- **41 migrations** in `supabase/migrations/`, `20260713120001` … `20260827120004`.
+  > ⚠️ صُحِّح في [RED-TEAM-FINAL]: كان السطر يقول «٢٤ … `20260816120004`» وهو **بائت
+  > بسبعة عشر ملفًّا**، آخرها هجرة إنفاذ البوّابة التي يعتمد عليها البند أدناه.
 - **13 are `APPLY_PENDING` against production** — DEC-103 / `FA-03`. Until applied, the
   admin dashboard is closed to the founder himself and entitlement/webhook tables are absent.
 - Edge function: `supabase/functions/salla-webhook/` (+ `contract.mjs`), proven by
@@ -116,6 +118,35 @@ stop: that build carries production write authority (DEC-002).
 - **Production migrations are founder-only** (DEC-003). An agent may write a migration;
   an agent may never apply one.
 - Email provider / outbox: `20260816120004_email_outbox.sql` — status in `08-UNKNOWNS.md`.
+
+### ⛔ بوّابة إطلاق صلبة — `qimmah-gateway` قبل أي طفرة تجارية
+
+> **أُضيف في [RED-TEAM-FINAL] بعد عطلٍ مُعاد إنتاجه.** هذا ليس تحسينًا: بدونه
+> **لا تجربة تبدأ ولا كودٌ يُسترَدّ ولا شراءٌ يُطالَب به ولا بلاغ طعام يصل.**
+
+هجرة `20260827120004` تجعل ختم `x-qimmah-gate` **سلطةً في القاعدة**: الطفرات
+الأربع (`start_trial` · `redeem_access_code_v2` · `claim_pending_grants` ·
+`submit_missing_food`) لا تُنفَّذ بلا ختم صالح، ولا يسكّه إلا الطرفية. والعميل
+صار يمرّ بها (`src/lib/access/gatewayClient.ts`). فالثلاثة أدناه **شرطٌ لازم
+معًا** — وغياب أيٍّ منها يعطّل التجارة بالكامل بينما يبقى باقي التطبيق يعمل،
+فيبدو العطل «مشكلة حساب» لا مشكلة نشر:
+
+| # | الشرط | من يملكه | كيف يُتحقَّق منه |
+|---|-------|----------|------------------|
+| ١ | الطرفية منشورة | المؤسس | `supabase functions deploy qimmah-gateway` (`verify_jwt=true`) |
+| ٢ | `QIMMAH_GATE_SECRET` (٣٢ محرفًا+) مضبوط على الطرفية | المؤسس | لوحة Supabase → Edge Functions → Secrets |
+| ٣ | `qimmah_gate_secret` في Vault **بنفس القيمة** | المؤسس | `select vault.create_secret('<نفس القيمة>', 'qimmah_gate_secret', '…')` |
+
+- **الخطوات الثلاث بيد المؤسس** (DEC-003) — لا يطبّقها وكيل.
+- **فشلٌ مغلق مقصود:** غياب السرّ ⇒ `private.gate_secret()` تعيد `null` ⇒ كل
+  نداء مبوَّب يُرفض. لا مسار «تخطَّ التحقّق»، ولا تدهور صامت.
+- **تحقّق ما بعد النشر (لا يُستنتَج):** بحسابٍ حقيقي على staging، ابدأ تجربة
+  واسترِدّ كودًا. النجاح هو الدليل الوحيد؛ خضرة البوّابة المحلّية **لا تثبت**
+  هذا البند لأن طقومها تسكّ الختم بنفسها.
+- الحارس البنيوي: `test:attack-gateway-coupling` — يمنع عودة الطرفين إلى
+  الاختلاف (نداءٌ عارٍ لدالّة مبوَّبة، أو فعلٌ مبوَّب بلا مستدعٍ).
+- التفصيل الكامل: [`docs/security/GATEWAY-STAMP-ENFORCEMENT.md`](../../security/GATEWAY-STAMP-ENFORCEMENT.md).
+
 
 ---
 

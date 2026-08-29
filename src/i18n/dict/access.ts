@@ -97,6 +97,8 @@ export interface AccessStrings {
   trialRevoked: string
   trialBackendAbsent: string
   trialPreviewNoServer: string
+  /** [RED-TEAM-FINAL] حدّ البوّابة لكل عنوان شبكة — حالة مشروعة لا عطل. */
+  trialRateLimited: string
   trialTimeout: string
   trialServiceError: string
   trialOffline: string
@@ -172,6 +174,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     trialRevoked: 'وصولك موقوف حاليًا، فما نقدر نبدأ تجربة. راسل الدعم وبنساعدك.',
     trialBackendAbsent: 'خدمة التجربة مو موصولة في هذي النسخة، وما بدأت تجربتك. تشتغل في النسخة الحيّة.',
     trialPreviewNoServer: 'هذي نسخة مراجعة بلا خادم، فالتجربة ما تبدأ فيها. تصفّح خطتك كاملة، والتجربة تشتغل في النسخة الحيّة.',
+    trialRateLimited: 'محاولات كثيرة من نفس الشبكة في وقت قصير. خذ لك دقايق وجرّب بعدها.',
     trialTimeout: 'الطلب طوّل وما وصلنا ردّ، وما بدأت تجربتك. جرّب مرة ثانية.',
     trialServiceError: 'فيه خلل عندنا — مو عندك — وما بدأت تجربتك. جرّب بعد شوي.',
     trialOffline: 'يبدو ما فيه اتصال بالنت، وما بدأت تجربتك. تأكّد من اتصالك وجرّب مرة ثانية.',
@@ -237,6 +240,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     trialRevoked: "Your access is currently suspended, so a trial can't start. Contact support and we will help.",
     trialBackendAbsent: "Trials aren't connected in this build, so nothing started. They work in the live version.",
     trialPreviewNoServer: "This is a review build with no server, so trials don't start here. Browse your whole plan — trials work in the live version.",
+    trialRateLimited: 'A lot of tries from the same network in a short window. Give it a few minutes and try again.',
     trialTimeout: 'The request took too long and we got no answer — your trial did not start. Give it another try.',
     trialServiceError: 'Something broke on our side — not yours — and your trial did not start. Try again shortly.',
     trialOffline: "Looks like there's no internet connection, so your trial did not start. Check it and try again.",

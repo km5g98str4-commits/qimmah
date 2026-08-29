@@ -78,6 +78,8 @@ const TRIAL_MESSAGE = {
   not_authenticated: 'trialNeedsAccount',
   email_not_verified: 'trialNeedsVerifiedEmail',
   already_claimed: 'trialAlreadyUsed',
+  // [RED-TEAM-FINAL] حدّ البوّابة لكل عنوان شبكة — لا عطل ولا لومٌ للمستخدم.
+  rate_limited: 'trialRateLimited',
   revoked: 'trialRevoked',
   backend_unconfigured: 'trialBackendAbsent',
   timeout: 'trialTimeout',
