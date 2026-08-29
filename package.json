@@ -158,6 +158,7 @@
     "test:attack-trial-race": "node scripts/attack/canonical-trial-race-attack.mjs",
     "test:attack-gateway-enforcement": "node scripts/attack/gateway-stamp-enforcement-attack.mjs",
     "test:attack-gateway-coupling": "node scripts/attack/gateway-client-coupling-attack.mjs",
+    "test:attack-pg": "node scripts/attack/run-pg-attacks.mjs",
     "test:attack-redeem-race": "node scripts/attack/redemption-concurrency-attack.mjs",
     "test:no-search-links": "node scripts/run-no-search-links-proof.mjs",
     "test:no-template-language": "node scripts/run-no-template-language-proof.mjs",
