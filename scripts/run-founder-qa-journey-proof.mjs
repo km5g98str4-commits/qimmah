@@ -162,7 +162,41 @@ try {
     }
   }
 
+  /**
+   * ═══ [RED-TEAM-FINAL] لماذا صار لا بدّ من **قطع الجلسة** قبل إنهائها ═══
+   *
+   * كانت الرحلة تسجّل مجموعة واحدة ثمّ تبحث عن زرّ الإنهاء فورًا — وكان ذلك
+   * صحيحًا **يوم كان سقف الأسبوع الأول يقتطع اليوم إلى تمرين واحد** («١ من ١»)،
+   * فيظهر الإنهاء بعد أول مجموعة. ثمّ رفع `[FOUNDER-QA-001]` السقف: يوم الخطة
+   * صار **أربعة تمارين**، فلا زرّ إنهاء عند التمرين الأول أصلًا.
+   *
+   * فكانت الرحلة تسقط بثلاثة فحوص على كودٍ سليم: لا جلسة في السجلّ لأن **لا
+   * جلسة أُنهيت**. والتشخيص المتسرّع كان سيقرأها «فقدان بيانات» — والقياس
+   * يقول عكسه: `activeWorkout` حاضرة وفيها المجموعة، والسجلّ فارغ لأن أحدًا
+   * لم يضغط «أنهِ».
+   *
+   * فتُقطَع الجلسة كما يقطعها إنسان: تقدّمٌ خطوةً خطوة حتى يظهر زرّ الإنهاء.
+   * وهذا **أقوى** من الأصل لا أضعف — يمرّ بالمسار متعدّد التمارين فعلًا.
+   */
   const finishBtn = page.getByRole('button', { name: /أنهِ|إنهاء/ }).first()
+  const advanceLabels = [/^التمرين التالي/, /^تخطي الراحة/, /^أكمل الجولة/, /^تم$/]
+  let advanced = 0
+  for (let step = 0; step < 40; step++) {
+    if (await finishBtn.isVisible().catch(() => false)) break
+    await clearOverlays()
+    if (await finishBtn.isVisible().catch(() => false)) break
+    let clicked = false
+    for (const re of advanceLabels) {
+      const b = page.getByRole('button', { name: re }).first()
+      if (await b.isVisible().catch(() => false)) {
+        if (await b.click({ timeout: 6_000 }).then(() => true).catch(() => false)) { clicked = true; advanced += 1; break }
+      }
+    }
+    if (!clicked) break
+    await settle(page, 450)
+  }
+  check('الجلسة تُقطَع خطوةً خطوة حتى يظهر الإنهاء (لا اختصار)',
+    advanced > 0 && await finishBtn.isVisible().catch(() => false), `${advanced} خطوة`)
   if (await finishBtn.isVisible().catch(() => false)) {
     await clearOverlays()
     await finishBtn.click({ timeout: 15_000 }).catch(() => {})
