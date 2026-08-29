@@ -52,14 +52,23 @@ jobs:
       - name: Lint (--max-warnings 0)
         run: npx eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
 
-      # ---- production build (tsc -b && vite build) ----
+      # ---- production build ----
+      # ⚠️ [RED-TEAM-FINAL] **`npm run build` لا `vite build`.**
+      # كانت الخطوة `npx tsc -b && npx vite build`، فتتخطّى
+      # `scripts/food-production/ensure-search-assets.mjs` الذي يعيش **داخل**
+      # سكربت `build` وحده. فلا تُولَّد `public/food/search/` (مولَّدة ولا
+      # تُلتزم)، ويسقط `test:search-quality` بـ١٦ من ٦٧ في CI بينما يمرّ ٦٧/٠
+      # محلّيًا حيث الأصول حاضرة من بناءٍ سابق. أي أن السير **كان يبني شيئًا
+      # غير الذي يُنشر** — والأحمر مقيم منذ 39fd151b (٢٧ أغسطس).
       - name: Production build
-        run: npx tsc -b && npx vite build
+        run: npm run build
 
-      # Informational, NON-GATING: the entry/boot budgets pass, but the script
-      # fails the process on a pre-existing lazy-chunk overage (NutritionView
-      # ~150KB > 130KB sub-limit) that lives in src/ (outside this branch's
-      # surface). Surfaced here, not gated. Tracked as tech-debt — see docs/ci/README.md.
+      # Informational, NON-GATING.
+      # ⚠️ [RED-TEAM-FINAL] صُحّح النصّ: كان يقول «entry/boot budgets pass»
+      # وأن الفائض في حزمة كسولة (NutritionView). **والمقيس عكسه**: الحزمة
+      # الكسولة الأكبر ١١١٫٥KB تحت حدّها (١٣٠KB)، والفائض في المدخل نفسه —
+      # entry ١١٦٫٨KB (الحدّ ٨٠) وboot ١٧٩٫٢KB (الحدّ ١٤٠). تعليقٌ يطمئن على
+      # ما لم يُقَس أخطرُ من غياب التعليق. يبقى غير حاكم، ويبقى دَينًا مسمّى.
       - name: Perf budget (informational, non-gating)
         continue-on-error: true
         run: node scripts/check-perf-budget.mjs
