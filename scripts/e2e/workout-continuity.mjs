@@ -11,9 +11,14 @@
  * حاوية الجلسة، وزمن «التمرين التالي» حتى التفاعل.
  */
 import { spawn } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import { dirname, resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { chromium } from './lib/engine.mjs'
 import { answerHistory, finishInputSteps, selectIntent } from './lib/onboarding-driver.mjs'
 
+// جذر المستودع — يحتاجه التأكيد المضادّ في ② الذي يقرأ مصدر آلة التنويه.
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const PORT = Number(process.env.PORT || 5407)
 const URL = `http://localhost:${PORT}`
 const settle = (page, ms = 700) => page.waitForTimeout(ms)
@@ -287,7 +292,19 @@ try {
   // ══════════════════════════════════════════════════════════════════════════
   // ② الجلسة المقتطَعة — لا تُسلَّم مبتورة بلا خبر
   // ══════════════════════════════════════════════════════════════════════════
-  console.log('\n② الأسبوع الأول — الجلسة تُقصَّر، والتقصير يُقال لا يُخفى')
+  // ═══ [RED-TEAM-FINAL] هذا القسم كان يحرس قرارًا **نُقض** ═══
+  //
+  // كُتب تحت `[WORKOUT-CONTINUITY-001]` الذي شخّص سقف الأسبوع الأول ثم اختار
+  // أن **يُبلّغه ويُبقيه** — لأن السقف كان يُقرأ قرار مؤسس مقفلًا. ثم **رفعه
+  // نصّ المؤسس صراحةً** في `[FOUNDER-QA-001]`: «يوم الخطة هو الجلسة».
+  // فبقي القسم يشترط اقتطاعًا لم يعد يقع، ويطلب تنويهًا لا سبب له — فيسقط
+  // بأربعة فحوص **على كودٍ صحيح**.
+  //
+  // ولأن حارسًا يسقط عند النجاح يُعلّم تعطيله (نفس درس الأربعة حرّاس في
+  // `07-STATE.md`)، حُوّل القسم إلى حارسٍ **للقرار الذي ساد**: يوم الخطة
+  // يُسلَّم كاملًا، ولا تنويه لأن لا اقتطاع. فلو عاد السقف الصامت يومًا
+  // سقط هذا القسم — وهو بعينه الحاجب الذي أُغلق.
+  console.log('\n② يوم الخطة هو الجلسة — لا سقف صامت، ولا تنويه بلا سبب')
   {
     const ctx = await browser.newContext({ viewport: { width: 390, height: 780 }, deviceScaleFactor: 2 })
     const page = await ctx.newPage()
@@ -305,8 +322,8 @@ try {
       const b = [...document.querySelectorAll('button')].find((x) => /ابدأ تمرين اليوم/.test(x.textContent || ''))
       return b ? b.innerText.replace(/\n+/g, ' ') : null
     })
-    check('زرّ البدء يَعِد بصيغة «كذا من كذا» لا بعدد الخطة وحده',
-      !!promise && /\d|[٠-٩]/.test(promise) && /من/.test(promise), `${promise} · الخطة: ${planned.join(',')}`)
+    check('زرّ البدء يَعِد بعدد تمارين اليوم — رقمًا يُقاس لا وعدًا مبهمًا',
+      !!promise && /\d|[٠-٩]/.test(promise), `${promise} · الخطة: ${planned.join(',')}`)
 
     await tap(page, /ابدأ تمرين اليوم/)
     await settle(page, 900)
@@ -315,15 +332,24 @@ try {
     if (warmSeen) { await page.locator('[data-testid="warmup-start"]').click({ force: true }); await settle(page, 1000) }
 
     const shot = await snapshot(page)
-    const trimmedHappened = shot.ofIndicator && Number(shot.ofIndicator.split('/')[1]) < Math.max(...planned)
-    check('الجلسة فعلًا أقصر من يوم الخطة (شرط هذا القسم قائم)', !!trimmedHappened,
-      `${shot.ofIndicator} مقابل خطة ${planned.join(',')}`)
-    check('التنويه حاضر على الشاشة ويسمّي سببه',
-      !!shot.trimmedNotice && ['firstWeek', 'easy'].includes(shot.trimmedNotice.reason),
-      JSON.stringify(shot.trimmedNotice))
-    check('ونصّه يذكر كم سُلّم من كم — لا عبارة عامّة',
-      !!shot.trimmedNotice && /من/.test(shot.trimmedNotice.text) && /[٠-٩\d]/.test(shot.trimmedNotice.text),
-      shot.trimmedNotice ? shot.trimmedNotice.text : 'لا تنويه')
+    const delivered = shot.ofIndicator ? Number(shot.ofIndicator.split('/')[1]) : null
+    const planDay = Math.max(...planned)
+    // ① الحاجب نفسه: حسابٌ جديد في أسبوعه الأول يستلم **يوم الخطة كاملًا**.
+    check('الجلسة تُسلّم يوم الخطة كاملًا — لا اقتطاع صامت في الأسبوع الأول',
+      delivered === planDay, `سُلّم ${delivered} من خطة ${planned.join(',')}`)
+    check('والعدّاد يبدأ من ١ (فالرقم أعلاه سقفٌ لا موضع)',
+      shot.ofIndicator === `1/${planDay}`, String(shot.ofIndicator))
+    // ② ولا تنويه اقتطاع — لأن لا اقتطاع. تنويهٌ هنا يعني عودة السقف.
+    check('ولا تنويه اقتطاع على الشاشة — لا سبب له',
+      shot.trimmedNotice === null, JSON.stringify(shot.trimmedNotice))
+    // ③ تأكيد مضادّ (§4.2): «لا تنويه» يُرضى **بحذف الميزة** أيضًا. فيُثبَت أن
+    //    آلة التنويه ما زالت قائمة ومشروطة بوقوع اقتطاع فعليّ — فالصمت هنا
+    //    نتيجةُ «لم يقع» لا نتيجةَ «لم يعد يُقال».
+    const notifierAlive = readFileSync(resolve(ROOT, 'src/components/WorkoutMode.tsx'), 'utf8')
+    check('⟲ وآلة التنويه ما زالت موصولة ومشروطة بـfullCount > total — فالصمت «لم يقع» لا «لم يعد يُقال»',
+      /trimmed\s*&&\s*trimmed\.fullCount\s*>\s*total/.test(notifierAlive)
+      && /data-session-trimmed=\{trimmed\.reason\}/.test(notifierAlive),
+      'WorkoutMode.tsx')
     check('والمؤشّر حاضر هنا أيضًا', shot.railStage === 'exercises', JSON.stringify(shot))
     await ctx.close()
   }
