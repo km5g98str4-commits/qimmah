@@ -198,6 +198,31 @@ check('الفرع المحلّي يسبق كل شيء (تقليد أو معاي�
   /if \(localEntitlementEnabled\(\)\) \{/.test(src))
 check('  ولا يمنح إلا من مخزن التقليد المعلَن — لا مصدر ثالث',
   /status: readMockActive\(\) \? \('active' as const\) : \('none' as const\), source: 'mock' as const/.test(src))
+// [WAVE2-PREMIUM-SURFACE] **شدٌّ لا تليين.** صار الفرع المحلّي يحمل `detail`
+// كي تعرف شاشة العضوية ما تعرضه (بلا تفصيل كان `kindFor` يسقط إلى `preview`
+// فتقول «مقفلة» وكل فعل مدفوع مفتوح). والخطر أن يصير التفصيل **مصدرًا ثانيًا**
+// للمنح، فيُحرَس صراحةً: مشتقٌّ من حالة التقليد وحدها، ولا يمسّ `status`.
+check('  والتفصيل مرآة حالة التقليد لا مصدرًا ثانيًا للمنح',
+  /detail: readMockActive\(\) \? mockDetail\(readMockKind\(\)\) : null/.test(src))
+{
+  // النقاء يُقاس على **جسم الدالّة بحدوده** لا بنافذة أحرف تبتلع ما بعدها:
+  // نافذةٌ عمياء كانت ترصد `resolveEntitlement` التالية لها وتحسبه مخالفة.
+  const open = src.indexOf('function mockDetail(kind: MockKind): EntitlementDetail {')
+  const body = open === -1 ? '' : src.slice(open, src.indexOf('\n}', open))
+  check('  و`mockDetail` نقيّة: لا تقرأ خادمًا ولا تخزينًا ولا تمنح',
+    open !== -1 && !/fetch|getSupabase|sessionStorage|localStorage|redeem/.test(body))
+  check('  ⟲ والقياس وقع على جسمٍ حقيقي لا على فراغ',
+    body.includes('serverState') && body.length > 200, `${body.length} حرفًا`)
+}
+{
+  // ⚔️ ولو صار التفصيل يمنح بنفسه — أي `status` يُشتقّ منه لا من `readMockActive`
+  // — لوجب أن يسقط الفحص أعلاه باسمه.
+  const forged = src.replace(
+    "status: readMockActive() ? ('active' as const) : ('none' as const), source: 'mock' as const",
+    "status: mockDetail(readMockKind()) ? ('active' as const) : ('none' as const), source: 'mock' as const")
+  check('  ⚔️ منحٌ مشتقٌّ من التفصيل بدل مخزن التقليد يُرصد',
+    !/status: readMockActive\(\) \? \('active' as const\)/.test(forged))
+}
 check('  وسلطته حصرًا: `mockEnabled` أو `founderQaEntitlementEnabled` — لا ثالث',
   /function localEntitlementEnabled\(\): boolean \{\s*return mockEnabled\(\) \|\| founderQaEntitlementEnabled\(\)\s*\}/.test(src))
 check('  وشرط المعاينة نصّ بيئة حرفي وقت بناء (يطويه المُصغِّر)',

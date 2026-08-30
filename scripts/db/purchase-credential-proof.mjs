@@ -484,8 +484,49 @@ console.log('\n⑥ العدّ — أربعة أقسام تجمع الصادر، 
     () => db.query(`select public.founder_issue_purchase_batch('r', 'SUPPORT-TRY', 1)`), 'founder_role_required')
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ⑦ مِفتاح الإطفاء — **الرفض عند الاسترداد**، لا العدّ وحده.
+// [WAVE2-PURCHASE-OPS]
+//
+// الفجوة التي يغلقها هذا القسم: القسم ⑥ يعطّل صكًّا ويقيس أثره في **العدّاد**
+// فقط. والعدّاد ليس هو الضمانة — الضمانة أن الصكّ المعطَّل **لا يمنح شيئًا**
+// لو حاول أحدهم استرداده. ومنطق الرفض قائم في `redeem_core` منذ
+// `20260824120001` (`or not c.enabled`)، لكنه لم يكن **مُثبَتًا على صكّ شراء**:
+// حارسٌ غير مُختبَر على مساره يبدو أخضر وهو غير مقيس (§4.2).
+// ═══════════════════════════════════════════════════════════════════════════
+console.log('\n⑦ الإطفاء يمنع المنح — لا العدّ وحده')
+{
+  // دفعتان بصكّ واحد لكلٍّ: فيصير ربط «النصّ الخام ⇄ الصفّ» قاطعًا بلا حاجة
+  // إلى بصمةٍ ولا إلى افتراض ترتيب.
+  const killed = await issuePurchase('SALLA-KILL-001', 1)
+  const alive = await issuePurchase('SALLA-LIVE-001', 1)
+  await asRole(db, null)
+  const victim = (await db.query(
+    `select id from public.access_codes where label = 'SALLA-KILL-001'`)).rows[0].id
+  await asRole(db, 'authenticated', founderId)
+  await db.query(`select public.founder_set_code_enabled($1, false, 'إطفاء — إثبات الرفض')`, [victim])
+
+  const user = await makeUser(db, 'killed@qimmah.test')
+  await asRole(db, 'authenticated', user)
+  const res = await redeemV2(killed.codes[0])
+  check('صكّ معطَّل يُردّ ولا يمنح', res.outcome !== 'premiumActive', JSON.stringify(res))
+  const after = await myState()
+  check('ولا Premium على الحساب بعده', after.state !== 'premiumActive', after.state)
+  const grants = (await db.query(
+    `select count(*)::int as n from public.entitlements where user_id = $1`, [user])).rows[0].n
+  check('ولا صفّ استحقاق كُتب أصلًا', grants === 0, `${grants} صفًّا`)
+
+  // ⟲ التأكيد المضادّ: الرفض سببه **الإطفاء** لا أنّ المستخدم ممنوع ولا أن
+  // الإصدار فاسد. فنفس الحساب يسترد صكًّا حيًّا فورًا فينجح.
+  const ok = await redeemV2(alive.codes[0])
+  check('⟲ ونفس الحساب يسترد صكًّا حيًّا بنجاح',
+    ok.outcome === 'premiumActive', JSON.stringify(ok))
+  check('⟲ فالرفض كان بسبب الإطفاء وحده — لا بسبب الحساب ولا الإصدار',
+    (await myState()).state === 'premiumActive')
+}
+
 // ═══════════════ ٧) حدّ المعدّل قائم على مسار الصكّ ═══════════════
-console.log('\n⑦ حدّ المعدّل — عشر محاولات فاشلة تقفل النافذة')
+console.log('\n⑧ حدّ المعدّل — عشر محاولات فاشلة تقفل النافذة')
 {
   const limitUser = await makeUser(db, 'limit@qimmah.test')
   await asRole(db, 'authenticated', limitUser)
@@ -498,7 +539,7 @@ console.log('\n⑦ حدّ المعدّل — عشر محاولات فاشلة ت
 }
 
 // ═══════════════ ٨) التأكيد المضادّ (§4.2) ═══════════════
-console.log('\n⑧ التأكيد المضادّ — الشكل يُهاجَم والسلوك القديم لم يُمسّ')
+console.log('\n⑨ التأكيد المضادّ — الشكل يُهاجَم والسلوك القديم لم يُمسّ')
 
 // الوصول الموقوت المفرد: إعادة محاولة صاحبه تبقى invalid_code — **لم نغيّرها**.
 {

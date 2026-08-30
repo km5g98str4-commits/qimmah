@@ -22,6 +22,7 @@ import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import { adminStrings } from '@/i18n/dict/admin'
+import { purchaseBatchStrings } from '@/i18n/dict/purchaseBatches'
 import type { AdminStrings } from '@/i18n/dict/admin'
 import { useLang } from '@/i18n'
 import type { AdminRoleDecision } from '../auth/adminRole'
@@ -33,6 +34,8 @@ import { OperationsPanel } from './OperationsPanel'
 import { AdminDenied } from './AdminDenied'
 import { AttentionPanel } from './AttentionPanel'
 import { CodesPanel } from './CodesPanel'
+import { PurchaseBatchPanel } from './PurchaseBatchPanel'
+import type { PurchaseBatchPanelProps } from './PurchaseBatchPanel'
 import type { CodesPanelProps } from './CodesPanel'
 import { FunnelChart, TrendChart } from './Charts'
 import { MetricCard } from './MetricCard'
@@ -84,7 +87,7 @@ function PostureStrip({ platform }: { platform: PlatformPosture }) {
   )
 }
 
-type Tab = 'overview' | 'users' | 'codes' | 'ops' | 'charts'
+type Tab = 'overview' | 'users' | 'codes' | 'purchases' | 'ops' | 'charts'
 
 interface AdminShellProps {
   decision: AdminRoleDecision
@@ -111,6 +114,8 @@ interface AdminShellProps {
    * شاشة لا تفعل شيئًا أسوأ من تبويب غائب.
    */
   codes?: CodesPanelProps
+  /** [WAVE2-PURCHASE-OPS] صكوك الشراء — تبويب مستقلّ عن أكواد الوصول: مخزونان لا يُخلطان. */
+  purchases?: PurchaseBatchPanelProps
   /**
    * حالة القراءة الحيّة. **بلا قيمة ⇒ `'not-founder'`** — الافتراض الأقلّ ادّعاءً:
    * مكوّن يُرسَم بلا إخبار عن مصدره لا يجوز أن يقول «حيّ».
@@ -130,6 +135,7 @@ export function AdminShell({
   detailLive,
   detailOpen,
   codes,
+  purchases,
   live = 'not-founder',
 }: AdminShellProps) {
   const lang = useLang()
@@ -152,6 +158,7 @@ export function AdminShell({
     { id: 'users', label: t.shell.navUsers, icon: 'Users' },
     // يظهر حين تُمرَّر قدرته فقط — لا تبويب يَعِد بما لا يعمل.
     ...(codes ? [{ id: 'codes' as Tab, label: t.codes.heading, icon: 'KeyRound' }] : []),
+    ...(purchases ? [{ id: 'purchases' as Tab, label: purchaseBatchStrings[lang === 'en' ? 'en' : 'ar'].heading, icon: 'Wallet' }] : []),
     // [COMMISSIONING §4] غرفة العمليات — بلا شرط: الغلاف كلّه خلف
     // `isAdmin(decision)` أعلاه، فمن وصل هنا مؤسسٌ أو دعم. وكل قراءة داخلها
     // محروسة بالدور في الخادم كذلك، وتعلن غيابها بسببه المسمّى.
@@ -346,6 +353,8 @@ export function AdminShell({
 
       {/* ——— الأكواد ——— */}
       {tab === 'codes' && codes ? <div className="mt-4">{<CodesPanel {...codes} />}</div> : null}
+
+      {tab === 'purchases' && purchases ? <div className="mt-4">{<PurchaseBatchPanel {...purchases} />}</div> : null}
 
       {/* ——— الاتجاهات ——— */}
       {tab === 'ops' ? <OperationsPanel lang={lang} decision={decision} /> : null}

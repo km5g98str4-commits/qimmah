@@ -1,6 +1,7 @@
 import type { WriteResult } from '@/lib/safeStorage'
 import { useState, useSyncExternalStore, type ReactNode } from 'react'
 import { AppNav, type AppView } from '@/components/AppNav'
+import { premiumStrings } from '@/i18n/dict/premium'
 import { Footer } from '@/components/Footer'
 import { Icon } from '@/components/Icon'
 import { DeleteAccountDialog } from '@/components/DeleteAccountDialog'
@@ -49,6 +50,8 @@ interface SettingsViewProps {
   onOpenTerms: () => void
   onOpenProductReview: () => void
   onOpenCalc: () => void
+  /** [WAVE2-PREMIUM-SURFACE] «العضوية» — مسار مستقلّ خارج `AppView` كـ«الحاسبة». */
+  onOpenPremium: () => void
 }
 
 /** صفحة الإعدادات — مجموعات: الحساب / البيانات / خطتي / الخصوصية والثقة. (ليست تعديل الخطة) */
@@ -61,6 +64,7 @@ export function SettingsView({
   onOpenTerms,
   onOpenProductReview,
   onOpenCalc,
+  onOpenPremium,
 }: SettingsViewProps) {
   const t = getStrings(lang)
   const auth = useAuth()
@@ -181,6 +185,22 @@ export function SettingsView({
               <p className="mt-2 text-xs leading-relaxed text-ink-500">{t.auth.deleteAccountDesc}</p>
             </div>
           )}
+        </SettingsGroup>
+
+        {/* 1.5) العضوية — [WAVE2-PREMIUM-SURFACE]
+            مدخل **دائم** إلى الحالة التجارية والتفعيل. قبله كان الطريق الوحيد
+            إلى حقل الكود هو `PremiumGate`، ولا تُفتح إلا بالاصطدام بفعل محجوب:
+            فمن اشترى صكًّا من سلة يفتح التطبيق ولا يجد أين يضعه. */}
+        <SettingsGroup icon="Sparkles" title={premiumStrings[lang].title}>
+          <button
+            type="button"
+            onClick={onOpenPremium}
+            data-testid="settings-premium-link"
+            className="btn-ghost justify-start px-4 py-2.5 text-sm"
+          >
+            <Icon name="KeyRound" className="h-4 w-4" />
+            {premiumStrings[lang].settingsLink}
+          </button>
         </SettingsGroup>
 
         {/* 2) البيانات */}

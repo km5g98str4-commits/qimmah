@@ -29,6 +29,8 @@ import {
   issueAccessCode,
   issueAccessCodeBatch,
   loadCodeBatches,
+  loadPurchaseBatches,
+  issuePurchaseBatch,
   loadCodeRedemptions,
   loadLiveCodePage,
   loadLiveExecutiveSnapshot,
@@ -48,6 +50,8 @@ import type {
   IssuedCode,
   IssuedCodeBatch,
   MetricValue,
+  IssuedPurchaseBatch,
+  PurchaseBatchRow,
 } from '../contract/types'
 import { unavailable } from '../contract/types'
 import { AdminDenied } from './AdminDenied'
@@ -111,6 +115,13 @@ export function AdminRoute() {
   const [batches, setBatches] = useState<PanelList<CodeBatchRow>>({ kind: 'loading' })
   const batchesRunRef = useRef(0)
   const [issuedBatch, setIssuedBatch] = useState<IssuedCodeBatch | null>(null)
+  // [WAVE2-PURCHASE-OPS] مخزون صكوك الشراء — حالة مستقلّة عن حملات الوصول.
+  const [purchaseBatches, setPurchaseBatches] = useState<PanelList<PurchaseBatchRow>>({ kind: 'loading' })
+  const purchaseRunRef = useRef(0)
+  // النصوص الخام تعيش هنا وحدها — ذاكرة اللحظة، بلا تخزين متصفّح ولا سجلّ.
+  const [issuedPurchase, setIssuedPurchase] = useState<IssuedPurchaseBatch | null>(null)
+  const [purchaseBusy, setPurchaseBusy] = useState(false)
+  const [purchaseError, setPurchaseError] = useState<LiveReadState | null>(null)
   // سجلّ مستبدلي كود واحد مفتوح — الفتح فعل طلب، فالنداء يقع عنده لا مع الجدول.
   const [redemptions, setRedemptions] = useState<{ codeId: string; list: PanelList<CodeRedemptionRow> } | null>(null)
   const redemptionsRunRef = useRef(0)
@@ -242,6 +253,26 @@ export function AdminRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed, auth.user?.id, codeNonce, nonce])
 
+  // ── [WAVE2-PURCHASE-OPS] مخزون صكوك الشراء ──
+  useEffect(() => {
+    if (!allowed) {
+      setPurchaseBatches({ kind: 'loading' })
+      return
+    }
+    const run = ++purchaseRunRef.current
+    let alive = true
+    void (async () => {
+      const res = await loadPurchaseBatches(decision)
+      if (!alive || run !== purchaseRunRef.current) return
+      // الغياب يبقى مسمّى: هجرة غير مطبَّقة تصل الشاشة `rpc-missing` لا جدولًا فارغًا.
+      setPurchaseBatches(res.ok ? { kind: 'rows', rows: res.rows } : { kind: 'gap', why: res.live })
+    })()
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowed, auth.user?.id, codeNonce, nonce])
+
   const refresh = useCallback(() => setNonce((n) => n + 1), [])
   const onSearch = useCallback((v: string) => setTyped(v), [])
   const onPage = useCallback((p: number) => setPage(Math.max(1, Math.trunc(p))), [])
@@ -364,6 +395,28 @@ export function AdminRoute() {
     [auth.user?.id],
   )
 
+  const onIssuePurchase = useCallback(
+    (input: { reason: string; label: string; count: number; expiresAt: string | null }) => {
+      setPurchaseBusy(true)
+      setPurchaseError(null)
+      void (async () => {
+        const res = await issuePurchaseBatch(decision, input)
+        setPurchaseBusy(false)
+        if (!res.ok) {
+          setPurchaseError(res.live)
+          return
+        }
+        setIssuedPurchase(res.value)
+        setCodeNonce((n) => n + 1)
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+
+  // الإغلاق **يمحو من الذاكرة** — ولا نسخة في أي مكان آخر تُستعاد منها.
+  const onDismissIssuedPurchase = useCallback(() => setIssuedPurchase(null), [])
+
   if (!allowed) return <AdminDenied decision={decision} />
   if (!snapshot) return <AdminLoading label={t.states.loading} />
 
@@ -404,6 +457,15 @@ export function AdminRoute() {
         batches,
         redemptions,
         onToggleRedemptions,
+      }}
+      purchases={{
+        canIssue: canWrite(decision),
+        busy: purchaseBusy,
+        onIssue: onIssuePurchase,
+        issued: issuedPurchase,
+        onDismissIssued: onDismissIssuedPurchase,
+        batches: purchaseBatches,
+        writeError: purchaseError,
       }}
     />
   )

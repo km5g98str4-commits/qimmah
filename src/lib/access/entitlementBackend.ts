@@ -192,7 +192,7 @@ export function looksLikeNetworkFailure(text: string): boolean {
   }
 }
 
-function perfNow(): number {
+export function perfNow(): number {
   try {
     return typeof performance !== 'undefined' && typeof performance.now === 'function' ? performance.now() : 0
   } catch {

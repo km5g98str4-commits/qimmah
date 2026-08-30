@@ -34,6 +34,7 @@ function createLazyViews() {
       import('@/views/CalcExplainerView').then((m) => ({ default: m.CalcExplainerView })),
     ),
     SettingsView: lazy(() => import('@/views/SettingsView').then((m) => ({ default: m.SettingsView }))),
+    PremiumView: lazy(() => import('@/views/PremiumView').then((m) => ({ default: m.PremiumView }))),
     PrivacyView: lazy(() => import('@/views/PrivacyView').then((m) => ({ default: m.PrivacyView }))),
     TermsView: lazy(() => import('@/views/TermsView').then((m) => ({ default: m.TermsView }))),
     ContactView: lazy(() => import('@/views/ContactView').then((m) => ({ default: m.ContactView }))),
@@ -548,6 +549,18 @@ export default function App() {
         onOpenTerms={() => setView('terms')}
         onOpenProductReview={() => setView('productReview')}
         onOpenCalc={() => navigate('calc')}
+        onOpenPremium={() => navigate('premium')}
+      />
+    )
+  } else if (view === 'premium') {
+    // [WAVE2-PREMIUM-SURFACE] سطح العضوية الدائم — الحالة تُقرأ من الخادم،
+    // والتفعيل يمرّ بنفس `redeem` التي تستعملها البوّابة. لا سلطة هنا.
+    content = (
+      <V.PremiumView
+        lang={LANG}
+        signedIn={Boolean(auth.user)}
+        onBack={() => navigate('settings')}
+        onSignIn={() => goAuth('login')}
       />
     )
   } else if (view === 'productReview') {

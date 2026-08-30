@@ -25,6 +25,7 @@ import {
   startTrialOnServer,
   type AccessFailure,
   type EntitlementDetail,
+  perfNow,
   type TrialOutcome,
 } from './entitlementBackend'
 
@@ -124,12 +125,74 @@ const MOCK_CODES: Record<string, RedeemOutcome> = {
   'QIMMAH-TEST-DOWN': 'service_error',
 }
 
+/**
+ * [WAVE2-PREMIUM-SURFACE] **أيّ نوعٍ من الوصول قلّدناه؟**
+ *
+ * ═══ العطل الذي أوجد هذا المفتاح ═══
+ * `MOCK_KEY` يحمل `'active'` وحدها، فبناء التقليد لا يفرّق بين تجربةٍ بدأت
+ * وصكّ شراءٍ استُردّ. والنتيجة أن `resolveEntitlement` كانت تعيد `status:
+ * 'active'` **بلا `detail`**، فيسقط `kindFor` إلى `preview` — أي أن شاشة
+ * العضوية تقول «قِمّة كاملة مقفلة» بينما كل فعل مدفوع مفتوح فعلًا. شاشةٌ تكذب
+ * على المؤسس في مراجعته بعينها هي ما تمنعه هذه الموجة.
+ *
+ * ═══ ولماذا مفتاح ثانٍ لا تغييرُ الأوّل ═══
+ * `MOCK_KEY === 'active'` يقرؤه **سبعة أطقم خارجية** (رحلة المؤسس · حدود
+ * المعاينة · أمان الحزمة · شخصيّتا الإصدار). فتغيير قيمته يكسرها بلا داعٍ.
+ * والمفتاح الجديد يطابق نفس النمط `qimmah:entitlement-mock` الذي يُجرَّد به
+ * بناء الإنتاج، فيبقى محكومًا بـ`test:preview-safety` كسابقه.
+ */
+const MOCK_KIND_KEY = 'qimmah:entitlement-mock-kind:v1'
+
+type MockKind = 'premium' | 'trial' | 'special'
+
+function readMockKind(): MockKind {
+  try {
+    const raw = window.sessionStorage.getItem(MOCK_KIND_KEY)
+    if (raw === 'premium' || raw === 'trial') return raw
+  } catch { /* الوصول محجوب — يُعامَل كغياب */ }
+  // الغياب لا يُخمَّن Premium: طقمٌ خارجيّ يضبط `MOCK_KEY` وحده يصف **وصولًا
+  // مفتوحًا غير مشترى** — وهذا `special` تمامًا، وهو أضعف الادّعاءين.
+  return 'special'
+}
+
+function writeMockKind(kind: MockKind): void {
+  try { window.sessionStorage.setItem(MOCK_KIND_KEY, kind) } catch { /* بلا تخزين يبقى الافتراض */ }
+}
+
 function readMockActive(): boolean {
   if (!localEntitlementEnabled()) return false
   try {
     return window.sessionStorage.getItem(MOCK_KEY) === 'active'
   } catch {
     return false
+  }
+}
+
+/**
+ * تفصيلٌ مركَّب لبناء التقليد — **مرآةُ حالة التقليد، لا ادّعاءُ خادم**.
+ *
+ * `noExpiry` و`expiresAtMs` يتبعان النوع كما يتبعانه على الخادم: Premium دائم
+ * (`null` ⇒ `remainingMs` تعيد `null` ⇒ **لا سطر مدّة ولا تاريخ مخترع**)،
+ * والتجربة ٧٢ ساعة، والوصول الخاص ١٤ يومًا افتراضًا. والساعة هنا ساعة الجهاز
+ * لأنه لا خادم يُسأل — وهذا مقبولٌ **في بناء التقليد وحده**، ويُعلنه `source`.
+ */
+function mockDetail(kind: MockKind): EntitlementDetail {
+  const now = Date.now()
+  const serverState = kind === 'premium' ? 'premiumActive'
+    : kind === 'trial' ? 'trialActive'
+    : 'specialAccessActive'
+  const expiresAtMs = kind === 'premium' ? null
+    : kind === 'trial' ? now + 72 * 60 * 60 * 1000
+    : now + 14 * 24 * 60 * 60 * 1000
+  return {
+    serverState,
+    entitlementType: kind === 'premium' ? 'premium' : kind === 'trial' ? 'trial' : 'special',
+    noExpiry: kind === 'premium',
+    expiresAtMs,
+    activatedAtMs: now,
+    serverTimeMs: now,
+    receivedAtPerfMs: perfNow(),
+    accountId: 'mock-account',
   }
 }
 
@@ -158,7 +221,15 @@ export async function resolveEntitlement(): Promise<{
   if (localEntitlementEnabled()) {
     // والسبب يُحمَل حين لا خادم: «الخدمة غير مضبوطة» لا «ما فيه نت» — نسخة
     // المراجعة بلا خادم أصلًا، ولوم شبكة المستخدم عليها كذبة صغيرة.
-    const local = { status: readMockActive() ? ('active' as const) : ('none' as const), source: 'mock' as const }
+    // ⚠️ السطر التالي **محروسٌ بحرفه** في `test:access-gate` («لا مصدر ثالث»).
+    // يبقى كما هو: المنح من `readMockActive()` وحدها، والمصدر معلَن `'mock'`.
+    // والتفصيل يُضاف ولا يُبدّل شيئًا منه — فهو **مرآة الحالة نفسها** لا مصدرًا
+    // ثانيًا: `mockDetail` دالّة نقيّة لا تقرأ إلا `readMockKind()`، وغيابه كان
+    // يُسقط `kindFor` إلى `preview` فتقول شاشة العضوية «مقفلة» وهي مفتوحة.
+    const local = {
+      status: readMockActive() ? ('active' as const) : ('none' as const), source: 'mock' as const,
+      detail: readMockActive() ? mockDetail(readMockKind()) : null,
+    }
     return backendAvailable() ? local : { ...local, lastError: 'backend_unconfigured' }
   }
   // [OVERNIGHT-3] عقد الخادم صار موجودًا. بلا ضبط Supabase تبقى الإجابة `none`
@@ -200,6 +271,8 @@ export async function redeemActivationCode(code: string): Promise<RedeemOutcome>
     if (known === 'success') {
       try {
         window.sessionStorage.setItem(MOCK_KEY, 'active')
+        // صكّ الشراء يمنح Premium دائمًا — والتقليد يعكس ذلك ولا يسوّيه بتجربة.
+        writeMockKind('premium')
       } catch {
         return 'service_error'
       }
@@ -275,6 +348,7 @@ export async function startTrial(): Promise<TrialOutcome> {
   if (mockEnabled()) {
     try {
       window.sessionStorage.setItem(MOCK_KEY, 'active')
+      writeMockKind('trial')
       return 'started'
     } catch {
       return 'service_error'

@@ -25,6 +25,10 @@ export type AppRoute =
   // صفحة «كيف نحسب أرقامك؟» — مدخلها من تبويب حسابي، ليست تبويبًا رئيسيًا.
   | 'calc'
   | 'settings'
+  // [WAVE2-PREMIUM-SURFACE] «العضوية» مسار حقيقي لا حالة داخل نافذة: كان
+  // التفعيل يعيش في `PremiumGate` التي لا تُفتح إلا بالاصطدام بفعل محجوب،
+  // فمن اشترى صكًّا لا يجد أين يضعه إلا بأن يتعثّر أوّلًا.
+  | 'premium'
   | 'privacy'
   | 'terms'
   | 'contact'
@@ -63,6 +67,7 @@ const ROUTES: AppRoute[] = [
   'recovery',
   'coach',
   'settings',
+  'premium',
   'privacy',
   'terms',
   'contact',
