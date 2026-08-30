@@ -10,7 +10,8 @@
 //      أرقام لاتينية داخل جملة عربية (BUG-019).
 //   ⑤ قانون ترتيب Q19 مطبَّق على كل يوم (مركّب → عزل → سمانة)، وأيام البرامج
 //      الجاهزة تمرّ بنفس الفحص الذي تمرّ به قوالب الجذع.
-//   ⑥ «أجهزة فقط»: كل تمرين يحمل `machine` في أدواته.
+//   ⑥ «أجهزة أو كيبل»: عدّة كل تمرين ⊆ {machine, cable} — الوزن الحرّ ممنوع
+//      (وُسّع في [DATASET-B] بقرار المؤسس «Machine/cable only»؛ انظر ⑥ أدناه).
 //   ⑦ لا معرّف برنامج جاهز يصطدم بمعرّف في `workoutTemplates`، و`getTemplate`
 //      صار يحلّ الاثنين بلا مساس بالقديم.
 //   ⑧ الأرقام والتغطية المقيسة — تُطبع لتُقرأ لا لتُصدَّق.
@@ -118,15 +119,47 @@ for (const { t, d } of allDays) {
     JSON.stringify(orderDayExerciseIds(d.exerciseIds)) === JSON.stringify(d.exerciseIds),
   )
   check(`${t.id}/${d.id}: أول حركة مركّبة`, isCompoundExercise(d.exerciseIds[0]), d.exerciseIds[0])
-  const calfIdx = d.exerciseIds.findIndex((id) => getExercise(id)?.primaryMuscle === 'calves')
-  if (calfIdx >= 0) check(`${t.id}/${d.id}: السمانة في الأخير`, calfIdx === d.exerciseIds.length - 1)
+  // [DATASET-B] كان الفحص «السمانة آخر تمرين». قانون Q19 نفسه لا يقول ذلك: السمانة
+  // **والكور** كلاهما رتبة ٩٠٠ يُغلقان الجلسة، ولا يرتّب أحدهما قبل الآخر. ومجموعة
+  // البيانات المعتمدة تُنهي يوم السفلي بالبطن بعد السمانة — وهو ترتيب صحيح بالقانون.
+  // فالفحص صار على ما يقوله القانون فعلًا: **الخواتيم كتلة متّصلة في الذيل**.
+  const finisherAt = d.exerciseIds.map((id) => {
+    const m = getExercise(id)?.primaryMuscle
+    return m === 'calves' || m === 'core'
+  })
+  const firstFinisher = finisherAt.indexOf(true)
+  if (firstFinisher >= 0) {
+    check(
+      `${t.id}/${d.id}: الخواتيم (سمانة/كور) كتلة متّصلة في الذيل`,
+      finisherAt.slice(firstFinisher).every(Boolean),
+      d.exerciseIds.join(' → '),
+    )
+  }
 }
 
 // ── ⑥ أجهزة فقط ─────────────────────────────────────────────────────────────
-console.log('\n⑥ أجهزة موجّهة فقط — لا وزن حرّ ولا كيبل داخل برنامج جاهز')
+console.log('\n⑥ أجهزة أو محطّات كيبل فقط — لا وزن حرّ داخل برنامج جاهز')
+// [DATASET-B] توسيع مقصود ومعلَن: مادة المؤسس المعتمدة تنصّ «Machine/cable only —
+// no barbells, no dumbbells»، ومجموعة البيانات تحمل تمرينَي كيبل مبرمَجين.
+// التوسيع في اتجاه واحد فقط: الكيبل دخل، والوزن الحرّ **لم يُرخَ عنه شيء**.
+const ALLOWED_EQUIPMENT = new Set(['machine', 'cable'])
 for (const { t, d } of allDays) {
-  const nonMachine = d.exerciseIds.filter((id) => !getExercise(id)?.equipment.includes('machine'))
-  check(`${t.id}/${d.id}: كلها أجهزة`, nonMachine.length === 0, nonMachine.join(','))
+  const disallowed = d.exerciseIds.filter((id) => {
+    const eq = getExercise(id)?.equipment ?? []
+    return eq.length === 0 || !eq.every((q) => ALLOWED_EQUIPMENT.has(q))
+  })
+  check(`${t.id}/${d.id}: كلها أجهزة أو كيبل`, disallowed.length === 0, disallowed.join(','))
+}
+// التوسيع نفسه مؤكَّد إيجابًا: لو عاد الشرط إلى `machine` وحده لسقط هذا الفحص.
+{
+  const cableInPrograms = allDays.flatMap(({ d }) =>
+    d.exerciseIds.filter((id) => (getExercise(id)?.equipment ?? []).includes('cable')),
+  )
+  check(
+    'الكيبل المعتمد يمرّ فعلًا (التوسيع مقصود لا صدفة)',
+    cableInPrograms.length > 0,
+    `${cableInPrograms.length} موضع كيبل مبرمَج`,
+  )
 }
 
 // ── ⑦ التعايش مع قوالب الجذع ────────────────────────────────────────────────
@@ -202,11 +235,21 @@ counter(
   'non-machine-exercise',
 )
 
-// ج) كيبل حقيقي — نفس المبدأ من الباب الآخر.
+// ج) بار حقيقي — الباب الآخر لقانون العدّة. (كان هذا الفحص يهاجم بالكيبل؛ الكيبل
+// صار مسموحًا بقرار المؤسس، فالهجوم انتقل إلى ما لا يزال ممنوعًا: الوزن الحرّ.)
 counter(
-  'كيبل حقيقي (cable-triceps-pushdown) داخل برنامج جاهز',
+  'بار حقيقي (barbell-bench-press) داخل برنامج جاهز',
   (t) => {
-    t[0].days[0].exerciseIds[8] = 'cable-triceps-pushdown'
+    t[0].days[0].exerciseIds[8] = 'barbell-bench-press'
+  },
+  'non-machine-exercise',
+)
+
+// ج-٢) وزن الجسم — صنف ثالث من الوزن الحرّ، كي لا يكون الحارس محفوظًا على مثالين.
+counter(
+  'وزن جسم (push-up) داخل برنامج جاهز',
+  (t) => {
+    t[0].days[0].exerciseIds[8] = 'push-up'
   },
   'non-machine-exercise',
 )
@@ -331,8 +374,12 @@ counter(
 {
   const step = __SOURCES__['src/components/customizer/steps/StepWorkoutTemplate.tsx']
   const registry = __SOURCES__['src/data/workoutTemplates.ts']
+  // [DATASET-B] كان النمط يثبّت **سطر الاستيراد حرفيًا** باسم واحد بين القوسين،
+  // فأي رمز إضافي يُستورد من الوحدة نفسها (مثل `builtInProgramMeta` لعرض
+  // أيام/أسبوع) يُسقط الفحص وهو سليم. المقصد أن الشاشة **تستورد البرامج
+  // وترسمها**، لا أن قائمة الاستيراد بطول واحد — فصار الفحص على المقصد.
   const listsBuiltIn =
-    /import \{ builtInWorkoutTemplates \} from '@\/data\/workoutTemplatesBuiltIn'/.test(step) &&
+    /import \{[^}]*\bbuiltInWorkoutTemplates\b[^}]*\} from '@\/data\/workoutTemplatesBuiltIn'/.test(step) &&
     /\[\.\.\.workoutTemplates, \.\.\.builtInWorkoutTemplates\]/.test(step) &&
     /templateCards\.map\(/.test(step)
   check('الشاشة الحيّة تعرض البرامج الجاهزة مع القائمة القديمة', listsBuiltIn)
@@ -348,7 +395,12 @@ counter(
     /\{workoutTemplates\.map\(/.test(`${step}\n {workoutTemplates.map((tpl) => {`) &&
     !/\{workoutTemplates\.map\(/.test(step))
   check('⟲ ونزع الاستيراد يُسقط الفحص نفسه',
-    !/builtInWorkoutTemplates/.test(step.replace(/builtInWorkoutTemplates/g, 'X')))
+    !/import \{[^}]*\bbuiltInWorkoutTemplates\b[^}]*\} from '@\/data\/workoutTemplatesBuiltIn'/
+      .test(step.replace(/builtInWorkoutTemplates/g, 'X')))
+  // ⟲ والتوسيع لا يبتلع الحالة المعاكسة: استيراد من وحدة أخرى لا يمرّ.
+  check('⟲ استيراد الرمز من وحدة أخرى لا يُرضي الفحص',
+    !/import \{[^}]*\bbuiltInWorkoutTemplates\b[^}]*\} from '@\/data\/workoutTemplatesBuiltIn'/
+      .test(step.replace(/@\/data\/workoutTemplatesBuiltIn/g, '@/data/somewhereElse')))
 }
 
 console.log(`\n${failed === 0 ? '✅' : '❌'} البرامج الجاهزة — نجح ${passed} · فشل ${failed}`)

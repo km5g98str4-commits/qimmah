@@ -55,7 +55,30 @@ const LIVE = new Set(
   Object.keys(result.metafile.inputs).filter((p) => p.startsWith('src/')).map((p) => p.replace(/\\/g, '/')),
 )
 check(`الرسم مبنيّ ويحمل وحدات حيّة (${LIVE.size})`, LIVE.size > 100)
-check('الرسم ليس شاملًا لكل ملف على القرص (وإلا لم يميّز شيئًا)', LIVE.size < 446)
+// [CONVERGENCE] كان الحدّ رقمًا مثبَّتًا (`< 446`) — أي لقطةً ليومٍ بعينه. فأيُّ
+// وحدة حيّة جديدة مشروعة تُسقط الحارس وهو سليم، وهو ما وقع فعلًا عند إضافة
+// `builtInProgramsSource.generated.ts` (٤٤٥ ⇒ ٤٤٦). والمقصد المكتوب في الرسالة
+// نفسها ليس رقمًا بل نسبة: **الرسم أصغر من شجرة القرص**، فيميّز الحيّ من الميت.
+// فصار الفحص يقيس ما تقوله رسالته: عدّ ملفات `src/` فعليًّا لا ثابتًا يشيخ.
+const walkAll = (dir, acc = []) => {
+  for (const entry of readdirSync(resolve(root, dir))) {
+    const rel = `${dir}/${entry}`
+    if (statSync(resolve(root, rel)).isDirectory()) walkAll(rel, acc)
+    else acc.push(rel)
+  }
+  return acc
+}
+const SRC_ON_DISK = walkAll('src').length
+check(
+  `الرسم ليس شاملًا لكل ملف على القرص (وإلا لم يميّز شيئًا) — حيّ ${LIVE.size} من ${SRC_ON_DISK}`,
+  LIVE.size < SRC_ON_DISK,
+)
+// ⟲ تأكيد مضادّ: الفحص أعلاه يُرضى أيضًا برسمٍ فارغ أو منهار. فيُشترط أن يبقى
+// الرسم كتلةً معتبَرة من الشجرة — وإلا فـ«أصغر» تصير صفرًا وتمرّ.
+check(
+  `⟲ والرسم ليس منهارًا: يغطّي أكثر من نصف الشجرة (${Math.round((LIVE.size / SRC_ON_DISK) * 100)}%)`,
+  LIVE.size > SRC_ON_DISK / 2,
+)
 
 console.log('\n② المالك الحيّ لكل سطح مزدوج — مثبت من الرسم')
 for (const s of SURFACES) {

@@ -12,6 +12,7 @@
 
 import type { Lang } from '@/lib/appPreferences'
 import { formatNumber } from '@/lib/numberFormat'
+import type { BuiltInDayKind as DayKind } from '@/data/builtInProgramsSource.generated'
 
 /** معرّفات البرامج الجاهزة — مسبوقة بـ`builtin-` كي لا تصطدم بمعرّفات `workoutTemplates`. */
 export type BuiltInTemplateId =
@@ -29,20 +30,10 @@ export type BuiltInTemplateId =
  * برنامج الستة أيام)، فالمعرّف الفعلي لليوم يُشتقّ في طبقة البيانات، والنصّ يُقرأ
  * من هنا بنوعه. هكذا لا يتكرّر النصّ بتكرار اليوم.
  */
-export type BuiltInDayKind =
-  | 'upperA'
-  | 'upperB'
-  | 'lowerA'
-  | 'lowerB'
-  | 'fullA'
-  | 'fullB'
-  | 'fullC'
-  | 'push'
-  | 'pull'
-  | 'legs'
-  | 'machinesA'
-  | 'machinesB'
-  | 'machinesC'
+// [DATASET-B] النوع صار يُستورد من الوحدة المولّدة بدل تكراره هنا: مصدر واحد
+// للمفاتيح، فأي نمط يوم يضيفه Dataset B يفشل هذا القاموس بالنوع فورًا إن لم
+// يُترجَم — لا نصّ ناقص يمرّ صامتًا.
+export type { BuiltInDayKind } from '@/data/builtInProgramsSource.generated'
 
 export interface BuiltInTemplateCopy {
   name: string
@@ -53,7 +44,17 @@ export interface BuiltInTemplateCopy {
 
 export interface BuiltInTemplateStrings {
   templates: Record<BuiltInTemplateId, BuiltInTemplateCopy>
-  days: Record<BuiltInDayKind, string>
+  days: Record<DayKind, string>
+  /** وسم العدّة على بطاقة البرنامج — لا وعد، وصف. */
+  equipmentLabel: string
+  /** «أيام/أسبوع» — يسبقه رقم منسَّق بلغة العرض. */
+  perWeek: string
+  /** يوم راحة في معاينة الجدول. */
+  rest: string
+  /** «اليوم» في معاينة الجدول — يليه رقم منسَّق. */
+  dayWord: string
+  /** شرح البرنامج المتناوب: الأسبوع يأخذ ثلاث جلسات من دورة أربع. */
+  rotationNote: string
 }
 
 const n = (value: number, lang: Lang): string => formatNumber(value, lang)
@@ -105,18 +106,29 @@ export const builtInTemplateStrings: Record<Lang, BuiltInTemplateStrings> = {
     days: {
       upperA: 'علوي أ',
       upperB: 'علوي ب',
+      upperCompact: 'علوي',
       lowerA: 'سفلي أ',
       lowerB: 'سفلي ب',
+      legsA: 'أرجل أ',
+      legsB: 'أرجل ب',
       fullA: 'جسم كامل أ',
       fullB: 'جسم كامل ب',
       fullC: 'جسم كامل ج',
-      push: 'دفع',
-      pull: 'سحب',
-      legs: 'أرجل',
+      begFullA: 'جسم كامل أ',
+      begFullB: 'جسم كامل ب',
+      pushA: 'دفع أ',
+      pushB: 'دفع ب',
+      pullA: 'سحب أ',
+      pullB: 'سحب ب',
       machinesA: 'أجهزة أ',
       machinesB: 'أجهزة ب',
       machinesC: 'أجهزة ج',
     },
+    equipmentLabel: 'أجهزة وكيبل فقط',
+    perWeek: 'أيام/أسبوع',
+    rest: 'راحة',
+    dayWord: 'اليوم',
+    rotationNote: 'دورة أربع جلسات تُؤدّى ثلاث مرّات بالأسبوع، فتتناوب بداية كل أسبوع.',
   },
   en: {
     templates: {
@@ -164,17 +176,28 @@ export const builtInTemplateStrings: Record<Lang, BuiltInTemplateStrings> = {
     days: {
       upperA: 'Upper A',
       upperB: 'Upper B',
+      upperCompact: 'Upper',
       lowerA: 'Lower A',
       lowerB: 'Lower B',
+      legsA: 'Legs A',
+      legsB: 'Legs B',
       fullA: 'Full Body A',
       fullB: 'Full Body B',
       fullC: 'Full Body C',
-      push: 'Push',
-      pull: 'Pull',
-      legs: 'Legs',
+      begFullA: 'Full Body A',
+      begFullB: 'Full Body B',
+      pushA: 'Push A',
+      pushB: 'Push B',
+      pullA: 'Pull A',
+      pullB: 'Pull B',
       machinesA: 'Machines A',
       machinesB: 'Machines B',
       machinesC: 'Machines C',
     },
+    equipmentLabel: 'Machines & cable only',
+    perWeek: 'days/week',
+    rest: 'Rest',
+    dayWord: 'Day',
+    rotationNote: 'A four-session cycle run three times a week, so each week starts where the last left off.',
   },
 }

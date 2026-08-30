@@ -44,192 +44,95 @@
 // حرفيًا** وأُعيد ترتيبها داخل اليوم بالقانون. لا تمرين حُذف بسبب الترتيب.
 
 import type { WorkoutTemplate, TemplateDay } from '@/types/workout'
+import {
+  builtInSessions,
+  builtInVariants,
+  builtInProgramSources,
+  type BuiltInSessionSource,
+  type BuiltInProgramSource,
+} from '@/data/builtInProgramsSource.generated'
 import { getExercise } from '@/data/exercises'
 import { isDayOrdered, orderDayExerciseIds } from '@/lib/workoutOrder'
 import { builtInTemplateStrings } from '@/i18n/dict/builtInTemplates'
-import type { BuiltInDayKind, BuiltInTemplateId } from '@/i18n/dict/builtInTemplates'
+import type { BuiltInTemplateId } from '@/i18n/dict/builtInTemplates'
 
 /** الحدّ الأدنى/الأقصى العاقل لعدد تمارين اليوم الواحد. */
 export const MIN_DAY_EXERCISES = 4
 export const MAX_DAY_EXERCISES = 9
 
 /**
- * وصفات الأيام — مصدر واحد يُركَّب منه كل برنامج. البرنامج الذي يكرّر يومًا
- * (الستة أيام) يعيد استخدام نفس الوصفة، فلا تتباعد نسختان لنفس اليوم بالسهو.
+ * [DATASET-B] الأيام والبرامج لم تعد مكتوبة هنا بيدٍ. مصدرها الوحيد هو الوحدة
+ * المولّدة من مجموعة البيانات المعتمدة (برهان ١٢/١٢، بصمة في الملف المولّد):
+ *
+ *   Dataset B  →  scripts/build-builtin-programs-source.mjs
+ *              →  src/data/builtInProgramsSource.generated.ts  (مطبوعة الأنواع)
+ *              →  هنا: تركيب WorkoutTemplate بالنموذج القائم
+ *              →  generatePlanFromTemplate  →  الخطة  →  الجلسة
+ *
+ * **المشاركة القانونية محفوظة:** «سفلي أ» و«أرجل أ» تسميتان تشيران إلى
+ * `cs-lower-a` نفسها. مصفوفة التمارين تعيش في الجلسة وحدها، فلا نسختان تتباعدان.
  */
-const DAY_RECIPES: Record<BuiltInDayKind, readonly string[]> = {
-  // مركّبات علوية (١١٠) ثم عزل (٥٠٠).
-  upperA: [
-    'incline-chest-press-machine',
-    'chest-press-machine',
-    'lat-pulldown-machine',
-    'seated-row-machine',
-    'shoulder-press-machine',
-    'pec-deck-machine',
-    'lateral-raise-machine',
-    'preacher-curl-machine',
-    'triceps-extension-machine',
-  ],
-  upperB: [
-    'chest-press-machine',
-    'incline-chest-press-machine',
-    'lat-pulldown-machine',
-    'chest-supported-row-machine',
-    'shoulder-press-machine',
-    'pec-deck-machine',
-    'lateral-raise-machine',
-    'preacher-curl-machine',
-    'triceps-extension-machine',
-  ],
-  // مركّبات أرجل (١٠٠) ثم عزل (٥٠٠) ثم السمانة (٩٠٠).
-  lowerA: [
-    'hack-squat-machine',
-    'leg-press-machine',
-    'seated-leg-curl',
-    'leg-extension-machine',
-    'standing-calf-raise-machine',
-  ],
-  lowerB: [
-    'hack-squat-machine',
-    'leg-press-machine',
-    'lying-leg-curl',
-    'leg-extension-machine',
-    'seated-calf-raise-machine',
-  ],
-  fullA: [
-    'leg-press-machine',
-    'chest-press-machine',
-    'lat-pulldown-machine',
-    'seated-row-machine',
-    'seated-leg-curl',
-    'lateral-raise-machine',
-    'standing-calf-raise-machine',
-  ],
-  fullB: [
-    'hack-squat-machine',
-    'incline-chest-press-machine',
-    'seated-row-machine',
-    'lat-pulldown-machine',
-    'shoulder-press-machine',
-    'leg-extension-machine',
-    'preacher-curl-machine',
-  ],
-  fullC: [
-    'leg-press-machine',
-    'chest-press-machine',
-    'lat-pulldown-machine',
-    'seated-leg-curl',
-    'pec-deck-machine',
-    'lateral-raise-machine',
-    'triceps-extension-machine',
-  ],
-  push: [
-    'incline-chest-press-machine',
-    'chest-press-machine',
-    'shoulder-press-machine',
-    'pec-deck-machine',
-    'lateral-raise-machine',
-    'triceps-extension-machine',
-  ],
-  pull: [
-    'lat-pulldown-machine',
-    'seated-row-machine',
-    'chest-supported-row-machine',
-    'reverse-pec-deck',
-    'preacher-curl-machine',
-  ],
-  legs: [
-    'hack-squat-machine',
-    'leg-press-machine',
-    'seated-leg-curl',
-    'leg-extension-machine',
-    'standing-calf-raise-machine',
-  ],
-  // أيام المبتدئ: دفع الأرجل وحده مركّبًا للأرجل (لا هاك سكوات)، وكل مجموعة
-  // كبرى ممثّلة — ستة تمارين لا أكثر.
-  machinesA: [
-    'leg-press-machine',
-    'chest-press-machine',
-    'lat-pulldown-machine',
-    'shoulder-press-machine',
-    'seated-leg-curl',
-    'standing-calf-raise-machine',
-  ],
-  machinesB: [
-    'leg-press-machine',
-    'incline-chest-press-machine',
-    'seated-row-machine',
-    'shoulder-press-machine',
-    'leg-extension-machine',
-    'seated-calf-raise-machine',
-  ],
-  machinesC: [
-    'leg-press-machine',
-    'chest-press-machine',
-    'chest-supported-row-machine',
-    'shoulder-press-machine',
-    'seated-leg-curl',
-    'lateral-raise-machine',
-  ],
+
+/** الجلسة القانونية لتسمية يوم. يرمي عند معرّف لا يُحلّ — لا إصلاح صامت. */
+function sessionForVariant(variantId: string): BuiltInSessionSource {
+  const v = builtInVariants[variantId]
+  if (!v) throw new Error(`[builtin-templates] unresolvable variant id: ${variantId}`)
+  const session = builtInSessions[v.sessionId]
+  if (!session) throw new Error(`[builtin-templates] variant '${variantId}' points at missing session '${v.sessionId}'`)
+  return session
 }
 
-/** تركيب كل برنامج: ترتيب أنواع الأيام كما تُؤدّى في الأسبوع. */
-const TEMPLATE_COMPOSITION: Record<BuiltInTemplateId, readonly BuiltInDayKind[]> = {
-  'builtin-upper-lower-4': ['upperA', 'lowerA', 'upperB', 'lowerB'],
-  'builtin-full-body-3': ['fullA', 'fullB', 'fullC'],
-  'builtin-ppl-6': ['push', 'pull', 'legs', 'push', 'pull', 'legs'],
-  'builtin-ppl-3': ['push', 'pull', 'legs'],
-  'builtin-upper-lower-full-3': ['upperA', 'lowerA', 'fullA'],
-  'builtin-full-body-2': ['fullA', 'fullB'],
-  // التناوب أ/ب: الأسبوع الأول ينتهي عند «علوي ب»، والذي يليه يبدأ من «سفلي ب».
-  // المعروض هنا هو أسبوع واحد صريح — الشرح في وصف البرنامج بالقاموس.
-  'builtin-upper-lower-3': ['upperA', 'lowerA', 'upperB'],
-  'builtin-beginner-machines-3': ['machinesA', 'machinesB', 'machinesC'],
-}
+/** ترتيب العرض — نفس ترتيب مادة المؤسس، مقروءًا من المصدر المولّد. */
+export const BUILT_IN_TEMPLATE_IDS: readonly BuiltInTemplateId[] = builtInProgramSources
+  .slice()
+  .sort((a, b) => a.order - b.order)
+  .map((p) => p.templateId as BuiltInTemplateId)
 
-/** ترتيب العرض — نفس ترتيب مادة المؤسس. */
-export const BUILT_IN_TEMPLATE_IDS: readonly BuiltInTemplateId[] = [
-  'builtin-upper-lower-4',
-  'builtin-full-body-3',
-  'builtin-ppl-6',
-  'builtin-ppl-3',
-  'builtin-upper-lower-full-3',
-  'builtin-full-body-2',
-  'builtin-upper-lower-3',
-  'builtin-beginner-machines-3',
-]
-
-function buildDay(templateId: BuiltInTemplateId, kind: BuiltInDayKind, index: number): TemplateDay {
+function buildDay(templateId: BuiltInTemplateId, variantId: string, index: number): TemplateDay {
+  const v = builtInVariants[variantId]
+  const session = sessionForVariant(variantId)
   return {
-    // معرّف اليوم فريد داخل البرنامج حتى لو تكرّر نوعه (دفع مرّتين).
-    id: `${templateId}-d${index + 1}-${kind}`,
-    nameAr: builtInTemplateStrings.ar.days[kind],
-    nameEn: builtInTemplateStrings.en.days[kind],
-    exerciseIds: [...DAY_RECIPES[kind]],
+    // معرّف اليوم فريد داخل البرنامج حتى لو تكرّرت تسميته.
+    id: `${templateId}-d${index + 1}-${v.dayKind}`,
+    nameAr: builtInTemplateStrings.ar.days[v.dayKind],
+    nameEn: builtInTemplateStrings.en.days[v.dayKind],
+    exerciseIds: [...session.exerciseIds],
   }
 }
 
-function buildTemplate(id: BuiltInTemplateId): WorkoutTemplate {
+function buildTemplate(source: BuiltInProgramSource): WorkoutTemplate {
+  const id = source.templateId as BuiltInTemplateId
   const ar = builtInTemplateStrings.ar.templates[id]
   const en = builtInTemplateStrings.en.templates[id]
+  // البرنامج المتناوب يعرض دورته الكاملة أيامًا؛ غيره يعرض جدوله الأسبوعي.
+  // في الحالتين كل معرّف يُحلّ لتسمية حقيقية — لا معرّف وهمي في أي مسار.
+  const variantIds = source.rotation
+    ? [...source.rotation.sequence]
+    : source.schedule.filter((e) => e.type === 'workout').map((e) => e.variantId as string)
   return {
     id,
     nameAr: ar.name,
     nameEn: en.name,
     descriptionAr: ar.description,
     descriptionEn: en.description,
-    // الحقل نصّ واحد في النوع القائم — العربية هي المعروضة، والإنجليزية متاحة
-    // بـ`builtInTemplateStrings.en` لمن يعرض بالإنجليزية.
     recommendedFor: ar.recommendedFor,
-    days: TEMPLATE_COMPOSITION[id].map((kind, i) => buildDay(id, kind, i)),
+    days: variantIds.map((vid, i) => buildDay(id, vid, i)),
   }
 }
 
-/** البرامج الجاهزة الثمانية، مبنيّة من الوصفات والقاموس. */
-export const builtInWorkoutTemplates: WorkoutTemplate[] = BUILT_IN_TEMPLATE_IDS.map(buildTemplate)
+/** البرامج الجاهزة الثمانية، مبنيّة من مجموعة البيانات المعتمدة والقاموس. */
+export const builtInWorkoutTemplates: WorkoutTemplate[] = builtInProgramSources
+  .slice()
+  .sort((a, b) => a.order - b.order)
+  .map(buildTemplate)
 
 export const builtInTemplateMap: Record<string, WorkoutTemplate> = Object.fromEntries(
   builtInWorkoutTemplates.map((t) => [t.id, t]),
+)
+
+/** بيانات البرنامج كما وردت في المجموعة — أيام/أسبوع، المستوى، الجدول، التناوب. */
+export const builtInProgramMeta: Record<string, BuiltInProgramSource> = Object.fromEntries(
+  builtInProgramSources.map((p) => [p.templateId, p]),
 )
 
 /** الوصول المُعنوَن ببرنامج جاهز واحد. */
@@ -270,9 +173,20 @@ export interface BuiltInTemplateIssue {
 const LATIN_DIGIT = /[0-9]/
 const ARABIC_LETTER = /[؀-ۿ]/
 
-function isMachineOnly(exerciseId: string): boolean {
+/**
+ * [DATASET-B] قانون العدّة: **جهاز أو محطّة كيبل**، ولا شيء غيرهما.
+ *
+ * كان الفحص يشترط `machine` وحده. مادة المؤسس المعتمدة تنصّ صراحةً على
+ * «Machine/cable only — no barbells, no dumbbells»، ومجموعة البيانات تحمل
+ * تمرينَي كيبل مبرمَجين (`cable-triceps-pushdown` و`cable-biceps-curl`).
+ * فوُسِّع الشرط ليطابق السياسة المعلنة، **ولم يُرخَ**: البار والدمبل والكيتل
+ * والمقعد ووزن الجسم كلها تسقط كما كانت.
+ */
+const ALLOWED_EQUIPMENT = new Set(['machine', 'cable'])
+
+function isMachineOrCable(exerciseId: string): boolean {
   const ex = getExercise(exerciseId)
-  return Boolean(ex && ex.equipment.includes('machine'))
+  return Boolean(ex && ex.equipment.length > 0 && ex.equipment.every((q) => ALLOWED_EQUIPMENT.has(q)))
 }
 
 /**
@@ -346,8 +260,8 @@ export function validateBuiltInTemplates(templates: readonly WorkoutTemplate[]):
         // ① حارس منع الاختراع: كل معرّف يجب أن يُحلّ لتمرين حقيقي في الكتالوج.
         if (!getExercise(id)) {
           push('unknown-exercise-id', where, id)
-        } else if (!isMachineOnly(id)) {
-          // ② قانون «أجهزة فقط» — معرّف حقيقي لكنه وزن حرّ/كيبل لا يمرّ.
+        } else if (!isMachineOrCable(id)) {
+          // ② قانون العدّة — معرّف حقيقي لكنه وزن حرّ لا يمرّ (الكيبل مسموح).
           push('non-machine-exercise', where, id)
         }
         if (seen.has(id)) push('duplicate-exercise-in-day', where, id)

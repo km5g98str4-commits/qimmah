@@ -7,7 +7,10 @@ import { ExerciseLibraryPicker } from '@/components/ExerciseLibraryPicker'
 import type { WizardCtx } from '../stepProps'
 import type { PlanDay, PlanExercise, WorkoutPlan } from '@/types/workout'
 import { workoutTemplates } from '@/data/workoutTemplates'
-import { builtInWorkoutTemplates } from '@/data/workoutTemplatesBuiltIn'
+import { builtInWorkoutTemplates, builtInProgramMeta } from '@/data/workoutTemplatesBuiltIn'
+import { builtInTemplateStrings } from '@/i18n/dict/builtInTemplates'
+import { builtInVariants } from '@/data/builtInProgramsSource.generated'
+import { formatNumber } from '@/lib/numberFormat'
 import { createPlanExercise, generatePlanFromTemplate, planExerciseName } from '@/lib/workoutPlan'
 import { analyzeWorkoutBalance } from '@/lib/workoutValidation'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
@@ -140,7 +143,45 @@ export function StepWorkoutTemplate({ ctx }: { ctx: WizardCtx }) {
                 {active && <Icon name="CheckCircle2" className="h-4 w-4 text-primary-c" />}
               </div>
               <p className="mt-2 text-xs leading-relaxed text-ink-500">{ctx.lang === 'en' ? tpl.descriptionEn : tpl.descriptionAr}</p>
-              <p className="mt-2 text-[11px] font-bold text-primary-c">{tpl.days.length} {d.daysAndRecommended} · {choices.recommendedFor[tpl.recommendedFor] ?? tpl.recommendedFor}</p>
+              {(() => {
+                // [DATASET-B] أيام/أسبوع تُقرأ من بيانات البرنامج لا من طول قائمة الأيام:
+                // البرنامج المتناوب يحمل أربع جلسات تُؤدّى ثلاث مرّات أسبوعيًا، فطول
+                // القائمة (٤) ليس عدد أيام التمرين (٣). الطول كان سيكذب على البطاقة.
+                const meta = builtInProgramMeta[tpl.id]
+                const bi = builtInTemplateStrings[ctx.lang === 'en' ? 'en' : 'ar']
+                const perWeek = meta ? meta.daysPerWeek : tpl.days.length
+                return (
+                  <>
+                    <p className="mt-2 text-[11px] font-bold text-primary-c">
+                      {formatNumber(perWeek, ctx.lang)} {meta ? bi.perWeek : d.daysAndRecommended} · {choices.recommendedFor[tpl.recommendedFor] ?? tpl.recommendedFor}
+                    </p>
+                    {meta && (
+                      <>
+                        <span className="mt-2 inline-block rounded-full border border-line bg-beige px-2 py-0.5 text-[10px] font-bold text-ink-700">
+                          {bi.equipmentLabel}
+                        </span>
+                        <ul className="mt-2 space-y-0.5">
+                          {meta.schedule.map((entry) => {
+                            const label = entry.variantId
+                              ? bi.days[builtInVariants[entry.variantId].dayKind]
+                              : bi.rest
+                            return (
+                              <li key={entry.day} className="text-[10px] text-ink-500">
+                                <span className="font-bold text-ink-700">{bi.dayWord} {formatNumber(entry.day, ctx.lang)}</span>
+                                {' — '}
+                                <span className={entry.variantId ? '' : 'opacity-60'}>{label}</span>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                        {meta.rotation && (
+                          <p className="mt-1 text-[10px] leading-relaxed text-ink-500">{bi.rotationNote}</p>
+                        )}
+                      </>
+                    )}
+                  </>
+                )
+              })()}
             </button>
           )
         })}
