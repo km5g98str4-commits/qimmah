@@ -144,6 +144,26 @@ try {
   check('الوزن المخزَّن قيمة قانونية 20.5 لا «٢٠٫٥»', stored?.weightKg === '20.5', JSON.stringify(stored))
   check('والتكرارات مخزَّنة 10', stored?.actualReps === '10', String(stored?.actualReps))
 
+  /**
+   * [WORKOUT-CLOSURE-001] مقام العدّاد على أرتيفكت المؤسس نفسه.
+   * كانت هذه الرحلة تقطع الجلسة كلّها **بلا قراءة «i من N» واحدة** — فجلسة
+   * «١ من ١» كانت ستعبرها ما دام `advanced > 0`. الآن: المقام الحيّ يُقارن
+   * بعدد يوم الخطة المحفوظ لنفس `dayId` الذي تحمله الجلسة الجارية.
+   */
+  const denom = await page.evaluate(() => {
+    const el = document.querySelector('[data-session-counter]')
+    const norm = (el?.textContent || '').replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    const m = norm.match(/(\d+)\s*من\s*(\d+)/)
+    const c = JSON.parse(localStorage.getItem('qimmah:customization:v1') || 'null')
+    const aw = JSON.parse(localStorage.getItem('qimmah:activeWorkout:v1') || '{}')
+    const dayId = aw.guest?.dayId
+    const day = (c?.workoutPlan?.days || []).find((d) => d.id === dayId)
+    return { i: m ? Number(m[1]) : null, n: m ? Number(m[2]) : null, planN: day ? day.exercises.length : null }
+  })
+  check('مقام العدّاد الحيّ = عدد يوم الخطة المحفوظ — ويوم متعدّد لا يفتح «١ من ١»',
+    denom.n !== null && denom.n === denom.planN && denom.n > 1,
+    JSON.stringify(denom))
+
 
   // ═══ ك+ل) إنهاء التمرين ← «اليوم» يعكسه ═══
   console.log('\n▸ ك/ل) إنهاء التمرين وانعكاسه')
