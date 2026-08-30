@@ -42,6 +42,11 @@ const AUTH_STUB = `
 console.log('\nإثبات صكوك الشراء — Postgres منفَّذ بالهجرات كاملة')
 
 const MIG = '20260829120001_purchase_credentials.sql'
+// [COMMERCE-W1-HARDENING] القدرة صار لها **هجرتان**: المُنشئة وتصليبها. ونسخة
+// «ما قبل الهجرة» أدناه تقيس أن القدرة ابنة هجرتها — فتستبعد الاثنتين معًا،
+// وإلّا لأنشأت هجرةُ التصليب `grant_premium_from_code` في عالمٍ يُفترض خلوّه
+// منها، فيسقط تأكيدٌ سليم على تغييرٍ سليم. الاستبعاد يتّسع بقدر القدرة لا أكثر.
+const MIG_HARDENING = '20260830120001_premium_authority_hardening.sql'
 const { db, applied, failed } = await createSandbox()
 check('كل هجرات المستودع تُطبَّق من قاعدة نظيفة', failed.length === 0,
   failed.map((f) => `${f.file}: ${f.message}`).join(' | '))
@@ -110,9 +115,51 @@ check('التوليد خادمي مسجَّل', rows.rows.every((r) => r.generat
 // سرّية الخام: الجدول يحمل بصمة sha256 hex لا النصّ — والنصّ لا يُستعاد.
 const hashesLookHashed = rows.rows.every((r) => /^[0-9a-f]{64}$/.test(r.code_hash))
 check('المخزون بصمات sha256 لا نصوص (لا استرداد للخام من القاعدة)', hashesLookHashed)
-const rawInTable = await db.query(
-  `select count(*)::int as n from public.access_codes where code_hash = any($1)`, [batch.codes])
-check('الخام نفسه غير موجود في أي code_hash', rawInTable.rows[0].n === 0)
+// ═══ [COMMERCE-W1-HARDENING] كان هنا تأكيدٌ **لا يقول شيئًا** ═══
+// كان: `where code_hash = any($1)` — يقارن بصمات ٦٤ خانة ستّ‌عشرية بأكواد من
+// ١٦ رمزًا من أبجدية كبيرة. فمتى صحّ الفحص أعلاه (كلّها بصمات) استحال أن يعود
+// هذا بصفٍّ — **تحصيل حاصل**، ويحمل مع ذلك دعوى عامّة: «لا استرداد للخام من
+// القاعدة». والدعوى عامّة والقياس عمودٌ واحد (§4.2: مرورٌ غير مستحقّ ليس نجاحًا).
+//
+// فيُقاس ما يُدَّعى: مسحٌ شامل لكل جدول أساس في القاعدة عن **نصّ** أيّ صكّ —
+// أيًّا كان العمود الذي قد يحمله (سبب · وسم · أثر تدقيق · حمولة jsonb).
+const leaks = await db.query(`
+  do $do$
+  declare r record; n bigint; pats text[] := $1::text[]; found text := '';
+  begin
+    for r in select table_schema s, table_name t from information_schema.tables
+              where table_type = 'BASE TABLE'
+                and table_schema not in ('pg_catalog','information_schema') loop
+      execute format('select count(*) from %I.%I x where x::text ilike any($1)', r.s, r.t)
+        into n using pats;
+      if n > 0 then found := found || format('%s.%s(%s) ', r.s, r.t, n); end if;
+    end loop;
+    if found <> '' then raise exception 'PLAINTEXT_LEAK: %', found; end if;
+  end $do$;`.replace('$1::text[]', `array[${batch.codes.map((c) => `'%${c}%'`).join(',')}]`))
+  .then(() => ({ leak: null }))
+  .catch((e) => ({ leak: String(e.message || e) }))
+check('لا نصّ صكٍّ واحد في **أي جدول** بالقاعدة — مسحٌ شامل لا عمودٌ واحد',
+  leaks.leak === null, leaks.leak || 'نظيفة')
+// ⚔️ ومحاكاة تسريب: لو حطّ الخام في أي عمود نصّي لالتُقط — فالمسح ليس أعمى.
+await db.query(`update public.access_codes set created_reason = '${batch.codes[0]}'
+                 where label = 'SALLA-PROOF-001'`)
+const leakSim = await db.query(`
+  do $do$
+  declare r record; n bigint; found text := '';
+  begin
+    for r in select table_schema s, table_name t from information_schema.tables
+              where table_type = 'BASE TABLE'
+                and table_schema not in ('pg_catalog','information_schema') loop
+      execute format('select count(*) from %I.%I x where x::text ilike any($1)', r.s, r.t)
+        into n using array['%${batch.codes[0]}%'];
+      if n > 0 then found := found || format('%s.%s ', r.s, r.t); end if;
+    end loop;
+    if found <> '' then raise exception 'PLAINTEXT_LEAK: %', found; end if;
+  end $do$;`).then(() => ({ leak: null })).catch((e) => ({ leak: String(e.message || e) }))
+check('⚔️ ولو دُسّ الخام في created_reason لالتقطه المسح باسم الجدول',
+  leakSim.leak !== null && /access_codes/.test(leakSim.leak), leakSim.leak || 'لم يُلتقط — المسح أعمى')
+await db.query(`update public.access_codes set created_reason = 'proof restore'
+                 where label = 'SALLA-PROOF-001'`)
 
 // السلطة: غير المؤسس والمجهول والدعم كلّهم مردودون باسم الرفض.
 const plainId = await makeUser(db, 'plain@qimmah.test')
@@ -487,7 +534,7 @@ await mustFail('الحزام البنيوي: العدّاد لا يتجاوز ا
 
 // نسخة ما قبل الهجرة: القدرة غائبة كلّها — فمصدرها هذه الهجرة لا غيرها.
 {
-  const { db: oldDb } = await createSandbox({ exclude: [MIG] })
+  const { db: oldDb } = await createSandbox({ exclude: [MIG, MIG_HARDENING] })
   const missing = (await oldDb.query(
     `select to_regprocedure('public.founder_issue_purchase_batch(text, text, int, timestamptz)') as f1,
             to_regprocedure('public.founder_purchase_batches(int)') as f2,
