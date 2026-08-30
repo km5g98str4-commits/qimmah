@@ -278,6 +278,8 @@ export interface AdminStrings {
     colStatus: string
     colUses: string
     colDuration: string
+    /** قيمة عمود المدّة لصكّ شراء دائم. */
+    durationPermanent: string
     colCreatedBy: string
     colCreatedAt: string
     colReason: string
@@ -868,6 +870,7 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       colStatus: 'الحالة',
       colUses: 'الاستخدامات',
       colDuration: 'المدّة',
+      durationPermanent: 'دائم',
       colCreatedBy: 'أصدره',
       colCreatedAt: 'تاريخ الإصدار',
       colReason: 'السبب',
@@ -1124,6 +1127,7 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       colStatus: 'Status',
       colUses: 'Redemptions',
       colDuration: 'Duration',
+      durationPermanent: 'Permanent',
       colCreatedBy: 'Issued by',
       colCreatedAt: 'Issued on',
       colReason: 'Reason',

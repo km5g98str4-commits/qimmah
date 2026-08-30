@@ -523,7 +523,7 @@ export function CodesPanel({
                         {r.redemptionCount} / {r.maxRedemptions}
                       </td>
                       <td className="px-3 py-2 tabular-nums text-ink-500">
-                        {r.durationDays} {t.codes.days}
+                        {r.durationDays === null ? t.codes.durationPermanent : `${r.durationDays} ${t.codes.days}`}
                       </td>
                       <td className="px-3 py-2 text-ink-500">{r.createdReason}</td>
                       <td className="px-3 py-2 tabular-nums text-ink-500">{r.createdAt.slice(0, 10)}</td>

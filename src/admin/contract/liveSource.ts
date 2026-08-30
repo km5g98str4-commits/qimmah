@@ -39,6 +39,8 @@ import {
   CODE_REDEMPTIONS_RPC,
   CODE_BATCHES_RPC,
   CODE_BATCH_ISSUE_RPC,
+  PURCHASE_BATCHES_RPC,
+  PURCHASE_BATCH_ISSUE_RPC,
   EMAIL_HEALTH_RPC,
   GRANTS_BY_SOURCE_RPC,
   FOOD_SUBMISSIONS_RPC,
@@ -50,6 +52,7 @@ import type {
   AdminCodePage,
   AdminCodeRow,
   CodeBatchRow,
+  PurchaseBatchRow,
   CodeRedemptionRow,
   EmailHealth,
   FailedOrderRow,
@@ -63,6 +66,7 @@ import type {
   ExecutiveSnapshot,
   IssuedCode,
   IssuedCodeBatch,
+  IssuedPurchaseBatch,
   MetricValue,
   OnboardingView,
   SeriesPoint,
@@ -505,7 +509,13 @@ export type WriteOutcome<T> = { readonly ok: true; readonly value: T } | { reado
 function toCodeRow(raw: Record<string, unknown>): AdminCodeRow | null {
   const status = CODE_STATUSES.find((v) => v === raw.status)
   if (typeof raw.code_id !== 'string' || typeof raw.created_at !== 'string' || !status) return null
-  if (typeof raw.duration_days !== 'number' || typeof raw.max_redemptions !== 'number') return null
+  if (typeof raw.max_redemptions !== 'number') return null
+  // [COMMERCE-W1-HARDENING] `duration_days = NULL` شكلٌ **مشروع** منذ صكوك الشراء
+  // (دائمة بلا مدّة). كان الحارس يردّه صفًّا مشوّهًا، وردُّ صفٍّ واحد يُسقط
+  // **الصفحة كلّها** (أدناه) — فأوّل صكّ شراء كان يُعمي لوحة الأكواد ومعها زرّ
+  // التعطيل، وهو مِفتاح الإطفاء الوحيد داخل المنتج لصكٍّ انكشف. والتشوّه الحقيقي
+  // (نصّ · undefined · NaN) ما زال يُردّ.
+  if (raw.duration_days !== null && typeof raw.duration_days !== 'number') return null
   if (typeof raw.redemption_count !== 'number') return null
   return {
     codeId: raw.code_id,
@@ -803,6 +813,71 @@ export async function loadCodeBatches(
     codesDisabled: numOrNull(r.codes_disabled),
     lastIssuedAt: txtOrNull(r.last_issued_at),
   }))
+}
+
+/**
+ * [COMMERCE-W1] مخزون صكوك الشراء مجمّعًا بالوسم. مفصولٌ عن حملات الوصول
+ * الموقوت: «غير مستردّ» أقصى ما نعلمه — بلا webhook لا ندّعي «متبقٍ في سلة».
+ */
+export async function loadPurchaseBatches(
+  decision: AdminRoleDecision,
+  limit = 100,
+): Promise<ListResult<PurchaseBatchRow>> {
+  return readRows(decision, PURCHASE_BATCHES_RPC, { p_limit: limit }, (r) => ({
+    label: txtOrNull(r.label),
+    codesIssued: numOrNull(r.codes_issued),
+    codesRedeemed: numOrNull(r.codes_redeemed),
+    codesDisabledUnredeemed: numOrNull(r.codes_disabled_unredeemed),
+    codesExpiredUnredeemed: numOrNull(r.codes_expired_unredeemed),
+    codesUnredeemed: numOrNull(r.codes_unredeemed),
+    lastIssuedAt: txtOrNull(r.last_issued_at),
+    lastRedeemedAt: txtOrNull(r.last_redeemed_at),
+  }))
+}
+
+/**
+ * [COMMERCE-W1] يُصدر **دفعة صكوك شراء** لمخزون سلة تحت وسم حملة إلزامي.
+ *
+ * ⚠️ النصوص الخام تعود هنا **مرّة واحدة ولا تُخزَّن** — هذا مصدر التصدير لسلة:
+ * تُصدَّر الآن أو لا تُستعاد أبدًا (الجدول بصمات مملّحة فقط). **وردٌّ بلا قائمة
+ * صكوك ليس نجاحًا**.
+ */
+export async function issuePurchaseBatch(
+  decision: AdminRoleDecision,
+  input: { reason: string; label: string; count: number; expiresAt?: string | null },
+): Promise<WriteOutcome<IssuedPurchaseBatch>> {
+  if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(PURCHASE_BATCH_ISSUE_RPC, {
+      p_reason: input.reason,
+      p_label: input.label,
+      p_count: input.count,
+      p_expires_at: input.expiresAt ?? null,
+    })
+    if (error) return { ok: false, live: classify(error) }
+    const rec = (data ?? {}) as Record<string, unknown>
+    const rawCodes = rec.codes
+    if (!Array.isArray(rawCodes) || rawCodes.length === 0) return { ok: false, live: 'failed' }
+    const codes: string[] = []
+    for (const c of rawCodes) {
+      if (typeof c !== 'string' || c === '') return { ok: false, live: 'failed' }
+      codes.push(c)
+    }
+    return {
+      ok: true,
+      value: {
+        label: typeof rec.label === 'string' ? rec.label : input.label,
+        count: typeof rec.count === 'number' && Number.isFinite(rec.count) ? rec.count : codes.length,
+        expiresAt: typeof rec.expires_at === 'string' ? rec.expires_at : null,
+        codes,
+        issuedAt: typeof rec.issued_at === 'string' ? rec.issued_at : new Date().toISOString(),
+      },
+    }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
 }
 
 /** «من استهلك هذا الكود ومتى» — كان عدّادًا، وصار سجلًّا. */

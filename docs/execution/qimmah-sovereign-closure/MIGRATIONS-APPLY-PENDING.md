@@ -65,6 +65,27 @@
 | ٢٣ | `20260826120002_founder_snapshot_signed_in_today.sql` | **تعيد تعريف** `founder_executive_snapshot()` بمفتاح `signedInToday` | **١٧ إلزامًا** |
 | ٢٤ | `20260826120003_founder_user_detail_history.sql` | **تعيد تعريف** `founder_user_detail(uuid)` بـ`commerce.codeHistory` و`foodSubmissions` | **١٧ و١٨ إلزامًا** |
 | ٢٥ | `20260826120004_founder_pending_orders.sql` | `founder_pending_orders` — أحداث سلة العالقة (`received`/`verified`) | ٨ · ١٦ |
+| ٢٦ | `20260829120001_purchase_credentials.sql` | **صكّ الشراء** — `grant_purpose` على `access_codes` · `private.issue_credential_core` · `grant_premium_from_code` (السلطة الواحدة) · **تعيد تعريف** `redeem_core` بفرع الشراء · `founder_issue_purchase_batch` · `founder_purchase_batches` | **٢٠ و٢١ إلزامًا** |
+| ٢٧ | `20260830120001_premium_authority_hardening.sql` | **تصليب سلطة Premium** — `entitlements.purchase_ledger_id` + فهرس فريد (شراءٌ واحد ⇒ منحة حيّة واحدة) · مُشغِّل يمنع الهبوط عن Premium · **تعيد تعريف** `grant_premium_from_code` | **٢٦ إلزامًا** |
+
+> ⛔ **والخطوة ٢٧ بعد ٢٦ قطعًا.** تعيد تعريف `private.grant_premium_from_code`
+> التي تُنشئها ٢٦، وتضيف عمودًا يقرأه جسدها الجديد. عكس الترتيب يترك السلطة
+> بلا ربطٍ بشرائها — أي **بلا سدّ إعادة تدوير البريد** — بلا خطأ واحد.
+>
+> **تحقّق بعد ٢٦:**
+> ```sql
+> select to_regprocedure('public.founder_issue_purchase_batch(text, text, int, timestamptz)') is not null as issuance,
+>        exists (select 1 from information_schema.columns
+>                 where table_name = 'access_codes' and column_name = 'grant_purpose') as purpose_col;
+> -- المتوقَّع: issuance = true · purpose_col = true
+> ```
+>
+> **تحقّق بعد ٢٧:**
+> ```sql
+> select to_regclass('public.entitlements_one_live_premium_per_purchase') is not null as unique_index,
+>        exists (select 1 from pg_trigger where tgname = 'entitlements_block_premium_downgrade') as downgrade_guard;
+> -- المتوقَّع: كلاهما true. وإن كان أحدهما false فالسدّ غائب والصكّ الواحد يمنح مرارًا.
+> ```
 
 > ⛔ **والخطوتان ٢٣ و٢٤ بعد ١٧ قطعًا** (و٢٤ بعد ١٨ أيضًا: تقرأ `food_submissions`).
 > كلتاهما تعيد تعريف دالّة عرّفتها ١٧ — عكس الترتيب يكتب النسخة القديمة فوق
