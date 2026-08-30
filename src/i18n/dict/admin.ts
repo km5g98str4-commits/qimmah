@@ -322,6 +322,40 @@ export interface AdminStrings {
     colBatchDisabled: string
     colBatchLast: string
   }
+  /** [PART D/E] صكوك الشراء — Premium دائم، مستقلّة عن الأكواد الموقوتة. */
+  purchase: {
+    heading: string
+    note: string
+    issueHeading: string
+    labelLabel: string
+    labelPlaceholder: string
+    countLabel: string
+    countHint: (max: number) => string
+    reasonLabel: string
+    reasonPlaceholder: string
+    issueButton: string
+    issuing: string
+    writeFailed: string
+    issuedHeading: string
+    rows: string
+    /** التحذير الأبرز: لا استعادة بعد الآن. */
+    cannotRecover: string
+    exportCsv: string
+    dismiss: string
+    inventoryHeading: string
+    /** «غير مستردّ» لا «متبقٍ في سلة» — الصدق التشغيليّ. */
+    inventoryNote: string
+    inventoryEmpty: string
+    inventoryUnavailable: string
+    noLabel: string
+    colLabel: string
+    colIssued: string
+    colRedeemed: string
+    colUnredeemed: string
+    colDisabled: string
+    colExpired: string
+    killSwitchNote: string
+  }
   /** حالات الكود كما تشتقّها القاعدة. */
   codeStatus: Record<string, string>
   /** [ADMIN-CONV] حالات بلاغ الطعام — لا يُعرض المعرّف الخام. */
@@ -912,6 +946,37 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       colBatchDisabled: 'معطَّل',
       colBatchLast: 'آخر إصدار',
     },
+    purchase: {
+      heading: 'صكوك الشراء',
+      note: 'صكّ الشراء يفتح قِمّة Premium دائمًا لمن يستردّه. تُولَّد هنا دفعةً تحت وسم حملة (مثل SALLA-LAUNCH-001)، وتُصدَّر لتُرفع لاحقًا كمخزون رقميّ في سلة.',
+      issueHeading: 'إصدار دفعة',
+      labelLabel: 'وسم الحملة',
+      labelPlaceholder: 'SALLA-LAUNCH-001',
+      countLabel: 'العدد',
+      countHint: (max) => `من ١ إلى ${max} لكل دفعة`,
+      reasonLabel: 'السبب (للأثر الإداري)',
+      reasonPlaceholder: 'دفعة إطلاق سلة الأولى',
+      issueButton: 'أصدر الدفعة',
+      issuing: 'نُصدر…',
+      writeFailed: 'ما تمّ الإصدار. جرّب مرة ثانية.',
+      issuedHeading: 'الدفعة صدرت',
+      rows: 'صكّ',
+      cannotRecover: 'هذي المرّة الوحيدة اللي تظهر فيها الأكواد. صدّرها الحين — ما نقدر نستعيدها بعدين، ولا محفوظة عندنا نصًّا.',
+      exportCsv: 'صدّر CSV',
+      dismiss: 'تمّ — أخفِ الأكواد',
+      inventoryHeading: 'مخزون الدفعات',
+      inventoryNote: '«غير مستردّ» يعني صكًّا ما استُردّ بعد — لا نعرف أهو في مخزون سلة، ولا بيد مشترٍ، ولا انكشف. ما نسمّيه «متبقٍ في سلة».',
+      inventoryEmpty: 'لا دفعات شراء بعد.',
+      inventoryUnavailable: 'العدّ غير متاح الآن.',
+      noLabel: 'بلا وسم',
+      colLabel: 'الحملة',
+      colIssued: 'صادر',
+      colRedeemed: 'مستردّ',
+      colUnredeemed: 'غير مستردّ',
+      colDisabled: 'معطَّل (غير مستردّ)',
+      colExpired: 'منتهٍ (غير مستردّ)',
+      killSwitchNote: 'لتعطيل صكٍّ مفرد غير مستردّ (مِفتاح الإطفاء): افتح صفحة الأكواد وعطّله باسمه. التعطيل الدفعيّ لكامل الحملة غير مدعوم في نموذج السلطة الحالي.',
+    },
     codeStatus: {
       issued: 'صادر',
       redeemed: 'استُرد',
@@ -1166,6 +1231,37 @@ export const adminStrings: Record<Lang, AdminStrings> = {
       colBatchRemaining: 'Remaining',
       colBatchDisabled: 'Disabled',
       colBatchLast: 'Last issued',
+    },
+    purchase: {
+      heading: 'Purchase credentials',
+      note: 'A purchase credential unlocks Qimmah Premium permanently for whoever redeems it. Generate a batch here under a campaign label (e.g. SALLA-LAUNCH-001) and export it to upload later as digital-code inventory in Salla.',
+      issueHeading: 'Issue a batch',
+      labelLabel: 'Campaign label',
+      labelPlaceholder: 'SALLA-LAUNCH-001',
+      countLabel: 'Count',
+      countHint: (max) => `1 to ${max} per batch`,
+      reasonLabel: 'Reason (admin audit)',
+      reasonPlaceholder: 'First Salla launch batch',
+      issueButton: 'Issue batch',
+      issuing: 'Issuing…',
+      writeFailed: "That didn't go through. Try again.",
+      issuedHeading: 'Batch issued',
+      rows: 'credentials',
+      cannotRecover: 'This is the only time these codes are shown. Export them now — they cannot be recovered later, and we do not store them in plaintext.',
+      exportCsv: 'Export CSV',
+      dismiss: 'Done — hide codes',
+      inventoryHeading: 'Batch inventory',
+      inventoryNote: '"Unredeemed" means a credential not yet redeemed — we do not know whether it sits in Salla inventory, is with a buyer, or leaked. We do not call it "remaining in Salla".',
+      inventoryEmpty: 'No purchase batches yet.',
+      inventoryUnavailable: 'Counts unavailable right now.',
+      noLabel: 'No label',
+      colLabel: 'Campaign',
+      colIssued: 'Issued',
+      colRedeemed: 'Redeemed',
+      colUnredeemed: 'Unredeemed',
+      colDisabled: 'Disabled (unredeemed)',
+      colExpired: 'Expired (unredeemed)',
+      killSwitchNote: 'To disable a single unredeemed credential (kill switch): open the Codes page and disable it by name. Batch-wide disable of a whole campaign is not supported in the current authority model.',
     },
     codeStatus: {
       issued: 'Issued',

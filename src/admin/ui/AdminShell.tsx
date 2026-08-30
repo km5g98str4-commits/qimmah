@@ -34,6 +34,8 @@ import { AdminDenied } from './AdminDenied'
 import { AttentionPanel } from './AttentionPanel'
 import { CodesPanel } from './CodesPanel'
 import type { CodesPanelProps } from './CodesPanel'
+import { PurchaseBatchPanel } from './PurchaseBatchPanel'
+import type { PurchaseBatchPanelProps } from './PurchaseBatchPanel'
 import { FunnelChart, TrendChart } from './Charts'
 import { MetricCard } from './MetricCard'
 import { UserDetailPanel } from './UserDetail'
@@ -84,7 +86,7 @@ function PostureStrip({ platform }: { platform: PlatformPosture }) {
   )
 }
 
-type Tab = 'overview' | 'users' | 'codes' | 'ops' | 'charts'
+type Tab = 'overview' | 'users' | 'codes' | 'purchase' | 'ops' | 'charts'
 
 interface AdminShellProps {
   decision: AdminRoleDecision
@@ -111,6 +113,8 @@ interface AdminShellProps {
    * شاشة لا تفعل شيئًا أسوأ من تبويب غائب.
    */
   codes?: CodesPanelProps
+  /** [PART D/E] لوحة صكوك الشراء — تظهر حين تُمرَّر قدرتها فقط. */
+  purchase?: PurchaseBatchPanelProps
   /**
    * حالة القراءة الحيّة. **بلا قيمة ⇒ `'not-founder'`** — الافتراض الأقلّ ادّعاءً:
    * مكوّن يُرسَم بلا إخبار عن مصدره لا يجوز أن يقول «حيّ».
@@ -130,6 +134,7 @@ export function AdminShell({
   detailLive,
   detailOpen,
   codes,
+  purchase,
   live = 'not-founder',
 }: AdminShellProps) {
   const lang = useLang()
@@ -152,6 +157,7 @@ export function AdminShell({
     { id: 'users', label: t.shell.navUsers, icon: 'Users' },
     // يظهر حين تُمرَّر قدرته فقط — لا تبويب يَعِد بما لا يعمل.
     ...(codes ? [{ id: 'codes' as Tab, label: t.codes.heading, icon: 'KeyRound' }] : []),
+    ...(purchase ? [{ id: 'purchase' as Tab, label: t.purchase.heading, icon: 'Sparkles' }] : []),
     // [COMMISSIONING §4] غرفة العمليات — بلا شرط: الغلاف كلّه خلف
     // `isAdmin(decision)` أعلاه، فمن وصل هنا مؤسسٌ أو دعم. وكل قراءة داخلها
     // محروسة بالدور في الخادم كذلك، وتعلن غيابها بسببه المسمّى.
@@ -346,6 +352,9 @@ export function AdminShell({
 
       {/* ——— الأكواد ——— */}
       {tab === 'codes' && codes ? <div className="mt-4">{<CodesPanel {...codes} />}</div> : null}
+
+      {/* ——— صكوك الشراء [PART D/E] ——— */}
+      {tab === 'purchase' && purchase ? <div className="mt-4"><PurchaseBatchPanel {...purchase} /></div> : null}
 
       {/* ——— الاتجاهات ——— */}
       {tab === 'ops' ? <OperationsPanel lang={lang} decision={decision} /> : null}

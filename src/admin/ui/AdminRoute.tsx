@@ -28,7 +28,9 @@ import type { AdminRoleDecision } from '../auth/adminRole'
 import {
   issueAccessCode,
   issueAccessCodeBatch,
+  issuePurchaseBatch,
   loadCodeBatches,
+  loadPurchaseBatches,
   loadCodeRedemptions,
   loadLiveCodePage,
   loadLiveExecutiveSnapshot,
@@ -47,6 +49,8 @@ import type {
   ExecutiveSnapshot,
   IssuedCode,
   IssuedCodeBatch,
+  IssuedPurchaseBatch,
+  PurchaseBatchRow,
   MetricValue,
 } from '../contract/types'
 import { unavailable } from '../contract/types'
@@ -111,6 +115,13 @@ export function AdminRoute() {
   const [batches, setBatches] = useState<PanelList<CodeBatchRow>>({ kind: 'loading' })
   const batchesRunRef = useRef(0)
   const [issuedBatch, setIssuedBatch] = useState<IssuedCodeBatch | null>(null)
+  // ═══ [PART D/E] صكوك الشراء — دفعة/مخزون مستقلّ عن الأكواد الموقوتة ═══
+  const [purchaseBatches, setPurchaseBatches] = useState<PanelList<PurchaseBatchRow>>({ kind: 'loading' })
+  const purchaseBatchesRunRef = useRef(0)
+  const [issuedPurchase, setIssuedPurchase] = useState<IssuedPurchaseBatch | null>(null)
+  const [purchaseBusy, setPurchaseBusy] = useState(false)
+  const [purchaseWriteError, setPurchaseWriteError] = useState<LiveReadState | null>(null)
+  const [purchaseNonce, setPurchaseNonce] = useState(0)
   // سجلّ مستبدلي كود واحد مفتوح — الفتح فعل طلب، فالنداء يقع عنده لا مع الجدول.
   const [redemptions, setRedemptions] = useState<{ codeId: string; list: PanelList<CodeRedemptionRow> } | null>(null)
   const redemptionsRunRef = useRef(0)
@@ -242,6 +253,25 @@ export function AdminRoute() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allowed, auth.user?.id, codeNonce, nonce])
 
+  // ── [PART D/E] مخزون صكوك الشراء — يُعاد مع كل إصدار دفعة شراء وكل تحديث ──
+  useEffect(() => {
+    if (!allowed) {
+      setPurchaseBatches({ kind: 'loading' })
+      return
+    }
+    const run = ++purchaseBatchesRunRef.current
+    let alive = true
+    void (async () => {
+      const res = await loadPurchaseBatches(decision)
+      if (!alive || run !== purchaseBatchesRunRef.current) return
+      setPurchaseBatches(res.ok ? { kind: 'rows', rows: res.rows } : { kind: 'gap', why: res.live })
+    })()
+    return () => {
+      alive = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allowed, auth.user?.id, purchaseNonce, nonce])
+
   const refresh = useCallback(() => setNonce((n) => n + 1), [])
   const onSearch = useCallback((v: string) => setTyped(v), [])
   const onPage = useCallback((p: number) => setPage(Math.max(1, Math.trunc(p))), [])
@@ -342,6 +372,30 @@ export function AdminRoute() {
   )
   const onDismissIssuedBatch = useCallback(() => setIssuedBatch(null), [])
 
+  /**
+   * [PART D/E] إصدار دفعة صكوك شراء. **الأكواد الخام تعيش في الحالة وحدها** —
+   * تظهر مرّة، تُصدَّر، ويصرفها المؤسس. لا تخزين محلّي ولا سجلّ.
+   */
+  const onIssuePurchase = useCallback(
+    (input: { reason: string; label: string; count: number; expiresAt: string | null }) => {
+      setPurchaseBusy(true)
+      setPurchaseWriteError(null)
+      void (async () => {
+        const res = await issuePurchaseBatch(decision, input)
+        setPurchaseBusy(false)
+        if (!res.ok) {
+          setPurchaseWriteError(res.live)
+          return
+        }
+        setIssuedPurchase(res.value)
+        setPurchaseNonce((n) => n + 1)
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+  const onDismissIssuedPurchase = useCallback(() => setIssuedPurchase(null), [])
+
   /** [ADMIN-CONV] «من استخدمه؟» — فتح السجلّ هو لحظة النداء، وإغلاقه لا ينادي. */
   const onToggleRedemptions = useCallback(
     (codeId: string) => {
@@ -404,6 +458,15 @@ export function AdminRoute() {
         batches,
         redemptions,
         onToggleRedemptions,
+      }}
+      purchase={{
+        onIssue: onIssuePurchase,
+        issued: issuedPurchase,
+        onDismiss: onDismissIssuedPurchase,
+        batches: purchaseBatches,
+        live: purchaseBatches.kind === 'rows' ? 'live' : purchaseBatches.kind === 'gap' ? purchaseBatches.why : 'not-founder',
+        writeError: purchaseWriteError,
+        busy: purchaseBusy,
       }}
     />
   )
