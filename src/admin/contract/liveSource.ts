@@ -509,7 +509,13 @@ export type WriteOutcome<T> = { readonly ok: true; readonly value: T } | { reado
 function toCodeRow(raw: Record<string, unknown>): AdminCodeRow | null {
   const status = CODE_STATUSES.find((v) => v === raw.status)
   if (typeof raw.code_id !== 'string' || typeof raw.created_at !== 'string' || !status) return null
-  if (typeof raw.duration_days !== 'number' || typeof raw.max_redemptions !== 'number') return null
+  if (typeof raw.max_redemptions !== 'number') return null
+  // [COMMERCE-W1-HARDENING] `duration_days = NULL` شكلٌ **مشروع** منذ صكوك الشراء
+  // (دائمة بلا مدّة). كان الحارس يردّه صفًّا مشوّهًا، وردُّ صفٍّ واحد يُسقط
+  // **الصفحة كلّها** (أدناه) — فأوّل صكّ شراء كان يُعمي لوحة الأكواد ومعها زرّ
+  // التعطيل، وهو مِفتاح الإطفاء الوحيد داخل المنتج لصكٍّ انكشف. والتشوّه الحقيقي
+  // (نصّ · undefined · NaN) ما زال يُردّ.
+  if (raw.duration_days !== null && typeof raw.duration_days !== 'number') return null
   if (typeof raw.redemption_count !== 'number') return null
   return {
     codeId: raw.code_id,

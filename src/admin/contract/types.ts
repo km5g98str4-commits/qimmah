@@ -379,7 +379,8 @@ export interface AdminCodeRow {
   readonly codeId: string
   readonly label: string | null
   readonly status: CodeStatus
-  readonly durationDays: number
+  /** NULL = صكّ شراء دائم (بلا مدّة). ليس صفًّا مشوّهًا — شكلٌ مشروع. */
+  readonly durationDays: number | null
   readonly maxRedemptions: number
   readonly redemptionCount: number
   readonly startsAt: string
