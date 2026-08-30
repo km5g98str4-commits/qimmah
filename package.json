@@ -281,7 +281,8 @@
     "test:staging-sql": "node scripts/staging/sql-bundle-proof.mjs",
     "build:builtin-programs": "node scripts/build-builtin-programs-source.mjs",
     "test:dataset-b-runtime": "node scripts/run-dataset-b-runtime-proof.mjs",
-    "test:e2e:dataset-b": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/dataset-b-programs.mjs"
+    "test:e2e:dataset-b": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/dataset-b-programs.mjs",
+    "test:e2e:founder-exact": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/founder-exact-workout.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
