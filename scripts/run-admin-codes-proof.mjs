@@ -143,17 +143,21 @@ check('نواة الإصدار ليست لأي دور عميل', !grantOf('issue
  * لا تُذكر في أيّهما **تُسقط الفحص** — فلا تُضاف قدرةٌ بلا قرار عن دورها.
  */
 const bodies = await db.query(`select proname, prosrc from pg_proc where proname like 'founder\\_%'`)
-/** قراءات: يبلغها المؤسس **والدعم**. [ADMIN-CONV] زادت الحملات والمعلّق. */
+/** قراءات: يبلغها المؤسس **والدعم**. [ADMIN-CONV] زادت الحملات والمعلّق.
+ *  [COMMERCE-W1] وعدّ مخزون صكوك الشراء قراءةٌ كذلك. */
 const ADMIN_READS = [
   'founder_executive_snapshot', 'founder_user_page', 'founder_user_detail', 'founder_code_page',
   'founder_failed_orders', 'founder_pending_orders', 'founder_code_redemptions', 'founder_code_batches',
   'founder_email_health', 'founder_grants_by_source', 'founder_food_submissions',
+  'founder_purchase_batches',
 ]
-/** أفعال لا رجعة فيها: للمؤسس وحده. */
+/** أفعال لا رجعة فيها: للمؤسس وحده.
+ *  [COMMERCE-W1] إصدار صكوك الشراء فعلٌ — صكّ حامل لمنحة دائمة، لا يبلغه الدعم. */
 const FOUNDER_WRITES = [
   'founder_issue_access_code', 'founder_issue_code_batch',
   'founder_set_code_enabled', 'founder_revoke_access',
   'founder_review_food_submission',
+  'founder_issue_purchase_batch',
 ]
 const known = new Set([...ADMIN_READS, ...FOUNDER_WRITES])
 const unclassified = bodies.rows.filter((r) => !known.has(r.proname)).map((r) => r.proname)

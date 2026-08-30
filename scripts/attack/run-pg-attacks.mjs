@@ -17,7 +17,9 @@
 import { execFileSync } from 'node:child_process'
 import { clusterAvailable } from '../db/lib/pg-staging.mjs'
 
-const SUITES = ['test:attack-trial-race', 'test:attack-redeem-race', 'test:attack-gateway-enforcement']
+const SUITES = ['test:attack-trial-race', 'test:attack-redeem-race', 'test:attack-gateway-enforcement',
+  // [COMMERCE-W1] ذرّية صكّ الشراء تحت التزامن — منحة Premium دائمة، فالسباق أثمن.
+  'test:attack-purchase-race']
 
 if (!clusterAvailable()) {
   console.error('❌ لا عنقود Postgres — وهذه الخطوة **تفشل** بغيابه ولا تتخطّاه.')

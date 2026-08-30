@@ -436,6 +436,35 @@ export interface IssuedCodeBatch {
 }
 
 /**
+ * [COMMERCE-W1] دفعة صكوك شراء صدرت للتوّ — **الظهور الوحيد لنصوصها الخام**،
+ * وهو **مصدر التصدير لسلة**: تُنسخ الآن أو لا تُستعاد أبدًا (الجدول بصمات فقط).
+ * لا `durationDays`: صكّ الشراء دائم، ومفرد الاستخدام بنيويًّا.
+ */
+export interface IssuedPurchaseBatch {
+  readonly label: string
+  readonly count: number
+  readonly expiresAt: string | null
+  readonly codes: readonly string[]
+  readonly issuedAt: string
+}
+
+/**
+ * [COMMERCE-W1] مخزون صكوك شراء مجمّع بالوسم — صفّ من `founder_purchase_batches`.
+ * «غير مستردّ» **لا يدّعي مكان الصكّ**: بلا webhook لا نعلم أهو في مخزون سلة أم
+ * بيد مشترٍ لم يفعّل. الأعداد `number | null` — الغياب نوع لا صفر.
+ */
+export interface PurchaseBatchRow {
+  readonly label: string | null
+  readonly codesIssued: number | null
+  readonly codesRedeemed: number | null
+  readonly codesDisabledUnredeemed: number | null
+  readonly codesExpiredUnredeemed: number | null
+  readonly codesUnredeemed: number | null
+  readonly lastIssuedAt: string | null
+  readonly lastRedeemedAt: string | null
+}
+
+/**
  * حملة مجمّعة بالوسم — صفّ من `founder_code_batches`.
  * الأعداد `number | null` عمدًا: **الغياب نوع لا صفر** — عددٌ لم يصل ليس
  * «صفر أكواد»، والواجهة تعرضه «—».
