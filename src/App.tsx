@@ -112,14 +112,16 @@ function LoadingFallback() {
  * فلو أغلقنا عند كل تشغيل لأغلقناها في نفس اللحظة التي فُتحت فيها.
  */
 function PremiumGateLayer({ lang, route }: { lang: Lang; route: AppRoute }) {
-  const { blockedAction, closeGate } = useAccess()
+  // [PREMIUM-UX-W2] البوّابة تُفتح بمسارين: فعلٌ محجوب (`guard`) **أو** تفعيلٌ
+  // ظاهر (`openActivation`) من بطاقة الوصول/سطر الحالة. مسار محصَّن واحد، مدخلان.
+  const { blockedAction, activationOpen, closeGate } = useAccess()
   const lastRoute = useRef(route)
   useEffect(() => {
     if (lastRoute.current === route) return
     lastRoute.current = route
     closeGate()
   }, [route, closeGate])
-  if (!blockedAction) return null
+  if (!blockedAction && !activationOpen) return null
   return (
     <Suspense fallback={null}>
       <PremiumGate lang={lang} />

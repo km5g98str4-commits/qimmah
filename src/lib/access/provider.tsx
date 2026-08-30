@@ -29,6 +29,8 @@ import {
 export function EntitlementProvider({ children }: { children: ReactNode }) {
   const [entitlement, setSnapshot] = useState<EntitlementSnapshot>(getEntitlement)
   const [blockedAction, setBlockedAction] = useState<PaidAction | null>(null)
+  // [PREMIUM-UX-W2] فتح التفعيل من سطحٍ ظاهر — لا يحتاج فعلًا محجوبًا.
+  const [activationOpen, setActivationOpen] = useState(false)
   const [trialResume, setTrialResume] = useState<TrialOutcome | null>(null)
 
   // المخزن العادي هو مصدر الحقيقة؛ الحالة هنا مرآة له فتُعاد الواجهة عند تغيّره.
@@ -206,14 +208,18 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
   const clearTrialIntent = useCallback(() => { clearIntent(); setTrialResume(null) }, [])
   const acknowledgeTrialResume = useCallback(() => setTrialResume(null), [])
 
-  const closeGate = useCallback(() => setBlockedAction(null), [])
+  // [PREMIUM-UX-W2] يفتح **نفس** البوّابة المحصَّنة من سطحٍ ظاهر بلا فعلٍ محجوب.
+  const openActivation = useCallback(() => setActivationOpen(true), [])
+  // إغلاقٌ واحد للمدخلين: الفعل المحجوب والتفعيل الظاهر. فلا تبقى نافذة حيّة
+  // من مسارٍ نُسي إغلاقه (نفس سبب إغلاق البوّابة عند تبدّل المسار في App.tsx).
+  const closeGate = useCallback(() => { setBlockedAction(null); setActivationOpen(false) }, [])
 
   const value = useMemo<AccessContextValue>(
     () => ({
-      entitlement, can, guard, blockedAction, closeGate, redeem, refresh, beginTrial,
+      entitlement, can, guard, blockedAction, activationOpen, openActivation, closeGate, redeem, refresh, beginTrial,
       recordTrialIntent, hasTrialIntent, clearTrialIntent, trialResume, acknowledgeTrialResume, notePurchaseAttempt,
     }),
-    [entitlement, can, guard, blockedAction, closeGate, redeem, refresh, beginTrial,
+    [entitlement, can, guard, blockedAction, activationOpen, openActivation, closeGate, redeem, refresh, beginTrial,
      recordTrialIntent, hasTrialIntent, clearTrialIntent, trialResume, acknowledgeTrialResume, notePurchaseAttempt],
   )
 

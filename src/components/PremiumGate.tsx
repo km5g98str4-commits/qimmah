@@ -26,8 +26,11 @@ function actionLabel(action: PaidAction, s: ReturnType<() => typeof accessString
 }
 
 export function PremiumGate({ lang }: { lang: Lang }) {
-  const { blockedAction, closeGate, redeem, beginTrial, recordTrialIntent, entitlement, notePurchaseAttempt } = useAccess()
+  const { blockedAction, activationOpen, closeGate, redeem, beginTrial, recordTrialIntent, entitlement, notePurchaseAttempt } = useAccess()
   const s = accessStrings[lang] ?? accessStrings.ar
+  // [PREMIUM-UX-W2] البوّابة مفتوحة بأحد مدخلين: فعلٌ محجوب أو تفعيلٌ ظاهر.
+  const open = blockedAction !== null || activationOpen
+  const activationOnly = blockedAction === null && activationOpen
   const [codeOpen, setCodeOpen] = useState(false)
   const [code, setCode] = useState('')
   const [state, setState] = useState<RedeemUiState>('idle')
@@ -45,14 +48,18 @@ export function PremiumGate({ lang }: { lang: Lang }) {
   // ولا يعرف أين كان (WCAG 2.4.3). الالتقاط قبل `focus()` لا بعده — بعده يكون
   // العنصر المحفوظ هو زرّ الإغلاق نفسه.
   useEffect(() => {
-    if (!blockedAction) return
+    if (!open) return
     const previouslyFocused = typeof document !== 'undefined'
       ? (document.activeElement as HTMLElement | null)
       : null
     returnFocusRef.current = previouslyFocused
-    setCodeOpen(false)
+    // [PREMIUM-UX-W2] المدخل الظاهر يفتح مباشرةً على حقل الكود: من ضغط «عندك كود
+    // تفعيل؟» قصدَ إدخال كودٍ، فلا يُطالَب بضغطةٍ ثانية ليصل إليه. أمّا المدخل
+    // المحجوب فيبدأ نظيفًا كما كان — يعرض ما يفتحه الاشتراك قبل حقل الكود.
+    setCodeOpen(activationOnly)
     setCode('')
     setState('idle')
+    setTrialState('idle')
     closeRef.current?.focus()
     return () => {
       const target = returnFocusRef.current
@@ -61,11 +68,11 @@ export function PremiumGate({ lang }: { lang: Lang }) {
       // إعادةٌ إلى عنصر منزوع لا تفعل شيئًا، والفحص يجعل النيّة صريحة.
       if (target && typeof target.focus === 'function' && target.isConnected) target.focus()
     }
-  }, [blockedAction])
+  }, [open, activationOnly])
 
   // Escape يغلق، والتركيز محبوس داخل النافذة ما دامت مفتوحة (WCAG 2.1.2).
   useEffect(() => {
-    if (!blockedAction) return
+    if (!open) return
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { closeGate(); return }
       if (e.key !== 'Tab') return
@@ -78,9 +85,9 @@ export function PremiumGate({ lang }: { lang: Lang }) {
     }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [blockedAction, closeGate])
+  }, [open, closeGate])
 
-  if (!blockedAction) return null
+  if (!open) return null
 
   /**
    * [SOVEREIGN-COMMERCE-001] الحقل الفارغ يُجاب عنه بنصّ لا بزرٍّ باهت.
@@ -116,15 +123,21 @@ export function PremiumGate({ lang }: { lang: Lang }) {
             <Icon name="Sparkles" className="h-5 w-5" />
           </span>
           <div className="min-w-0 flex-1">
-            <h2 id="premium-gate-title" className="text-base font-black text-ink-900">{s.gateTitle}</h2>
-            <p className="mt-1 text-[0.8rem] font-bold text-ink-500">{actionLabel(blockedAction, s)}</p>
+            {/* [PREMIUM-UX-W2] العنوان يتبع المدخل: التفعيل الظاهر ليس «هذي الخطوة
+                محجوبة» بل «فعّل وصولك». والمحجوب يبقى كما كان — يُسمّي فعله. */}
+            <h2 id="premium-gate-title" className="text-base font-black text-ink-900">
+              {activationOnly ? s.gateActivationTitle : s.gateTitle}
+            </h2>
+            <p className="mt-1 text-[0.8rem] font-bold text-ink-500">
+              {blockedAction ? actionLabel(blockedAction, s) : s.gateActivationSubtitle}
+            </p>
           </div>
           <button ref={closeRef} type="button" onClick={closeGate} aria-label={s.gateSecondary} className="grid h-11 w-11 shrink-0 place-items-center rounded-lg text-ink-400 hover:bg-beige hover:text-ink-700">
             <Icon name="X" className="h-4 w-4" />
           </button>
         </div>
 
-        <p className="mt-3 text-sm leading-relaxed text-ink-500">{s.gateBody}</p>
+        <p className="mt-3 text-sm leading-relaxed text-ink-500">{activationOnly ? s.gateActivationBody : s.gateBody}</p>
 
         <div className="mt-5 space-y-2.5">
           <a

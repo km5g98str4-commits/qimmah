@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
+import { AccessCard } from '@/components/AccessCard'
 import { DataManagementPanel } from '@/components/DataManagementPanel'
 import { cn } from '@/lib/cn'
 import type { Lang, ThemePref, ThemeSchedule } from '@/lib/appPreferences'
@@ -160,34 +161,14 @@ export function ProfileV2({ lang, onNavigate }: ProfileV2Props) {
           <Row icon="Settings" label={t('الإعدادات والخصوصية', 'Settings & privacy')} onClick={() => setScreen('settings')} />
         </section>
 
-        {/* قِمّة Premium — الشراء يتمّ عند سلة بالكامل، لا دفع داخل التطبيق.
-            كان هذا سطرًا هادئًا بزرّ يحوّل إلى «الإعدادات» ولا شيء فيها عن
-            Premium — أي زرّ ميت بمظهر عرض. صار رابطًا حقيقيًا لوجهة واحدة
-            مصدرها `product.checkoutUrl`.
-            النبرة تبقى هادئة (§6): بلا تهويل ولا ندرة مصطنعة ولا سعر مكتوب
-            في المكوّن (§0.1 — سلة تعرض السعر). */}
-        {model.subscription.showQuietLine && model.subscription.enabled && (
-          <section className="rounded-3xl border border-line bg-surface p-4 shadow-card">
-            <div className="flex items-center gap-3">
-              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-primary-soft text-primary-c">
-                <Icon name="Sparkles" className="h-5 w-5" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-black text-ink-900">{model.subscription.name}</p>
-                <p className="mt-0.5 text-xs leading-relaxed text-ink-500">{model.subscription.text}</p>
-              </div>
-            </div>
-            <a
-              href={model.subscription.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary mt-3.5 flex min-h-[44px] w-full items-center justify-center gap-2 text-sm"
-            >
-              {model.subscription.cta}
-              <Icon name="ExternalLink" className="h-4 w-4" />
-            </a>
-          </section>
-        )}
+        {/* ═══ [PREMIUM-UX-W2] بطاقة الوصول — المدخل الأوّليّ الظاهر للتفعيل ═══
+            كان هنا سطر Premium **ثابت** يقول «احصل على Premium» **حتى لمن
+            يملكه أصلًا** — لأنه لا يقرأ الاستحقاق. صار بطاقةً تتبع حالة الخادم:
+            Premium يُعرض «مفعّل» لا «اشترِ»، والوصول الموقوت لا يُسمّى Premium
+            مشترى، والتجربة عدّادها، ومدخل الكود ظاهر في كل حالة غير المفعّلة.
+            السلطة كلّها للخادم (`useAccessSummary`)، ومدخل الكود يفتح البوّابة
+            المحصَّنة نفسها — لا مسار تفعيل ثانٍ. */}
+        <AccessCard lang={lang} />
       </div>
     </div>
   )

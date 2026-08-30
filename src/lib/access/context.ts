@@ -28,6 +28,19 @@ export interface AccessContextValue {
   guard: <A extends unknown[]>(action: PaidAction, run: (...args: A) => void) => (...args: A) => void
   /** الفعل الذي فتح البوّابة حاليًا (null = مغلقة). */
   blockedAction: PaidAction | null
+  /**
+   * ═══ [PREMIUM-UX-W2] فتح التفعيل **بلا فعلٍ محجوب** ═══
+   *
+   * كانت البوّابة تُفتح حصرًا حين يصطدم المستخدم بفعلٍ مدفوع (`guard`). فمن أراد
+   * إدخال كوده أو بدء تجربته **قبل** أن يصطدم بحائط لم يجد لها مدخلًا — وهو
+   * بالضبط ما يمنعه التكليف: «التفعيل مسار أوّليّ ظاهر، لا يُكتشف بالخطأ».
+   *
+   * فيُفتح المدخل نفسه (نفس البوّابة، نفس المسار المحصَّن، نفس معالجة الأخطاء)
+   * من سطحٍ ظاهر — بطاقة الوصول في الحساب، أو سطر الحالة. لا مسار ثانٍ يتباعد.
+   */
+  activationOpen: boolean
+  openActivation: () => void
+  /** يغلق البوّابة **والتفعيل** معًا — مدخلٌ واحد، إغلاقٌ واحد. */
   closeGate: () => void
   redeem: (code: string) => Promise<RedeemOutcome>
   refresh: () => Promise<void>
@@ -84,6 +97,8 @@ export const CLOSED_ACCESS: AccessContextValue = {
   can: () => false,
   guard: () => () => {},
   blockedAction: null,
+  activationOpen: false,
+  openActivation: () => {},
   closeGate: () => {},
   redeem: async () => 'service_error',
   refresh: async () => {},

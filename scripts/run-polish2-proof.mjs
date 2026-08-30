@@ -104,11 +104,16 @@ check('⟲ و`.tap-target` ما زال يعني ٤٤ بكسلًا فعلًا', T
 check('language toggle (compact) ≥44 tall', read('src/i18n/LanguageToggle.tsx').includes('min-h-[44px]'))
 check('close-workout button 44×44', workout.includes('h-11 w-11 place-items-center rounded-xl'))
 check('plate + warmup buttons use expanded hit-area', (workout.match(/before:-inset/g) ?? []).length >= 2)
-// [CTO-009/WP-3] كان يحرس زرّ «اعرف المزيد» النصّي، وقد استُبدل بنداء Premium
-// الذي يفتح سلة. **الضمان لم يتغيّر** — هدف لمس ≥44بكسل — والفحص وُجّه للعنصر
-// الذي حلّ محلّه بدل أن يُحذف: الرابط الخارجي نفسه، لا أي عنصر آخر في الشاشة.
-check('profile Premium CTA ≥44 tall', /min-h-\[44px\][^"]*"\s*\n?\s*>\s*\n?\s*\{model\.subscription\.cta\}/.test(read('src/views/ProfileV2.tsx'))
-  || /href=\{model\.subscription\.url\}[\s\S]{0,400}?min-h-\[44px\]/.test(read('src/views/ProfileV2.tsx')))
+// [CTO-009/WP-3 → PREMIUM-UX-W2] كان يحرس زرّ «اعرف المزيد» ثم نداء Premium في
+// ProfileV2. الآن نداء الشراء يعيش في بطاقة الوصول (AccessCard) عبر PurchaseCta،
+// وأزرارها كلها `min-h-[44px]`. **الضمان لم يتغيّر** — هدف لمس ≥44بكسل — والفحص
+// وُجّه للعنصر الذي حلّ محلّه: رابط الشراء الخارجي في AccessCard.
+{
+  const accessCard = read('src/components/AccessCard.tsx')
+  const purchaseCtaTall = /product\.checkoutUrl[\s\S]{0,400}?min-h-\[44px\]/.test(accessCard)
+    || /min-h-\[44px\][\s\S]{0,400}?product\.checkoutUrl/.test(accessCard)
+  check('profile Premium CTA ≥44 tall (بطاقة الوصول)', purchaseCtaTall)
+}
 
 // ── A: return hero is an honest single path (no separate-session promise) ──
 const model = read('src/lib/todayV2Model.ts')
