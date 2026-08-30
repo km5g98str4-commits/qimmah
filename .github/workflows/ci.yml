@@ -112,6 +112,14 @@ jobs:
       - name: Commissioning journeys (real Postgres, all migrations)
         run: npm run test:commissioning
 
+      # ═══ [RED-TEAM-FINAL] الأطقم التي تحتاج عنقودًا — تُشغَّل حيث يوجد ═══
+      # ثلاثة أطقم أمنية (ذرّية التجربة · ذرّية الكود · ختم البوّابة سلطةً في
+      # القاعدة) موصولةٌ بـ`test:gate` — والبوّابة تسبق إقلاع Postgres في هذا
+      # السير، فكانت تُعلن تخطّيها وتخرج بـ0 **فلم تُنفَّذ قطّ**. تُشغَّل هنا
+      # بعد العنقود، وغيابُه في هذه الخطوة فشلٌ أحمر لا تخطٍّ.
+      - name: Postgres-backed attack suites (trial race · redeem race · gateway stamp authority)
+        run: npm run test:attack-pg
+
       - name: Install Playwright Chromium
         run: npx playwright install --with-deps chromium
 

@@ -349,6 +349,40 @@ setRpc(fail({ code: '42501', message: 'founder_role_required' }))
 const issueDenied = await issueAccessCode(FOUNDER, { reason: 'x', durationDays: 14, maxRedemptions: 1 })
 check('الإصدار: منع الخادم يُسمّى ولا يُبتلع', !issueDenied.ok && issueDenied.live === 'denied-by-server')
 
+// ٨-د) ═══ [COMMERCE-W1-HARDENING] صكّ الشراء لا يُعمي لوحة الأكواد ═══
+// صكوك الشراء دائمة، فـ`duration_days = NULL`. وكان مُحوّل الصفوف يشترط رقمًا،
+// وردُّ صفٍّ واحد يُسقط **الصفحة كلّها** — فأوّل صكّ يُصدره المؤسس كان يُطفئ
+// اللوحة ومعها زرّ التعطيل، وهو مِفتاح الإطفاء الوحيد داخل المنتج لصكٍّ انكشف.
+// (والصفحة مرتّبة بالأحدث، فالصكّ الجديد يقع في أوّل صفحة تُحمَّل دائمًا.)
+const codeRow = (over: Record<string, unknown>) => ({
+  code_id: '11111111-1111-4111-8111-111111111111', label: 'SPECIAL-1', status: 'issued',
+  duration_days: 14, max_redemptions: 1, redemption_count: 0,
+  starts_at: '2026-08-30T00:00:00Z', expires_at: null, created_by: 'founder:x',
+  created_reason: 'proof', created_at: '2026-08-30T00:00:00Z', total_rows: 2, ...over,
+})
+setRpc(ok([
+  codeRow({}),
+  codeRow({ code_id: '22222222-2222-4222-8222-222222222222', label: 'SALLA-LAUNCH-001',
+            duration_days: null, grant_purpose: 'purchase' }),
+]))
+const mixedPage = await loadLiveCodePage(FOUNDER)
+check('صفحة فيها صكّ شراء (مدّة NULL) تُقرأ حيّةً — لا تُطفأ اللوحة',
+  mixedPage.live === 'live' && mixedPage.page.state === 'ready')
+check('وصفّاها كلاهما حاضر — الشراء لا يُسقِط الموقوت معه',
+  mixedPage.page.state === 'ready' && mixedPage.page.value.rows.length === 2)
+check('ومدّة الصكّ الدائم تصل null لا رقمًا مخترعًا',
+  mixedPage.page.state === 'ready' && mixedPage.page.value.rows[1].durationDays === null)
+// ⚔️ التأكيد المضادّ: التشوّه **الحقيقي** ما زال يُسقط الصفحة — القبول توسّع
+// بقدر الشكل المشروع لا أكثر، وإلّا لصار الحارس بابًا مفتوحًا.
+setRpc(ok([codeRow({ duration_days: 'forever' })]))
+const malformed = await loadLiveCodePage(FOUNDER)
+check('⚔️ ومدّة نصّية ما زالت تُسقط الصفحة — لا نصف قائمة أكواد',
+  malformed.live === 'failed' && malformed.page.state === 'unavailable')
+setRpc(ok([codeRow({ max_redemptions: null })]))
+const malformed2 = await loadLiveCodePage(FOUNDER)
+check('⚔️ وحدّ استخدام NULL يُسقطها كذلك — الاستثناء للمدّة وحدها',
+  malformed2.live === 'failed' && malformed2.page.state === 'unavailable')
+
 // ٨-د) رد ناجح: الحقول تمرّ، وكتل المنتج **تبقى غائبة**.
 const DETAIL_OK = {
   as_of: AS_OF,

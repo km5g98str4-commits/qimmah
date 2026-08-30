@@ -130,12 +130,16 @@ const ADMIN_READS = [
   'founder_executive_snapshot', 'founder_user_page', 'founder_user_detail', 'founder_code_page',
   'founder_failed_orders', 'founder_pending_orders', 'founder_code_redemptions', 'founder_code_batches',
   'founder_email_health', 'founder_grants_by_source', 'founder_food_submissions',
+  // [COMMERCE-W1] عدّ مخزون صكوك الشراء — قراءة، يبلغها المؤسس والدعم.
+  'founder_purchase_batches',
 ]
 /** أفعال لا رجعة فيها: للمؤسس وحده. */
 const FOUNDER_WRITES = [
   'founder_issue_access_code', 'founder_issue_code_batch',
   'founder_set_code_enabled', 'founder_revoke_access',
   'founder_review_food_submission',
+  // [COMMERCE-W1] إصدار صكوك الشراء — صكّ حامل لمنحة دائمة، لا يبلغه الدعم.
+  'founder_issue_purchase_batch',
 ]
 const known = new Set([...ADMIN_READS, ...FOUNDER_WRITES])
 const unclassified = bodies.rows.filter((r) => !known.has(r.proname)).map((r) => r.proname)
