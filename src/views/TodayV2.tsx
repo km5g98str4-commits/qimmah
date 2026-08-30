@@ -310,12 +310,16 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
 
         {/* [CTO-70] البند ٣ — بروتوكول التعثّر: يحلّ محلّ أول انتصار عند العودة
             بعد انقطاع، فلا تتزاحم بطاقتا ترحيب على نفس الشاشة. */}
+        {/* [WORKOUT-CLOSURE-001] علم «الأخفّ» يُكتب بنفس هوية قارئه
+            (`isEasyToday(uid)` في شاشة التمرين): الاستدعاء بلا وسيط كان يحلّ
+            المالك عبر `getLastUser()` بينما القارئ يحلّه من سياق المصادقة الحيّ
+            — فيُكتب العلم تحت هوية ويُقرأ تحت أخرى، فلا يصل أو يصل لغير صاحبه. */}
         {model.state === 'returnAfterBreak' && (
           <MissedDayCard
             lang={lang}
             fullMin={model.durationMin}
             easyMin={easyMinutesFor(model.durationMin)}
-            onStartEasy={() => { enableEasyToday(); onNavigate('workout') }}
+            onStartEasy={() => { enableEasyToday(uid); onNavigate('workout') }}
           />
         )}
 
