@@ -250,6 +250,108 @@ try {
     check(`${label}: يُحفظ بأعداد ${expected.join('·')}`, JSON.stringify(p?.days.map((d) => d.n)) === JSON.stringify(expected), JSON.stringify(p?.days.map((d) => d.n)))
   }
 
+  // ══════════════════════════════════════════════════════════════════════════
+  // ⑤ المصفوفة الحيّة — [WORKOUT-CLOSURE-001]: كل برنامج، كل جلسة، ضغطة «ابدأ»
+  //    حقيقية وقراءة مقام حقيقية.
+  //
+  // ═══ الفجوة التي يغلقها هذا القسم ═══
+  // مراجعة أدلّة «١ من ١» وجدت أن يوم الـ٩ تمارين **لم يبدأ جلسةً في أي إثبات**:
+  // هذه الرحلة كانت تقف عند الخطة المحفوظة، ورحلة الاتّصال تبدأ جلسة خطة
+  // الإعداد فقط. فكانت تقارير «مُصلَح» صادقة عن نصفَي مسارٍ لم يلتقيا.
+  // هنا يلتقيان: البرامج الثمانية × كل جلساتها = ٢٨ ضغطة «ابدأ»، ولكلٍّ
+  // تأكيد أن مقام العدّاد الحيّ = عدد يوم الخطة المحفوظ = عدد Dataset B المعلن.
+  // ══════════════════════════════════════════════════════════════════════════
+  console.log('\n⑤ المصفوفة الحيّة — ٨ برامج × كل الجلسات: المقام الحيّ = المحفوظ = المعلَن')
+  {
+    /** العناوين كما تظهر للمستخدم، والأعداد كما أعلنتها Dataset B (يحرس تطابقَها
+     * مع المصدر المولَّد `test:dataset-b-runtime` ⑦ — فالتكرار هنا تثبيتٌ للعقد
+     * في طبقة المتصفّح لا مصدرًا ثانيًا يشيخ بصمت). */
+    const MATRIX = [
+      [/علوي\s*\/\s*سفلي — ٤ أيام/, 'علوي/سفلي ٤ أيام', [9, 6, 9, 6]],
+      [/جسم كامل — ٣ أيام/, 'جسم كامل ٣ أيام', [7, 7, 7]],
+      [/دفع \/ سحب \/ أرجل — ٦ أيام/, 'دفع/سحب/أرجل ٦ أيام', [6, 6, 6, 6, 6, 6]],
+      [/دفع \/ سحب \/ أرجل — ٣ أيام/, 'دفع/سحب/أرجل ٣ أيام', [6, 6, 6]],
+      [/علوي \/ سفلي \/ جسم كامل — ٣ أيام/, 'علوي/سفلي/جسم كامل ٣ أيام', [8, 6, 7]],
+      [/جسم كامل — ٢ أيام/, 'جسم كامل ٢ أيام للمبتدئ', [6, 6]],
+      [/علوي \/ سفلي — ٣ أيام بالتناوب/, 'علوي/سفلي ٣ أيام بالتناوب', [9, 6, 9, 6]],
+      [/أجهزة للمبتدئ — ٣ أيام/, 'أجهزة للمبتدئ ٣ أيام', [6, 6, 6]],
+    ]
+    const counterOf = () => page.evaluate(() => {
+      const el = document.querySelector('[data-session-counter]')
+      if (!el) return null
+      const norm = el.textContent.replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+      const m = norm.match(/(\d+)\s*من\s*(\d+)/)
+      return m ? { i: Number(m[1]), n: Number(m[2]) } : null
+    })
+    for (const [re, label, expected] of MATRIX) {
+      await openTemplateStep(page)
+      const found = await page.evaluate((src) => {
+        const matcher = new RegExp(src)
+        const b = [...document.querySelectorAll('button')].find((x) => (x.innerText || '').includes('أجهزة وكيبل فقط') && matcher.test((x.innerText || '').split('\n')[0]))
+        if (!b) return false
+        b.click()
+        return true
+      }, re.source)
+      check(`${label}: البطاقة موجودة`, found)
+      await settle(page, 900)
+      await page.evaluate(() => {
+        const b = [...document.querySelectorAll('button')].find((x) => (x.innerText || '').trim() === 'تأكيد')
+        if (b) b.click()
+      })
+      await settle(page, 700)
+      await tap(page, /^حفظ مؤقت$|^تم الحفظ$/)
+      await settle(page, 700)
+      if (await activateGate(page)) { await settle(page, 500); await tap(page, /^حفظ مؤقت$|^تم الحفظ$/) }
+      await settle(page, 1100)
+      const saved = await readPlan()
+      check(`${label}: المحفوظ = المعلَن ${expected.join('·')}`,
+        Boolean(saved) && JSON.stringify(saved.days.map((d) => d.n)) === JSON.stringify(expected),
+        JSON.stringify(saved?.days.map((d) => d.n)))
+      if (!saved) continue
+
+      // كل جلسات البرنامج تُبدأ فعلًا من شبكة الأيام — لا من زرّ اليوم وحده.
+      await page.evaluate(() => { window.location.hash = '#/workout' })
+      await settle(page, 1300)
+      const denominators = []
+      // صفوف الأيام أزرار بذاتها — «بقية الأيام» في شاشة التمرين، صفّ لكل يوم
+      // خطة بترتيبها، وضغطه يمرّ بنفس `startDay` الذي يمرّ به زرّ اليوم.
+      const startDayRow = (idx) => page.evaluate((i) => {
+        const rows = [...document.querySelectorAll('[data-testid="workout-plan-day"]')]
+        if (!rows[i]) return false
+        rows[i].click()
+        return true
+      }, idx)
+      for (let di = 0; di < saved.days.length; di += 1) {
+        let started = await startDayRow(di)
+        if (!started) { denominators.push('no-row'); continue }
+        await settle(page, 900)
+        if (await activateGate(page)) {
+          await settle(page, 500)
+          started = await startDayRow(di)
+          await settle(page, 900)
+        }
+        const skip = page.locator('[data-testid="warmup-skip"]')
+        if (await skip.isVisible().catch(() => false)) {
+          await skip.click({ force: true })
+          await settle(page, 900)
+        }
+        const shot = await counterOf()
+        denominators.push(shot ? shot.n : null)
+        // ✕ أيقوني — يُنقر باسمه الوصولي لا بنصّه (لا نصّ له).
+        await page.evaluate(() => {
+          const x = document.querySelector('button[aria-label="إغلاق"]')
+          if (x) x.click()
+        })
+        await settle(page, 700)
+      }
+      check(`${label}: مقام كل جلسة حيّة = عدد يومها المحفوظ`,
+        JSON.stringify(denominators) === JSON.stringify(expected),
+        `حيّ: ${JSON.stringify(denominators)} · متوقّع: ${JSON.stringify(expected)}`)
+      check(`${label}: لا جلسة حيّة انهارت إلى تمرين واحد`,
+        denominators.every((n) => typeof n === 'number' && n > 1), JSON.stringify(denominators))
+    }
+  }
+
   await ctx.close()
 } catch (err) {
   fail += 1
