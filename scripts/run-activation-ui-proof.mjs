@@ -100,7 +100,10 @@ check('لا تعتمد واجهة التفعيل على alert أو confirm', !/\
 check('محاكاة الالتفاف: نزع aria-modal يُكتشف', !gate.replace('aria-modal="true"', '').includes('aria-modal="true"'))
 
 console.log('\n② التركيز يُلتقط قبل الفتح ويُعاد عند الإغلاق (WCAG 2.4.3)')
-const focusBlock = block(gate, 'useEffect(() => {\n    if (!blockedAction) return', '}, [blockedAction])')
+// [PREMIUM-UX-W2] البوّابة تُفتح بمدخلين (فعلٌ محجوب أو تفعيلٌ ظاهر)، فحارس
+// الأثر صار `if (!open) return` وتبعيّته `[open, activationOnly]`. النيّة نفسها
+// (التقاط التركيز قبل الفتح، وإعادته في التفكيك) لم تتغيّر — تُقاس بحدودها الجديدة.
+const focusBlock = block(gate, 'useEffect(() => {\n    if (!open) return', '}, [open, activationOnly])')
 check('كتلة أثر الفتح موجودة بحدودها', focusBlock.length > 0)
 check('★ العنصر السابق يُلتقط **قبل** إعطاء التركيز لزرّ الإغلاق',
   focusBlock.indexOf('document.activeElement') >= 0
@@ -289,7 +292,10 @@ check('والتقليد يعكس الخادم: `QIMMAH-TEST-EXPIRED` صار يُ
   /'QIMMAH-TEST-EXPIRED': 'invalid'/.test(source))
 
 console.log('\n⑩ دورة حياة البوّابة — تُغلق عند تبدّل المسار')
-const layer = block(app, 'function PremiumGateLayer(', 'if (!blockedAction) return null')
+// [PREMIUM-UX-W2] الطبقة تُفتح الآن بمدخلين — `blockedAction || activationOpen` —
+// فحدّها الأدنى صار `if (!blockedAction && !activationOpen) return null`. مراقبة
+// المسار والإغلاق عند تبدّله لم يتغيّرا.
+const layer = block(app, 'function PremiumGateLayer(', 'if (!blockedAction && !activationOpen) return null')
 check('طبقة البوّابة موجودة بحدودها', layer.length > 0)
 check('★ الطبقة تراقب المسار وتغلق عند **تبدّله**',
   /route/.test(layer) && /closeGate\(\)/.test(layer) && /lastRoute/.test(layer),

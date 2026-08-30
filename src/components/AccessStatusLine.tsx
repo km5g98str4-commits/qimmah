@@ -27,6 +27,8 @@
 import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { Lang } from '@/lib/appPreferences'
+import { accessStrings } from '@/i18n/dict/access'
+import { useAccess } from '@/lib/access/useAccess'
 import { useAccessSummary } from '@/lib/access/useAccessSummary'
 
 export interface AccessStatusLineProps {
@@ -43,17 +45,24 @@ export interface AccessStatusLineProps {
 const SPEAKS: ReadonlySet<string> = new Set(['trial', 'trialExpired', 'revoked'])
 
 export function AccessStatusLine({ lang, signedIn }: AccessStatusLineProps) {
-  // ⚠️ الهوك يُستدعى **دائمًا** قبل أي خروج مبكّر — وهذا ليس أسلوبًا بل شرط
-  // صحّة: مؤقّت إعادة الحسم يعيش داخله، فتخطّيه شرطيًّا يُطفئ الصدق نفسه
-  // الذي رُكّب هذا المكوّن لأجله.
+  // ⚠️ الهوكان يُستدعيان **دائمًا** قبل أي خروج مبكّر — وهذا ليس أسلوبًا بل شرط
+  // صحّة: مؤقّت إعادة الحسم يعيش داخل `useAccessSummary`، فتخطّيه شرطيًّا يُطفئ
+  // الصدق نفسه الذي رُكّب هذا المكوّن لأجله.
   const summary = useAccessSummary(lang)
+  const { openActivation } = useAccess()
+  const s = accessStrings[lang] ?? accessStrings.ar
 
   if (!signedIn) return null
   if (!SPEAKS.has(summary.kind)) return null
   if (!summary.label) return null
 
+  // [PREMIUM-UX-W2] مدخل تفعيل **من أي شاشة** — لا يُكتشف بالاصطدام بحائط.
+  // للتجربة الجارية والمنتهية: كودٌ يُدخَل الآن. أمّا الإيقاف (`revoked`) فمنعٌ
+  // إداريٌّ لاصق لا يرفعه كود — فلا يُعرَض له مدخل يَعِد بما لا يقع.
+  const canActivate = summary.kind === 'trial' || summary.kind === 'trialExpired'
+
   return (
-    <p
+    <div
       data-testid="access-status-line"
       data-access-kind={summary.kind}
       role="status"
@@ -65,10 +74,20 @@ export function AccessStatusLine({ lang, signedIn }: AccessStatusLineProps) {
       )}
     >
       <Icon
-        name={summary.tone === 'blocked' ? 'ShieldOff' : summary.tone === 'ending' ? 'Clock' : 'Sparkles'}
+        name={summary.tone === 'blocked' ? 'Lock' : summary.tone === 'ending' ? 'Clock' : 'Sparkles'}
         className={cn('h-4 w-4 shrink-0', summary.tone === 'ending' ? 'text-warning' : 'text-ink-500')}
       />
-      <span>{summary.label}</span>
-    </p>
+      <span className="min-w-0 flex-1">{summary.label}</span>
+      {canActivate && (
+        <button
+          type="button"
+          data-testid="access-status-activate"
+          onClick={openActivation}
+          className="shrink-0 rounded-lg px-2 py-1 font-black text-primary-c underline-offset-2 hover:underline"
+        >
+          {s.haveCode}
+        </button>
+      )}
+    </div>
   )
 }

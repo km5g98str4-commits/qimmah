@@ -109,6 +109,33 @@ export interface AccessStrings {
   codeNeedsVerifiedEmail: string
 
   /**
+   * ═══ [PREMIUM-UX-W2] المدخل الظاهر للتفعيل ═══
+   * حين تُفتح البوّابة من بطاقة الوصول لا من فعلٍ محجوب، عنوانها **دعوة** لا
+   * حاجب: «فعّل وصولك» لا «هذي الخطوة محجوبة».
+   */
+  gateActivationTitle: string
+  gateActivationSubtitle: string
+  gateActivationBody: string
+
+  /**
+   * ═══ [PREMIUM-UX-W2] بطاقة الوصول — أوّل سطح يرى المستخدم حالته فيه ═══
+   * كل حالة سطرها الصادق: Premium **مفعّل بلا انتهاء**، والوصول الموقوت
+   * **مفتوح ولا يُسمّى Premium مشترى**، والتجربة عدّادها، والمنتهية **بياناتها
+   * محفوظة**. لا سعر (§0.1)، ولا لغة اشتراك، ولا «مدى الحياة».
+   */
+  cardPremiumBadge: string
+  cardPremiumNote: string
+  cardSpecialNote: string
+  cardTrialNote: string
+  cardExpiredNote: string
+  cardNoAccessTitle: string
+  cardNoAccessNote: string
+  /** «فعّل الآن» — نداء فعلٍ بارز بعد انتهاء التجربة. */
+  cardActivateCta: string
+  /** عنوان بطاقة الحساب — «وصولك». */
+  cardSectionTitle: string
+
+  /**
    * ═══ مؤشّر الوصول الحالي ═══
    * لم يكن في التطبيق سطر واحد يقول للمستخدم **ما وضعه الآن**: لا «عندك
    * Premium»، ولا عدّاد تجربة، ولا إشعار إيقاف. الحالة كانت تُقرأ للقرار
@@ -182,6 +209,20 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     redeemRateLimited: 'حاولت كثير في وقت قصير. خذ لك دقايق وجرّب بعدها.',
     codeNeedsVerifiedEmail: 'كودك تمام — بس لازم تأكّد بريدك أول. افتح رسالة التأكيد وبعدها ارجع جرّب.',
 
+    gateActivationTitle: 'فعّل وصولك',
+    gateActivationSubtitle: 'ابدأ تجربتك أو اكتب كود التفعيل',
+    gateActivationBody: 'عندك كود من حملة أو دعوة؟ اكتبه تحت وينفتح لك كل شي. وإذا اشتريت قِمّة Premium من سلة، حسابك يفتح بنفسه.',
+
+    cardPremiumBadge: 'مفعّل',
+    cardPremiumNote: 'يشمل تحديثات قِمّة — بلا اشتراك شهري',
+    cardSpecialNote: 'وصولك مفتوح حاليًا. عندك كود قِمّة Premium؟ فعّله وخلّه دائم.',
+    cardTrialNote: 'تقدر تفعّل قِمّة Premium بأي وقت.',
+    cardExpiredNote: 'بياناتك كلها محفوظة. فعّل قِمّة Premium وتكمّل من نفس المكان.',
+    cardNoAccessTitle: 'ابدأ مع قِمّة',
+    cardNoAccessNote: 'جرّب Premium ٧٢ ساعة مجانًا، أو اكتب كود التفعيل إذا عندك واحد.',
+    cardActivateCta: 'فعّل الآن',
+    cardSectionTitle: 'وصولك',
+
     statusChecking: 'نتحقّق من وصولك…',
     statusPremium: 'قِمّة Premium مفعّل',
     statusSpecial: 'وصولك مفتوح',
@@ -247,6 +288,20 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     trialCta: 'Try Premium for 72 hours',
     redeemRateLimited: "That's a lot of tries in a short window. Give it a few minutes and try again.",
     codeNeedsVerifiedEmail: 'Your code is fine — you just need to confirm your email first. Open the confirmation message, then try again.',
+
+    gateActivationTitle: 'Activate your access',
+    gateActivationSubtitle: 'Start your trial or enter an activation code',
+    gateActivationBody: 'Have a code from a campaign or invite? Enter it below and everything opens up. And if you bought Qimmah Premium on Salla, your account unlocks on its own.',
+
+    cardPremiumBadge: 'Active',
+    cardPremiumNote: 'Includes Qimmah updates — no monthly subscription',
+    cardSpecialNote: 'Your access is open right now. Have a Qimmah Premium code? Activate it to make it permanent.',
+    cardTrialNote: 'You can activate Qimmah Premium anytime.',
+    cardExpiredNote: 'All your data is saved. Activate Qimmah Premium to pick up right where you left off.',
+    cardNoAccessTitle: 'Start with Qimmah',
+    cardNoAccessNote: 'Try Premium free for 72 hours, or enter an activation code if you have one.',
+    cardActivateCta: 'Activate now',
+    cardSectionTitle: 'Your access',
 
     statusChecking: 'Checking your access…',
     statusPremium: 'Qimmah Premium is active',

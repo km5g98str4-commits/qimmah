@@ -103,10 +103,14 @@ check('تسميات §03 الخمس موجودة', ['اليوم', 'التمار�
 {
   const productCfg = read('src/config/product.ts')
   const model = read('src/lib/profileV2Model.ts')
-  const surfaces = (profileV2.match(/model\.subscription\.url/g) ?? []).length
-  check('سطح Premium واحد لا أكثر', surfaces === 1, `${surfaces}`)
+  // [PREMIUM-UX-W2] سطح Premium انتقل من كتلة ثابتة في ProfileV2 إلى بطاقة الوصول
+  // (AccessCard) الواحدة، وProfileV2 يفوّض إليها. النيّة نفسها — سطحٌ واحد بوجهةٍ
+  // واحدة مصدرها الإعدادات، بلا سعر ولا نصّ محظور — تُقاس في موضعها الجديد.
+  const accessCard = read('src/components/AccessCard.tsx')
+  const mounts = (profileV2.match(/<AccessCard\b/g) ?? []).length
+  check('سطح وصول واحد في الحساب — ProfileV2 يفوّض لبطاقة الوصول (مرّة واحدة)', mounts === 1, `${mounts}`)
   check('الوجهة من مصدر واحد لا نصّ مكتوب في المكوّن',
-    model.includes('url: product.checkoutUrl') && !/salla\.sa/i.test(profileV2))
+    accessCard.includes('product.checkoutUrl') && !/salla\.sa/i.test(accessCard) && !/salla\.sa/i.test(profileV2))
   // [OVERNIGHT-5] كان الفحص سطرًا واحدًا (`/checkoutUrl:.*salla\.sa/`)، فسقط
   // لحظة صارت القيمة متعدّدة الأسطر — **والوجهة لم تتغيّر عن سلة بحرف**. أي
   // أنه كان يقيس تنسيقًا لا مقصدًا. فيُستخرَج الآن **القيمة** ويُفحص مضمونها.
@@ -128,12 +132,15 @@ check('تسميات §03 الخمس موجودة', ['اليوم', 'التمار�
   // محاكاة الالتفاف: جذر المتجر وحده يجب أن يسقط فحص المنتج.
   check('ولو عادت الوجهة جذرًا لسقط الفحص أعلاه — فهو ليس تحصيل حاصل',
     !/p1181109938/.test("checkoutUrl: 'https://salla.sa/Qimmahsa',"))
-  check('الرابط الخارجي محمي بـnoopener', /rel="noopener noreferrer"/.test(profileV2))
+  check('الرابط الخارجي محمي بـnoopener', /rel="noopener noreferrer"/.test(accessCard))
   check('لا دفع داخل التطبيق ولا مزوّد ثالث',
-    !/stripe|revenuecat|applepay|in-app purchase/i.test(profileV2 + model + productCfg))
-  // النصّ المعتمد وحده (§0.1) — والممنوع يُفحص في المكوّن والنموذج معًا.
-  check('النصّ المعتمد لـPremium حاضر', model.includes('يشمل تحديثات قِمّة — بلا اشتراك شهري'))
+    !/stripe|revenuecat|applepay|in-app purchase/i.test(accessCard + profileV2 + model + productCfg))
+  // النصّ المعتمد وحده (§0.1) — والممنوع يُفحص في المكوّن والنموذج والقاموس معًا.
+  const accessDict = read('src/i18n/dict/access.ts')
+  check('النصّ المعتمد لـPremium حاضر',
+    accessDict.includes('يشمل تحديثات قِمّة — بلا اشتراك شهري') && model.includes('يشمل تحديثات قِمّة — بلا اشتراك شهري'))
   const userFacing = model.replace(/\/\/[^\n]*/g, '') + profileV2.replace(/\{\/\*[\s\S]*?\*\/\}/g, '')
+    + accessCard.replace(/\/\/[^\n]*/g, '')
   check('لا «مدى الحياة» ولا lifetime في سطح المستخدم',
     !/مدى الحياة|lifetime|كل التحديثات الحالية/i.test(userFacing))
   // §0.1: السعر يُقرأ من مصدره الوحيد — وسلة هي من تعرضه اليوم.

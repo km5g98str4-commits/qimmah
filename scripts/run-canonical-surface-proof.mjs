@@ -55,7 +55,21 @@ const LIVE = new Set(
   Object.keys(result.metafile.inputs).filter((p) => p.startsWith('src/')).map((p) => p.replace(/\\/g, '/')),
 )
 check(`الرسم مبنيّ ويحمل وحدات حيّة (${LIVE.size})`, LIVE.size > 100)
-check('الرسم ليس شاملًا لكل ملف على القرص (وإلا لم يميّز شيئًا)', LIVE.size < 446)
+// ⚠️ **لا عدد سحريّ.** كان الحدّ `< 446` رقمًا مجمّدًا عند لحظة كتابته، فأيّ
+// مكوّن حيّ جديد يبلغه يُسقط الحارس بلا عيب — وهو ما وقع فعلًا. النيّة الحقيقية:
+// الرسم **مجموعة جزئية فعلية** من مصادر القرص (ثمّة ملفّات ميتة خارجه)، فتُقاس
+// مقابل عدّ القرص الحيّ لا مقابل رقم. الأدلّة الأصيلة على التمييز تبقى في §② و§④ب.
+const allSrc = (dir, acc = []) => {
+  for (const entry of readdirSync(resolve(root, dir))) {
+    const rel = `${dir}/${entry}`
+    if (statSync(resolve(root, rel)).isDirectory()) allSrc(rel, acc)
+    else if (/\.(ts|tsx)$/.test(entry)) acc.push(rel)
+  }
+  return acc
+}
+const TOTAL_SRC = allSrc('src').length
+check(`الرسم مجموعة جزئية فعلية من مصادر القرص — ثمّة ميت خارجه (${LIVE.size} < ${TOTAL_SRC})`,
+  LIVE.size < TOTAL_SRC)
 
 console.log('\n② المالك الحيّ لكل سطح مزدوج — مثبت من الرسم')
 for (const s of SURFACES) {
