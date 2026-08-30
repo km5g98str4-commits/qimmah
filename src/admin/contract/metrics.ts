@@ -65,6 +65,16 @@ export const CODE_BATCHES_RPC = 'founder_code_batches'
  * تُنشئ حِملًا زائدًا فيصير النداء السداسي القائم ملتبسًا (رأس `20260824120005`).
  */
 export const CODE_BATCH_ISSUE_RPC = 'founder_issue_code_batch'
+/**
+ * [COMMERCE-W1] مخزون صكوك الشراء — قراءة، يبلغها المؤسس والدعم.
+ * منفصلة عن حملات الوصول الموقوت: عدّها بمفردات لا تدّعي مكان الصكّ.
+ */
+export const PURCHASE_BATCHES_RPC = 'founder_purchase_batches'
+/**
+ * [COMMERCE-W1] إصدار دفعة صكوك شراء لمخزون سلة — **فعل، للمؤسس وحده**.
+ * الصكّ حاملٌ لمنحة Premium دائمة، فوسمه إلزامي ومفرد الاستخدام بنيويًّا.
+ */
+export const PURCHASE_BATCH_ISSUE_RPC = 'founder_issue_purchase_batch'
 export const EMAIL_HEALTH_RPC = 'founder_email_health'
 export const GRANTS_BY_SOURCE_RPC = 'founder_grants_by_source'
 export const FOOD_SUBMISSIONS_RPC = 'founder_food_submissions'
