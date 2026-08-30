@@ -389,7 +389,15 @@ function workoutPlanShapeOk(v: unknown): boolean {
   if (!isPlainObject(v)) return false
   if (!Array.isArray(v.days)) return false
   if (v.templateId !== undefined && typeof v.templateId !== 'string') return false
-  return v.days.every((d) => isPlainObject(d))
+  // [WORKOUT-CLOSURE-001] اليوم بلا مصفوفة تمارين سليمة سجلٌّ تالف لا يوم قصير:
+  // كان الفحص يقبل يومًا فقد `exercises` (أو حملها بغير مصفوفة)، فيعبر البوّابة
+  // ويصل شاشة التمرين بعدد كاذب. العنصر غير الكائن داخل المصفوفة نفس الحكم.
+  return v.days.every(
+    (d) =>
+      isPlainObject(d) &&
+      Array.isArray((d as Record<string, unknown>).exercises) &&
+      ((d as Record<string, unknown>).exercises as unknown[]).every(isPlainObject),
+  )
 }
 
 /**

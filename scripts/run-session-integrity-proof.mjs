@@ -12,7 +12,12 @@ import { tmpdir } from 'node:os'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const root = resolve(__dirname, '..')
 
-const SOURCE_FILES = ['src/views/WorkoutView.tsx', 'src/components/WorkoutMode.tsx']
+const SOURCE_FILES = [
+  'src/views/WorkoutView.tsx',
+  'src/components/WorkoutMode.tsx',
+  // [WORKOUT-CLOSURE-001] كاتب علم «الأخفّ» — يُفحص أنه يكتب بهوية قارئه.
+  'src/views/TodayV2.tsx',
+]
 const sources = Object.fromEntries(
   SOURCE_FILES.map((p) => [p, readFileSync(join(root, p), 'utf8')]),
 )

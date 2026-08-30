@@ -23,7 +23,15 @@
  */
 import { generatePlan } from '@/lib/planGenerator'
 import { defaultProfile } from '@/lib/calculators'
-import { EASY_MIN_EXERCISES, easyExerciseCount, sessionExerciseCount } from '@/lib/easySession'
+import {
+  EASY_MIN_EXERCISES,
+  clearEasyToday,
+  easyExerciseCount,
+  enableEasyToday,
+  isEasyToday,
+  sessionExerciseCount,
+} from '@/lib/easySession'
+import { readCustomization } from '@/lib/customization'
 import { workoutScreenStrings } from '@/i18n/dict/workoutScreen'
 import type { Profile } from '@/types/profile'
 
@@ -183,6 +191,104 @@ check('⟲ عودة سبب اقتطاع تلقائي تُلتقط باسمها',
 // ⟲-٥ `easyExerciseCount` نفسها محروسة: النسبة تعمل فوق الأرضية.
 check('⟲ الأرضية لا تبتلع النسبة — ما فوقها يتبعها',
   easyExerciseCount(12, 60, 30) === 6 && easyExerciseCount(12, 60, 5) === EASY_MIN_EXERCISES)
+
+console.log('\n⑥ علم «الأخفّ» يُكتب بهوية قارئه — [WORKOUT-CLOSURE-001]')
+/**
+ * ═══ العطل المغلق ═══
+ * الكاتب (`TodayV2`: زرّ «ابدأ بنسخة أخفّ») كان يستدعي `enableEasyToday()` بلا
+ * هوية، فيحلّ المالك عبر `getLastUser()`؛ والقارئ (`WorkoutView`:
+ * `isEasyToday(userId)`) يحلّه من سياق المصادقة الحيّ. خوارزميّتا حلّ لهوية
+ * واحدة = صنف «أحيانًا» بعينه: علمٌ يُكتب تحت مفتاح ويُقرأ تحت آخر.
+ */
+const todaySrc = __SOURCES__['src/views/TodayV2.tsx']
+  .replace(/\/\*[\s\S]*?\*\//g, ' ')
+  .replace(/\{\/\*[\s\S]*?\*\/\}/g, ' ')
+  .replace(/^[ \t]*\/\/.*$/gm, ' ')
+check('الكاتب يمرّر هوية صريحة: `enableEasyToday(uid)`',
+  /enableEasyToday\(uid\)/.test(todaySrc) && !/enableEasyToday\(\)/.test(todaySrc))
+check('والقارئ يقرأ بنفس مصدر الهوية: `isEasyToday(userId)`',
+  /isEasyToday\(userId\)/.test(view))
+// وظيفيًا فوق كعب التخزين: الهوية تعزل، والكتابة بلا هوية لا تصل صاحب الحساب.
+{
+  clearEasyToday('user-a')
+  clearEasyToday(null)
+  enableEasyToday('user-a')
+  check('الكتابة بهوية تصل قارئها ولا تتسرّب للضيف',
+    isEasyToday('user-a') && !isEasyToday(null))
+  clearEasyToday('user-a')
+  // ⟲ صنف العطل حقيقي لا نظريًا: الكتابة بلا هوية (لا مستخدم أخير ⇒ ضيف)
+  //    لا يراها قارئ الحساب — وهو بالضبط ما كان يقع في الشاشة.
+  enableEasyToday(undefined)
+  check('⟲ الكتابة بلا هوية تضلّ عن قارئ الحساب — فالفحص البنيوي أعلاه ليس ترفًا',
+    !isEasyToday('user-a') && isEasyToday(null))
+  clearEasyToday(null)
+}
+// ⟲ عودة الاستدعاء العاري إلى الشاشة تُلتقط بالنمط نفسه.
+check('⟲ عودة `enableEasyToday()` العارية تُلتقط باسمها',
+  /enableEasyToday\(\)/.test(`${todaySrc}\n onStartEasy={() => { enableEasyToday(); onNavigate('workout') }}`)
+  && !/enableEasyToday\(\)/.test(todaySrc))
+
+console.log('\n⑦ بوّابة شكل الخطة عند القراءة — اليوم المبتور لا يعبر')
+/**
+ * ═══ الثغرة المغلقة ═══
+ * `workoutPlanShapeOk` كان يفحص أن الأيام كائنات ولا يفحص `exercises` — فيوم
+ * فقدَ مصفوفته (كتابة قديمة/تلف) كان يعبر بوّابة التلف ثم **يُفجّر** الشاشة
+ * (`day.exercises.length` على undefined) أو يصل بعدد كاذب. الآن: سجلّ تالف
+ * يُعلن تلفه ويُستبدل بالافتراضي **الموسوم** — تدهور معلَن لا انهيار صامت.
+ */
+{
+  const KEY = 'qimmah:customization:v1'
+  const healthyDay = {
+    id: 'd1', nameAr: 'اليوم 1', nameEn: 'Day 1',
+    exercises: Array.from({ length: 9 }, (_, i) => ({ id: `d1-x${i}`, exerciseId: `x${i}`, order: i, sets: 3, reps: '8', restSec: 90 })),
+  }
+  const writeCz = (plan: unknown) => window.localStorage.setItem(KEY, JSON.stringify({ workoutPlan: plan }))
+
+  writeCz({ templateId: 'tpl', days: [healthyDay] })
+  const healthy = readCustomization()
+  check('خطة سليمة (٩ تمارين) تعبر كاملةً',
+    healthy.state === 'saved' && healthy.customization.workoutPlan.days[0]?.exercises.length === 9,
+    `state=${healthy.state}`)
+
+  writeCz({ templateId: 'tpl', days: [{ id: 'd1', nameAr: 'اليوم 1', nameEn: 'Day 1' }] })
+  const truncated = readCustomization()
+  check('يوم بلا مصفوفة تمارين ⇒ تلف معلَن وافتراضي موسوم — لا عدد كاذب',
+    truncated.state !== 'saved' && truncated.reason === 'shape' && truncated.customization.isDefault === true,
+    `state=${truncated.state} reason=${truncated.reason}`)
+
+  writeCz({ templateId: 'tpl', days: [{ ...healthyDay, exercises: 'boom' }] })
+  check('و`exercises` بغير مصفوفة ⇒ نفس الحكم',
+    readCustomization().state !== 'saved')
+
+  // ⟲ الحارس غير مفرط الشدّ: اليوم الفارغ **شرعي** (تمرين فارغ بالتصميم).
+  writeCz({ templateId: 'tpl', days: [{ ...healthyDay, exercises: [] }] })
+  check('⟲ ويوم بمصفوفة فارغة شرعيّ يعبر — الحارس لا يصرخ بلا سبب',
+    readCustomization().state === 'saved')
+
+  // ⟲ إثبات أن الثغرة كانت حقيقية: منطق البوّابة القديم (كائنٌ فكفى) يبتلع
+  //    اليوم المبتور الذي يرفضه الحكم الجديد أعلاه.
+  const oldGate = (days: unknown[]) => days.every((d) => !!d && typeof d === 'object' && !Array.isArray(d))
+  check('⟲ البوّابة القديمة كانت تبتلع اليوم المبتور — والجديدة ترفضه باسمه',
+    oldGate([{ id: 'd1' }]) && truncated.state !== 'saved')
+
+  window.localStorage.removeItem(KEY)
+}
+
+console.log('\n⑧ الاستئناف يعيد بناء اليوم كاملًا — اللقطة تحاشي لا سلطة')
+/**
+ * قانون المؤسس: إعادة التحميل في منتصف جلسة من ٩ تعيد **٩** بموضعها — لا جلسةً
+ * من تمرين واحد ولا جلسة جديدة. السلطة وقت الاستئناف هي **يوم الخطة الحالي**
+ * (`plan.days.find(dayId)`)، واللقطة المحفوظة تحاشي حالة الجولات فقط.
+ */
+check('إعادة البناء تمشي على يوم الخطة كاملًا لا على مفاتيح اللقطة',
+  /day\.exercises\.forEach\(\(pe\)/.test(modeSrc) && /resume\?\.exercises\[pe\.id\]/.test(modeSrc)
+  && !/Object\.keys\(resume\.exercises\)/.test(modeSrc))
+check('والموضع المحفوظ يُحصر داخل حدود اليوم الحالي',
+  /Math\.min\(resume\.current, Math\.max\(0, day\.exercises\.length - 1\)\)/.test(modeSrc))
+// ⟲ إعادة بناء تُقصر الجلسة على مفاتيح اللقطة (تمرين نشط وحيد) تُلتقط باسمها.
+check('⟲ إعادة بناء على مفاتيح اللقطة وحدها تُلتقط باسمها',
+  /Object\.keys\(resume\.exercises\)/.test(`${modeSrc}\n Object.keys(resume.exercises).forEach((k) => {})`)
+  && !/Object\.keys\(resume\.exercises\)/.test(modeSrc))
 
 console.log(`\n${fails.length === 0 ? '✅' : '❌'} سلامة الجلسة: ${pass} ناجحة · ${fails.length} فاشلة`)
 if (fails.length > 0) {
