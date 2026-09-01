@@ -41,6 +41,7 @@ import {
   CODE_BATCH_ISSUE_RPC,
   PURCHASE_BATCHES_RPC,
   PURCHASE_BATCH_ISSUE_RPC,
+  PURCHASE_BATCH_DISABLE_RPC,
   EMAIL_HEALTH_RPC,
   GRANTS_BY_SOURCE_RPC,
   FOOD_SUBMISSIONS_RPC,
@@ -873,6 +874,43 @@ export async function issuePurchaseBatch(
         expiresAt: typeof rec.expires_at === 'string' ? rec.expires_at : null,
         codes,
         issuedAt: typeof rec.issued_at === 'string' ? rec.issued_at : new Date().toISOString(),
+      },
+    }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
+/**
+ * [WAVE3-SALLA-PREP] يطفئ **كل صكوك الدفعة غير المستردّة** بنداء واحد.
+ *
+ * الاتجاه الوحيد المتاح من المتصفّح: يسحب ولا يمنح. المنح الممنوحة لمشترين
+ * شرعيين لا تُمسّ (`derive_state` لا تقرأ `access_codes` أصلًا)، والعدّ الراجع
+ * هو بالضبط ما كان معروضًا في عمود «غير مستردّ» لحظة النداء.
+ */
+export async function disablePurchaseBatch(
+  decision: AdminRoleDecision,
+  input: { label: string; reason: string },
+): Promise<WriteOutcome<{ label: string; disabledCount: number }>> {
+  if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(PURCHASE_BATCH_DISABLE_RPC, {
+      p_label: input.label,
+      p_reason: input.reason,
+    })
+    if (error) return { ok: false, live: classify(error) }
+    const rec = (data ?? {}) as Record<string, unknown>
+    // العدّ جزء من العقد لا زينة: ردٌّ بلا عدد صحيح ليس نجاحًا يُعرَض.
+    if (typeof rec.disabled_count !== 'number' || !Number.isFinite(rec.disabled_count)) {
+      return { ok: false, live: 'failed' }
+    }
+    return {
+      ok: true,
+      value: {
+        label: typeof rec.label === 'string' ? rec.label : input.label,
+        disabledCount: rec.disabled_count,
       },
     }
   } catch {

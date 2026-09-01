@@ -56,10 +56,24 @@ export interface PurchaseBatchStrings {
   loading: string
   gap: (why: string) => string
 
-  /** مِفتاح الإطفاء — الموجود منه والغائب، كلاهما مُعلَن. */
+  /** مِفتاح الإطفاء — المفرد قائم، والدفعيّ صار قائمًا. */
   killHeading: string
   killNote: string
-  killBatchAbsent: string
+
+  /** [WAVE3] إطفاء الدفعة — فعل هدّام يتطلّب سببًا وتأكيدًا. */
+  batchDisableCta: string
+  batchDisableTitle: (label: string) => string
+  batchDisableBody: string
+  /** الحقيقة التي لا تُترك للاستنتاج: منح المشترين قائمة. */
+  batchDisableNotRevoked: string
+  batchDisableReasonLabel: string
+  batchDisableReasonPlaceholder: string
+  batchDisableReasonRequired: string
+  batchDisableConfirm: string
+  batchDisableCancel: string
+  batchDisableWorking: string
+  batchDisableDone: (count: number, label: string) => string
+  batchDisableFailed: (why: string) => string
 }
 
 export const purchaseBatchStrings: Record<'ar' | 'en', PurchaseBatchStrings> = {
@@ -107,8 +121,20 @@ export const purchaseBatchStrings: Record<'ar' | 'en', PurchaseBatchStrings> = {
     gap: (why) => `ما قدرنا نقرأ المخزون — ${why}`,
 
     killHeading: 'إطفاء صكّ',
-    killNote: 'تعطيل صكّ غير مستردّ يتمّ من «أكواد الوصول» — ابحث بالوسم وعطّل الصكّ. الصكّ المعطَّل يُرفض عند الاسترداد ولا يمنح شيئًا.',
-    killBatchAbsent: 'ما فيه إطفاء لدفعة كاملة بنداء واحد في نموذج السلطة الحالي. الإطفاء صكًّا صكًّا. (بند مرفوع للمؤسس — ما اخترعناه هنا.)',
+    killNote: 'تعطيل صكّ واحد يتمّ من «أكواد الوصول» — ابحث بالوسم وعطّله. ولإطفاء دفعة كاملة تسرّبت: زرّ «أطفئ غير المستردّ» على صفّ الدفعة نفسه.',
+
+    batchDisableCta: 'أطفئ غير المستردّ',
+    batchDisableTitle: (label) => `إطفاء غير المستردّ في «${label}»`,
+    batchDisableBody: 'كل صكّ ما استُردّ بعد في هذي الدفعة بيُرفض من اللحظة — ما يفتح Premium لأحد. الإطفاء ما يرجع من الشاشة.',
+    batchDisableNotRevoked: 'تفعيلات Premium القائمة ما تنسحب — اللي اشترى وفعّل، وصوله باقٍ.',
+    batchDisableReasonLabel: 'السبب (إلزامي — يُحفظ في سجلّ التدقيق)',
+    batchDisableReasonPlaceholder: 'مثال: تسرّب ملفّ التصدير قبل الرفع',
+    batchDisableReasonRequired: 'اكتب سببًا — بدونه ما ننفّذ.',
+    batchDisableConfirm: 'أطفئ الآن',
+    batchDisableCancel: 'تراجع',
+    batchDisableWorking: 'جارٍ الإطفاء…',
+    batchDisableDone: (count, label) => `تمّ — أُطفئ ${count} صكًّا غير مستردّ في «${label}». تفعيلات Premium القائمة ما انمست.`,
+    batchDisableFailed: (why) => `ما نُفّذ الإطفاء — ${why}`,
   },
   en: {
     heading: 'Purchase codes',
@@ -154,7 +180,19 @@ export const purchaseBatchStrings: Record<'ar' | 'en', PurchaseBatchStrings> = {
     gap: (why) => `Could not read inventory — ${why}`,
 
     killHeading: 'Disabling a code',
-    killNote: 'Disable an unredeemed code from "Access codes" — search by label and disable it. A disabled code is refused at redemption and grants nothing.',
-    killBatchAbsent: 'The current authority model has no single-call disable for a whole batch. Disabling is per code. (Raised for the founder — not invented here.)',
+    killNote: 'Disable a single code from "Access codes" — search by label and disable it. For a whole leaked batch: the "Disable unredeemed" button on the batch row itself.',
+
+    batchDisableCta: 'Disable unredeemed',
+    batchDisableTitle: (label) => `Disable unredeemed codes in "${label}"`,
+    batchDisableBody: 'Every code in this batch not yet redeemed will be refused from this moment — it unlocks Premium for no one. This cannot be undone from this screen.',
+    batchDisableNotRevoked: 'Existing Premium activations are not revoked — whoever bought and activated keeps their access.',
+    batchDisableReasonLabel: 'Reason (required — kept in the audit trail)',
+    batchDisableReasonPlaceholder: 'e.g. export file leaked before upload',
+    batchDisableReasonRequired: 'Write a reason — we will not proceed without one.',
+    batchDisableConfirm: 'Disable now',
+    batchDisableCancel: 'Cancel',
+    batchDisableWorking: 'Disabling…',
+    batchDisableDone: (count, label) => `Done — disabled ${count} unredeemed codes in "${label}". Existing Premium activations are untouched.`,
+    batchDisableFailed: (why) => `Disable did not run — ${why}`,
   },
 }

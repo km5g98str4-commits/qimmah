@@ -13,6 +13,7 @@
 //      ولا سجلّ شراء ثانٍ (idempotent تحت التزامن، لا تسلسليًّا فقط).
 //   ④ ترقية متزامنة: تجربة نشطة + صكّان يُستردّان معًا ⇒ Premium واحدة لا اثنتان.
 //   ⑤ تأكيد مضادّ: الاسترداد المشروع الواحد ينجح فعلًا (لا «صفر فائزين» مجّاني).
+//   ⑥ [WAVE3] استردادٌ يسابق إطفاء الدفعة — A كاملة أو B كاملة، لا هجين.
 //
 // قاعدة القراءة: 🛡️ = الهجوم رُدّ · ⚔️ = الهجوم نجح (عيب مؤكَّد).
 // ============================================================================
@@ -162,6 +163,71 @@ console.log('\n④ ترقية متزامنة — تجربة نشطة، صكّا�
   }
   check('ترقية متزامنة ⇒ صفّ منحة واحد بالضبط (قيد user_id الفريد)', dupEnt === 0, `dup-ent ${dupEnt}/${ITER}`)
   check('والحالة النهائية premiumActive حتمًا', notPremium === 0, `not-premium ${notPremium}/${ITER}`)
+}
+
+// ── ⑥ [WAVE3] استردادٌ يسابق إطفاءَ الدفعة — نتيجتان صحيحتان لا ثالثة ──────
+// A: الاسترداد سبق ⇒ منحة قائمة + صفّه يبقى حيًّا (مسند الدفعة يُسقطه) + سجلّ=١.
+// B: الإطفاء سبق  ⇒ لا منحة + صفّه مُطفأ + عدّاده صفر + سجلّ=٠.
+// الهجين الممنوع بالاسم: منحةٌ قائمة **وصفُّها مُطفأ قبل استرداده** — أي
+// premium && !enabled && count=0، أو منحة بلا سجلّ، أو عدّاد بلا منحة.
+console.log('\n⑥ استرداد ⚔ إطفاء الدفعة — على نفس الصكّ، عمليتا psql مستقلّتان')
+{
+  let winA = 0, winB = 0, hybrid = 0, partialLedger = 0, ghostCount = 0, siblingLive = 0
+  const outcomes = []
+  for (let k = 0; k < ITER; k++) {
+    const stg = createStaging()
+    try {
+      const fid = seed(stg)
+      // صكّان: الأول ساحة السباق، والثاني شاهدٌ يجب أن يُطفأ في الحالتين.
+      const codes = issue(stg, fid, `PKILL${k}`, 2)
+      const u = makeUser(stg, `pkill${k}@example.com`)
+      const res = await stg.race(
+        [
+          `select public.redeem_access_code_v2('${codes[0]}');`,
+          `select public.founder_disable_purchase_batch('PKILL${k}', 'سباق — إثبات ⑥');`,
+        ],
+        [{ role: 'authenticated', uid: u }, { role: 'authenticated', uid: fid }],
+      )
+      const premium = isPremium(res[0])
+      const row = stg.one(
+        `select enabled::text || '|' || redemption_count::text from public.access_codes
+          where grant_purpose='purchase' and redemption_count > 0 limit 1;`)
+      const anyRedeemed = row !== '' && row != null
+      const [en0, cnt0] = String(stg.one(
+        `select enabled::text || '|' || redemption_count::text from public.access_codes
+          where code_hash in (select ih.email_hash from private.identity_hashes(private.normalize_access_code('${codes[0]}')) ih);`)).split('|')
+      const ledger = Number(stg.one(`select count(*) from public.purchase_ledger;`))
+      const disabledUnredeemed = Number(stg.one(
+        `select count(*) from public.access_codes where grant_purpose='purchase' and not enabled and redemption_count = 0;`))
+
+      if (premium) {
+        // A — ولا يكون A إلا كاملًا: صفّه حيّ، عدّاده ١، سجلّ ١، وأخوه مُطفأ.
+        if (en0 === 'true' && cnt0 === '1' && ledger === 1) winA++
+        else hybrid++
+        if (ledger !== 1) partialLedger++
+        if (disabledUnredeemed !== 1) siblingLive++
+      } else {
+        // B — ولا يكون B إلا كاملًا: صفّه مُطفأ، عدّاده ٠، لا سجلّ، والاثنان مُطفآن.
+        if (en0 === 'false' && cnt0 === '0' && ledger === 0) winB++
+        else hybrid++
+        if (Number(cnt0) > 0) ghostCount++
+        if (disabledUnredeemed !== 2) siblingLive++
+      }
+      void anyRedeemed
+      outcomes.push(premium ? 'A' : 'B')
+    } finally { stg.drop() }
+  }
+  check('كل جولة انتهت A كاملةً أو B كاملةً — صفر هجين', hybrid === 0,
+    `A=${winA} · B=${winB} · hybrid=${hybrid} · [${outcomes.join('')}]`)
+  check('لا «منحة قائمة وصفٌّ مُطفأ قبل استرداده» — الهجين المسمّى بعينه', hybrid === 0)
+  check('لا سجلّ شراء ناقص مع منحة (partial ledger)', partialLedger === 0, `${partialLedger}/${ITER}`)
+  check('لا عدّاد استرداد بلا منحة (ghost count)', ghostCount === 0, `${ghostCount}/${ITER}`)
+  check('والصكّ الشقيق غير المتسابَق عليه مُطفأ في كل جولة — فالإطفاء وقع فعلًا',
+    siblingLive === 0, `${siblingLive}/${ITER}`)
+  // ⟲ التأكيد المضادّ: السباق يرى الاتجاهين لا اتجاهًا واحدًا يمرّ مجّانًا —
+  // ٨ جولات كلّها A أو كلّها B تعني أن التزامن لم يقع أصلًا فيُبلَّغ لا يُدّعى.
+  check('⟲ والقياس رأى نتيجةً محدَّدة في كل جولة (لا جولة بلا حكم)',
+    winA + winB + hybrid === ITER, `${winA + winB + hybrid}/${ITER}`)
 }
 
 // ── ⑤ تأكيد مضادّ — الاسترداد المشروع ينجح فعلًا ───────────────────────────

@@ -31,6 +31,7 @@ import {
   loadCodeBatches,
   loadPurchaseBatches,
   issuePurchaseBatch,
+  disablePurchaseBatch,
   loadCodeRedemptions,
   loadLiveCodePage,
   loadLiveExecutiveSnapshot,
@@ -122,6 +123,10 @@ export function AdminRoute() {
   const [issuedPurchase, setIssuedPurchase] = useState<IssuedPurchaseBatch | null>(null)
   const [purchaseBusy, setPurchaseBusy] = useState(false)
   const [purchaseError, setPurchaseError] = useState<LiveReadState | null>(null)
+  // [WAVE3] إطفاء الدفعة — نتيجة بعدد حرفي من الخادم، وخطؤها مسمّى.
+  const [batchDisableBusy, setBatchDisableBusy] = useState(false)
+  const [batchDisableResult, setBatchDisableResult] = useState<{ label: string; disabledCount: number } | null>(null)
+  const [batchDisableError, setBatchDisableError] = useState<LiveReadState | null>(null)
   // سجلّ مستبدلي كود واحد مفتوح — الفتح فعل طلب، فالنداء يقع عنده لا مع الجدول.
   const [redemptions, setRedemptions] = useState<{ codeId: string; list: PanelList<CodeRedemptionRow> } | null>(null)
   const redemptionsRunRef = useRef(0)
@@ -417,6 +422,27 @@ export function AdminRoute() {
   // الإغلاق **يمحو من الذاكرة** — ولا نسخة في أي مكان آخر تُستعاد منها.
   const onDismissIssuedPurchase = useCallback(() => setIssuedPurchase(null), [])
 
+  const onDisableBatch = useCallback(
+    (input: { label: string; reason: string }) => {
+      setBatchDisableBusy(true)
+      setBatchDisableError(null)
+      void (async () => {
+        const res = await disablePurchaseBatch(decision, input)
+        setBatchDisableBusy(false)
+        if (!res.ok) {
+          setBatchDisableError(res.live)
+          return
+        }
+        setBatchDisableResult(res.value)
+        // العدّادات تتبدّل بعد الإطفاء — تُعاد قراءة المخزون من المصدر.
+        setCodeNonce((n) => n + 1)
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+  const onDismissDisableResult = useCallback(() => setBatchDisableResult(null), [])
+
   if (!allowed) return <AdminDenied decision={decision} />
   if (!snapshot) return <AdminLoading label={t.states.loading} />
 
@@ -466,6 +492,11 @@ export function AdminRoute() {
         onDismissIssued: onDismissIssuedPurchase,
         batches: purchaseBatches,
         writeError: purchaseError,
+        onDisableBatch,
+        disableBusy: batchDisableBusy,
+        disableResult: batchDisableResult,
+        onDismissDisableResult,
+        disableError: batchDisableError,
       }}
     />
   )

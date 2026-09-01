@@ -53,6 +53,7 @@ export {
   issueAccessCode,
   issueAccessCodeBatch,
   issuePurchaseBatch,
+  disablePurchaseBatch,
   loadCodeBatches,
   loadPurchaseBatches,
   loadCodeRedemptions,

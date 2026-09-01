@@ -140,6 +140,9 @@ const FOUNDER_WRITES = [
   'founder_review_food_submission',
   // [COMMERCE-W1] إصدار صكوك الشراء — صكّ حامل لمنحة دائمة، لا يبلغه الدعم.
   'founder_issue_purchase_batch',
+  // [WAVE3] إطفاء دفعة الصكوك — فعلٌ هدّام باتجاه واحد (يسحب ولا يمنح)،
+  // للمؤسس وحده، ولا يبلغه الدعم.
+  'founder_disable_purchase_batch',
 ]
 const known = new Set([...ADMIN_READS, ...FOUNDER_WRITES])
 const unclassified = bodies.rows.filter((r) => !known.has(r.proname)).map((r) => r.proname)

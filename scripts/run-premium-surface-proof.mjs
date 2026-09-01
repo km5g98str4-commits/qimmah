@@ -205,8 +205,12 @@ check('والمعنى يقول صراحةً إننا لا نعرف مكان ال
 check('الغياب يُعرض «—» ولا يصير صفرًا', /n === null \? '—'/.test(panel))
 check('duration_days الغائبة ليست عطلًا: اللوحة لا تعرض مدّة للصكّ أصلًا',
   !/durationDays/.test(panel))
-check('وغياب الإطفاء الدفعيّ **مُعلَن** لا مسكوتٌ عنه',
-  /purchase-kill-batch-absent/.test(panel) && /killBatchAbsent/.test(dict))
+// [WAVE3] كان هذا الفحص يحرس **إعلان غياب** الإطفاء الدفعيّ. القدرة بُنيت
+// (`founder_disable_purchase_batch` + زرّها)، فانقلب الحارس من «الغياب مُعلَن»
+// إلى «الحضور محروس» — قسم WAVE3 أدناه يتولّى العمق، وهذا يحرس الوصلة.
+check('الإطفاء الدفعيّ صار قائمًا — زرّه على صفّ الدفعة',
+  /purchase-batch-disable-open/.test(panel) && /batchDisableCta/.test(dict)
+  && !/killBatchAbsent/.test(dict))
 
 console.log('\n▸ ⚔️ محاكاة الالتفاف — اللوحة')
 {
@@ -236,6 +240,64 @@ console.log('\n▸ ⚔️ محاكاة الالتفاف — اللوحة')
   const forged = panel.replace('PURCHASE_BATCH_MAX = 500', 'PURCHASE_BATCH_MAX = 5000')
   check('⚔️ حدٌّ عميلٌ أعلى من الخادم يُرصد',
     /PURCHASE_BATCH_MAX = 5000/.test(forged) && /PURCHASE_BATCH_MAX = 500\b/.test(panel))
+}
+
+console.log('\n════════ [WAVE3] إطفاء الدفعة — سطح المتصفّح ════════\n')
+
+{
+  const live = read('src/admin/contract/liveSource.ts')
+  const panelW3 = read('src/admin/ui/PurchaseBatchPanel.tsx')
+  const dictW3 = read('src/i18n/dict/purchaseBatches.ts')
+  const routeW3 = read('src/admin/ui/AdminRoute.tsx')
+  const migration = read('supabase/migrations/20260831120001_purchase_batch_disable.sql')
+
+  console.log('▸ الاتجاه الواحد — يسحب ولا يمنح')
+  check('العقد يحمل `disablePurchaseBatch` موصولًا بدالّة الخادم',
+    /disablePurchaseBatch/.test(live) && /founder_disable_purchase_batch/.test(read('src/admin/contract/metrics.ts')))
+  check('ولا دالّة تمكينٍ دفعيّ في العقد كلّه — بأي اسم',
+    !/enablePurchaseBatch|batchEnable|enableBatch|setBatchEnabled/i.test(codeOnly(live)))
+  check('ولا في اللوحة ولا في الحاوي',
+    !/enablePurchaseBatch|setBatchEnabled/i.test(codeOnly(panelW3)) && !/enablePurchaseBatch|setBatchEnabled/i.test(codeOnly(routeW3)))
+  check('والنداء لا يحمل وسيط اتجاه — لا p_enabled في دالّة الدفعة',
+    !/founder_disable_purchase_batch\([^)]*p_enabled/.test(migration))
+
+  console.log('\n▸ التأكيد والسبب — فعلٌ هدّام لا يمرّ خفيفًا')
+  check('زرّ الإطفاء يفتح كتلة تأكيد لا ينفّذ مباشرة',
+    /purchase-batch-disable-open/.test(panelW3) && /setConfirmLabel\(b\.label\)/.test(panelW3))
+  check('والتأكيد يشترط سببًا غير فارغ قبل النداء',
+    /reason === ''/.test(panelW3) && /batchDisableReasonRequired/.test(panelW3))
+  check('والنتيجة تعرض العدد الحرفي من الخادم',
+    /disableResult\.disabledCount/.test(panelW3))
+  check('والعقد يرفض ردًّا بلا عدد صحيح — العدّ جزء من العقد',
+    /typeof rec\.disabled_count !== 'number'/.test(live))
+
+  console.log('\n▸ الصدق — منح المشترين لا تُمسّ، ويُقال ذلك في الشاشة')
+  check('لافتة «التفعيلات القائمة لا تُسحب» مرسومة في كتلة التأكيد',
+    /purchase-batch-disable-not-revoked/.test(panelW3))
+  check('ونصّها موجود بالعربية والإنجليزية معًا',
+    /ما تنسحب/.test(dictW3) && /are not revoked/.test(dictW3))
+  check('ورسالة النجاح تكرّر الحقيقة نفسها بعد التنفيذ',
+    /ما انمست/.test(dictW3) && /are untouched/.test(dictW3))
+  check('ولا نصوص خام تُعرض في مسار الإطفاء — القسم لا يلمس codes',
+    !/issued\.codes/.test(panelW3.slice(panelW3.indexOf('purchase-batch-disable-confirm'))))
+
+  console.log('\n▸ ⚔️ محاكاة الالتفاف — Wave3')
+  {
+    const forged = live.replace('export async function disablePurchaseBatch',
+      'export async function enablePurchaseBatch(d, i) { return 0 }\nexport async function disablePurchaseBatch')
+    check('⚔️ عقدٌ يحمل تمكينًا دفعيًّا يُرصد باسمه',
+      /enablePurchaseBatch/i.test(codeOnly(forged)) && !/enablePurchaseBatch/i.test(codeOnly(live)))
+  }
+  {
+    const forged = panelW3.replace('data-testid="purchase-batch-disable-not-revoked"', 'data-testid="gone"')
+    check('⚔️ كتلة تأكيد بلا لافتة «لا تُسحب» تُرصد',
+      !/purchase-batch-disable-not-revoked/.test(forged) && /purchase-batch-disable-not-revoked/.test(panelW3))
+  }
+  {
+    const forged = panelW3.replace("if (reason === '') { setDisableLocalError(t.batchDisableReasonRequired); return }", '')
+    check('⚔️ تأكيدٌ ينفّذ بلا سبب يُرصد',
+      !/batchDisableReasonRequired\); return \}/.test(forged) && /batchDisableReasonRequired\); return \}/.test(panelW3))
+  }
 }
 
 console.log('\n════════════════════════════════════════════════════════════')

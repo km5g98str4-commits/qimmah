@@ -45,6 +45,16 @@ export interface PurchaseBatchPanelProps {
   onDismissIssued: () => void
   batches: PanelList<PurchaseBatchRow>
   writeError: LiveReadState | null
+  /**
+   * [WAVE3] إطفاء غير المستردّ في دفعة — **الاتجاه الوحيد المتاح**: يسحب ولا
+   * يمنح. التنفيذ في الحاوي (نداء `disablePurchaseBatch`)، وهنا التأكيد والسبب.
+   */
+  onDisableBatch: (input: { label: string; reason: string }) => void
+  disableBusy: boolean
+  /** آخر نتيجة إطفاء — تُعرض بعددها الحرفي، ويصرفها المؤسس بنفسه. */
+  disableResult: { label: string; disabledCount: number } | null
+  onDismissDisableResult: () => void
+  disableError: LiveReadState | null
 }
 
 /** عدد أو «—». **الغياب لا يصير صفرًا** (نفس عقد `metricValue`). */
@@ -66,6 +76,7 @@ function safeFileName(label: string): string {
 
 export function PurchaseBatchPanel({
   canIssue, busy, onIssue, issued, onDismissIssued, batches, writeError,
+  onDisableBatch, disableBusy, disableResult, onDismissDisableResult, disableError,
 }: PurchaseBatchPanelProps) {
   const lang = useLang()
   const t = purchaseBatchStrings[lang === 'en' ? 'en' : 'ar']
@@ -76,6 +87,11 @@ export function PurchaseBatchPanel({
   const [count, setCount] = useState('1')
   const [expiresAt, setExpiresAt] = useState('')
   const [error, setError] = useState<string | null>(null)
+  // [WAVE3] تأكيد الإطفاء — وسم الدفعة المفتوح للتأكيد وسببه. حالة عرضٍ محلّية
+  // بحتة: القرار والسلطة في الخادم، وحتى النداء يمرّ بالحاوي لا من هنا.
+  const [confirmLabel, setConfirmLabel] = useState<string | null>(null)
+  const [disableReason, setDisableReason] = useState('')
+  const [disableLocalError, setDisableLocalError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
   const objectUrlRef = useRef<string | null>(null)
 
@@ -261,6 +277,7 @@ export function PurchaseBatchPanel({
                   <th scope="col" className="px-3 py-2 text-start font-black">{t.colExpired}</th>
                   <th scope="col" className="px-3 py-2 text-start font-black">{t.colLastIssued}</th>
                   <th scope="col" className="px-3 py-2 text-start font-black">{t.colLastRedeemed}</th>
+                  <th scope="col" className="px-3 py-2"><span className="sr-only">{t.batchDisableCta}</span></th>
                 </tr>
               </thead>
               <tbody>
@@ -274,6 +291,19 @@ export function PurchaseBatchPanel({
                     <td className="px-3 py-2 tabular-nums text-ink-700">{num(b.codesExpiredUnredeemed)}</td>
                     <td dir="ltr" className="px-3 py-2 tabular-nums text-ink-500">{when(b.lastIssuedAt)}</td>
                     <td dir="ltr" className="px-3 py-2 tabular-nums text-ink-500">{when(b.lastRedeemedAt)}</td>
+                    <td className="px-3 py-2">
+                      {canIssue && b.label ? (
+                        <button
+                          type="button"
+                          onClick={() => { setConfirmLabel(b.label); setDisableReason(''); setDisableLocalError(null); onDismissDisableResult() }}
+                          data-testid="purchase-batch-disable-open"
+                          data-batch-label={b.label}
+                          className="btn-ghost min-h-[36px] whitespace-nowrap px-3 text-xs text-danger"
+                        >
+                          {t.batchDisableCta}
+                        </button>
+                      ) : null}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -282,13 +312,71 @@ export function PurchaseBatchPanel({
         )}
       </div>
 
-      {/* ── مِفتاح الإطفاء: الموجود منه والغائب، كلاهما مُعلَن ── */}
+      {/* ── [WAVE3] تأكيد إطفاء الدفعة — فعل هدّام بسبب إلزامي ──
+          الاتجاه الوحيد من المتصفّح: إطفاء. لا زرّ تمكينٍ دفعيّ هنا ولا في
+          العقد ولا في القاعدة — تمكينُ دفعةٍ مخترقة أداةُ منحٍ جماعي. */}
+      {confirmLabel ? (
+        <div className="rounded-2xl border-2 border-danger/50 bg-danger/[0.05] p-4" data-testid="purchase-batch-disable-confirm">
+          <h3 className="text-sm font-black text-ink-900">{t.batchDisableTitle(confirmLabel)}</h3>
+          <p className="mt-1.5 text-sm leading-relaxed text-ink-700">{t.batchDisableBody}</p>
+          <p className="mt-1.5 text-[0.8rem] font-bold leading-relaxed text-ink-700" data-testid="purchase-batch-disable-not-revoked">
+            {t.batchDisableNotRevoked}
+          </p>
+          <label htmlFor="batch-disable-reason" className="mt-3 block text-[0.78rem] font-bold text-ink-700">
+            {t.batchDisableReasonLabel}
+          </label>
+          <input
+            id="batch-disable-reason"
+            data-testid="purchase-batch-disable-reason"
+            value={disableReason}
+            onChange={(e) => { setDisableReason(e.target.value); setDisableLocalError(null) }}
+            placeholder={t.batchDisableReasonPlaceholder}
+            autoComplete="off"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-900 outline-none focus:border-danger"
+          />
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              disabled={disableBusy}
+              aria-busy={disableBusy}
+              onClick={() => {
+                const reason = disableReason.trim()
+                if (reason === '') { setDisableLocalError(t.batchDisableReasonRequired); return }
+                onDisableBatch({ label: confirmLabel, reason })
+              }}
+              data-testid="purchase-batch-disable-confirm-btn"
+              className="btn-primary min-h-[44px] bg-danger px-4 text-sm hover:bg-danger disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {disableBusy ? t.batchDisableWorking : t.batchDisableConfirm}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setConfirmLabel(null); setDisableLocalError(null) }}
+              data-testid="purchase-batch-disable-cancel"
+              className="btn-ghost min-h-[44px] px-4 text-sm"
+            >
+              {t.batchDisableCancel}
+            </button>
+          </div>
+          <p role="status" aria-live="polite" data-testid="purchase-batch-disable-error"
+             className={`text-xs font-bold text-danger ${disableLocalError || disableError ? 'mt-2.5' : ''}`}>
+            {disableLocalError ?? (disableError ? t.batchDisableFailed(disableError) : '')}
+          </p>
+        </div>
+      ) : null}
+
+      {/* النتيجة — العدد الحرفي من الخادم، ومعه الحقيقة التي لا تُترك للاستنتاج. */}
+      {disableResult ? (
+        <div className="rounded-2xl border border-line bg-surface p-4" data-testid="purchase-batch-disable-result" role="status">
+          <p className="text-sm font-bold leading-relaxed text-ink-900">
+            {t.batchDisableDone(disableResult.disabledCount, disableResult.label)}
+          </p>
+        </div>
+      ) : null}
+
       <div className="rounded-2xl border border-line bg-surface p-4">
         <h3 className="text-sm font-black text-ink-900">{t.killHeading}</h3>
         <p className="mt-1 text-sm leading-relaxed text-ink-500">{t.killNote}</p>
-        <p className="mt-2 text-[0.75rem] font-bold leading-relaxed text-ink-400" data-testid="purchase-kill-batch-absent">
-          {t.killBatchAbsent}
-        </p>
       </div>
     </section>
   )

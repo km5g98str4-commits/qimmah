@@ -158,6 +158,9 @@ const FOUNDER_WRITES = [
   'founder_set_code_enabled', 'founder_revoke_access',
   'founder_review_food_submission',
   'founder_issue_purchase_batch',
+  // [WAVE3] إطفاء دفعة الصكوك — فعلٌ هدّام باتجاه واحد (يسحب ولا يمنح)،
+  // للمؤسس وحده، ولا يبلغه الدعم.
+  'founder_disable_purchase_batch',
 ]
 const known = new Set([...ADMIN_READS, ...FOUNDER_WRITES])
 const unclassified = bodies.rows.filter((r) => !known.has(r.proname)).map((r) => r.proname)

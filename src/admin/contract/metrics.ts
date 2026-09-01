@@ -75,6 +75,12 @@ export const PURCHASE_BATCHES_RPC = 'founder_purchase_batches'
  * الصكّ حاملٌ لمنحة Premium دائمة، فوسمه إلزامي ومفرد الاستخدام بنيويًّا.
  */
 export const PURCHASE_BATCH_ISSUE_RPC = 'founder_issue_purchase_batch'
+/**
+ * [WAVE3-SALLA-PREP] إطفاء دفعة صكوك — **فعل، للمؤسس وحده، اتجاه واحد**.
+ * يطال غير المستردّ فقط؛ Premium الممنوح لا يُمسّ بنيويًّا. لا نظير تمكين
+ * دفعيّ عمدًا — تمكينُ دفعةٍ مخترقة من متصفّح أداةُ منحٍ جماعي.
+ */
+export const PURCHASE_BATCH_DISABLE_RPC = 'founder_disable_purchase_batch'
 export const EMAIL_HEALTH_RPC = 'founder_email_health'
 export const GRANTS_BY_SOURCE_RPC = 'founder_grants_by_source'
 export const FOOD_SUBMISSIONS_RPC = 'founder_food_submissions'

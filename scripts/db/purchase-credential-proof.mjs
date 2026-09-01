@@ -589,6 +589,133 @@ await mustFail('الحزام البنيوي: العدّاد لا يتجاوز ا
   await oldDb.close?.()
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ⑩ إطفاء الدفعة — [WAVE3-SALLA-PREP]
+//
+// الشرط قبل رفع أي دفعة حقيقية إلى سلة: تسريبُ ملفّ التصدير يُجاب بنداء واحد
+// لا بخمسمئة نقرة. يُقاس هنا: سلطة المؤسس وحده · السبب إلزامي **ومحفوظ** ·
+// العدّ صادق · المستردّ ومنحتُه لا يُمسّان · المُطفأ يُرفض · لا تمكين دفعيّ.
+// ═══════════════════════════════════════════════════════════════════════════
+console.log('\n⑩ إطفاء الدفعة — نداء واحد، غير المستردّ فقط، وPremium لا يُمسّ')
+{
+  // دفعة قياس: ٤ صكوك — واحد يُستردّ قبل الإطفاء، ثلاثة تبقى غير مستردّة.
+  const wave = await issuePurchase('SALLA-W3-KILL', 4)
+  const buyer = await makeUser(db, 'w3-buyer@qimmah.test')
+  await asRole(db, 'authenticated', buyer)
+  const bought = await redeemV2(wave.codes[0])
+  check('التمهيد: مشترٍ شرعي استردّ قبل الإطفاء', bought.outcome === 'premiumActive', JSON.stringify(bought))
+
+  // ── السلطة: الدعم قارئ لا كاتب، والسبب والوسم إلزاميان ──
+  const supportW3 = await makeUser(db, 'w3-support@qimmah.test')
+  await asRole(db, 'service_role')
+  await db.query(`select public.admin_set_role('w3-support@qimmah.test', 'support', 'إثبات ⑩')`)
+  await asRole(db, 'authenticated', supportW3)
+  await mustFail('الدعم لا يطفئ دفعة (require_founder)',
+    () => db.query(`select public.founder_disable_purchase_batch('SALLA-W3-KILL', 'محاولة دعم')`),
+    'founder_role_required')
+  await asRole(db, 'authenticated', founderId)
+  await mustFail('سببٌ فارغ يُرفض باسمه',
+    () => db.query(`select public.founder_disable_purchase_batch('SALLA-W3-KILL', '   ')`),
+    'reason required')
+  await mustFail('وسمٌ لا دفعة له خطأ مسمّى لا صفرًا صامتًا',
+    () => db.query(`select public.founder_disable_purchase_batch('SALLA-TYPO-999', 'سبب')`),
+    'no such batch')
+
+  // ── الإطفاء نفسه: عدّ صادق يطابق عمود «غير مستردّ» لحظةَ الضغط ──
+  const before = (await db.query(`select * from public.founder_purchase_batches(100)`)).rows
+    .find((r) => r.label === 'SALLA-W3-KILL')
+  const res = (await db.query(
+    `select public.founder_disable_purchase_batch('SALLA-W3-KILL', 'تسريب ملفّ التصدير — إثبات ⑩') as r`)).rows[0].r
+  check('disabled_count بالضبط = «غير مستردّ» المعروض قبل الضغط',
+    Number(res.disabled_count) === 3 && Number(before.codes_unredeemed) === 3,
+    `count=${res.disabled_count} · معروض=${before.codes_unredeemed}`)
+  check('والردّ يحمل الوسم واللحظة', res.label === 'SALLA-W3-KILL' && typeof res.disabled_at === 'string')
+
+  // ── التدقيق: مَن ومتى ولماذا — محفوظة على كل صفّ مُطفأ ──
+  await asRole(db, null)
+  const audit = (await db.query(
+    `select count(*)::int as n,
+            count(*) filter (where disabled_reason = 'تسريب ملفّ التصدير — إثبات ⑩'
+                               and disabled_at is not null
+                               and disabled_by like 'founder:%') as stamped
+       from public.access_codes
+      where label = 'SALLA-W3-KILL' and not enabled`)).rows[0]
+  check('السبب والفاعل واللحظة محفوظة على الصفوف الثلاثة كلّها',
+    audit.n === 3 && audit.stamped === 3, JSON.stringify(audit))
+
+  // ── المستردّ لم يُمسّ: صفّه حيّ، ومنحة صاحبه قائمة ──
+  const redeemedRow = (await db.query(
+    `select enabled, disabled_reason from public.access_codes
+      where label = 'SALLA-W3-KILL' and redemption_count >= max_redemptions`)).rows[0]
+  check('صفّ الصكّ المستردّ بقي enabled وبلا وسم إطفاء',
+    redeemedRow.enabled === true && redeemedRow.disabled_reason === null, JSON.stringify(redeemedRow))
+  await asRole(db, 'authenticated', buyer)
+  check('وPremium المشتري الشرعي قائم بعد إطفاء الدفعة',
+    (await myState()).state === 'premiumActive')
+  // ⟲ وإعادة محاولة صاحب الصكّ (ردٌّ ضائع) ما زالت تتقارب — صفّه حيّ عمدًا.
+  const replay = await redeemV2(wave.codes[0])
+  check('⟲ وإعادةُ صاحب الصكّ المستردّ تتقارب على premiumActive لا على رفض',
+    replay.outcome === 'premiumActive', JSON.stringify(replay))
+
+  // ── المُطفأ يُرفض ولا يمنح ──
+  const late = await makeUser(db, 'w3-late@qimmah.test')
+  await asRole(db, 'authenticated', late)
+  const denied = await redeemV2(wave.codes[1])
+  check('صكّ من الدفعة المُطفأة يُرفض بعد الإطفاء', denied.outcome !== 'premiumActive', JSON.stringify(denied))
+  check('ولا منحة كُتبت للمحاوِل', (await myState()).state !== 'premiumActive')
+
+  // ── الإعادة والعدّ المتقاطع ──
+  await asRole(db, 'authenticated', founderId)
+  const res2 = (await db.query(
+    `select public.founder_disable_purchase_batch('SALLA-W3-KILL', 'نداء ثانٍ — لا شيء يتبقّى') as r`)).rows[0].r
+  check('نداءٌ ثانٍ يعيد صفرًا — آمنُ الإعادة، لا خطأ ولا عدّ مزدوج',
+    Number(res2.disabled_count) === 0, JSON.stringify(res2))
+  const after = (await db.query(`select * from public.founder_purchase_batches(100)`)).rows
+    .find((r) => r.label === 'SALLA-W3-KILL')
+  check('والعدّاد بعد الإطفاء: مستردّ=١ · معطَّل غير مستردّ=٣ · غير مستردّ=٠ — والجمع تامّ',
+    Number(after.codes_redeemed) === 1 && Number(after.codes_disabled_unredeemed) === 3
+    && Number(after.codes_unredeemed) === 0
+    && Number(after.codes_redeemed) + Number(after.codes_disabled_unredeemed)
+       + Number(after.codes_expired_unredeemed) + Number(after.codes_unredeemed) === Number(after.codes_issued),
+    JSON.stringify(after))
+
+  // ── الإطفاء المفرد صار يحفظ سببه — الفجوة الحيّة سُدَّت ──
+  const single = await issuePurchase('SALLA-W3-ONE', 1)
+  await asRole(db, null)
+  const oneId = (await db.query(`select id from public.access_codes where label = 'SALLA-W3-ONE'`)).rows[0].id
+  await asRole(db, 'authenticated', founderId)
+  await db.query(`select public.founder_set_code_enabled($1, false, 'سبب مفرد — إثبات ⑩')`, [oneId])
+  await asRole(db, null)
+  let one = (await db.query(`select disabled_reason, disabled_at, disabled_by, enabled
+                               from public.access_codes where id = $1`, [oneId])).rows[0]
+  check('الإطفاء المفرد يحفظ السبب والفاعل واللحظة (كانت تُرمى)',
+    one.disabled_reason === 'سبب مفرد — إثبات ⑩' && one.disabled_at !== null
+    && String(one.disabled_by).startsWith('founder:') && one.enabled === false, JSON.stringify(one))
+  // ⟲ وإعادة التمكين المفرد تمحو أثر إطفاءٍ لم يعد قائمًا — لا سبب بائت على صفّ حيّ.
+  await asRole(db, 'authenticated', founderId)
+  await db.query(`select public.founder_set_code_enabled($1, true, 'إعادة تمكين — إثبات ⑩')`, [oneId])
+  await asRole(db, null)
+  one = (await db.query(`select disabled_reason, disabled_at, disabled_by, enabled
+                           from public.access_codes where id = $1`, [oneId])).rows[0]
+  check('⟲ إعادة التمكين المفرد تمحو disabled_* — الحالة لا تكذب التاريخ',
+    one.enabled === true && one.disabled_reason === null && one.disabled_at === null && one.disabled_by === null,
+    JSON.stringify(one))
+  void single
+
+  // ── ⚔️ لا تمكين دفعيّ — بنيويًّا لا التزامًا ──
+  const massEnable = (await db.query(
+    `select count(*)::int as n from pg_proc p join pg_namespace ns on ns.oid = p.pronamespace
+      where ns.nspname = 'public'
+        and p.proname ~ '(enable|activate).*(batch|bulk)|(batch|bulk).*(enable|activate)'`)).rows[0].n
+  check('⚔️ لا دالّة عامّة تمكينٍ دفعيّ بأي اسم', massEnable === 0, `${massEnable}`)
+  const batchSrc = (await db.query(
+    `select prosrc from pg_proc where oid = 'public.founder_disable_purchase_batch(text,text)'::regprocedure`)).rows[0].prosrc
+  check('⚔️ ودالّة الدفعة لا تحمل مسار تمكين — enabled=false وحدها',
+    !batchSrc.includes('enabled = true') && batchSrc.includes('enabled = false'))
+  check('⚔️ ومسندها يُسقط المستردّ نصًّا — لا اعتمادًا على صدفة بيانات',
+    batchSrc.includes('redemption_count < c.max_redemptions'))
+}
+
 // ═══════════════ الخلاصة ═══════════════
 const failCount = results.length - pass
 console.log(`\n${failCount === 0 ? '🎉' : '🔴'} صكوك الشراء: ${pass} نجحت / ${failCount} فشلت (المجموع ${results.length})`)
