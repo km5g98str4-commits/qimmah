@@ -3,7 +3,68 @@
 > **Canonical owner of one fact only: where execution stands right now.**
 > A zero-context session reads `README.md` → `00-GROUND.md` → this file, and can continue.
 
-**Last updated:** 2026-09-01 · **by:** موجة ٣ — تصليب مخزون الصكوك وتجهيز سلة
+**Last updated:** 2026-09-03 · **by:** الالتقاء النهائي — المرشّح الواحد [FINAL-RC]
+
+---
+
+## 0-ع. الأرض الآن — المرشّح النهائي [FINAL-RC] (٣ سبتمبر)
+
+```
+FINAL RC : converge/final-rc-001 @ <رأس هذا الالتزام>
+BASE     : codex/qimmah-gateway-cors-repair-001 @ 2edd6b9f (CI #572 أخضر) = Wave 3 @ b2a14204 + إصلاح CORS للبوّابة
+MERGED   : claude/workout-runtime-closure-001 @ 104d971e — خمسة التزامات cherry-pick -x بالترتيب
+           (32bdd502 · 1ec5f4e2 · 7a0b04e6 · 7019cb89 · 104d971e)
+GATE     : أخضر في worktree معزول بعد npm ci — typecheck · lint · build · test:gate (١٩٣ خطوة · صفر تخطٍّ معلَن)
+           · attack-pg 5/5 على PostgreSQL 16 حقيقي (55432) · الرحلات الأربع بمتصفّح Chromium
+CI       : يُقرأ على رأس هذا الفرع بعد الدفع — ولا يُعلَن قبل اكتمال السير **كاملًا**
+STAGING  : الخلفية خضراء (Codex — بوّابة v10 · OPTIONS/CORS حيّ · عضو 6/6 · مؤسس 10/10 · تجربة وصكّ وإطفاء حقيقيّون)
+           · الانحدار **الأمامي** على هذا الـSHA بالضبط بيد Codex/المؤسس: الخروج إلى *.supabase.co محجوب من حاويات الوكلاء (403 من وكيل الخروج)
+```
+
+### ما التقى هنا — اتّحاد مُتحقَّق لا دمج أعمى
+
+- الحارة تفرّعت من `18c4c231` (رأس التقاء ما قبل Wave 2) ولم تكن سلفًا لشيء؛ ملفّاتها ١١: **ثمانية غير متقاطعة** مع خطّ RC
+  (مطابقة بايتًا لرأس الحارة بعد الالتقاط) و**ثلاثة متقاطعة** حُسمت اتّحادًا وطُبعت قيمها (§4.1):
+  `ci.yml` = خطوات RC (+٨: attack-pg) ∪ خطوات الحارة (+١٥: رحلة المؤسس الحرفية · مصفوفة Dataset B) بترتيبهما ·
+  `package.json` = `test:e2e:founder-exact` بجوار `test:e2e:premium-surface` (JSON يُقرأ) ·
+  `07-STATE.md` = §7 «إغلاق زمن تشغيل التمرين» محفوظ أدناه كما كتبته الحارة.
+- **إصلاحا وقت التشغيل المقبولان** داخل الرأس: `enableEasyToday(uid)` في `TodayV2` (كاتب العلم وقارئه بهوية واحدة) ·
+  `workoutPlanShapeOk` يرفض يومًا بلا مصفوفة `exercises` (تلف معلَن لا انهيار). البنود الثلاثة **المؤجَّلة** تبقى مؤجَّلة في
+  `docs/product/BACKLOG.md`: `rotation.weeks` · النقر اليدوي أثناء التقدّم التلقائي · ١٢ رسمًا توضيحيًا.
+- **ميزانية سير CI ٣٥ ⇐ ٤٥ دقيقة بالقياس**: #572 (رأس CORS) = ٢٧:٥٣، وخطوتا الحارة على #566 = ١:٠٠ + ٢:٥٩ ⇒ ≈ ٣٢/٣٥
+  (٩١٪). لا خطوة حُذفت ولا إثبات قُصِّر — التعليل في `ci.yml` نفسه.
+- **ما بقي محفوظًا بلا لمس:** سلطة التجارة (Wave 2/3 · صكوك الشراء · إطفاء الدفعة) · Dataset B · إصلاح CORS ·
+  توجيه العميل عبر البوّابة · خطوة attack-pg في CI · كل التصليب الأمني الأحدث.
+
+### الأدلّة — مقيسة على شجرة هذا الرأس (الوثائق وميزانية CI وحدهما بعد القياس)
+
+| الطقم | النتيجة |
+|---|---|
+| `npm ci` · typecheck · lint · build | exit 0 · exit 0 · exit 0 · exit 0 (٤٢ ث) |
+| `test:gate` | **١٩٣ خطوة · exit 0 · صفر تخطٍّ معلَن** (٦٥٩ ث، والعنقود حيّ فأطقمه نُفِّذت داخل البوّابة أيضًا) |
+| `test:attack-pg` (PostgreSQL 16 حقيقي) | **5/5 نُفِّذت ونجحت** — trial-race 11/0 · redeem-race 11/0 · gateway-enforcement 21/0 · purchase-race 18/0 · premium-authority 14/0 |
+| رحلات المتصفّح (Chromium) | اتّصال الجلسة **25/0** · المؤسس الحرفية ٤ أيام × ٧٥ د **18/0** · مصفوفة Dataset B ٨ برامج **56/0** · مراجعة المؤسس (founder_preview) **43/0** |
+| Dataset B وقت التشغيل · البرامج الجاهزة · سلامة الجلسة | **205/0 · 358/0 · 36/0** |
+| صكوك الشراء · سلطة Premium · سباق الصكّ · CORS البوّابة | **105/0 · 14/0 · 18/0 · 18/0** |
+
+### الانحدار الأمامي على staging — تسليم حرفي (لا يُنفَّذ من هذه الحاوية)
+
+بعد اخضرار CI على الـSHA المدفوع، وبلا إعادة هجرات ولا إعادة نشر للبوّابة:
+
+```bash
+git fetch origin converge/final-rc-001 && git checkout <SHA النهائي> && npm ci
+VITE_SUPABASE_URL='https://odpkvswfiihrkglgfghd.supabase.co' VITE_SUPABASE_ANON_KEY='<anon staging>' npm run build   # VITE_APP_ENV يبقى فارغًا
+grep -rl ledlypcyrtnzvjvhykwz dist/assets/*.js | wc -l        # لازم 0
+grep -o 'qimmah-build" content="[^"]*' dist/index.html       # لازم يحمل الـSHA القصير نفسه
+```
+
+ثم بمتصفّح Chromium على هذا الأرتيفكت: دخول عضو · مسار التجربة عبر البوّابة · واجهة تفعيل الكود · بقاء Premium بعد
+إعادة التحميل والخروج/الدخول · جلسة تمرين متعدّدة التمارين «١ من N» ⇐ «N من N» · استئناف بعد إعادة التحميل ·
+فتح `/admin` بحساب المؤسس · فتح لوحة «صكوك الشراء». WebKit يبقى فحصًا منفصلًا بيد المؤسس.
+
+### ما لم يُمَسّ
+
+`main` · الإنتاج (`ledlypcyrtnzvjvhykwz`) · حالة staging · سلة · أي هجرة على قاعدة حيّة.
 
 ---
 
