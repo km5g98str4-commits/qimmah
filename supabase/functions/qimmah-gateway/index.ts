@@ -38,6 +38,7 @@ import { createClient } from 'jsr:@supabase/supabase-js@2'
 import {
   readGatewayConfig, parseGatewayRequest, clientIp, httpStatusFor, mintStamp, STAMP_HEADER,
 } from './contract.mjs'
+import { withBrowserCors } from './cors.mjs'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 declare const Deno: any
@@ -48,7 +49,7 @@ const json = (outcome: string, extra: Record<string, unknown> = {}) =>
     headers: { 'content-type': 'application/json' },
   })
 
-Deno.serve(async (req: Request): Promise<Response> => {
+const handleGatewayRequest = async (req: Request): Promise<Response> => {
   if (req.method !== 'POST') return json('method_not_allowed')
 
   const env = Deno.env.toObject()
@@ -117,4 +118,11 @@ Deno.serve(async (req: Request): Promise<Response> => {
     return json('rpc_error', { reason: error.message ?? '', code: (error as { code?: string }).code ?? '' })
   }
   return json('ok', { result: data })
-})
+}
+
+const internalErrorResponse = (error: unknown) => {
+  console.error('[qimmah-gateway] unhandled error:', error)
+  return json('failed', { reason: 'internal_error' })
+}
+
+Deno.serve((req: Request) => withBrowserCors(req, handleGatewayRequest, internalErrorResponse))
