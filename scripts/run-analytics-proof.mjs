@@ -274,10 +274,17 @@ check('م١: الرفض يُثبَّت فلا يتكرّر السؤال', /markN
 check('م١-ب: NotificationSettingsPanel محذوفة ولا مرجع لها', !existsSync(resolve(root, 'src/components/NotificationSettingsPanel.tsx')) && appSource.every(({ text }) => !text.includes('NotificationSettingsPanel')))
 
 console.log('\n⑦ سياسة الخصوصية تبقى صادقة')
-const strings = read('src/config/strings.ts')
-check('العربية ما زالت تنصّ على أن الإحصاءات لا تُرسَل لأي خادم', /لا\s+تُرسَل\s+هذه\s+الإحصاءات\s+إلى\s+أي\s+خادم/.test(strings))
-check('الإنجليزية كذلك', /not\s+sent\s+to\s+any\s+server/i.test(strings))
-check('ووعد «تبقى على جهازك» صار مسنودًا بمخزن فعلي', /تبقى\s+على\s+جهازك/.test(strings) && read('src/lib/tracking/store.ts').includes('TRACKING_EVENTS_KEY_BASE'))
+const legal = read('src/legal/canonicalLegalContent.ts')
+check('العربية تنصّ أن التشخيص الاختياري متوقف ما لم يُضبط ويُوافق عليه',
+  /التشخيص\s+الاختياري\s+متوقفًا\s+ما\s+لم\s+يُضبط\s+وتوافق\s+عليه/.test(legal))
+check('الإنجليزية تنصّ على العقد نفسه',
+  /optional\s+diagnostics\s+remain\s+disabled\s+unless\s+configured\s+and\s+consented\s+to/i.test(legal))
+check('ووعد التخزين المحلي الافتراضي مسنود بمخزن فعلي',
+  /على\s+جهازك\s+افتراضيًا/.test(legal) &&
+  /on\s+your\s+device\s+by\s+default/i.test(legal) &&
+  read('src/lib/tracking/store.ts').includes('TRACKING_EVENTS_KEY_BASE'))
+check('التفاف: ادعاء إرسال التشخيص افتراضيًا يناقض العقد ويُكشف',
+  /enabled\s+by\s+default/i.test('Diagnostics are enabled by default'))
 
 console.log(`\n✅ نجحت ${pass} فحوص تتبّع محلي (مصدرية).`)
 

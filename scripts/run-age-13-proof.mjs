@@ -21,7 +21,9 @@ const check = (label, ok) => {
   else { fails.push(label); console.log('  ✗ ' + label) }
 }
 
-const policy = read('src/data/policyCopy.ts')
+// `policyCopy.ts` صار جسر توافق فقط؛ النص الحيّ نفسه في المصدر القانوني الواحد.
+const policyBridge = read('src/data/policyCopy.ts')
+const policy = read('src/legal/canonicalLegalContent.ts')
 const validation = read('src/lib/validation.ts')
 const onboarding = read('src/i18n/dict/onboarding.ts')
 const flow = read('src/lib/onboardingV2Flow.ts')
@@ -66,7 +68,7 @@ const FORBIDDEN = [
   ['رسالة «بين 12 و90»', /بين\s*12\s*و\s*90/],
   ['نطاق مدقّق min: 12', /min:\s*12\b/],
 ]
-const SURFACES = { 'policyCopy.ts': policy, 'validation.ts': validation, 'onboarding.ts': onboarding, 'onboardingV2Flow.ts': flow, 'profileDomain.ts': domain }
+const SURFACES = { 'canonicalLegalContent.ts': policy, 'validation.ts': validation, 'onboarding.ts': onboarding, 'onboardingV2Flow.ts': flow, 'profileDomain.ts': domain }
 for (const [label, re] of FORBIDDEN) {
   const hits = Object.entries(SURFACES).filter(([, src]) => re.test(src)).map(([n]) => n)
   check(`${label} — غائب من كل الأسطح`, hits.length === 0)
@@ -77,6 +79,7 @@ console.log('\n═══ 5) تأكيد مضادّ — الإثبات ليس فا
 // لو صار أحد الأسطح فارغًا أو تغيّر مساره لمرّت الفحوص أعلاه مجّانًا.
 check('كل الأسطح الخمسة قُرئت بمحتوى فعلي', Object.values(SURFACES).every((s) => s.length > 500))
 check('سطح الأهلية يحوي فعلًا نصّ الموافقة', policy.includes('eligibilityPrefix'))
+check('جسر التوافق يعيد التصدير من المصدر القانوني ولا ينسخ النص', policyBridge.includes('canonicalLegalContent') && !policyBridge.includes('13 or older'))
 // محاكاة التفاف (§4.2): ملف يستورد النطاق **ثم يعيد إعلانه بأرقامه** يجب أن
 // يسقط. الفحص أعلاه يبحث عن الإعلان لا عن الاستيراد وحده — وهذا يثبت ذلك.
 const SMUGGLED = "import { AGE_RANGE } from '@/config/profileDomain'\nconst AGE_RANGE = { min: 12, max: 100 }"

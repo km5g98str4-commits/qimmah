@@ -22,6 +22,8 @@ interface ProfileChoiceStrings {
   userType: Record<'individual' | 'coach' | 'creator', string>
   workoutBalanceWarning: Record<string, string>
   minorGoalNote: string
+  minorNutritionGuidanceTitle: string
+  minorNutritionGuidanceBody: string
   generatedPlanReason: (plan: string, goal: string, level: string, days: number, atHome: boolean) => string
   generatedWarning: Record<string, string>
   generatedWarningFallback: string
@@ -40,6 +42,8 @@ const ar: ProfileChoiceStrings = {
   userType: { individual: 'فرد', coach: 'مدرب', creator: 'صانع محتوى' },
   workoutBalanceWarning: {},
   minorGoalNote: 'أهداف تعديل الوزن متاحة من 18 سنة — ننصح بمراجعة مختص تغذية',
+  minorNutritionGuidanceTitle: 'إرشاد مناسب لعمرك',
+  minorNutritionGuidanceBody: 'بنركّز على العادات والتسجيل وإرشاد نوعي بدون أهداف سعرات أو ماكروز أو ماء رقمية. تقدر تراجع مختص نمو أو تغذية لأرقام مناسبة لك.',
   generatedPlanReason: (plan, goal, level, days, atHome) => `اخترنا تقسيمة «${plan}» تلقائيًا لأنك ${goal} بمستوى ${level} و${days} أيام تمرين${atHome ? ' في المنزل' : ''}.`,
   generatedWarning: {},
   generatedWarningFallback: 'راجع ملاحظة الخطة قبل اعتماد التغييرات.',
@@ -63,6 +67,8 @@ const en: ProfileChoiceStrings = {
     'تنبيه: لا توجد تمارين كافية للأرجل.': 'Your plan does not include enough leg work.',
   },
   minorGoalNote: 'Weight-change goals are available from age 18 — we recommend consulting a nutrition specialist.',
+  minorNutritionGuidanceTitle: 'Age-appropriate guidance',
+  minorNutritionGuidanceBody: 'We’ll focus on habits, logging, and qualitative guidance without numeric calorie, macro, or water targets. A growth or nutrition specialist can provide numbers suited to you.',
   generatedPlanReason: (plan, goal, level, days, atHome) => `We selected “${plan}” based on your ${goal.toLowerCase()} goal, ${level.toLowerCase()} level, and ${days} training days${atHome ? ' at home' : ''}.`,
   generatedWarning: {
     'بدأنا بحجم أخفّ هذا الأسبوع لبداية آمنة — زِد تدريجيًا بعدها.': 'We started with lighter volume this week for a safer return. Build up gradually afterward.',
@@ -88,3 +94,11 @@ const en: ProfileChoiceStrings = {
 }
 
 export const profileChoiceStrings: Record<Lang, ProfileChoiceStrings> = { ar, en }
+
+/** ترجمة تحذيرات المولّد عند حدّ العرض، مع إبقاء العربية مصدر المفاتيح التاريخي. */
+export function localizeGeneratedWarnings(lang: Lang, warningsAr: readonly string[]): string[] {
+  const choices = profileChoiceStrings[lang]
+  return warningsAr.map((warning) =>
+    lang === 'en' ? choices.generatedWarning[warning] ?? choices.generatedWarningFallback : warning,
+  )
+}

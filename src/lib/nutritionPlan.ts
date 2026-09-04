@@ -77,6 +77,19 @@ export function createEmptyMeal(order: number, id?: string): PlanMeal {
 
 /** الخطة الافتراضية — أهدافها من الحسابات الذكية + وجبات أولية. */
 export function defaultNutritionPlan(targets: Targets, goal: CalorieGoal): NutritionPlan {
+  if (targets.numericNutritionStatus !== 'available') {
+    return {
+      enabled: true,
+      targetCalories: 0,
+      targetProtein: 0,
+      targetCarbs: 0,
+      targetFat: 0,
+      targetWaterLiters: 0,
+      meals: [],
+      style: 'simple_guidance',
+      mealsPerDay: 4,
+    }
+  }
   const seed = ['high-protein-breakfast', 'chicken-rice', 'greek-yogurt-snack', 'light-dinner']
   return {
     enabled: true,

@@ -33,7 +33,7 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
   // عند تغيّر الملف: إن لم تُعدَّل الحسابات يدويًا، أعد حسابها تلقائيًا
   const set = (partial: Partial<Profile>) => {
     const next: Profile = { ...p, ...partial }
-    if (manual) {
+    if (manual && !isMinorAge(next.age)) {
       ctx.update({ profile: next })
     } else {
       ctx.update({
@@ -214,11 +214,17 @@ export function StepBody({ ctx }: { ctx: WizardCtx }) {
           الخلل تسمية على قيمة، لا تعديل صامت. البروتين والماء بجانبه كانا
           يعرضان قيم الهدف أصلًا، فكانت السعرات وحدها خارج السرب.
         */}
-        <div className="mt-3 grid grid-cols-3 gap-3 text-center">
-          <LivePreview label={d.bodyTargetCalories} value={`${ctx.data.targets.targetCalories}`} unit={d.unitCalories} />
-          <LivePreview label={d.bodyProtein} value={`${ctx.data.targets.proteinGrams}`} unit={d.unitG} />
-          <LivePreview label={d.bodyWater} value={`${ctx.data.targets.waterLiters}`} unit={d.unitLiter} />
-        </div>
+        {minor ? (
+          <p className="mt-3 text-sm leading-relaxed text-ink-600" data-testid="customizer-body-under18-guidance">
+            {choices.minorNutritionGuidanceBody}
+          </p>
+        ) : (
+          <div className="mt-3 grid grid-cols-3 gap-3 text-center">
+            <LivePreview label={d.bodyTargetCalories} value={`${ctx.data.targets.targetCalories}`} unit={d.unitCalories} />
+            <LivePreview label={d.bodyProtein} value={`${ctx.data.targets.proteinGrams}`} unit={d.unitG} />
+            <LivePreview label={d.bodyWater} value={`${ctx.data.targets.waterLiters}`} unit={d.unitLiter} />
+          </div>
+        )}
       </div>
     </div>
   )

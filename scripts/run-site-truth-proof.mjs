@@ -18,6 +18,7 @@ import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 
 const SITE_DIR = 'site'
+const CANONICAL_LEGAL = 'src/legal/canonicalLegalContent.ts'
 
 /**
  * كل قاعدة تصف **جملة منفية بعينها**، لا كلمة مفتاحية.
@@ -58,12 +59,11 @@ const FORBIDDEN = [
 
 /** التصريحات التي **يجب أن تبقى** — الفحص يعمل في الاتجاهين. */
 const REQUIRED = [
-  { file: 'privacy.html', pattern: /qimmah\.support@gmail\.com/u, what: 'بريد التواصل المعتمد' },
-  { file: 'privacy.html', pattern: /الحد\s+الأدنى\s+للعمر:\s*١٣\s+سنة/u, what: 'الحدّ الأدنى ١٣ (عربي)' },
-  { file: 'privacy.html', pattern: /Minimum\s+age:\s*13\s+years/iu, what: 'الحدّ الأدنى ١٣ (إنجليزي)' },
-  { file: 'privacy.html', pattern: /قراءة\s+فقط/u, what: 'تصريح قراءة HealthKit فقط' },
-  { file: 'terms.html', pattern: /الحد\s+الأدنى\s+للعمر:\s*١٣\s+سنة/u, what: 'الحدّ الأدنى ١٣ في الشروط' },
-  { file: 'terms.html', pattern: /ليس\s+تشخيصًا/u, what: 'التنويه الطبي' },
+  { file: CANONICAL_LEGAL, root: true, pattern: /configured\(c\.contactEmail/u, what: 'حقل بريد التواصل المحكوم بالإطلاق' },
+  { file: CANONICAL_LEGAL, root: true, pattern: /الحد الأدنى المدعوم 13 سنة/u, what: 'الحدّ الأدنى 13 (عربي)' },
+  { file: CANONICAL_LEGAL, root: true, pattern: /minimum supported age is 13/iu, what: 'الحدّ الأدنى 13 (إنجليزي)' },
+  { file: CANONICAL_LEGAL, root: true, pattern: /Apple Health قراءة فقط/u, what: 'تصريح قراءة HealthKit فقط' },
+  { file: CANONICAL_LEGAL, root: true, pattern: /ليس جهة طبية/u, what: 'التنويه الطبي' },
   { file: 'index.html', pattern: /على\s+جهازك\s+أولًا/u, what: 'هوية «محلي أولًا» على الصفحة الرئيسية' },
 ]
 
@@ -88,7 +88,7 @@ for (const file of htmlFiles) {
 // ٢) وكل تصريح واجب حاضر في موضعه.
 for (const rule of REQUIRED) {
   checks++
-  const text = readFileSync(join(SITE_DIR, rule.file), 'utf8')
+  const text = readFileSync(rule.root ? rule.file : join(SITE_DIR, rule.file), 'utf8')
   if (!rule.pattern.test(text)) {
     failures.push(`${rule.file} — تصريح واجب مفقود: ${rule.what}`)
   }
@@ -105,8 +105,8 @@ for (const rule of REQUIRED) {
 // **معلَن مفصول بصريًا**. والتوحيد يهدم الفصل.
 const REGISTERS = [
   {
-    file: 'privacy.html',
-    own: { pattern: /<strong>و\)\s*موقعك<\/strong>/u, what: 'الصياغة القانونية المُعنونة' },
+    file: '../src/legal/canonicalLegalContent.ts',
+    own: { pattern: /لا يُطلب موقعك إلا إذا اخترت جدولة الوضع الداكن/u, what: 'الصياغة القانونية المُعنونة' },
     foreign: { pattern: /لا\s+نطلب\s+موقعك\s+إلا\s+في\s+حالة\s+واحدة/u, what: 'الصياغة السردية (صفحة الدعم)' },
   },
   {
@@ -159,10 +159,9 @@ for (const r of REGISTERS) {
 
 /** الأسطح التي يقرأ عليها المستخدم نموذج الوصول — الموقع والمتجر والقانوني. */
 const COMMERCIAL_SURFACES = [
-  'site/terms.html',
+  CANONICAL_LEGAL,
   'site/index.html',
   'site/support.html',
-  'docs/legal/terms-of-service.md',
   'docs/legal/APPSTORE-COMPLIANCE-PACK.md',
   'docs/appstore/02-description.md',
   'docs/appstore/STORE-TESTFLIGHT-PACK.md',
@@ -233,44 +232,20 @@ const EN_ONETIME = { what: 'one-time purchase, not a subscription', pattern: /no
 
 const ACCESS_BLOCKS = [
   {
-    file: 'site/terms.html',
-    id: 'شروط الموقع — العربية (قانوني)',
-    start: /<h2>٨\) الوصول والدفع<\/h2>/u,
-    end: /<h2>/u,
-    must: [
-      AR_FREE, AR_TRIAL, AR_PREMIUM, AR_CODE, AR_ONETIME,
-      { what: 'ما هو مدفوع (التسجيل)', pattern: /تسجيل\s+التمارين/u },
-      { what: 'نفي التجديد التلقائي', pattern: /تجديدًا\s+تلقائيًا/u },
-    ],
-    leak: { what: 'عنوان القسم التالي (الحدّ انفلت)', pattern: /<h2>/u },
+    file: CANONICAL_LEGAL,
+    id: 'الشروط القانونية المعتمدة — العربية',
+    start: /heading: '٤\. المعاينة المجانية والوصول المدفوع'/u,
+    end: /\{ heading: '٦\./u,
+    must: [AR_FREE, AR_TRIAL, AR_PREMIUM, AR_CODE, AR_ONETIME, { what: 'السعر 19.99', pattern: /19\.99/u }],
+    leak: { what: 'القسم السادس (الحدّ انفلت)', pattern: /\{ heading: '٦\./u },
   },
   {
-    file: 'site/terms.html',
-    id: 'شروط الموقع — الإنجليزية (قانوني)',
-    start: /<h2>8\) Access and payment<\/h2>/u,
-    end: /<h2>/u,
-    must: [
-      EN_FREE, EN_TRIAL, EN_PREMIUM, EN_CODE, EN_ONETIME,
-      { what: 'what is paid (logging)', pattern: /logging\s+workouts/iu },
-      { what: 'auto-renewal denied', pattern: /auto-renewing/iu },
-    ],
-    leak: { what: 'the next section heading (boundary escaped)', pattern: /<h2>/u },
-  },
-  {
-    file: 'docs/legal/terms-of-service.md',
-    id: 'الشروط (مسودة المالك) — العربية',
-    start: /### 8\. الوصول والدفع/u,
-    end: /\n### /u,
-    must: [AR_FREE, AR_TRIAL, AR_PREMIUM, AR_CODE, AR_ONETIME],
-    leak: { what: 'عنوان قسم آخر', pattern: /\n#{2,3} /u },
-  },
-  {
-    file: 'docs/legal/terms-of-service.md',
-    id: 'الشروط (مسودة المالك) — الإنجليزية',
-    start: /### 8\. Access and payment/u,
-    end: /\n### /u,
-    must: [EN_FREE, EN_TRIAL, EN_PREMIUM, EN_CODE, EN_ONETIME],
-    leak: { what: 'another section heading', pattern: /\n#{2,3} /u },
+    file: CANONICAL_LEGAL,
+    id: 'canonical legal terms — English',
+    start: /heading: '4\. Free preview and paid access'/u,
+    end: /\{ heading: '6\./u,
+    must: [EN_FREE, EN_TRIAL, EN_PREMIUM, EN_CODE, EN_ONETIME, { what: 'the SAR 19.99 price', pattern: /19\.99/u }],
+    leak: { what: 'section six (boundary escaped)', pattern: /\{ heading: '6\./u },
   },
   {
     file: 'docs/legal/APPSTORE-COMPLIANCE-PACK.md',
@@ -434,8 +409,8 @@ for (const block of ACCESS_BLOCKS) {
 const APPROVED_PREMIUM = [
   { file: 'src/i18n/dict/reveal.ts', pattern: /يشمل تحديثات قِمّة — بلا اشتراك شهري/u, what: 'نصّ Premium المعتمد (عربي)' },
   { file: 'src/i18n/dict/reveal.ts', pattern: /Includes Qimmah updates — no monthly subscription/u, what: 'نصّ Premium المعتمد (إنجليزي)' },
-  { file: 'site/terms.html', pattern: /يشمل تحديثات قِمّة — بلا اشتراك شهري/u, what: 'نفس الصيغة على الشروط المنشورة (عربي)' },
-  { file: 'site/terms.html', pattern: /includes Qimmah updates — no monthly subscription/iu, what: 'نفس الصيغة على الشروط المنشورة (إنجليزي)' },
+  { file: CANONICAL_LEGAL, pattern: /يشمل تحديثات قِمّة — بلا اشتراك شهري/u, what: 'نفس الصيغة على الشروط القانونية (عربي)' },
+  { file: CANONICAL_LEGAL, pattern: /includes Qimmah updates — no monthly subscription/iu, what: 'نفس الصيغة على الشروط القانونية (إنجليزي)' },
 ]
 for (const a of APPROVED_PREMIUM) {
   checks++

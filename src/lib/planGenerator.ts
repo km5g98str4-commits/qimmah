@@ -963,6 +963,22 @@ function pickTemplateForDiet(preferredId: string, dietPattern: DietPattern | und
 
 /** يولّد خطة أكل تقريبية من الأهداف والتفضيلات (يحاول الاقتراب من السعرات/البروتين). */
 export function generateNutrition(p: Profile, targets: Targets): { plan: NutritionPlan; warning?: string } {
+  // لا نعيد تعويض الأصفار بوجبات/أهداف افتراضية: حالة الحجب سلطة منتج، لا نقص بيانات.
+  if (targets.numericNutritionStatus !== 'available') {
+    return {
+      plan: {
+        enabled: p.trackNutrition,
+        targetCalories: 0,
+        targetProtein: 0,
+        targetCarbs: 0,
+        targetFat: 0,
+        targetWaterLiters: 0,
+        meals: [],
+        style: p.nutritionDisplayStyle ?? 'simple_guidance',
+        mealsPerDay: p.mealsPerDay,
+      },
+    }
+  }
   const goal = calorieGoalFromGoalType(p.goalType)
   const targetCalories =
     targets.targetCalories ||
@@ -1186,9 +1202,12 @@ export function generatePlan(profile: Profile): GeneratedPlan {
     goal: calorieGoalFromGoalType(effectiveGoalType),
   }
   const targets = computeTargets(p)
-  // بداية متحفّظة: الرجوع بعد انقطاع أو الانتظام المتقطّع → حجم أسبوع أوّل أخفّ.
+  // بداية متحفّظة: من لم يلتزم سابقًا، أو يعود بعد انقطاع، يبدأ بحجم أخفّ.
   const isConservativeStart =
-    p.goalType === 'returning' || p.consistency === 'returning' || p.consistency === 'onoff'
+    p.goalType === 'returning' ||
+    p.consistency === 'never' ||
+    p.consistency === 'returning' ||
+    p.consistency === 'onoff'
 
   const { plan, specs } = generateWorkoutPlan(p)
   let workoutPlan = plan

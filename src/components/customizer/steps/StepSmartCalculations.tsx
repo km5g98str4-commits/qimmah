@@ -4,16 +4,18 @@ import { Icon } from '@/components/Icon'
 import { NumericInput } from '@/components/NumericInput'
 import type { WizardCtx } from '../stepProps'
 import type { Targets } from '@/types/profile'
-import { computeTargets, profileHash } from '@/lib/calculators'
+import { computeTargets, hasNumericNutritionPrescription, profileHash } from '@/lib/calculators'
 import { NUM_LIMITS } from '@/lib/validation'
 import type { Lang } from '@/lib/appPreferences'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 /** خطوة الحسابات الذكية — أرقام مقدّرة قابلة للتعديل اليدوي. */
 export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
   const t = ctx.data.targets
   const manual = ctx.data.targetsMeta.manuallyEdited
+  const policy = profileChoiceStrings[ctx.lang]
   // أي تعديل يدوي على رقم → يضع علامة «معدّل يدويًا»
   const setT = (partial: Partial<Targets>) =>
     ctx.update({ targets: { ...t, ...partial }, targetsMeta: { ...ctx.data.targetsMeta, manuallyEdited: true } })
@@ -23,6 +25,24 @@ export function StepSmartCalculations({ ctx }: { ctx: WizardCtx }) {
       targets: computeTargets(ctx.data.profile),
       targetsMeta: { manuallyEdited: false, lastCalculatedFromProfileHash: profileHash(ctx.data.profile) },
     })
+
+  if (!hasNumericNutritionPrescription(t)) {
+    return (
+      <div>
+        <StepHeader icon="BarChart3" title={d.smartTitle} description={d.smartDescription} />
+        <div className="rounded-2xl border border-line bg-beige p-5" data-testid="smart-calculations-under18-policy">
+          <h3 className="text-base font-black text-ink-900">{policy.minorNutritionGuidanceTitle}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-ink-700">{policy.minorNutritionGuidanceBody}</p>
+        </div>
+        <div className="mt-5">
+          <Card icon="Dumbbell" title={d.smartTrainingCard} full>
+            <TextField label={d.smartSuggestedSplit} value={t.suggestedTrainingSplit} onChange={(v) => setT({ suggestedTrainingSplit: v })} />
+            <TextField label={d.smartNotes} value={t.notes} onChange={(v) => setT({ notes: v })} />
+          </Card>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>

@@ -16,7 +16,14 @@ const __ls = {
   get length() { return __store.size; },
   key(i) { return Array.from(__store.keys())[i] ?? null; },
   getItem: (k) => (__store.has(k) ? __store.get(k) : null),
-  setItem: (k, v) => { __store.set(k, String(v)); },
+  setItem: (k, v) => {
+    if (globalThis.__qimmahFailStorageKey === k) {
+      const error = new Error('simulated quota failure');
+      error.name = 'QuotaExceededError';
+      throw error;
+    }
+    __store.set(k, String(v));
+  },
   removeItem: (k) => { __store.delete(k); },
   clear: () => { __store.clear(); },
 };

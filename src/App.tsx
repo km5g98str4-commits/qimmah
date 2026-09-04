@@ -481,6 +481,10 @@ export default function App() {
   // ——— بناء عنصر الشاشة الحالية ثم لفّه بحدّ Suspense (أسفل المزوّدات حتى تبقى حالتها
   //     محفوظة أثناء تحميل الحِزم عند الطلب) ———
   let content: ReactNode
+  // التبويبات الرئيسية تملك هدف التخطّي داخل `<main>` في MobileShell. أمّا
+  // الشاشات المستقلة فتحتاج الهدف على هذا الغلاف. إبقاء المعرّف على الاثنين
+  // يصنع هدفين بالاسم نفسه ويجعل نتيجة رابط التخطّي رهينة ترتيب DOM.
+  let contentOwnsMainTarget = false
 
   if (view === 'start') {
     content = (
@@ -594,6 +598,7 @@ export default function App() {
     content = <V.StepsView lang={LANG} onBack={() => navigate('progress')} onOpenSettings={() => navigate('settings')} />
   } else {
     // ——— التبويبات الرئيسية داخل قشرة الجوال ———
+    contentOwnsMainTarget = true
     content = (
       <>
           <Suspense fallback={<TabSkeleton />}>
@@ -667,6 +672,7 @@ export default function App() {
 
   // حدّ أخطاء المسارات فوق Suspense: فشل تحميل حزمة أو انهيار شاشة يعرض بطاقة
   // «أعد المحاولة» (تعيد إنشاء الحِزم الكسولة وتعيد الاستيراد) — لا شاشة بيضاء.
+  const ContentRoot = contentOwnsMainTarget ? 'div' : 'main'
   return (
     <>
       {/* رابط التخطّي (QEA-005 — WCAG 2.4.1) — أول عنصر قابل للتركيز في الصفحة، قبل أي
@@ -674,12 +680,20 @@ export default function App() {
           الصفحة). الهدف id="main-content" ثابت عبر كل الشاشات (وسم/تبويب/شاشة بداية…). */}
       <a
         href="#main-content"
+        onClick={(event) => {
+          event.preventDefault()
+          document.getElementById('main-content')?.focus({ preventScroll: false })
+        }}
         className="sr-only focus:not-sr-only focus:fixed focus:start-3 focus:top-3 focus:z-[999] focus:rounded-xl focus:bg-primary focus:px-4 focus:py-2.5 focus:text-sm focus:font-bold focus:text-white focus:shadow-lg"
       >
         {LANG === 'en' ? 'Skip to main content' : 'تخطَّ إلى المحتوى الرئيسي'}
       </a>
       <RouteErrorBoundary onRetry={retryLazyViews}>
-        <div id="main-content" tabIndex={-1} className="outline-none">
+        <ContentRoot
+          id={contentOwnsMainTarget ? undefined : 'main-content'}
+          tabIndex={contentOwnsMainTarget ? undefined : -1}
+          className="outline-none"
+        >
           {/*
             [QIM-FINAL-CLOSURE-001] استئناف التجربة المعلّقة — الحلقة المكسورة تُغلق هنا.
 
@@ -708,7 +722,7 @@ export default function App() {
           */}
           <AccessStatusLine lang={LANG} signedIn={Boolean(auth.user)} />
           <Suspense fallback={<LoadingFallback />}>{content}</Suspense>
-        </div>
+        </ContentRoot>
         {/*
           [QIM-WEB-FOUNDER-UX-003/حزمة ١] لا شريط تثبيت **ثابتًا** فوق جذر التطبيق.
 

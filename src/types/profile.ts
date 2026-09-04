@@ -133,6 +133,11 @@ export interface Profile {
 
 /** أهداف مقدّرة قابلة للتعديل اليدوي. */
 export interface Targets {
+  /**
+   * سياسة وصف الأرقام الغذائية. القيمة ليست صلاحية عرض فقط: المولّد والحاسبة
+   * يعيدان أصفارًا محايدة عندما تكون الوصفة محجوبة، وتمنع الواجهات عرضها كأهداف.
+   */
+  numericNutritionStatus: 'available' | 'suppressed-under18' | 'unavailable'
   bmi: number
   bmiLabel: string
   bmr: number

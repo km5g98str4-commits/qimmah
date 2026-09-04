@@ -624,7 +624,7 @@ function buildArabicStrings(
     caloriesMaintain: `محافظة: بلا تعديل. ${n(example.tdee)} سعرة يوميًا.`,
     caloriesBulk: `تضخيم: زائد ${n(formula.bulkSurplus)} سعرة. ${n(example.tdee)} + ${n(formula.bulkSurplus)} = ${n(example.bulkingCalories)}.`,
     caloriesFloor: `لا تنزل سعراتك المستهدفة تحت حدّ أدنى مهما كان هدفك: ${n(copy.maleCalorieFloor)} للذكور و${n(copy.femaleCalorieFloor)} للإناث. النزول تحت هذا الحدّ يحتاج إشرافًا مختصًّا، ولا نصل إليه بحساب تلقائي.`,
-    caloriesMinor: `لمن هم دون ${n(ADULT_MIN_AGE)} سنة نحسب على المحافظة دائمًا — بلا عجز أو فائض — لأن تعديل الوزن في هذا العمر يحتاج متابعة مختصّ ومخططات نموّ.`,
+    caloriesMinor: `لمن هم دون ${n(ADULT_MIN_AGE)} سنة لا نحسب أو نعرض أهداف سعرات أو ماكروز أو ماء، ولا مؤشّر كتلة جسم أو توقّع تغيّر وزن مشتقًّا من معادلات البالغين. تبقى متابعة الأكل والعادات والتمرين متاحة، ويقدر مختص نمو أو تغذية يحدّد أرقامًا مناسبة للحالة.`,
     caloriesHonesty: `رقما ${n(formula.cutDeficit)} و${n(formula.bulkSurplus)} اختيار من قِمّة، لا معادلة منشورة. اخترناهما لأنهما يعطيان تغيّرًا ملموسًا مع بقاء الخطة قابلة للاستمرار. الأنسب لك قد يختلف.`,
     caloriesAdjust:
       'إن لاحظنا أن وزنك لا يتحرّك كما هو متوقّع، سنقترح تعديلًا ونشرح سببه. ولن نغيّر أرقامك دون علمك.',
@@ -939,7 +939,7 @@ function buildEnglishStrings(
     caloriesMaintain: `Maintain: no adjustment. ${n(example.tdee)} kcal/day.`,
     caloriesBulk: `Bulk: plus ${n(formula.bulkSurplus)} kcal. ${n(example.tdee)} + ${n(formula.bulkSurplus)} = ${n(example.bulkingCalories)}.`,
     caloriesFloor: `Your target never goes below a floor, whatever your goal: ${n(copy.maleCalorieFloor)} for men and ${n(copy.femaleCalorieFloor)} for women. Going below that needs professional supervision and isn’t something we reach automatically.`,
-    caloriesMinor: `For anyone under ${n(ADULT_MIN_AGE)} we always calculate at maintenance — no deficit or surplus — because changing weight at that age needs specialist follow-up and growth charts.`,
+    caloriesMinor: `For anyone under ${n(ADULT_MIN_AGE)}, we do not calculate or show calorie, macro, or water targets, adult-derived BMI interpretation, or weight-change forecasts. Food logging, habits, and training remain available; a growth or nutrition specialist can provide numbers suited to the individual.`,
     caloriesHonesty: `The ${n(formula.cutDeficit)} and ${n(formula.bulkSurplus)} figures are Qimmah’s choice, not a published equation. We chose them to give noticeable change while keeping the plan sustainable. What suits you may differ.`,
     caloriesAdjust:
       'If we notice your weight isn’t moving as expected, we’ll suggest an adjustment and explain why. We won’t change your numbers without telling you.',

@@ -14,10 +14,11 @@ import {
   ingredientDisplayName,
   mealTypeLabels,
 } from '@/lib/nutritionPlan'
-import { targetCaloriesFor } from '@/lib/calculators'
+import { hasNumericNutritionPrescription, targetCaloriesFor } from '@/lib/calculators'
 import { NUM_LIMITS } from '@/lib/validation'
 import type { Lang } from '@/lib/appPreferences'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 // text-base (16px) لا text-sm: يمنع تكبير iOS التلقائي عند التركيز على الحقول.
 const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 text-base text-ink-900 focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30'
@@ -26,6 +27,8 @@ const inputCls = 'w-full rounded-lg border border-line bg-beige px-2.5 py-1.5 te
 export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
   const d = onboardingStrings[ctx.lang]
   const np = ctx.data.nutritionPlan
+  const hasNumericTargets = hasNumericNutritionPrescription(ctx.data.targets)
+  const policy = profileChoiceStrings[ctx.lang]
   const setNp = (partial: Partial<NutritionPlan>) => ctx.update({ nutritionPlan: { ...np, ...partial } })
   const [pickerMealId, setPickerMealId] = useState<string | null>(null)
   const [tplOpen, setTplOpen] = useState(false)
@@ -125,7 +128,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
       </button>
 
       {/* إشعار اختلاف الأهداف عن الحسابات الذكية */}
-      {np.enabled && differsFromSmart && (
+      {np.enabled && hasNumericTargets && differsFromSmart && (
         <div className="mb-4 flex flex-col gap-3 rounded-2xl border border-gold-400/40 bg-gold-200/40 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="flex items-start gap-2 text-sm text-ink-700">
             <Icon name="AlertTriangle" className="mt-0.5 h-4 w-4 shrink-0 text-gold-600" />
@@ -139,7 +142,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
       )}
 
       {/* الأهداف */}
-      <div className="card p-5">
+      {hasNumericTargets ? <div className="card p-5">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-base font-bold text-ink-900">{d.nutGoalsTitle}</h3>
           <button type="button" onClick={useSmart} className="btn-ghost px-3 py-2 text-xs">
@@ -154,7 +157,12 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
           <Target lang={ctx.lang} label={d.nutFat} value={np.targetFat} max={1000} onChange={(v) => setNp({ targetFat: v })} />
           <Target lang={ctx.lang} label={d.nutWater} value={np.targetWaterLiters} step="0.1" max={15} onChange={(v) => setNp({ targetWaterLiters: v })} />
         </div>
-      </div>
+      </div> : (
+        <div className="card p-5" data-testid="customizer-nutrition-under18-policy">
+          <h3 className="text-base font-black text-ink-900">{policy.minorNutritionGuidanceTitle}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-ink-700">{policy.minorNutritionGuidanceBody}</p>
+        </div>
+      )}
 
       {/* وجبات جاهزة */}
       <div className="mt-5">

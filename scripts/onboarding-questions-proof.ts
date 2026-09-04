@@ -504,7 +504,10 @@ check('قسم القيمة يستهلك القاموس الذي كان ميّت�
 check('السطور المقاسة والمشتقّة مفصولتان بوسم مرئي', revealSource.includes('data-testid="reveal-value-measured"') && revealSource.includes('data-testid="reveal-value-estimated"') && revealSource.includes('badge={v.estimateBadge}'))
 check('صفّ الأدوات مشروط بوجودها — لا سطر بلا مصدر', revealSource.includes('equipment.length > 0 &&'))
 check('صفّ المكان مشروط بمعرفته', revealSource.includes('{place && <Row'))
-check('السعرات والبروتين مشروطان بمخرَج المحرّك', revealSource.includes('{targets && ('))
+check('السعرات والبروتين مشروطان بإتاحة مخرَج المحرّك للبالغ',
+  revealSource.includes("targets?.numericNutritionStatus === 'available' && ("))
+check('التفاف: وجود targets وحده لا يكفي لإظهار أرقام القاصر',
+  !"{targets && (".includes("numericNutritionStatus === 'available'"))
 check('التقسيمة المعروضة في الكشف هي نفسها المُقاسة بالمحرّك', revealSource.includes('plannedSplitLabelForDays(profile.trainingDays, splits)'))
 check('اتجاه التغذية ثلاث حالات لا حالة واحدة', Object.keys(revealStrings.ar.value.nutritionStyle).length === 3 && Object.keys(revealStrings.en.value.nutritionStyle).length === 3)
 check('حارس التناقض: هدف يخالف اتجاهه لا يُرسم رقمًا', viewSource.includes('targetContradictsGoal') && viewSource.includes("goalType === 'cutting' && derived > currentWeightKg") && viewSource.includes("goalType === 'bulking' && derived < currentWeightKg"))

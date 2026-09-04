@@ -1,6 +1,6 @@
 // إثبات وحدة لقاعدة «القاصرون → المحافظة فقط» (Option B، قرار المالك).
 // يُشغَّل عبر esbuild فوق localStorage مُحاكى (بلا متصفح) — انظر run-minors-proof.mjs.
-// يغطّي: مخرجات المحافظة للأعمار 12/15/17، استحالة العجز، حدّ 18، تماسك حالة التعطيل،
+// يغطّي: حجب الوصفة الرقمية للأعمار 13/15/17، حدّ 18، تماسك حالة التعطيل،
 // هجرة حساب قاصر حالي (ذهابًا وإيابًا/idempotent)، وعزل ختم الهجرة بين مستخدمَين.
 
 import {
@@ -48,14 +48,16 @@ const minorProfile = (over: Partial<Profile>): Profile => ({
 })
 
 // ── (1) الأعمار 12/15/17: مخرجات محافظة فقط، والعجز مستحيل ─────────────────
-console.log('\n(1) MINORS 12/15/17 — MAINTENANCE-ONLY, DEFICIT IMPOSSIBLE')
-for (const age of [12, 15, 17]) {
+console.log('\n(1) MINORS 13/15/17 — NUMERIC PRESCRIPTION SUPPRESSED')
+for (const age of [13, 15, 17]) {
   for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
     const goal = goalType === 'cutting' ? 'cut' : goalType === 'bulking' ? 'bulk' : 'maintain'
     const t = computeTargets(minorProfile({ age, goalType, goal }))
-    eq(`age ${age} ${goalType}: target == maintenance`, t.targetCalories, t.maintenanceCalories)
-    eq(`age ${age} ${goalType}: target == TDEE (no deficit/surplus)`, t.targetCalories, t.tdee)
-    check(`age ${age} ${goalType}: NOT below maintenance (deficit impossible)`, t.targetCalories >= t.maintenanceCalories)
+    eq(`age ${age} ${goalType}: explicit policy`, t.numericNutritionStatus, 'suppressed-under18')
+    check(`age ${age} ${goalType}: all adult-derived nutrition/BMI numbers are zero`, [
+      t.bmi, t.bmr, t.tdee, t.maintenanceCalories, t.cuttingCalories, t.bulkingCalories,
+      t.targetCalories, t.proteinGrams, t.fatGrams, t.carbsGrams, t.waterLiters,
+    ].every((value) => value === 0))
     eq(`age ${age} ${goalType}: no weekly weight change`, t.weeklyWeightChangeKg, 0)
     eq(`age ${age} ${goalType}: no ETA weeks`, t.estimatedWeeksToGoal, 0)
     check(`age ${age} ${goalType}: keeps «تقديري» specialist note`, t.notes.includes(MINOR_PLAN_NOTE))
@@ -75,7 +77,7 @@ console.log('\n(2) AGE-18 BOUNDARY — FULL GOALS RESTORED')
 
 // ── (3) تماسك حالة التعطيل والنسخة الصادقة (يقود aria-disabled/aria-describedby) ──
 console.log('\n(3) DISABLED-GOAL STATE + HONEST COPY')
-eq('isMinorAge(12)', isMinorAge(12), true)
+eq('isMinorAge(13)', isMinorAge(13), true)
 eq('isMinorAge(17)', isMinorAge(17), true)
 eq('isMinorAge(18)', isMinorAge(18), false)
 eq('isMinorAge(0) — unset age not restricted', isMinorAge(0), false)
@@ -104,7 +106,8 @@ const migrated = loadCustomization()
 eq('migrated goalType == maintenance', migrated.profile.goalType, 'maintenance')
 eq('migrated goal == maintain', migrated.profile.goal, 'maintain')
 check('migration stamp set', typeof migrated.targetsMeta.minorGoalMigratedAt === 'string')
-eq('migrated targets == maintenance calories', migrated.targets.targetCalories, migrated.targets.maintenanceCalories)
+eq('migrated targets policy == suppressed-under18', migrated.targets.numericNutritionStatus, 'suppressed-under18')
+eq('migrated targets contain no numeric prescription', migrated.targets.targetCalories, 0)
 check('one-time notice not yet dismissed', migrated.targetsMeta.minorGoalNoticeDismissed !== true)
 
 // ذهابًا وإيابًا: حفظ ثم تحميل ثانية — idempotent (لا يتغيّر الهدف ولا يُستبدل الختم)

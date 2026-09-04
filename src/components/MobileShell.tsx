@@ -182,14 +182,6 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
 
   return (
     <div className="qimmah-app-shell h-[100dvh] overflow-hidden bg-page">
-      {/* رابط تخطٍّ للمحتوى — أول عنصر قابل للتركيز؛ مخفي حتى التركيز بلوحة المفاتيح. */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:z-[60] focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white focus:shadow-glow"
-        style={{ insetInlineStart: '0.5rem' }}
-      >
-        {ar ? 'تخطَّ إلى المحتوى' : 'Skip to content'}
-      </a>
       <div className="app-container flex h-full min-h-0 flex-col border-x border-line/60">
         {/* هيدر مدمج */}
         {/* الهيدر يملك منطقة الأمان العلوية: مع تراكب شريط الحالة على iOS يمتد سطحه

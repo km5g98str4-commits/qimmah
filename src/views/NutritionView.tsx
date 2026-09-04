@@ -14,6 +14,8 @@ import type { Lang } from '@/lib/appPreferences'
 import { useAccess } from '@/lib/access/useAccess'
 import { formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
 import { clearQuickLogIntent, takeQuickLogIntent, type QuickLogIntent } from '@/lib/quickLogIntent'
+import { hasNumericNutritionPrescription } from '@/lib/calculators'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 interface NutritionViewProps {
   lang: Lang
@@ -50,6 +52,8 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const d = nutritionScreenStrings[lang]
   const { state, totals, addWater, resetWater, removeLog, updateLogQuantity } = useNutritionToday()
   const np = customization.nutritionPlan
+  const hasNumericTargets = hasNumericNutritionPrescription(customization.targets)
+  const agePolicy = profileChoiceStrings[lang]
 
   /**
    * [QIM-WEB-FOUNDER-UX-004/حزمة ٤] استهلاك نيّة التسجيل السريع — **في المسار الحيّ**.
@@ -89,11 +93,11 @@ export function NutritionView({ lang }: NutritionViewProps) {
     return () => window.removeEventListener('qimmah:quick-log', onEvent)
   }, [])
 
-  const targetCalories = np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000
-  const targetProtein = np.targetProtein || customization.targets.proteinGrams || 120
-  const targetCarbs = np.targetCarbs || customization.targets.carbsGrams || 200
-  const targetFat = np.targetFat || customization.targets.fatGrams || 70
-  const targetWaterMl = Math.round((np.targetWaterLiters || customization.targets.waterLiters || 3) * 1000)
+  const targetCalories = hasNumericTargets ? np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000 : 0
+  const targetProtein = hasNumericTargets ? np.targetProtein || customization.targets.proteinGrams || 120 : 0
+  const targetCarbs = hasNumericTargets ? np.targetCarbs || customization.targets.carbsGrams || 200 : 0
+  const targetFat = hasNumericTargets ? np.targetFat || customization.targets.fatGrams || 70 : 0
+  const targetWaterMl = hasNumericTargets ? Math.round((np.targetWaterLiters || customization.targets.waterLiters || 3) * 1000) : 0
 
   // أسلوب العرض من الإعداد (مصدر الحقيقة). افتراضيًا «اقتراح وجبات» للمستخدمين الحاليين.
   const style = np.style ?? 'meal_suggestions'
@@ -131,7 +135,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
             كانت الخانات الأربع بنفس الوزن (`text-lg` لكلٍّ)، فالعين تمسح أربعة
             أرقام لتستنتج الرقم الوحيد الذي جاءت لأجله. صار المتبقّي رقمًا كبيرًا
             مستقلًّا، والمعادلة تحته سطرًا مساندًا يشرح من أين جاء. */}
-        <div className="card p-5">
+        {hasNumericTargets ? <div className="card p-5">
           <p className="text-xs font-bold text-ink-500">{t.equationNote}</p>
 
           <div className="mt-3 flex items-baseline gap-2">
@@ -149,7 +153,12 @@ export function NutritionView({ lang }: NutritionViewProps) {
             <Op symbol={d.opPlus} />
             <EqCell label={t.exerciseCals} value={exerciseCals} lang={lang} />
           </div>
-        </div>
+        </div> : (
+          <div className="card p-5" data-testid="nutrition-under18-guidance">
+            <h2 className="text-sm font-black text-ink-900">{agePolicy.minorNutritionGuidanceTitle}</h2>
+            <p className="mt-2 text-sm leading-relaxed text-ink-600">{agePolicy.minorNutritionGuidanceBody}</p>
+          </div>
+        )}
 
         {/*
           [QIM-WEB-FOUNDER-UX-004/حزمة ٤] عمودان دائمًا — **لا `sm:grid-cols-4`.**
@@ -166,10 +175,10 @@ export function NutritionView({ lang }: NutritionViewProps) {
           المتاحة فعلًا لأنه لا يسأل عن غيرها.
         */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <MacroCard label={t.protein} eaten={round(totals.protein)} target={targetProtein} unit={d.gramsUnit} color="#22c55e" lang={lang} />
-          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={targetCarbs} unit={d.gramsUnit} color="#0ea5e9" lang={lang} />
-          <MacroCard label={t.fat} eaten={round(totals.fat)} target={targetFat} unit={d.gramsUnit} color="#e0941f" lang={lang} />
-          <MacroCard label={t.water} eaten={state.waterMl} target={targetWaterMl} unit={d.mlUnit} color="#F26A21" lang={lang} />
+          <MacroCard label={t.protein} eaten={round(totals.protein)} target={hasNumericTargets ? targetProtein : null} unit={d.gramsUnit} color="#22c55e" lang={lang} />
+          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={hasNumericTargets ? targetCarbs : null} unit={d.gramsUnit} color="#0ea5e9" lang={lang} />
+          <MacroCard label={t.fat} eaten={round(totals.fat)} target={hasNumericTargets ? targetFat : null} unit={d.gramsUnit} color="#e0941f" lang={lang} />
+          <MacroCard label={t.water} eaten={state.waterMl} target={hasNumericTargets ? targetWaterMl : null} unit={d.mlUnit} color="#F26A21" lang={lang} />
         </div>
 
         {/* حالة فارغة — تحفيز لتسجيل أول وجبة */}
@@ -203,7 +212,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
           </div>
         ) : (
           <div className="mt-6">
-            <QuickMealLogger lang={lang} targetCalories={targetCalories} targetProtein={targetProtein} />
+            <QuickMealLogger lang={lang} targetCalories={targetCalories} targetProtein={targetProtein} showTargets={hasNumericTargets} />
           </div>
         )}
 
@@ -253,8 +262,8 @@ function EqCell({ label, value, lang }: { label: string; value: number; lang: La
   )
 }
 
-function MacroCard({ label, eaten, target, unit, color, lang }: { label: string; eaten: number; target: number; unit: string; color: string; lang: Lang }) {
-  const pct = target > 0 ? Math.min(1, eaten / target) : 0
+function MacroCard({ label, eaten, target, unit, color, lang }: { label: string; eaten: number; target: number | null; unit: string; color: string; lang: Lang }) {
+  const pct = target !== null && target > 0 ? Math.min(1, eaten / target) : 0
   return (
     // [WP-4B] البطاقة كانت `flex` أفقيًا: الحلقة ٤٠بكسل + نصّ بجانبها داخل عمود
     // من عمودين على ٣٧٥بكسل ⇒ النصّ يُقصّ («بروتين» و«١٢٠ / ١٥٠غ» يتزاحمان).
@@ -262,12 +271,12 @@ function MacroCard({ label, eaten, target, unit, color, lang }: { label: string;
     <div className="card flex flex-col items-start gap-2.5 p-4">
       <div className="flex w-full items-center justify-between gap-2">
         <p className="min-w-0 truncate text-xs font-bold text-ink-500">{label}</p>
-        <Ring pct={pct} color={color} />
+        {target !== null && <Ring pct={pct} color={color} />}
       </div>
       <p className="min-w-0 text-base font-black leading-none text-ink-900">
         {formatNumber(eaten, lang)}
         {/* الهدف لا يُقصّ: `whitespace-nowrap` يمنع كسر «/ ١٥٠غ» على سطرين. */}
-        <span className="whitespace-nowrap text-[11px] font-bold text-ink-400"> / {formatNumber(target, lang)}{unit}</span>
+        {target !== null && <span className="whitespace-nowrap text-[11px] font-bold text-ink-400"> / {formatNumber(target, lang)}{unit}</span>}
       </p>
     </div>
   )
@@ -547,14 +556,17 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, onReset, focusRequ
           <Icon name="Droplets" className="h-4 w-4 text-primary-c" />
           {t.water}
         </span>
-        <span className="text-sm font-black text-primary-c">{formatNumber(Number((waterMl / 1000).toFixed(2)), lang)} / {formatNumber(Number((targetMl / 1000).toFixed(1)), lang)} {d.litersUnit}</span>
+        <span className="text-sm font-black text-primary-c">
+          {formatNumber(Number((waterMl / 1000).toFixed(2)), lang)}
+          {targetMl > 0 && <> / {formatNumber(Number((targetMl / 1000).toFixed(1)), lang)}</>} {d.litersUnit}
+        </span>
       </div>
       {targetMl > 0 && (
         <p data-testid="water-remaining" className="mt-1 text-xs font-bold text-ink-500">
           {remainingMl > 0 ? w.litersRemaining(liters(remainingMl)) : w.litersTargetMet}
         </p>
       )}
-      <ProgressBar current={waterMl} target={targetMl || 1} color="bg-primary" className="mt-3 h-1.5" />
+      {targetMl > 0 && <ProgressBar current={waterMl} target={targetMl} color="bg-primary" className="mt-3 h-1.5" />}
       <div className="mt-3 flex flex-wrap gap-2">
         {/* الوسم للقيادة الآلية: نصّ الزرّ يمرّ بـ`formatNumeralsIn` فيصير «+٢٥٠ مل»
             في العربية، وأي إثبات يمسكه برقم لاتيني يبور عند أول جلسة عربية —
@@ -564,7 +576,9 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, onReset, focusRequ
       </div>
       <div className="mt-2 flex items-center gap-2">
         {/* `type="text"` لا `number` — نفس سبب حقل الكمية أعلاه. */}
+        <label htmlFor="custom-water-amount" className="sr-only">{t.customWater}</label>
         <input
+          id="custom-water-amount"
           type="text"
           inputMode="numeric"
           autoComplete="off"

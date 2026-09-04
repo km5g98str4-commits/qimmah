@@ -236,7 +236,10 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
   const focusIsPinned = focus === BRIDGE_PINNED_MUSCLE_FOCUS
   const usedAdvancedSplit = profile.splitMode === 'advanced' && Boolean(profile.splitChoice)
   const conservativeStart =
-    effectiveGoal === 'returning' || profile.consistency === 'returning' || profile.consistency === 'onoff'
+    effectiveGoal === 'returning' ||
+    profile.consistency === 'never' ||
+    profile.consistency === 'returning' ||
+    profile.consistency === 'onoff'
   // [SOVEREIGN-PLAN-001] الحالة تُقرأ الآن من **مصدر الترشيح نفسه** لا من تعبير
   // نمطي موازٍ، وتشمل المفاتيح البنيوية (`injuryAreas`) كما تشمل النصّ الحرّ —
   // فلا يفترق ما يُعلَن للمستخدم عمّا رشّحه المحرّك فعلًا.
@@ -345,21 +348,23 @@ export function buildPlanRationale(profile: Profile, plan: GeneratedPlan): PlanR
     basis: 'structural',
   })
 
-  // ١٠) سعرات الهدف — رقم مقيس من مخرجات الحاسبات.
-  decisions.push({
-    area: 'calorieTarget',
-    drivers: [
-      { key: 'goalType', value: effectiveGoal },
-      { key: 'gender', value: profile.gender },
-      { key: 'weightKg', value: profile.weightKg },
-      { key: 'heightCm', value: profile.heightCm },
-      { key: 'age', value: profile.age },
-      { key: 'activityLevel', value: profile.activityLevel },
-      { key: 'trainingDays', value: days },
-    ],
-    outcome: { key: 'targetCalories', value: plan.targets.targetCalories },
-    basis: 'measured',
-  })
+  // ١٠) سعرات الهدف — لا قرار رقمي إطلاقًا حين تكون الوصفة محجوبة بالعمر.
+  if (plan.targets.numericNutritionStatus === 'available') {
+    decisions.push({
+      area: 'calorieTarget',
+      drivers: [
+        { key: 'goalType', value: effectiveGoal },
+        { key: 'gender', value: profile.gender },
+        { key: 'weightKg', value: profile.weightKg },
+        { key: 'heightCm', value: profile.heightCm },
+        { key: 'age', value: profile.age },
+        { key: 'activityLevel', value: profile.activityLevel },
+        { key: 'trainingDays', value: days },
+      ],
+      outcome: { key: 'targetCalories', value: plan.targets.targetCalories },
+      basis: 'measured',
+    })
+  }
 
   // ١١) حاجز القاصرين — يُذكر فقط حين يُطبَّق فعلًا.
   if (goalWasRestricted) {

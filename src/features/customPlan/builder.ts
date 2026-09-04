@@ -372,6 +372,7 @@ export type ApplyCalendarPatchResult =
   | { status: 'updated'; schedule: WeeklySchedule; clearedWeekdays: number[]; clearedOverrides: string[] }
   | { status: 'skipped'; reason: 'no-schedule' | 'no-change' }
   | { status: 'rejected'; violations: ScheduleViolation[] }
+  | { status: 'failed'; reason: 'quota' | 'unavailable' | 'error' }
 
 /**
  * يطبّق ترقيع حذف اليوم على الجدول الأسبوعي المخزّن (P4):
@@ -424,6 +425,7 @@ export function applyCalendarDayRemoval(patch: CalendarDayRemovalPatch): ApplyCa
     updatedAt: new Date().toISOString(),
   })
   if (saved.status === 'rejected') return { status: 'rejected', violations: saved.violations }
+  if (saved.status === 'failed') return saved
   return { status: 'updated', schedule: saved.schedule, clearedWeekdays, clearedOverrides }
 }
 

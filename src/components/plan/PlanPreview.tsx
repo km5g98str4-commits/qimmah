@@ -4,6 +4,8 @@ import type { GeneratedPlan } from '@/lib/planGenerator'
 import { ePlanStrings, fillTemplate } from '@/i18n/dict/ePlan'
 import { getExercise } from '@/data/exercises'
 import { formatNumeralsIn } from '@/lib/numberFormat'
+import { hasNumericNutritionPrescription } from '@/lib/calculators'
+import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 /**
  * معاينة الخطة (حارة E · المرحلة الثانية — الموجة ٢) — **مكوّن عرضي بحت.**
@@ -37,6 +39,7 @@ export function PlanPreview({
   notes?: readonly string[]
 }) {
   const s = ePlanStrings[lang]
+  const policy = profileChoiceStrings[lang]
   const num = (n: number) => (lang === 'ar' ? n.toLocaleString('ar-EG') : n.toLocaleString('en-US'))
   /**
    * اسم يوم الخطة **مُخزَّن** بأرقام لاتينية عمدًا («اليوم 1 · علوي») — انظر
@@ -50,6 +53,7 @@ export function PlanPreview({
   const days = plan.workoutPlan.days
   const firstDay = days[0]
   const splitTitle = s.splitTitles[plan.suggestedWorkoutTemplateId] ?? plan.suggestedWorkoutTemplateId
+  const hasNumericNutrition = hasNumericNutritionPrescription(plan.targets)
 
   const label = fillTemplate(s.planLabel, {
     goal: s.goalLabels[goalType],
@@ -131,21 +135,30 @@ export function PlanPreview({
         </>
       )}
 
-      <h3 className="mt-5 text-sm font-medium text-ink-900">{s.targetsHeading}</h3>
-      <p className="mt-1 text-sm leading-relaxed text-ink-500">{s.targetsNote}</p>
-      <p className="mt-2 text-2xl font-semibold text-ink-900">
-        {num(plan.targets.targetCalories)}{' '}
-        <span className="text-sm font-normal text-ink-500">{s.caloriesUnit}</span>
-        <span className="sr-only"> {s.calories}</span>
-      </p>
-      <ul className="mt-2 space-y-1.5" data-testid="plan-preview-macros">
-        {macros.map((m) => (
-          <li key={m.key} className="flex items-baseline justify-between gap-3 text-sm text-ink-700">
-            <span className="text-start">{m.label}</span>
-            <span className="shrink-0 text-end text-ink-500">{m.value}</span>
-          </li>
-        ))}
-      </ul>
+      {hasNumericNutrition ? (
+        <>
+          <h3 className="mt-5 text-sm font-medium text-ink-900">{s.targetsHeading}</h3>
+          <p className="mt-1 text-sm leading-relaxed text-ink-500">{s.targetsNote}</p>
+          <p className="mt-2 text-2xl font-semibold text-ink-900">
+            {num(plan.targets.targetCalories)}{' '}
+            <span className="text-sm font-normal text-ink-500">{s.caloriesUnit}</span>
+            <span className="sr-only"> {s.calories}</span>
+          </p>
+          <ul className="mt-2 space-y-1.5" data-testid="plan-preview-macros">
+            {macros.map((m) => (
+              <li key={m.key} className="flex items-baseline justify-between gap-3 text-sm text-ink-700">
+                <span className="text-start">{m.label}</span>
+                <span className="shrink-0 text-end text-ink-500">{m.value}</span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <section className="mt-5 rounded-xl border border-line bg-beige p-3" data-testid="plan-preview-under18-guidance">
+          <h3 className="text-sm font-medium text-ink-900">{policy.minorNutritionGuidanceTitle}</h3>
+          <p className="mt-1 text-sm leading-relaxed text-ink-700">{policy.minorNutritionGuidanceBody}</p>
+        </section>
+      )}
 
       {notes && notes.length > 0 && (
         <>

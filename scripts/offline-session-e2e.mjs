@@ -15,11 +15,20 @@
 //   EVIDENCE_DIR=/tmp/my-evidence node scripts/offline-session-e2e.mjs
 
 import { spawn } from 'node:child_process'
-import { chromium } from './e2e/lib/engine.mjs'
 import { mkdirSync, mkdtempSync, writeFileSync, rmSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { tmpdir } from 'node:os'
-import { completeOnboarding, seedMockSession } from './lib/onboarding-driver.mjs'
+import { assertOfflineHarnessEnv } from './lib/offline-harness-guard.mjs'
+
+// This is intentionally the first executable action. A rejected target exits
+// before evidence writes, Playwright import, browser/build spawn, or fetch.
+const SAFE_TARGET = assertOfflineHarnessEnv(process.env)
+if (process.argv.includes('--guard-only')) {
+  console.log(`OFFLINE_HARNESS_GUARD_OK:${SAFE_TARGET.targetEnv}`)
+  process.exit(0)
+}
+const { chromium } = await import('./e2e/lib/engine.mjs')
+const { completeOnboarding, seedMockSession } = await import('./lib/onboarding-driver.mjs')
 
 const EVIDENCE_DIR = resolve(process.argv[2] || process.env.EVIDENCE_DIR || join(tmpdir(), `qimmah-offline-evidence-${Date.now()}`))
 mkdirSync(EVIDENCE_DIR, { recursive: true })
@@ -41,7 +50,10 @@ try {
   const buildOutDir = mkdtempSync(join(tmpdir(), 'qimmah-offline-build-'))
   console.log(`— بناء flagless إلى مخرج مؤقّت: ${buildOutDir} —`)
   await new Promise((res, rej) => {
-    const p = spawn('npx', ['vite', 'build', '--outDir', buildOutDir], { stdio: 'inherit', env: { ...process.env, VITE_DESIGN_V2: 'true' } })
+    const safeBuildEnv = SAFE_TARGET.targetEnv === 'local'
+      ? { ...process.env, VITE_DESIGN_V2: 'true', VITE_APP_ENV: 'founder_preview', VITE_SUPABASE_URL: '', VITE_SUPABASE_ANON_KEY: '' }
+      : { ...process.env, VITE_DESIGN_V2: 'true', VITE_APP_ENV: 'founder_preview' }
+    const p = spawn('npx', ['vite', 'build', '--outDir', buildOutDir], { stdio: 'inherit', env: safeBuildEnv })
     p.on('exit', (code) => (code === 0 ? res() : rej(new Error(`build exit ${code}`))))
   })
   check('البناء إلى مخرج مؤقّت نجح (لا dist ثابت)', true, buildOutDir)
@@ -71,8 +83,9 @@ try {
   })
   let page = await context.newPage()
   const consoleErrors = []
+  const unauthorizedResponses = []
   page.on('console', (m) => { if (m.type() === 'error') consoleErrors.push(m.text()) })
-  page.on('response', (r) => { if (r.status() === 401) console.log('  [DIAG 401]', r.url()) })
+  page.on('response', (r) => { if (r.status() === 401) unauthorizedResponses.push(r.url()) })
   page.on('pageerror', (e) => consoleErrors.push('pageerror: ' + e.message))
 
   // ————— ٤) تثبيت متصل: زيارة أولى + انتظار جهوزية عامل الخدمة فعليًا. —————
@@ -111,7 +124,7 @@ try {
   // لا فور معالج النقر مباشرة — قراءة فورية بلا انتظار تُنتج سلبيًا كاذبًا هنا.
   await page.waitForTimeout(500)
 
-  const activeKeySnapshot = await page.evaluate(() => Object.keys(localStorage).find((k) => k.startsWith('qimmah:active-workout:v2')))
+  const activeKeySnapshot = await page.evaluate(() => localStorage.getItem('qimmah:activeWorkout:v1') ? 'qimmah:activeWorkout:v1' : null)
   check('مفتاح الجلسة النشطة موجود في التخزين قبل قطع الشبكة', Boolean(activeKeySnapshot), activeKeySnapshot || '(none)')
 
   // ————— ٦) قطع الشبكة فعليًا (لا محاكاة) — ثم خلفية حقيقية دقيقتين. —————
@@ -145,7 +158,7 @@ try {
   // مهلة استقرار قبل الإغلاق: تمنح Chromium فرصة لتفريغ كتابات localStorage المعلَّقة إلى
   // القرص (ملف بيانات المستخدم الدائم) قبل إنهاء العملية — إغلاق فوري بلا مهلة قد يُسابق
   // التفريغ الفعلي فينتج فقدًا ظاهريًا مصدره توقيت المتصفّح لا سلوك التطبيق.
-  const activeKeyBeforeClose = await page.evaluate(() => Object.keys(localStorage).find((k) => k.startsWith('qimmah:active-workout:v2')))
+  const activeKeyBeforeClose = await page.evaluate(() => localStorage.getItem('qimmah:activeWorkout:v1') ? 'qimmah:activeWorkout:v1' : null)
   check('مفتاح الجلسة النشطة موجود قبل إغلاق السياق (تأكيد إضافي)', Boolean(activeKeyBeforeClose), activeKeyBeforeClose || '(none)')
   await page.waitForTimeout(1500)
   await context.close()
@@ -159,7 +172,7 @@ try {
   const consoleErrors2 = []
   page.on('console', (m) => { if (m.type() === 'error') consoleErrors2.push(m.text()) })
   page.on('pageerror', (e) => consoleErrors2.push('pageerror: ' + e.message))
-  page.on('response', (r) => { if (r.status() === 401) console.log('  [DIAG 401]', r.url()) })
+  page.on('response', (r) => { if (r.status() === 401) unauthorizedResponses.push(r.url()) })
 
   let restartOk = true
   let restartErrorText = ''
@@ -175,7 +188,7 @@ try {
   check('فتح جديد للسياق (يحاكي إعادة تشغيل التطبيق) دون اتصال نجح', restartOk, restartErrorText)
   check('لا شاشة بيضاء بعد إعادة تشغيل العملية دون اتصال', !isWhiteScreenRestart, `طول النص: ${bodyAfterRestart.trim().length}`)
 
-  const activeKeyAfterRestart = await page.evaluate(() => Object.keys(localStorage).find((k) => k.startsWith('qimmah:active-workout:v2')))
+  const activeKeyAfterRestart = await page.evaluate(() => localStorage.getItem('qimmah:activeWorkout:v1') ? 'qimmah:activeWorkout:v1' : null)
   check('مفتاح الجلسة النشطة ما زال محفوظًا بعد إعادة التشغيل دون اتصال (لا فقد بيانات)', Boolean(activeKeyAfterRestart), activeKeyAfterRestart || '(none)')
 
   // ————— ٨ب) إعادة تشغيل العملية تهبط على لوحة اليوم (المسار الافتراضي) لا شاشة التمرين
@@ -194,16 +207,16 @@ try {
   const bodyReconnected = await page.locator('body').innerText().catch(() => '')
   check('التطبيق يعمل طبيعيًا بعد إعادة الاتصال', bodyReconnected.trim().length > 5)
 
-  // 401 على REST /profiles متوقّع ومفسَّر: جلسة QA وهمية (رمز مصطنَع لا يقبله الخادم
-  // الحقيقي) — مزامنة الملف السحابي بالخلفية ترفضها Supabase بصدق (يثبت أن RLS/التحقّق
-  // يعملان، لا ثغرة). حساب حقيقي بجلسة صالحة لن يُنتج هذا. أي خطأ آخر غير هذا النمط يُفشل الفحص.
-  const EXPECTED_MOCK_SESSION_401 = /Failed to load resource: the server responded with a status of 401/
   const allConsoleErrors = [...consoleErrors, ...consoleErrors2]
-  const unexpectedErrors = allConsoleErrors.filter((e) => !EXPECTED_MOCK_SESSION_401.test(e))
   check(
-    'لا أخطاء console غير متوقّعة (401 مزامنة الجلسة الوهمية مستثنى ومُوثَّق)',
-    unexpectedErrors.length === 0,
-    unexpectedErrors.length > 0 ? unexpectedErrors.join(' | ') : `(${allConsoleErrors.length} 401 متوقّع من REST /profiles — جلسة QA وهمية)`,
+    'لا أخطاء console؛ 401 ليس نجاحًا مقبولًا في حارس عدم الاتصال',
+    allConsoleErrors.length === 0,
+    allConsoleErrors.join(' | '),
+  )
+  check(
+    'لا استجابة شبكة 401 في الرحلة',
+    unauthorizedResponses.length === 0,
+    unauthorizedResponses.join(' | '),
   )
 
   await context.close()

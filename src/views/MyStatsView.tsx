@@ -17,6 +17,7 @@ import {
 import { statsScreenStrings } from '@/i18n/dict/statsScreen'
 import type { Lang } from '@/lib/appPreferences'
 import type { MuscleId } from '@/types/muscles'
+import { hasNumericNutritionPrescription } from '@/lib/calculators'
 
 interface MyStatsViewProps {
   lang: Lang
@@ -51,8 +52,9 @@ export function MyStatsView({ lang }: MyStatsViewProps) {
     const weekly = weeklyAdherenceStreak(daysPerWeek)
 
     const np = customization.nutritionPlan
-    const targetCalories = np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000
-    const targetProtein = np.targetProtein || customization.targets.proteinGrams || 120
+    const hasNumericTargets = hasNumericNutritionPrescription(customization.targets)
+    const targetCalories = hasNumericTargets ? np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000 : null
+    const targetProtein = hasNumericTargets ? np.targetProtein || customization.targets.proteinGrams || 120 : null
     const nutrition = nutritionWeekSummary(getNutritionLogs(), np.meals)
 
     const weights = weightSeries(getMeasurementLogs())
@@ -91,8 +93,8 @@ type Stats = {
   coverage: { covered: MuscleId[]; missed: MuscleId[] }
   weekly: { streakWeeks: number; thisWeekCount: number; daysPerWeek: number }
   nutrition: { trackedDays: number; avgCalories: number; avgProtein: number }
-  targetCalories: number
-  targetProtein: number
+  targetCalories: number | null
+  targetProtein: number | null
   weights: { date: string; weightKg: number }[]
 }
 
@@ -204,11 +206,11 @@ function TargetRow({
   testId: string
   label: string
   value: number
-  target: number
+  target: number | null
   unit: string
   d: (typeof statsScreenStrings)['ar']
 }) {
-  const pct = percentOfTarget(value, target)
+  const pct = target === null ? null : percentOfTarget(value, target)
   const barPct = pct === null ? 0 : Math.min(100, pct)
   return (
     <div>
@@ -219,18 +221,22 @@ function TargetRow({
           <span className="text-[10px] font-bold text-ink-400"> {unit}</span>
         </p>
       </div>
-      <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-beige">
-        <div className="h-full rounded-full bg-primary" style={{ width: `${barPct}%` }} />
-      </div>
-      <p className="mt-1 text-[10px] text-ink-400" data-testid={`${testId}-target`}>
-        {d.targetPrefix} {target} {unit}
-        {pct !== null && (
-          <span data-testid={`${testId}-pct`}>
-            {' '}
-            · {pct}% {d.ofTargetSuffix}
-          </span>
-        )}
-      </p>
+      {target !== null && (
+        <>
+          <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-beige">
+            <div className="h-full rounded-full bg-primary" style={{ width: `${barPct}%` }} />
+          </div>
+          <p className="mt-1 text-[10px] text-ink-400" data-testid={`${testId}-target`}>
+            {d.targetPrefix} {target} {unit}
+            {pct !== null && (
+              <span data-testid={`${testId}-pct`}>
+                {' '}
+                · {pct}% {d.ofTargetSuffix}
+              </span>
+            )}
+          </p>
+        </>
+      )}
     </div>
   )
 }

@@ -202,13 +202,6 @@ export interface ShellStrings {
     bannerInstall: string
     bannerDismiss: string
   }
-  legal: {
-    privacyTitle: string
-    termsTitle: string
-    back: string
-    privacyBody: string[]
-    termsBody: string[]
-  }
   notFound: {
     code: string
     title: string
@@ -673,25 +666,6 @@ const ar: ShellStrings = {
     bannerInstall: 'تثبيت',
     bannerDismiss: 'لاحقًا',
   },
-  legal: {
-    privacyTitle: 'سياسة الخصوصية',
-    termsTitle: 'شروط الاستخدام',
-    back: 'رجوع',
-    privacyBody: [
-      'قِمّة يعمل محليًا أولًا (local-first): تُحفظ بياناتك على جهازك، ويمكنك استخدام التطبيق كاملًا كضيف دون إنشاء حساب. الحساب اختياري، والغرض منه مزامنة بياناتك بين أجهزتك عند تفعيل المزامنة.',
-      'المزامنة السحابية غير مفعّلة في هذه النسخة، فلا تُرفع بياناتك إلى أي خادم عند تسجيل الدخول. وعند تفعيلها تُرفع بياناتك إلى حسابك الخاص عبر Supabase، ولا يصل إلى صفوفك إلا أنت (Row Level Security).',
-      'لا نبيع بياناتك ولا نشاركها مع معلنين. قياساتك وسجلّاتك الصحية تبقى ملكك ويمكنك حذفها في أي وقت عبر «إعادة ضبط البيانات».',
-      'نستخدم إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) لتحسين قِمّة، دون بيعها أو تتبّعك خارج التطبيق. وفي هذه النسخة لا تُرسَل هذه الإحصاءات إلى أي خادم، بل تبقى على جهازك.',
-    'يمكنك حذف حسابك وكل بياناته نهائيًا من «الإعدادات → الحساب → حذف الحساب»، أو تصدير نسخة كاملة من بياناتك في أي وقت من «الإعدادات → البيانات».',
-    ],
-    termsBody: [
-      'قِمّة أداة لتنظيم ومتابعة التمرين والتغذية والمكملات والقياسات للرياضي الفرد. الاستخدام على مسؤوليتك الشخصية.',
-      'المحتوى داخل التطبيق (حسابات السعرات واقتراحات أوزان التمرين) تقديري وتعليمي فقط، وليس نصيحة طبية أو غذائية أو دوائية.',
-      'استشر طبيبًا أو مختصًا مؤهّلًا قبل تغيير نظامك الغذائي أو الدوائي أو برنامج تمرينك، خصوصًا عند وجود حالة صحية.',
-      'أنت مسؤول عن صحة البيانات التي تُدخلها وعن الاحتفاظ بنسخة احتياطية عبر خاصية التصدير.',
-      'مصادر الوسائط: صور إرشادات التمارين الثابتة مشتقة من قاعدتَي free-exercise-db و wrkout/exercises.json، ومتاحة بموجب Unlicense/إهداء الملك العام. أمّا الرسوم التوضيحية لبطاقات الأجهزة فهي أعمال أصلية من إنتاج قِمّة (IN-HOUSE) نملك حقوقها كاملةً.',
-    ],
-  },
   notFound: {
     code: '٤٠٤',
     title: 'الصفحة غير موجودة',
@@ -1151,25 +1125,6 @@ const en: ShellStrings = {
     bannerText: 'Add Qimmah to your Home Screen — faster and works offline.',
     bannerInstall: 'Install',
     bannerDismiss: 'Later',
-  },
-  legal: {
-    privacyTitle: 'Privacy Policy',
-    termsTitle: 'Terms of Use',
-    back: 'Back',
-    privacyBody: [
-      'Qimmah is local-first: your data is stored on your device, and you can use the whole app as a guest without creating an account. An account is optional; its purpose is to sync your data across your devices once sync is enabled.',
-      'Cloud sync is not enabled in this version, so logging in does not upload your data to any server. Once it is enabled, your data is uploaded to your own account via Supabase, and only you can read your rows (Row Level Security).',
-      'We do not sell or share your data with advertisers. Your measurements remain yours and can be deleted anytime via “Reset data”.',
-      'We use fully anonymous usage analytics (no name, email, or personal data) to improve Qimmah — never sold and never used to track you across apps. In this version these analytics are not sent to any server; they stay on your device.',
-      'You can permanently delete your account and all its data from Settings → Account → Delete account, or export a full copy of your data anytime from Settings → Data.',
-    ],
-    termsBody: [
-      'Qimmah is a tool to organize and track training, nutrition, supplements, and measurements for the individual athlete. Use is at your own responsibility.',
-      'In-app content (calorie calculations and suggested training weights) is estimated and educational only, not medical, nutritional, or pharmaceutical advice.',
-      'Consult a qualified professional before changing your diet, medication, or training program, especially with a health condition.',
-      'You are responsible for the accuracy of the data you enter and for keeping a backup via the export feature.',
-      'Media sources: Static exercise-instruction images are derived from free-exercise-db and wrkout/exercises.json, available under the Unlicense/public-domain dedication. Machine-card illustrations are original in-house Qimmah artwork that we fully own.',
-    ],
   },
   notFound: {
     code: '404',

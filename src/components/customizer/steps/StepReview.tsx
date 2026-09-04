@@ -3,7 +3,7 @@ import { Icon } from '@/components/Icon'
 import { StepHeader } from '../StepHeader'
 import type { WizardCtx } from '../stepProps'
 import { resetQimmah } from '@/lib/resetQimmah'
-import { targetCaloriesFor } from '@/lib/calculators'
+import { hasNumericNutritionPrescription, targetCaloriesFor } from '@/lib/calculators'
 import { generatePlan, planTitle, type GeneratedPlan } from '@/lib/planGenerator'
 import { buildPlanRationale } from '@/lib/planRationale'
 import { PlanWhyPanel } from '@/components/plan/PlanWhyPanel'
@@ -24,12 +24,15 @@ export function StepReview({ ctx }: { ctx: WizardCtx }) {
   const [advanced, setAdvanced] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
+  const hasNumericTargets = hasNumericNutritionPrescription(data.targets)
   const summary: { label: string; value: string }[] = [
     { label: d.reviewName, value: data.identity.userName },
     { label: d.reviewGoal, value: choices.goal[data.profile.goalType] },
     { label: d.reviewWeight, value: `${data.profile.weightKg} → ${data.profile.targetWeightKg} ${d.unitKg}` },
-    { label: d.reviewTargetCalories, value: `${targetCaloriesFor(data.profile.goal, data.targets)}` },
-    { label: d.reviewProtein, value: `${data.targets.proteinGrams}${d.gGram}` },
+    ...(hasNumericTargets ? [
+      { label: d.reviewTargetCalories, value: `${targetCaloriesFor(data.profile.goal, data.targets)}` },
+      { label: d.reviewProtein, value: `${data.targets.proteinGrams}${d.gGram}` },
+    ] : []),
     { label: d.reviewSchedule, value: planTitle(data.workoutPlan.templateId, ctx.lang) },
     { label: d.reviewMeals, value: `${data.nutritionPlan.meals.length}` },
     { label: d.reviewSuppMed, value: `${data.wellnessPlan.supplements.length + data.wellnessPlan.medications.length}` },

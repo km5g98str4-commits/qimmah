@@ -12,6 +12,7 @@ const check = (label, condition) => {
 
 const login = read('src/views/LoginView.tsx')
 const policy = read('src/data/policyCopy.ts')
+const canonicalLegal = read('src/legal/canonicalLegalContent.ts')
 const onbV2 = read('src/views/OnboardingV2.tsx')
 const flow = read('src/lib/onboardingV2Flow.ts')
 const profile = read('src/lib/planBuilderAnswers.ts')
@@ -26,7 +27,12 @@ const publicRedirects = read('public/_redirects')
 console.log('\n① بوابة أهلية 12+ على سطح الحساب المشترك بين v1 وv2')
 check('زر التسجيل محجوب بلا موافقة', /pw\.valid && eligible12/.test(login))
 check('حارس الإرسال يعيد التحقق قبل signUp', login.indexOf('if (isSignup && !eligible12)') < login.indexOf('auth.signUp('))
-check('روابط الشروط والخصوصية داخلية ولا تفتح صفحة ويب منفصلة', login.includes('POLICY_LINKS.terms') && login.includes('POLICY_LINKS.privacy') && policy.includes("terms: '#/terms'") && policy.includes("privacy: '#/privacy'") && !login.includes('target="_blank"'))
+check('روابط الشروط والخصوصية داخلية ولا تفتح صفحة ويب منفصلة',
+  login.includes('POLICY_LINKS.terms') && login.includes('POLICY_LINKS.privacy') &&
+  policy.includes("export { POLICY_LINKS, policyCopy }") &&
+  canonicalLegal.includes("terms: '#/terms'") && canonicalLegal.includes("privacy: '#/privacy'") &&
+  !login.includes('target="_blank"'))
+check('التفاف: رابط قانوني خارجي لا يمرّ كمسار داخلي', !"https://example.test/terms".startsWith('#/'))
 // [QIM-WEB-FOUNDER-UX-006/حزمة ٦] **المقصد نفسه، والضمانة أقوى.**
 //
 // كان هذا الفحص يتحقّق من الآليّة القديمة: حالة وضع محلّية في `LoginView` تُرفَع
@@ -154,32 +160,24 @@ check('شاشات الدخول العامة تستخدم viewport داخليًا
 // إيقاف في الإعدادات. فإن بُني المفتاح يومًا، يسقط الفحص فيُذكّر بتحديث النصّ —
 // وهو السلوك المطلوب: بوابة تتكلّم عند تغيّر الحقيقة لا بوابة تصمت للأبد.
 console.log('\n④ صدق سياسة الخصوصية — النصّ المنشور يطابق ما يفعله التطبيق')
-const strings = read('src/config/strings.ts')
-/** يستخرج كتلة `privacyBody: [...]` رقم n (0 = العربية، 1 = الإنجليزية) بحدودها. */
-const privacyBlock = (index) => {
-  let from = -1
-  for (let i = 0; i <= index; i++) from = strings.indexOf('privacyBody: [', from + 1)
-  if (from < 0) return ''
-  const to = strings.indexOf('],', from)
-  return to < 0 ? '' : strings.slice(from, to)
-}
-const privacyAr = privacyBlock(0)
-const privacyEn = privacyBlock(1)
-check('كتلتا الخصوصية استُخرجتا بحدودهما لا الملف كله', privacyAr.length > 200 && privacyEn.length > 200 && privacyAr !== privacyEn && privacyAr.length < strings.length * 0.2)
-check('العربية لا تدّعي أن الحساب مطلوب', !/يتطلّب\s+حساب|يشترط\s+حساب|تحتاج\s+حسابًا\s+لاستخدام/.test(privacyAr))
-check('الإنجليزية لا تدّعي أن الحساب مطلوب', !/requires?\s+an\s+account/i.test(privacyEn))
-check('العربية تنصّ صراحةً على أن الضيف يستخدم التطبيق بلا حساب', /كضيف\s+دون\s+إنشاء\s+حساب/.test(privacyAr))
-check('الإنجليزية تنصّ صراحةً على مسار الضيف', /as\s+a\s+guest\s+without\s+creating\s+an\s+account/i.test(privacyEn))
-check('العربية تعلن أن المزامنة غير مفعّلة في هذه النسخة', /المزامنة\s+السحابية\s+غير\s+مفعّلة/.test(privacyAr))
-check('الإنجليزية تعلن أن المزامنة غير مفعّلة', /sync\s+is\s+not\s+enabled\s+in\s+this\s+version/i.test(privacyEn))
-// اقتران النصّ بالكود: علم المزامنة ما زال مطفأً افتراضيًا، فالجملة أعلاه صادقة.
-check('علم المزامنة ما زال مطفأً افتراضيًا (وإلا كذبت الجملة)', /VITE_SYNC_ENABLED === 'true'/.test(read('src/lib/syncQueue.ts')))
+const privacyStart = canonicalLegal.indexOf('function privacy(lang: Lang)')
+const privacyEnd = canonicalLegal.indexOf('function terms(lang: Lang)', privacyStart)
+const privacy = canonicalLegal.slice(privacyStart, privacyEnd)
+check('كتلة الخصوصية الموحّدة استُخرجت بحدودها لا الملف كله', privacy.length > 1000 && privacy.length < canonicalLegal.length)
+check('العربية لا تدّعي أن الحساب مطلوب للاستخدام المحلي', !/يتطلّب\s+حسابًا\s+للاستخدام\s+المحلي|يشترط\s+حسابًا\s+للاستخدام\s+المحلي/.test(privacy))
+check('الإنجليزية لا تدّعي أن الحساب مطلوب للاستخدام المحلي', !/requires?\s+an\s+account\s+for\s+local\s+use/i.test(privacy))
+check('العربية تنصّ صراحةً على أن الحساب اختياري للاستخدام المحلي', /الحساب\s+اختياري\s+للاستخدام\s+المحلي/.test(privacy))
+check('الإنجليزية تنصّ صراحةً على أن الحساب اختياري للاستخدام المحلي', /account\s+is\s+optional\s+for\s+local\s+use/i.test(privacy))
+check('العربية تفصل المزامنة الاختيارية عن إنشاء الحساب', /المزامنة\s+السحابية\s+اختيار\s+منفصل/.test(privacy) && /لا\s+تُزامن[^.]+لمجرد\s+إنشاء\s+حساب/.test(privacy))
+check('الإنجليزية تفصل المزامنة الاختيارية عن إنشاء الحساب', /cloud\s+sync\s+is\s+a\s+separate,\s+optional\s+choice/i.test(privacy) && /not\s+synced\s+merely\s+because\s+you\s+created\s+an\s+account/i.test(privacy))
+// اقتران النصّ بالكود: العلم يبقى مطفأً افتراضيًا، ولا يتحول إنشاء الحساب إلى مزامنة ضمنية.
+check('علم المزامنة ما زال مطفأً افتراضيًا', /VITE_SYNC_ENABLED === 'true'/.test(read('src/lib/syncQueue.ts')))
 // اقتران ثانٍ: لا مفتاح إيقاف تحليلات في الواجهة ⇒ لا وعد به في السياسة.
 const analyticsToggleInUi = ['src/views/SettingsView.tsx', 'src/views/ProfileV2.tsx', 'src/views/PrivacyView.tsx'].some((p) => /setConsent\s*\(/.test(read(p)))
-check('لا وعد بمفتاح إيقاف تحليلات ما دام غير مبنيّ في الواجهة', analyticsToggleInUi || (!/الإعدادات\s*→\s*الخصوصية/.test(privacyAr) && !/Settings\s*→\s*Privacy/i.test(privacyEn)))
-check('وبديله المعلَن: لا إرسال إلى أي خادم في هذه النسخة', /لا\s+تُرسَل\s+هذه\s+الإحصاءات\s+إلى\s+أي\s+خادم/.test(privacyAr) && /not\s+sent\s+to\s+any\s+server/i.test(privacyEn))
+check('لا وعد بمفتاح إيقاف تحليلات ما دام غير مبنيّ في الواجهة', analyticsToggleInUi || (!/الإعدادات\s*→\s*الخصوصية/.test(privacy) && !/Settings\s*→\s*Privacy/i.test(privacy)))
+check('التشخيص الاختياري معلن كمطفأ ما لم يُضبط ويُوافق عليه', /التشخيص\s+الاختياري\s+متوقفًا\s+ما\s+لم\s+يُضبط\s+وتوافق\s+عليه/.test(privacy) && /optional\s+diagnostics\s+remain\s+disabled\s+unless\s+configured\s+and\s+consented\s+to/i.test(privacy))
 // وعدُ الحذف يبقى مسنودًا بمسار حقيقي (أُغلق في [CTO-65] البند ١) — لا يُعاد فتحه.
-check('وعد «الإعدادات → الحساب → حذف الحساب» ما زال له مسار فعلي', /الإعدادات\s*→\s*الحساب\s*→\s*حذف الحساب/.test(privacyAr) && read('src/views/SettingsView.tsx').includes('DeleteAccountDialog'))
+check('وعد طلب حذف الحساب ما زال له مسار فعلي', /طلب\s+حذف\s+الحساب/.test(privacy) && /request\s+account\s+deletion/i.test(privacy) && read('src/views/SettingsView.tsx').includes('DeleteAccountDialog'))
 
 // التأكيد المضادّ (§4.2) — الفحوص أعلاه تُكشَف عند الالتفاف ولا تصرخ على السليم.
 console.log('\n④-ب التأكيد المضادّ — البوابة تُمسك النصّ المخالف ولا تُمسك السليم')
@@ -188,7 +186,7 @@ const SMUGGLED_EN = "      'Qimmah requires an account and follows a local-first
 check('التفاف: عودة «يتطلّب حسابًا» تُكشَف', /يتطلّب\s+حساب/.test(SMUGGLED_AR))
 check('التفاف: عودة "requires an account" تُكشَف', /requires?\s+an\s+account/i.test(SMUGGLED_EN))
 check('التفاف: نصّ يذكر الضيف لكن يشترط الحساب لا يمرّ', /يتطلّب\s+حساب/.test(SMUGGLED_AR + '\nويمكنك استخدام التطبيق كضيف دون إنشاء حساب.'))
-check('ولا تُكشَف الجملة السليمة الحالية', !/يتطلّب\s+حساب/.test(privacyAr) && !/requires?\s+an\s+account/i.test(privacyEn))
+check('ولا تُكشَف الجملة السليمة الحالية كاشتراط للاستخدام المحلي', !/يتطلّب\s+حسابًا\s+للاستخدام\s+المحلي/.test(privacy) && !/requires?\s+an\s+account\s+for\s+local\s+use/i.test(privacy))
 check('«الحساب اختياري» المشروعة لا تُعدّ اشتراطًا', !/يتطلّب\s+حساب/.test('الحساب اختياري، والغرض منه مزامنة بياناتك بين أجهزتك.'))
 
 console.log(`\n✅ نجحت ${pass} فحوص سياسة/غلاف أصلي.`)

@@ -1,8 +1,9 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'node:path'
 import { execSync } from 'node:child_process'
 import { readFileSync, writeFileSync } from 'node:fs'
+import { assertProductionLegalReady, resolveLegalLaunchConfig } from './build/legalLaunchConfig'
 
 // ═══ [SOVEREIGN-PREVIEW-SAFETY] نشرات الفروع تُبنى معاينةً لا إنتاجًا ═══
 //
@@ -63,7 +64,7 @@ const buildCommit = (() => {
 //
 // تُحقن في index.html وحده (لا داخل الأصول المُهشّمة)، فلا تُغيّر هاشات الحِزم،
 // وindex.html مضبوط على `no-cache` في `_headers` فتصل القراءة طازجة دائمًا.
-function buildIdentityPlugin() {
+function buildIdentityPlugin(legalReady: boolean) {
   const buildTime = new Date().toISOString()
   const appEnv = process.env.VITE_APP_ENV === 'founder_preview' ? 'founder_preview' : 'production'
   return {
@@ -78,6 +79,7 @@ function buildIdentityPlugin() {
         // [FOUNDER-QA-PREVIEW-SAFETY] البيئة تُعلَن في الوسم كما يُعلَن الهاش:
         // تُقرأ بطلب واحد بلا تنفيذ سكربت، فيُحسم «أهذه معاينة أم إنتاج؟» فورًا.
         { tag: 'meta', attrs: { name: 'qimmah-env', content: appEnv }, injectTo: 'head' as const },
+        { tag: 'meta', attrs: { name: 'qimmah-legal-ready', content: legalReady ? 'yes' : 'no' }, injectTo: 'head' as const },
       ]
     },
   }
@@ -111,9 +113,14 @@ function swVersionPlugin() {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  // Vite لا يضع ملفات .env في process.env أثناء تقييم config؛ نحمّلها صراحةً
+  // ثم نعطي متغيرات المضيف الأولوية. فرع main لا يبنى إن بقي أي اعتماد قانوني.
+  const buildEnv = { ...loadEnv(mode, process.cwd(), ''), ...process.env }
+  const legalLaunchConfig = resolveLegalLaunchConfig(buildEnv)
+  assertProductionLegalReady(buildEnv, legalLaunchConfig)
   return {
-    plugins: [react(), buildIdentityPlugin(), swVersionPlugin()],
+    plugins: [react(), buildIdentityPlugin(legalLaunchConfig.ready), swVersionPlugin()],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, './src'),
@@ -122,6 +129,7 @@ export default defineConfig(() => {
     define: {
       __APP_VERSION__: JSON.stringify(pkgVersion),
       __BUILD_COMMIT__: JSON.stringify(buildCommit),
+      __LEGAL_LAUNCH_CONFIG__: JSON.stringify(legalLaunchConfig),
     },
     build: {
       outDir: 'dist',

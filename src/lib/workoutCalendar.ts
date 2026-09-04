@@ -26,6 +26,7 @@ import { runMigration } from '@/lib/dataOwnership'
 import { enqueueSyncDelete, enqueueSyncOperation } from '@/lib/syncQueue'
 import { hasSavedCustomization, loadCustomization } from '@/lib/customization'
 import { loadSessions } from '@/lib/workoutSessions'
+import { readRaw, safeRemove, safeWriteJson, type WriteResult } from '@/lib/safeStorage'
 
 export const WORKOUT_CALENDAR_KEY = 'qimmah:workoutCalendar:v1'
 
@@ -94,10 +95,12 @@ export type MissedResolution =
 export type SaveScheduleResult =
   | { status: 'saved'; schedule: WeeklySchedule }
   | { status: 'rejected'; violations: ScheduleViolation[] }
+  | { status: 'failed'; reason: Exclude<WriteResult, 'ok'> }
 
 export type ApplyMissedResult =
   | { status: 'applied'; schedule: WeeklySchedule }
   | { status: 'rejected'; violations: ScheduleViolation[] }
+  | { status: 'failed'; reason: Exclude<WriteResult, 'ok'> }
 
 // ── ثوابت التقسيمة ────────────────────────────────────────────────────────────
 
@@ -193,23 +196,18 @@ function normalizeSchedule(raw: unknown): WeeklySchedule | null {
 
 /** يقرأ الجدول المحفوظ — null إن لم يُضبط شيء (⇒ احتياط التدوير القديم). */
 export function loadWeeklySchedule(): WeeklySchedule | null {
-  const s = ls()
-  if (!s) return null
   ensureCalendarMigrated()
   try {
-    const raw = s.getItem(WORKOUT_CALENDAR_KEY)
+    const raw = readRaw(WORKOUT_CALENDAR_KEY)
     return raw ? normalizeSchedule(JSON.parse(raw)) : null
   } catch {
     return null
   }
 }
 
-function writeSchedule(schedule: WeeklySchedule): void {
-  try {
-    ls()?.setItem(WORKOUT_CALENDAR_KEY, JSON.stringify(schedule))
-  } catch {
-    /* امتلاء/حجب التخزين — لا نرمي؛ الاحتياط القديم يبقى صالحًا */
-  }
+function writeSchedule(schedule: WeeklySchedule): WriteResult {
+  const result = safeWriteJson(WORKOUT_CALENDAR_KEY, schedule)
+  if (result !== 'ok') return result
   // مزامنة الجدول (P12): صف واحد لكل حساب في workout_schedule — updatedAt الجدول
   // هو طابع LWW. enqueueSyncOperation تتولى بوابات المالك/العلم/التبنّي/الإيقاف.
   enqueueSyncOperation('workout_schedule', 'self', {
@@ -217,16 +215,15 @@ function writeSchedule(schedule: WeeklySchedule): void {
     updated_at: schedule.updatedAt || new Date().toISOString(),
     deleted_at: null,
   })
+  return 'ok'
 }
 
-export function clearWeeklySchedule(): void {
-  try {
-    ls()?.removeItem(WORKOUT_CALENDAR_KEY)
-  } catch {
-    /* تجاهل */
-  }
+export function clearWeeklySchedule(): WriteResult {
+  const result = safeRemove(WORKOUT_CALENDAR_KEY)
+  if (result !== 'ok') return result
   // شاهد قبر بطابع (P12): مسح الجدول على جهاز لا يُبعث من السحابة بجدول أقدم.
   enqueueSyncDelete('workout_schedule', 'self')
+  return 'ok'
 }
 
 /**
@@ -237,8 +234,7 @@ export function clearWeeklySchedule(): void {
 export function setScheduleFromSync(schedule: unknown): boolean {
   const normalized = normalizeSchedule(schedule)
   if (!normalized) return false
-  writeSchedule(normalized)
-  return true
+  return writeSchedule(normalized) === 'ok'
 }
 
 // ── الاقتراحات الافتراضية ─────────────────────────────────────────────────────
@@ -366,7 +362,8 @@ export function saveWeeklySchedule(schedule: WeeklySchedule): SaveScheduleResult
   const violations = validateSchedule(normalized)
   if (violations.length) return { status: 'rejected', violations }
   const stamped: WeeklySchedule = { ...normalized, updatedAt: new Date().toISOString() }
-  writeSchedule(stamped)
+  const result = writeSchedule(stamped)
+  if (result !== 'ok') return { status: 'failed', reason: result }
   return { status: 'saved', schedule: stamped }
 }
 
@@ -629,7 +626,8 @@ export function applyMissedDecision(decision: MissedDayDecision, resolution: Mis
   }
   // skip: تسجيل القرار فقط (تمّ أعلاه) — لا تغيير على الجدول.
 
-  writeSchedule(next)
+  const result = writeSchedule(next)
+  if (result !== 'ok') return { status: 'failed', reason: result }
   return { status: 'applied', schedule: next }
 }
 
@@ -660,7 +658,8 @@ export function ensureCalendarMigrated(): { status: 'done' | 'skipped' | 'rolled
       if (!c.workoutPlan.days.length) return
       const daysPerWeek = clamp(c.profile.trainingDays || c.workoutPlan.days.length, 1, 7)
       const schedule = suggestedSchedule(c.workoutPlan, daysPerWeek, 6)
-      writeSchedule({ ...schedule, source: 'migration' })
+      const result = writeSchedule({ ...schedule, source: 'migration' })
+      if (result !== 'ok') throw new Error(`workout-calendar-write:${result}`)
     },
     verify: () => {
       // حالات «لا شيء يُكتب» صحيحة بذاتها؛ وإن كُتب جدول فيجب أن يُقرأ صالحًا.

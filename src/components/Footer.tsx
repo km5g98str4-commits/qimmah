@@ -5,6 +5,7 @@ import { getLanguage } from '@/lib/appPreferences'
 import { getStrings } from '@/config/strings'
 import { miscStrings } from '@/i18n/dict/misc'
 import { Icon } from './Icon'
+import { POLICY_LINKS } from '@/legal/canonicalLegalContent'
 
 /**
  * الفوتر — هوية + روابط الثقة (الخصوصية/الشروط/التواصل) + حقوق.
@@ -38,8 +39,8 @@ export function Footer() {
               تُفتح على الجوال. `inline-flex` + `min-h-[44px]` يرفعها للحدّ بلا
               تغيير حجم الخطّ ولا معنى النصّ. */}
           <div className="flex flex-wrap items-center gap-x-4">
-            <a href="#/privacy" className="inline-flex min-h-[44px] items-center text-ink-500 transition-colors hover:text-brand-300">{d.privacy}</a>
-            <a href="#/terms" className="inline-flex min-h-[44px] items-center text-ink-500 transition-colors hover:text-brand-300">{d.terms}</a>
+            <a href={POLICY_LINKS.privacy} className="inline-flex min-h-[44px] items-center text-ink-500 transition-colors hover:text-brand-300">{d.privacy}</a>
+            <a href={POLICY_LINKS.terms} className="inline-flex min-h-[44px] items-center text-ink-500 transition-colors hover:text-brand-300">{d.terms}</a>
             <a href="#/contact" className="inline-flex min-h-[44px] items-center text-ink-500 transition-colors hover:text-brand-300">{d.contact}</a>
             <p className="flex items-center gap-1.5">
               {d.footerNote}

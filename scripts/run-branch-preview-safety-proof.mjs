@@ -29,6 +29,21 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const PROD_HOST = 'ledlypcyrtnzvjvhykwz'
 /** الفرع الذي ينشر إنتاجًا في مشروع Pages. */
 const PRODUCTION_BRANCH = 'main'
+// قيم اختبارية غير حقيقية لإثبات الضابط الإنتاجي بعد إضافة بوابة القانون.
+// لا تُستعمل في أي بناء منشور ولا تُخفّف شرط `main`؛ بل تسمح لهذا الاختبار
+// وحده بالوصول إلى القياس الذي يليه (وجود اعتماد الإنتاج في الأرتيفكت).
+const LEGAL_TEST_ENV = {
+  VITE_LEGAL_CONTROLLER_NAME_AR: 'جهة اختبار',
+  VITE_LEGAL_CONTROLLER_NAME_EN: 'Test Controller',
+  VITE_LEGAL_CONTACT_EMAIL: 'legal-test@example.invalid',
+  VITE_LEGAL_EFFECTIVE_DATE: '2026-01-01',
+  VITE_LEGAL_GOVERNING_VENUE_AR: 'اختصاص اختبار',
+  VITE_LEGAL_GOVERNING_VENUE_EN: 'Test venue',
+  VITE_LEGAL_DATA_REGION_AR: 'منطقة اختبار',
+  VITE_LEGAL_DATA_REGION_EN: 'Test region',
+  VITE_LEGAL_REVIEW_ID: 'TEST-ONLY',
+  VITE_LEGAL_REVIEW_APPROVED: 'true',
+}
 
 let pass = 0
 const fails = []
@@ -97,7 +112,7 @@ check('لا ملف واحد في أرتيفكت الفرع يحمل عنوان �
 check('وسم البيئة يعلن المعاينة', branch.envMeta === 'founder_preview', `qimmah-env=${branch.envMeta || '(غائب)'}`)
 
 console.log('\n② التأكيد المضادّ — الفرع الإنتاجي ما زال إنتاجًا')
-const prod = buildWith({ CF_PAGES_BRANCH: PRODUCTION_BRANCH })
+const prod = buildWith({ CF_PAGES_BRANCH: PRODUCTION_BRANCH, ...LEGAL_TEST_ENV })
 check('أرتيفكت الفرع الإنتاجي يحمل عنوان الإنتاج (الفحص ليس فارغًا)', prod.prodHostFiles > 0, `files=${prod.prodHostFiles}`)
 check('وسم البيئة يعلن الإنتاج', prod.envMeta === 'production', `qimmah-env=${prod.envMeta || '(غائب)'}`)
 

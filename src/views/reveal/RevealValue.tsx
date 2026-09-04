@@ -81,7 +81,7 @@ export function RevealValue({ lang, profile, plan, goalLabel }: RevealValueProps
       </ul>
 
       {/* ما حسبناه — مشتقّ، فيحمل وسمه المرئي. */}
-      {targets && (
+      {targets?.numericNutritionStatus === 'available' && (
         <ul className="mt-3 space-y-2 border-t border-line pt-3 text-[0.83rem] leading-relaxed text-ink-700" data-testid="reveal-value-estimated">
           <Row icon="Flame" text={v.nutrition(formatNumber(targets.targetCalories, lang))} badge={v.estimateBadge} />
           <Row icon="Utensils" text={v.protein(formatNumber(targets.proteinGrams, lang))} badge={v.estimateBadge} />

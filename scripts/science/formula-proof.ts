@@ -84,12 +84,15 @@ verifyTargets('female-cut-45', profile({
   estimatedWeeksToGoal: 28,
 })
 
-// Onboarding extrema and the explicit 12-year boundary. Passing proves implementation,
-// not scientific validity: Mifflin-St Jeor was not established as a paediatric equation.
-verifyTargets('onboarding-min-age12', profile({
-  gender: 'female', age: 12, heightCm: 120, weightKg: 30, targetWeightKg: 30,
+// Supported minor boundary: no adult-derived numeric prescription is computed or exposed.
+verifyTargets('onboarding-min-age13', profile({
+  gender: 'female', age: 13, heightCm: 120, weightKg: 30, targetWeightKg: 30,
   activityLevel: 'sedentary', trainingDays: 0, goal: 'maintain', goalType: 'maintenance',
-}), { bmr: 829, tdee: 995, targetCalories: 995, proteinGrams: 54, fatGrams: 30, carbsGrams: 127, waterLiters: 2.5, bmi: 20.8 })
+}), {
+  numericNutritionStatus: 'suppressed-under18', bmr: 0, tdee: 0, maintenanceCalories: 0,
+  targetCalories: 0, proteinGrams: 0, fatGrams: 0, carbsGrams: 0, waterLiters: 0,
+  bmi: 0, bmiLabel: '', weeklyWeightChangeKg: 0, estimatedWeeksToGoal: 0,
+})
 
 // Water is now clamped to WATER_MAX_LITERS (4.0). Pre-fix this vector returned 9.0 L —
 // the guardrail regression below asserts it can never return there again.
@@ -104,9 +107,9 @@ check('seven-day activity multiplier', totalActivityMultiplier('very_active', 7)
 // ── SCIENTIFIC GUARDRAIL REGRESSION ────────────────────────────────────────
 // These assertions lock in the two safety fixes and must never regress:
 //   1) Water is clamped to [2.5, 4.0] L — the 9 L max-bound output can never return.
-//   2) Under-18 users never receive an adult BMI classification (WHO requires BMI-for-age);
-//      they get the safe specialist-referral label and a minor plan note instead.
-// The matrix covers age 12/17/18, both sexes, min/max weight+height, cut/bulk/maintain,
+//   2) Under-18 users never receive adult-derived BMI, calorie, macro, hydration, or
+//      forecast numbers. They receive explicit suppression state and qualitative guidance.
+// The matrix covers age 13/17/18, both sexes, min/max weight+height, cut/bulk/maintain,
 // and zero activity, as required by the mission.
 console.log('\nSCIENTIFIC GUARDRAIL REGRESSION')
 
@@ -122,12 +125,14 @@ for (const kg of [115, 150, 200, 250]) {
   check(`water never exceeds cap at ${kg}kg`, w <= WATER_MAX_LITERS && w >= WATER_MIN_LITERS, true)
 }
 
-// (2) MINOR BMI GUARDRAIL — under 18 never gets an adult label; gets safe wording + note.
-for (const age of [12, 15, 17]) {
+// (2) MINOR NUMERIC GUARDRAIL — under 18 gets no adult-derived numeric prescription.
+for (const age of [13, 15, 17]) {
   for (const gender of ['male', 'female'] as const) {
     const t = targetsFor({ gender, age, heightCm: 160, weightKg: 60, targetWeightKg: 60, goalType: 'maintenance', goal: 'maintain', activityLevel: 'sedentary', trainingDays: 0 })
-    check(`minor ${gender} age ${age}: safe BMI label`, t.bmiLabel, MINOR_BMI_LABEL)
-    check(`minor ${gender} age ${age}: BMI number still shown`, t.bmi > 0, true)
+    check(`minor ${gender} age ${age}: explicit suppression state`, t.numericNutritionStatus, 'suppressed-under18')
+    check(`minor ${gender} age ${age}: no BMI number or label`, t.bmi === 0 && t.bmiLabel === '', true)
+    check(`minor ${gender} age ${age}: no calorie/macro/hydration numbers`,
+      [t.bmr, t.tdee, t.maintenanceCalories, t.targetCalories, t.proteinGrams, t.fatGrams, t.carbsGrams, t.waterLiters].every((value) => value === 0), true)
     check(`minor ${gender} age ${age}: plan note present`, t.notes.includes(MINOR_PLAN_NOTE), true)
   }
 }
@@ -139,24 +144,24 @@ for (const gender of ['male', 'female'] as const) {
   check(`adult ${gender} age 18: no minor note`, t.notes.includes(MINOR_PLAN_NOTE), false)
 }
 
-// Minor cut/bulk/maintain all keep the safe label (goal must not re-open the adult path).
+// Minor cut/bulk/maintain all keep suppression (goal must not re-open the adult path).
 for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
   const goal = goalType === 'cutting' ? 'cut' : goalType === 'bulking' ? 'bulk' : 'maintain'
-  const t = targetsFor({ gender: 'male', age: 12, heightCm: 120, weightKg: 30, targetWeightKg: 30, goalType, goal, activityLevel: 'sedentary', trainingDays: 0 })
-  check(`minor age 12 ${goalType}: safe BMI label`, t.bmiLabel, MINOR_BMI_LABEL)
+  const t = targetsFor({ gender: 'male', age: 13, heightCm: 120, weightKg: 30, targetWeightKg: 30, goalType, goal, activityLevel: 'sedentary', trainingDays: 0 })
+  check(`minor age 13 ${goalType}: suppression remains authoritative`, t.numericNutritionStatus, 'suppressed-under18')
 }
 
-// ── MINOR MAINTENANCE-ONLY (Option B) ──────────────────────────────────────
-// Under-18 users are maintenance-only: target calories == maintenance == TDEE for ANY
-// stored goalType (deficit/surplus impossible), and no weight-change forecast is applied.
+// ── MINOR NUMERIC SUPPRESSION ───────────────────────────────────────────────
+// Under-18 users receive no numeric prescription for ANY stored goalType, and no
+// weight-change forecast is applied.
 // A non-maintenance target weight is deliberately ignored so no cut/bulk leaks through.
-for (const age of [12, 15, 17]) {
+for (const age of [13, 15, 17]) {
   for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
     const goal = goalType === 'cutting' ? 'cut' : goalType === 'bulking' ? 'bulk' : 'maintain'
     // targetWeightKg set 8kg below current on purpose — a cut/bulk pipeline would react to it.
     const t = targetsFor({ gender: 'male', age, heightCm: 165, weightKg: 60, targetWeightKg: 52, goalType, goal, activityLevel: 'moderate', trainingDays: 4 })
-    check(`minor age ${age} ${goalType}: target == maintenance (no deficit/surplus)`, t.targetCalories, t.maintenanceCalories)
-    check(`minor age ${age} ${goalType}: target == TDEE`, t.targetCalories, t.tdee)
+    check(`minor age ${age} ${goalType}: target, maintenance, and TDEE are suppressed`, t.targetCalories === 0 && t.maintenanceCalories === 0 && t.tdee === 0, true)
+    check(`minor age ${age} ${goalType}: suppression state survives stored goal`, t.numericNutritionStatus, 'suppressed-under18')
     check(`minor age ${age} ${goalType}: no weekly weight change`, t.weeklyWeightChangeKg, 0)
     check(`minor age ${age} ${goalType}: no ETA weeks`, t.estimatedWeeksToGoal, 0)
     check(`minor age ${age} ${goalType}: keeps «تقديري» minor plan note`, t.notes.includes(MINOR_PLAN_NOTE), true)

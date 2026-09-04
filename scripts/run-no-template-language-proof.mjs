@@ -125,15 +125,25 @@ check('ولا يُكشَف رأس عمود «النوع» المشروع', !/pre
 
 console.log('\n═══ 4) الفصحى القانونية لم تُمس — القيد المحفوظ ═══')
 const policy = read('src/data/policyCopy.ts')
-// النصّ القانوني نفسه يعيش في `strings.ts → legal`، لا في ملفّي العرض — فحصه
-// على مصدره لا على المكوّن، وإلا مرّ الفحص على غلاف فارغ.
-const legalBlock = strings.slice(strings.indexOf('privacyBody: ['))
-check('كتلة الخصوصية القانونية ما زالت موجودة', /privacyBody:\s*\[/.test(strings))
-check('كتلة الشروط القانونية ما زالت موجودة', /termsBody:\s*\[/.test(strings))
-check('مربّع الأهلية القانوني قائم', policy.includes('eligibilityPrefix'))
+// النصّ القانوني انتقل إلى مصدر واحد متعمّد. نفحص المصدر، ثم اقتران شاشتي
+// العرض به؛ وجود أجزاء متفرّقة لا يكفي لإرضاء الحارس (§4.2).
+const canonicalLegal = read('src/legal/canonicalLegalContent.ts')
+const canonicalView = read('src/components/legal/CanonicalLegalView.tsx')
+const privacyView = read('src/views/PrivacyView.tsx')
+const termsView = read('src/views/TermsView.tsx')
+check('كتلة الخصوصية القانونية ما زالت موجودة', /function privacy\(lang: Lang\): LegalDocument/.test(canonicalLegal))
+check('كتلة الشروط القانونية ما زالت موجودة', /function terms\(lang: Lang\): LegalDocument/.test(canonicalLegal))
+check('مربّع الأهلية القانوني قائم', policy.includes('policyCopy') && canonicalLegal.includes('eligibilityPrefix'))
 // عيّنة فصحى صريحة: لو حُوّل القانوني إلى عامية بالخطأ لسقط هذا.
-check('الخصوصية ما زالت بالفصحى (عيّنة مسمّاة)', legalBlock.includes('لا نبيع بياناتك ولا نشاركها مع معلنين'))
-check('وشاشتا العرض ما زالتا تستدعيان النصّ القانوني', read('src/views/PrivacyView.tsx').includes('privacyBody') && read('src/views/TermsView.tsx').includes('termsBody'))
+check('الخصوصية ما زالت بالفصحى (عيّنة مسمّاة)', canonicalLegal.includes('المسؤول عن المعالجة'))
+check('وشاشتا العرض تستدعيان المصدر القانوني الموحّد',
+  canonicalView.includes('getLegalDocument(kind, lang)') &&
+  privacyView.includes('<CanonicalLegalView kind="privacy"') &&
+  termsView.includes('<CanonicalLegalView kind="terms"'))
+// هجوم مضاد: غلافان يحملان الاسمين بلا استدعاء المصدر لا يمران.
+const SMUGGLED_LEGAL_VIEWS = '<CanonicalLegalView kind="privacy"/><CanonicalLegalView kind="terms"/>'
+check('التفاف: اسما العرض وحدهما لا يغنيان عن اقترانهما بالمصدر',
+  !SMUGGLED_LEGAL_VIEWS.includes('getLegalDocument(kind, lang)'))
 
 console.log(`\n${fails.length === 0 ? '✅' : '❌'} إثبات خلوّ الواجهة من لغة القالب: ${pass} فحصًا، ${fails.length} فشل.`)
 if (fails.length) { for (const f of fails) console.log('   ✗ ' + f); process.exit(1) }

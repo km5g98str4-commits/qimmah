@@ -75,19 +75,22 @@ export const WATER_MAX_LITERS = 4.0
 export const ADULT_MIN_AGE = 18
 
 /**
- * قرار المالك (Option B): التطبيق يبقى 12+، لكن القاصرين (دون 18) مقيّدون بهدف
- * «المحافظة» فقط — لا تنشيف/تضخيم. عتبة العمر واحدة (ADULT_MIN_AGE) للتصنيف
- * والهدف معًا. الحارس مبنيّ على نفس الأساس العلمي المُوثّق (WHO: تعديل الوزن للأطفال
- * يحتاج مخططات نمو وإشراف مختص، لا عجز/فائض ثابت). `age > 0` يتفادى تقييد عمر غير مُدخل.
+ * التطبيق يبقى 13+، لكن من هم دون 18 لا يتلقّون وصفة رقمية مشتقة من معادلات البالغين.
+ * عتبة العمر واحدة (ADULT_MIN_AGE) للتصنيف والهدف معًا. `age > 0` يتفادى تقييد
+ * عمر غير مُدخل.
  */
 export function isMinorAge(age: number): boolean {
   return age > 0 && age < ADULT_MIN_AGE
 }
 
+/** مصدر الحقيقة لقرار عرض/توليد الوصفة الغذائية الرقمية. */
+export function hasNumericNutritionPrescription(targets: Targets): boolean {
+  return targets.numericNutritionStatus === 'available'
+}
+
 /**
- * الهدف الفعّال للحساب: القاصرون يُحسبون على «المحافظة» دائمًا مهما كان الهدف المخزّن،
- * فلا يُطبَّق أي عجز/فائض في أي مكان من خطّ الحساب. مصدر حقيقة واحد تستهلكه الواجهة
- * والهجرة والبراهين معًا.
+ * الهدف الفعّال: القاصرون يُقيّدون إلى «المحافظة» قبل أن يصلوا إلى أي منطق خطة.
+ * الحارس الرقمي الأقوى في `computeTargets`: لا تُحسب لهم أصلًا معادلات طاقة البالغين.
  */
 export function effectiveGoalTypeForAge(goalType: GoalType, age: number): GoalType {
   return isMinorAge(age) ? 'maintenance' : goalType
@@ -101,7 +104,7 @@ export const MINOR_GOAL_RESTRICTION_NOTE =
  * إصدار صيغة الحساب — يُضمَّن في بصمة الملف الشخصي حتى تُعاد الحسابات تلقائيًا
  * للمستخدمين الحاليين عند تغيّر المعادلات (سقف الماء 4 لتر + تصنيف BMI للقاصرين).
  */
-export const CALC_FORMULA_VERSION = 'p25-water-cap4-minor-bmi'
+export const CALC_FORMULA_VERSION = 'p1-under18-no-adult-prescription'
 
 /**
  * معامل النشاط الكلّي = NEAT + (أيام التمرين × 0.025)، بسقف 1.9.
@@ -208,8 +211,8 @@ function bmrFor(gender: Gender, weight: number, height: number, age: number): nu
 export const BMI_NOTE = 'مؤشر BMI لا يفرّق بين العضلات والدهون، لذلك يُستخدم كمؤشر عام فقط.'
 
 /**
- * صياغة آمنة للقاصرين (دون 18): نعرض رقم BMI (حساب صحيح) لكن نعطّل تصنيف البالغين
- * لأن WHO تشترط «BMI حسب العمر» للأعمار 5–19، ونوجّه لمختص. لا نخترع percentiles.
+ * لا تُستخدم للقاصرين في V1: بقيت مُصدّرة فقط لتوافق البيانات القديمة والبراهين التي
+ * تتحقق أن الواجهات لا تعرضها. لا نحسب ولا نعرض BMI رقميًا لمن هم دون 18.
  */
 export const MINOR_BMI_LABEL = 'حسب BMI: يحتاج تقييمًا حسب العمر (مخططات نمو) — راجع مختصًا'
 
@@ -268,11 +271,11 @@ export const LOW_CALORIE_NOTE =
   'السعرات المستهدفة منخفضة نسبيًا؛ تأكد من تغطية احتياجك من البروتين والطاقة، وارفعها إذا شعرت بإرهاق.'
 
 /**
- * تنبيه القاصرين (دون 18): معادلات الطاقة والماكروز (ميفلين–سانت جيور، بروتين/كجم) مصمّمة
- * للبالغين وخارج نطاق التحقّق للأطفال؛ نعرضها كتقدير تنظيمي فقط ونوصي بإشراف مختص.
+ * سياسة V1 لمن هم دون 18: متابعة وعادات وإرشاد نوعي بلا وصفة رقمية مشتقة من معادلات
+ * البالغين، وبلا اختراع معادلات أطفال أو مخططات نمو.
  */
 export const MINOR_PLAN_NOTE =
-  'عمرك دون 18: هذه أرقام تقديرية بمعادلات مصمّمة للبالغين، وليست بديلًا عن متابعة مختص نمو/تغذية.'
+  'لأن عمرك دون 18، بنركّز على العادات والتسجيل وإرشاد نوعي بدون أهداف سعرات أو ماكروز أو ماء رقمية. تقدر تراجع مختص نمو أو تغذية لأرقام مناسبة لك.'
 
 /** اقتراح تقسيمة التمرين (قابل للتعديل من المستخدم). */
 function suggestedSplit(
@@ -289,8 +292,11 @@ function suggestedSplit(
   return 'جسم كامل (Full Body)'
 }
 
-export function emptyTargets(): Targets {
+export function emptyTargets(
+  numericNutritionStatus: Targets['numericNutritionStatus'] = 'unavailable',
+): Targets {
   return {
+    numericNutritionStatus,
     bmi: 0,
     bmiLabel: '',
     bmr: 0,
@@ -316,6 +322,16 @@ export function computeTargets(p: Profile): Targets {
   const h = p.heightCm
   const age = p.age
   if (w <= 0 || h <= 0) return emptyTargets()
+
+  // [QIM-RED-001] حدّ سلطة مركزي: لا تُشغَّل معادلات البالغين أصلًا لمن هم دون 18.
+  // الأصفار قيم داخلية محايدة فقط، وتحمل حالة صريحة تمنع عرضها كأهداف.
+  if (isMinorAge(age)) {
+    return {
+      ...emptyTargets('suppressed-under18'),
+      suggestedTrainingSplit: suggestedSplit(p.trainingDays, p.trainingLevel, p.workoutEnvironment),
+      notes: MINOR_PLAN_NOTE,
+    }
+  }
 
   const bmr = round(bmrFor(p.gender, w, h, age))
   // معامل النشاط الكلّي = NEAT (حركة الحياة) + إضافة التمرين (أيام×0.025)، بسقف 1.9.
@@ -366,6 +382,7 @@ export function computeTargets(p: Profile): Targets {
   }
 
   return {
+    numericNutritionStatus: 'available',
     bmi,
     bmiLabel: bmiLabelFor(bmi, age),
     bmr,
@@ -382,7 +399,6 @@ export function computeTargets(p: Profile): Targets {
     estimatedWeeksToGoal: weeks,
     suggestedTrainingSplit: suggestedSplit(p.trainingDays, p.trainingLevel, p.workoutEnvironment),
     notes: [
-      age < ADULT_MIN_AGE ? MINOR_PLAN_NOTE : '',
       p.gender === 'unspecified' ? 'تقدير تقريبي (لم يُحدَّد الجنس).' : '',
       isLowCalorie ? LOW_CALORIE_NOTE : '',
     ]
@@ -416,6 +432,7 @@ export const defaultProfile: Profile = {
 
 /** السعرات المستهدفة حسب هدف الملف الشخصي. */
 export function targetCaloriesFor(goal: CalorieGoal, t: Targets): number {
+  if (!hasNumericNutritionPrescription(t)) return 0
   if (goal === 'cut') return t.cuttingCalories
   if (goal === 'bulk') return t.bulkingCalories
   return t.maintenanceCalories

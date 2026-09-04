@@ -26,6 +26,7 @@ import { buildTodayV2Model } from '@/lib/todayV2Model'
 import { buildWorkoutV2Model } from '@/lib/workoutV2Model'
 import { getDefaultCustomization, type Customization } from '@/lib/customization'
 import { getDayStamp } from '@/lib/today'
+import { SYNC_QUEUE_PREFIX, setSyncFeatureEnabledForTests, setSyncRuntime } from '@/lib/syncQueue'
 
 let pass = 0
 let fail = 0
@@ -285,6 +286,36 @@ console.log('\n⑧ الهجرة: خطة قائمة → جدول حقيقي، ide
   resetCalendarMigrationAttemptForTests()
   ensureCalendarMigrated()
   check('جدول المستخدم الموجود لا تدوسه الهجرة', userSaved.status === 'saved' && ls.getItem(WORKOUT_CALENDAR_KEY) === userRaw)
+}
+
+console.log('\n⑨ صدق الحفظ: فشل التخزين لا يدّعي النجاح ولا يطلق مزامنة')
+{
+  ls.clear()
+  const plan = makePlan(3)
+  const first = setTrainingWeekdays(plan, [0, 2, 4], 0)
+  const before = ls.getItem(WORKOUT_CALENDAR_KEY)
+  const userId = 'calendar-storage-proof-user'
+  ls.setItem('qimmah:dataOwner:v1', JSON.stringify({ owner: userId, stampedAt: new Date().toISOString() }))
+  ls.setItem(`qimmah:syncConsent:v1:${userId}`, JSON.stringify({ enabled: true }))
+  setSyncFeatureEnabledForTests(true)
+  setSyncRuntime(userId, false)
+  const queueKey = `${SYNC_QUEUE_PREFIX}${userId}`
+  ls.removeItem(queueKey)
+
+  ;(globalThis as typeof globalThis & { __qimmahFailStorageKey?: string }).__qimmahFailStorageKey = WORKOUT_CALENDAR_KEY
+  const failed = setTrainingWeekdays(plan, [1, 3, 5], 0)
+  const failedMissed = first.status === 'saved'
+    ? applyMissedDecision({ type: 'missed', date: '2026-07-22', weekday: 3, planDayIndex: 2, options: ['move_to_next', 'skip', 'reschedule'] }, { choice: 'skip' }, THU)
+    : null
+  delete (globalThis as typeof globalThis & { __qimmahFailStorageKey?: string }).__qimmahFailStorageKey
+
+  check('كتابة الجدول تحت QuotaExceededError تُعاد failed:quota لا saved', failed.status === 'failed' && failed.reason === 'quota')
+  check('قرار اليوم الفائت تحت فشل التخزين لا يُعاد applied', failedMissed?.status === 'failed' && failedMissed.reason === 'quota')
+  check('آخر جدول صالح يبقى كما هو بعد فشل الكتابة', ls.getItem(WORKOUT_CALENDAR_KEY) === before)
+  check('فشل الكتابة المحلية لا يُدرج عملية مزامنة كاذبة', ls.getItem(queueKey) === null)
+
+  setSyncRuntime(null, false)
+  setSyncFeatureEnabledForTests(undefined)
 }
 
 console.log(`\n${'─'.repeat(46)}`)

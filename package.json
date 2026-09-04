@@ -90,6 +90,11 @@
     "test:coach-ui": "node scripts/run-coach-ui-proof.mjs",
     "test:injury-safety": "node scripts/run-injury-safety-proof.mjs",
     "test:minors": "node scripts/run-minors-proof.mjs",
+    "test:prelaunch-age-beginner": "node scripts/run-prelaunch-age-beginner-proof.mjs",
+    "test:canonical-legal": "node scripts/run-canonical-legal-proof.mjs",
+    "test:prelaunch-web": "node scripts/prelaunch-web-proof.mjs",
+    "test:offline-harness-guard": "node scripts/offline-harness-guard-proof.mjs",
+    "pretest:gate": "npm run test:prelaunch-age-beginner && npm run test:canonical-legal && npm run test:prelaunch-web && npm run test:offline-harness-guard",
     "test:observability": "node scripts/run-observability-proof.mjs",
     "test:native-bridge": "node scripts/run-native-bridge-proof.mjs",
     "test:water-guard": "node scripts/run-water-guard-proof.mjs",
@@ -289,6 +294,7 @@
     "test:dataset-b-runtime": "node scripts/run-dataset-b-runtime-proof.mjs",
     "test:e2e:dataset-b": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/dataset-b-programs.mjs",
     "test:e2e:premium-surface": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/premium-surface.mjs",
+    "test:e2e:prelaunch-web": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/prelaunch-web-accessibility.mjs",
     "test:e2e:founder-exact": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/founder-exact-workout.mjs"
   },
   "dependencies": {

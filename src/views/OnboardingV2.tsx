@@ -22,7 +22,7 @@ import { trackLocal, SETUP_STEP_NAMES } from '@/lib/tracking'
 import { POLICY_LINKS, policyCopy } from '@/data/policyCopy'
 import { toAnswersFromV2, type V2Place } from '@/lib/onboardingV2Adapter'
 import { isMinorAge } from '@/lib/calculators'
-import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
+import { localizeGeneratedWarnings, profileChoiceStrings } from '@/i18n/dict/profileChoices'
 import { bodyStepStrings } from '@/i18n/dict/bodyStep'
 import { goalWordingFor, onboardingIntentStrings } from '@/i18n/dict/onboardingIntent'
 import { setupWhyLines } from '@/i18n/dict/setupWhy'
@@ -1589,7 +1589,12 @@ export function PlanHandoffScreen({
         )}
         {plan && goalType && (
           <div className="mt-4">
-            <PlanPreview lang={lang} plan={plan} goalType={goalType} />
+            <PlanPreview
+              lang={lang}
+              plan={plan}
+              goalType={goalType}
+              notes={localizeGeneratedWarnings(lang, plan.warningsAr)}
+            />
           </div>
         )}
         {rationale && (

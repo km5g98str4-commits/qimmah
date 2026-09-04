@@ -1,6 +1,6 @@
 import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
-import { targetCaloriesFor } from '@/lib/calculators'
+import { hasNumericNutritionPrescription, targetCaloriesFor } from '@/lib/calculators'
 import { planTitle } from '@/lib/planGenerator'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
 import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
@@ -144,6 +144,7 @@ export function buildPlanChanges(saved: Customization, pending: Customization, l
 
   // الفرق لا الجدول: المتطابق يُسقَط قبل أي شيء آخر.
   return rows
+    .filter((r) => hasNumericNutritionPrescription(pending.targets) || (r.key !== 'calories' && r.key !== 'protein'))
     .filter((r) => r.before !== r.after)
     .map((r) => ({ key: r.key, label: r.label, before: r.before, after: r.after, reason: r.reason() }))
 }

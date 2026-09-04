@@ -414,6 +414,7 @@ function workoutPlanShapeOk(v: unknown): boolean {
  * العطل الذي جاء ليغلقه، معمَّمًا. التُقط بكتابة الملف بكاتب المنتج ثم قراءته.
  */
 const TARGET_TEXT_FIELDS = new Set(['suggestedTrainingSplit', 'notes'])
+const NUMERIC_NUTRITION_STATUSES = new Set(['available', 'suppressed-under18', 'unavailable'])
 
 export function isReadableCustomizationShape(v: unknown): v is Partial<Customization> {
   if (!isPlainObject(v)) return false
@@ -428,6 +429,10 @@ export function isReadableCustomizationShape(v: unknown): v is Partial<Customiza
   if (v.targets !== undefined) {
     if (!isPlainObject(v.targets)) return false
     for (const [k, val] of Object.entries(v.targets)) {
+      if (k === 'numericNutritionStatus') {
+        if (typeof val !== 'string' || !NUMERIC_NUTRITION_STATUSES.has(val)) return false
+        continue
+      }
       if (k.endsWith('Label') || TARGET_TEXT_FIELDS.has(k)) {
         // الحقول النصّية تبقى محروسة كنصوص — لا تُترك بلا نوع.
         if (val !== undefined && typeof val !== 'string') return false
@@ -531,7 +536,12 @@ export function loadCustomization(): Customization {
  * هذا يضمن أن المتابعة واللوحة تعكسان حسابات صحيحة دائمًا.
  */
 function withFreshTargets(c: Customization): Customization {
-  if (c.targetsMeta.manuallyEdited) return c
+  // لا يسمح التعديل اليدوي القديم بتجاوز سياسة العمر الجديدة.
+  const minor = isMinorAge(c.profile.age)
+  const agePolicyMismatch = minor
+    ? c.targets.numericNutritionStatus !== 'suppressed-under18'
+    : c.targets.numericNutritionStatus === 'suppressed-under18'
+  if (c.targetsMeta.manuallyEdited && !agePolicyMismatch) return c
   const hash = profileHash(c.profile)
   if (c.targetsMeta.lastCalculatedFromProfileHash === hash) return c
   const targets = computeTargets(c.profile)

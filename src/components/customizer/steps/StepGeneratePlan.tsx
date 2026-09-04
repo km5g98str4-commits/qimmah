@@ -5,7 +5,7 @@ import { Icon } from '@/components/Icon'
 import { cn } from '@/lib/cn'
 import type { WizardCtx } from '../stepProps'
 import type { Profile } from '@/types/profile'
-import { nutritionStyleOptions, targetCaloriesFor } from '@/lib/calculators'
+import { hasNumericNutritionPrescription, nutritionStyleOptions, targetCaloriesFor } from '@/lib/calculators'
 import { generatePlan, generateNutrition, buildWeeklySchedule, planTitle } from '@/lib/planGenerator'
 import { generatePlanFromTemplate, planExerciseName } from '@/lib/workoutPlan'
 import { mealDisplayName } from '@/lib/nutritionPlan'
@@ -14,7 +14,7 @@ import { commitmentName } from '@/lib/commitmentPlan'
 import { workoutTemplates } from '@/data/workoutTemplates'
 import { routineTypeColors } from '@/data/routine'
 import { onboardingStrings } from '@/i18n/dict/onboarding'
-import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
+import { localizeGeneratedWarnings, profileChoiceStrings } from '@/i18n/dict/profileChoices'
 
 /** خطوة توليد الخطة — قِمّة تجهّز خطة جاهزة من بياناتك (الأهداف للعرض فقط). */
 export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
@@ -45,9 +45,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
   }, [])
 
   const generated = useMemo(() => generatePlan(p), [p])
-  const warnings = generated.warningsAr.map((warning) =>
-    ctx.lang === 'en' ? choices.generatedWarning[warning] ?? choices.generatedWarningFallback : warning,
-  )
+  const warnings = localizeGeneratedWarnings(ctx.lang, generated.warningsAr)
 
   const planName = planTitle(ctx.data.workoutPlan.templateId, ctx.lang)
   // [CTO-71] البند ٣ — السطح الثالث: صياغة الهدف في **تفسير الخطة** تتبع المستوى
@@ -64,6 +62,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
   const firstDay = ctx.data.workoutPlan.days[0]
   const calories = targetCaloriesFor(p.goal, ctx.data.targets)
   const np = ctx.data.nutritionPlan
+  const hasNumericTargets = hasNumericNutritionPrescription(ctx.data.targets)
 
   const chooseTemplate = (id: string) => {
     ctx.update({ workoutPlan: generatePlanFromTemplate(id), routine: buildWeeklySchedule(id, p.trainingDays) })
@@ -89,15 +88,19 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
       </p>
 
       {/* الأهداف (عرض فقط) */}
-      <Card icon="BarChart3" title={d.genDailyTargets}>
-        <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
-          <Stat label={d.genCalories} value={`${calories}`} />
-          <Stat label={d.genProtein} value={`${ctx.data.targets.proteinGrams}${d.gGram}`} />
-          <Stat label={d.genCarbs} value={`${ctx.data.targets.carbsGrams}${d.gGram}`} />
-          <Stat label={d.genFat} value={`${ctx.data.targets.fatGrams}${d.gGram}`} />
-          <Stat label={d.genWater} value={`${ctx.data.targets.waterLiters}${d.lLiter}`} />
-          <Stat label="BMI" value={`${ctx.data.targets.bmi}`} />
-        </div>
+      <Card icon="BarChart3" title={hasNumericTargets ? d.genDailyTargets : choices.minorNutritionGuidanceTitle}>
+        {hasNumericTargets ? (
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
+            <Stat label={d.genCalories} value={`${calories}`} />
+            <Stat label={d.genProtein} value={`${ctx.data.targets.proteinGrams}${d.gGram}`} />
+            <Stat label={d.genCarbs} value={`${ctx.data.targets.carbsGrams}${d.gGram}`} />
+            <Stat label={d.genFat} value={`${ctx.data.targets.fatGrams}${d.gGram}`} />
+            <Stat label={d.genWater} value={`${ctx.data.targets.waterLiters}${d.lLiter}`} />
+            <Stat label="BMI" value={`${ctx.data.targets.bmi}`} />
+          </div>
+        ) : (
+          <p className="text-sm leading-relaxed text-ink-700" data-testid="generated-plan-under18-policy">{choices.minorNutritionGuidanceBody}</p>
+        )}
       </Card>
 
       {/* جدول التمرين المقترح */}
@@ -169,14 +172,14 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
                 </select>
               </label>
             </div>
-            <div className="mt-3 rounded-xl border border-line bg-page p-3">
+            {hasNumericTargets && <div className="mt-3 rounded-xl border border-line bg-page p-3">
               <p className="text-xs font-bold text-primary-c">{d.genPlanned} {Math.round(np.meals.reduce((a, m) => a + m.calories, 0))} {d.calWord} · {Math.round(np.meals.reduce((a, m) => a + m.protein, 0))}{d.gGram} {d.genPlannedProteinSuffix} ({d.genPlannedTargetPrefix} {np.targetCalories} {d.calWord} · {np.targetProtein}{d.gGram})</p>
               <ul className="mt-1.5 space-y-0.5">
                 {np.meals.map((m) => (
                   <li key={m.id} className="truncate text-xs text-ink-500">• {mealDisplayName(m, ctx.lang)} — {m.calories} {d.calWord}</li>
                 ))}
               </ul>
-            </div>
+            </div>}
           </>
         )}
       </Card>

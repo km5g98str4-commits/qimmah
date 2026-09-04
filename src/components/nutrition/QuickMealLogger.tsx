@@ -43,6 +43,8 @@ interface QuickMealLoggerProps {
   lang: Lang
   targetCalories: number
   targetProtein: number
+  /** إخفاء وصفة الأهداف مع بقاء التسجيل الغذائي متاحًا. */
+  showTargets?: boolean
   /** خانة الوجبة التي تُسجَّل تحتها الإضافات (افتراضيًا سناك). */
   defaultMeal?: MealSlot
   /** وضع مضمّن داخل قسم وجبة: يُظهر لوحة الإضافة فقط (بلا تقدّم/سجل/تنويه). */
@@ -58,7 +60,7 @@ function round(n: number): number {
 }
 
 /** مسجّل وجبات سريع — بحث في قاعدة الأطعمة أو إضافة سعرات/بروتين مخصّصة، مع تقدّم يومي. */
-export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMeal, embedded = false, onLogged }: QuickMealLoggerProps) {
+export function QuickMealLogger({ lang, targetCalories, targetProtein, showTargets = true, defaultMeal, embedded = false, onLogged }: QuickMealLoggerProps) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
   const { state, totals, addLog, removeLog: rawRemoveLog } = useNutritionToday()
@@ -264,7 +266,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, defaultMe
 
   return (
     <div className={embedded ? '' : 'card p-5'}>
-      {!embedded && (
+      {!embedded && showTargets && (
         <>
           {/* التقدّم اليومي */}
           <div className="grid grid-cols-2 gap-4">

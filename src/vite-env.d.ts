@@ -15,3 +15,17 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+declare const __LEGAL_LAUNCH_CONFIG__: {
+  ready: boolean
+  unresolved: string[]
+  controllerNameAr: string
+  controllerNameEn: string
+  contactEmail: string
+  effectiveDate: string
+  governingVenueAr: string
+  governingVenueEn: string
+  dataRegionAr: string
+  dataRegionEn: string
+  legalReviewId: string
+}

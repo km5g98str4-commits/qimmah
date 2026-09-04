@@ -2,9 +2,8 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="UTF-8" />
-    <!-- قفل التكبير للإحساس الأصلي: WKWebView يحترم maximum-scale/user-scalable فيُلغى التكبير
-         بالنقر المزدوج والقرص داخل التطبيق. متصفّح iOS Safari يتجاهلهما (يحفظ إمكانية الوصول على الويب). -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <!-- لا نقيّد التكبير: pinch zoom و200% جزء من عقد الوصولية على الويب والـWebView. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
     <!-- الأيقونات -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -71,11 +70,17 @@
         "applicationCategory": "HealthApplication",
         "operatingSystem": "Web",
         "inLanguage": "ar",
-        "isAccessibleForFree": true,
+        "isAccessibleForFree": false,
+        "hasPart": {
+          "@type": "WebApplication",
+          "name": "Qimmah plan preview",
+          "isAccessibleForFree": true
+        },
         "offers": {
           "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "SAR"
+          "price": "19.99",
+          "priceCurrency": "SAR",
+          "category": "one-time purchase"
         }
       }
     </script>

@@ -143,6 +143,16 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
         <p className="mt-4 text-xs font-bold leading-relaxed text-primary-c">{d.inputsAccuracy}</p>
       </section>
 
+      {minor ? (
+        <section className="rounded-2xl border border-line bg-beige p-5" data-testid="e-calc-under18-policy">
+          <div className="flex items-center gap-2">
+            <Icon name="Info" className="h-4 w-4 text-primary-c" />
+            <h2 className="text-base font-black text-ink-900">{d.caloriesTitle}</h2>
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-ink-700">{d.caloriesMinor}</p>
+        </section>
+      ) : (
+        <>
       <ExplainerSection icon="Scale" title={d.bmiTitle} result={value(t.bmi)}>
         <Body>{d.bmiWhat}</Body>
         <Formula>{`${value(p.weightKg)} ÷ (${value(p.heightCm / 100)})² = ${value(t.bmi)}`}</Formula>
@@ -270,6 +280,8 @@ function CalcFilled({ data, lang, d }: { data: CalcExplainerData; lang: Lang; d:
         <p className="mt-2 text-xs leading-relaxed text-ink-500">{d.disclaimerWhen}</p>
         <p className="mt-2 text-xs font-bold leading-relaxed text-ink-700">{d.disclaimerYou}</p>
       </section>
+        </>
+      )}
     </div>
   )
 }
