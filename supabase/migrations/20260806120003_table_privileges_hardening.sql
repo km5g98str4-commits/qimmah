@@ -59,6 +59,36 @@
 -- أمني يجب أن يكون قرارًا واعيًا لا سطرًا جاهزًا.
 -- ============================================================================
 
+-- ═══════════════════════════════════════════════════════════════════════════
+-- [PROD-DRIFT] الفعل صار **شاملًا للمخطّط** كتأكيده — والسبب عطلٌ مقيس لا تحسين
+-- ═══════════════════════════════════════════════════════════════════════════
+-- كانت هذه الهجرة تحصّن **قائمة مسمّاة** ثم تؤكّد **على المخطّط كلّه**. وذلك
+-- تفاوتٌ بنيويّ: كل جدول خارج القائمة يبقى مكشوفًا، ثم يُسقِط التأكيدُ الهجرةَ
+-- نفسها. فهي تفشل حيث تُحتاج بالضبط — على قاعدة فيها جدول لم تعرفه القائمة.
+--
+-- ولم يكن فرضًا: preflight الإنتاج (٤ سبتمبر ٢٠٢٦) قاس على
+-- `ledlypcyrtnzvjvhykwz` ستّة جداول قديمة خارج القائمة —
+-- `custom_foods` · `food_logs` · `progress_photos` · `weight_logs` ·
+-- `workout_logs` · `workout_sets` — كلٌّ منها يمنح `anon` و`authenticated`
+-- ‏`SELECT,INSERT,UPDATE,DELETE,REFERENCES,TRIGGER,TRUNCATE`. فكان التأكيدان
+-- يسقطان والهجرةُ تُجهَض. وstaging لم يكشفها لأنه بُني نظيفًا من مجلّد الهجرات
+-- وحده — **عطلٌ يعيش في الفرق بين البيئتين**، وهو ما وُجد الـpreflight له.
+--
+-- ═══ الثابت المطلوب — يُنفَّذ لا يُدَّعى ═══
+--   ① `anon` لا يملك **شيئًا** على أي جدول في `public`. بلا استثناء.
+--   ② `authenticated` لا يملك إلا ما تمنحه القائمة المسمّاة أدناه صراحةً.
+--   ③ **الجدول المجهول يسقط إلى الصفر** — لا إلى ما ورثه من المنصّة. فالافتراض
+--      «مغلق» لا «مفتوح»، والقائمة تمنح ولا تحرس.
+--   ④ `service_role` (مفتاح الخادم) **لا يُمسّ**: السحب يسمّي دورَي العميل
+--      وحدهما، فالإدارة والهجرات تبقى عاملة.
+--
+-- ولماذا لا استثناء للجداول الستّة: لا صفّ فيها (٠ مقيسًا)، ولا مستهلك لها في
+-- الكود (أثرها الوحيد تعليق TODO وسطر وثيقة)، فلا سلطة عميل تُبرَّر لها. وأي
+-- استثناء هنا كان سيُبقي `TRUNCATE` لـ`anon` على ستّة جداول **ليخضرّ فحص** —
+-- وهو عين ما تمنعه هذه الهجرة. تُترك بيانات الجداول وبنيتها وRLS كما هي؛
+-- **المسحوب صلاحيةُ العميل وحدها** (قرار المؤسس: لا حذف في هذا الإصدار).
+-- ═══════════════════════════════════════════════════════════════════════════
+
 do $$
 declare
   t text;
@@ -71,37 +101,42 @@ declare
   ];
   -- ② الوصول المقروء: SELECT فقط.
   read_only_tables text[] := array['entitlements', 'access_code_redemptions'];
-  -- ③ غير مرئية لأي عميل.
+  -- ③ غير مرئية لأي عميل — تُذكر توثيقًا، وحجبها من السحب الشامل لا منها.
   invisible_tables text[] := array[
     'access_codes', 'trial_ledger', 'purchase_ledger', 'code_redemption_ledger'
   ];
 begin
-  -- ① ────────────────────────────────────────────────────────────────────
-  foreach t in array sync_tables loop
+  -- ═══ عقد الوجود: قائمةٌ تسمّي جدولًا غائبًا خطأُ عقدٍ لا حالةَ قاعدة ═══
+  foreach t in array sync_tables || read_only_tables || invisible_tables loop
     if to_regclass('public.' || quote_ident(t)) is null then
       raise exception 'hardening: expected table public.% is missing', t;
     end if;
+  end loop;
+
+  -- ═══ ① السحب **الشامل**: كل جدول أساسي في `public`، معروفًا كان أو مجهولًا ═══
+  -- هنا صار الفعل بحجم التأكيد. الجدول الذي لم يخطر ببال أحد يفقد كل صلاحية
+  -- عميل — فلا يبقى مكشوفًا ولا يُسقِط الهجرة.
+  for t in
+    select c.relname
+      from pg_class c join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = 'public' and c.relkind = 'r'
+     order by c.relname
+  loop
     execute format('revoke all on public.%I from anon, authenticated;', t);
-    -- يُعاد المطلوب وحده — لا TRUNCATE ولا REFERENCES ولا TRIGGER.
+  end loop;
+
+  -- ═══ ② ثم يُعاد المطلوب وحده — والقائمة تمنح فقط، ولا تحرس ═══
+  foreach t in array sync_tables loop
+    -- لا TRUNCATE ولا REFERENCES ولا TRIGGER — CRUD صرفًا، وRLS تحصره بالصفّ.
     execute format('grant select, insert, update, delete on public.%I to authenticated;', t);
   end loop;
 
-  -- ② ────────────────────────────────────────────────────────────────────
   foreach t in array read_only_tables loop
-    if to_regclass('public.' || quote_ident(t)) is null then
-      raise exception 'hardening: expected table public.% is missing', t;
-    end if;
-    execute format('revoke all on public.%I from anon, authenticated;', t);
     execute format('grant select on public.%I to authenticated;', t);
   end loop;
 
-  -- ③ ────────────────────────────────────────────────────────────────────
-  foreach t in array invisible_tables loop
-    if to_regclass('public.' || quote_ident(t)) is null then
-      raise exception 'hardening: expected table public.% is missing', t;
-    end if;
-    execute format('revoke all on public.%I from anon, authenticated;', t);
-  end loop;
+  -- ③ لا سطر لـ`invisible_tables`: صفرُها ناتجُ السحب الشامل لا منحةٌ مضادّة.
+  --    و`anon` لا يُمنح في أي فرع أعلاه — إطلاقًا.
 end;
 $$;
 
@@ -147,6 +182,27 @@ begin
    where table_schema = 'public' and grantee = 'anon';
   if leftover is not null then
     raise exception 'hardening incomplete — anon still holds: %', leftover;
+  end if;
+
+  -- ═══ [PROD-DRIFT] الثابت موجبًا: كل جدول **خارج** القائمة يساوي صفرًا ═══
+  -- التأكيدان أعلاه ينفيان (لا صلاحية محظورة · لا anon). وهذا يُثبت الوجه
+  -- الموجب: أن الجدول الذي لا تعرفه القائمة **سقط إلى الصفر فعلًا** ولم يبقَ
+  -- على وراثته. بدونه يمرّ CRUD موروثٌ لـ`authenticated` على جدولٍ مجهول
+  -- صامتًا — فهو ينفي نجاحًا غير مستحقّ لا يلتقطه النفيان (§4.2).
+  select string_agg(format('%s=%s', table_name, privilege_type), ', ')
+    into leftover
+    from information_schema.role_table_grants
+   where table_schema = 'public'
+     and grantee = 'authenticated'
+     and table_name not in (
+       'profiles', 'workout_sessions', 'exercise_history', 'measurement_logs',
+       'daily_logs', 'nutrition_logs', 'water_logs', 'supplement_logs',
+       'medication_logs', 'step_logs', 'achievements', 'custom_plans', 'todos',
+       'nutrition_ledger', 'recovery_logs', 'workout_schedule', 'plan_templates',
+       'entitlements', 'access_code_redemptions'
+     );
+  if leftover is not null then
+    raise exception 'hardening incomplete — unlisted table still grants authenticated: %', leftover;
   end if;
 end;
 $$;
