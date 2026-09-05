@@ -103,7 +103,7 @@ consent filters the payload at the single choke point (`syncFieldPolicy.ts:61-66
 Premium `no_expiry` with no renewal logic — the code matches CLM-012 even while the store copy does not ·
 purchase needs no activation code (`access.ts:139`) · injury engine correctness (`injurySafety.ts:44-95`,
 fail-closed) · plan-rationale honestly separates `measured` from `structural` and names inactive axes
-(`planRationale.ts:143-165`) · minors limited to maintenance (`calculators.ts:75,327`) · age floor 13 ·
+(`planRationale.ts:143-165`) · ages 12–17 receive no adult numeric personalization (`calculators.ts:75`) · age floor 12 ·
 analytics local-only, **no endpoint at all** (`tracking/index.ts:1-6`) · location read once, never
 stored or sent (`geolocation.ts:21`) · Apple Health **read-only** (`health/connect.ts:53`) ·
 disconnecting a metric purges its samples (`:298-306`) · export works from the UI ·

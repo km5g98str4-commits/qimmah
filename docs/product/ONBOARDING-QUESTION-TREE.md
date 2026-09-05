@@ -19,7 +19,7 @@
 | الحقيقة | الدليل |
 |---|---|
 | التدفّق الحالي يجمع الجسد أولًا ثم الهدف، والموافقة الصحية **قبل** الحقول | `src/lib/onboardingV2Flow.ts:130` — «الإذن يسبق الجمع لا يليه» |
-| حاجز القاصرين يقبل من 13 سنة ويقيّد الأهداف ولا يطرد | `src/lib/onboardingV2Flow.ts:26` |
+| حاجز القاصرين يقبل من 12 سنة ويقيّد الأهداف ولا يطرد | `src/config/profileDomain.ts` و`src/lib/calculators.ts` |
 | نموذج `Answers` يحمل حقولًا **جاهزة وغير مسؤولة** في التدفّق الحالي: الخبرة، الانتظام، النشاط اليومي، نمط التغذية، عدد الوجبات، الحساسية، نمط الأكل | `src/lib/planBuilderAnswers.ts:23-58` |
 | سؤال المعدّات الحالي (`pref`) **لا يُحفظ ولا يغيّر شيئًا** | `src/lib/onboardingV2Adapter.ts:48` — «no field in `Answers`, so it is NOT persisted» |
 | الأهداف في الكود ثلاثة فقط: `cut` · `maintain` · `bulk` | `src/data/planBuilder.ts:51` و`src/design-system/v2/labels.ts:137` |
@@ -255,7 +255,7 @@
 - **المعرّف:** `basicsTitle` · `basicsHint` · `basicsAgeLabel` · `basicsGenderLabel` · `basicsHeightLabel` · `basicsWeightLabel` · `basicsErr*`
 - **شرط الظهور:** دائم، بعد الموافقة.
 - **الحقول:** `age` · `sex` · `heightCm` · `weightKg`
-- **النطاقات المؤكَّدة في الكود:** العمر 13–100 · الطول 120–220 سم · الوزن 30–250 كجم (`onboardingV2Flow.ts:26-29`)
+- **النطاقات المؤكَّدة في الكود:** العمر 12–100 · الطول 120–220 سم · الوزن 30–250 كجم (`src/config/profileDomain.ts`)
 
 | | العربية | English |
 |---|---|---|
@@ -273,7 +273,7 @@
 
 | المعرّف | العربية | English |
 |---|---|---|
-| `basicsErrAge` | العمر بين 13 و100 سنة. | Age should be between 13 and 100. |
+| `basicsErrAge` | العمر بين 12 و100 سنة. | Age should be between 12 and 100. |
 | `basicsErrHeight` | الطول بين 120 و220 سم. | Height should be between 120 and 220 cm. |
 | `basicsErrWeight` | الوزن بين 30 و250 كجم. | Weight should be between 30 and 250 kg. |
 | `basicsErrMissing` | نحتاج الأربعة جميعًا لنحسب أرقامك بدقّة. | We need all four to calculate your numbers accurately. |

@@ -28,8 +28,8 @@ function profile(overrides: Partial<Profile>): Profile {
   }
 }
 
-console.log('\n① UNDER-18 AUTHORITY — 13/17 SUPPRESSED; 18 RESTORED')
-for (const age of [13, 17]) {
+console.log('\n① UNDER-18 AUTHORITY — 12/17 SUPPRESSED; 18 RESTORED')
+for (const age of [12, 17]) {
   const targets = computeTargets(profile({ age }))
   check(`age ${age}: explicit suppressed status`, targets.numericNutritionStatus === 'suppressed-under18')
   check(`age ${age}: no adult energy/macros/hydration/BMI numbers`, [
@@ -74,7 +74,7 @@ const totalSets = (p: ReturnType<typeof generatePlan>) => p.workoutPlan.days.red
 )
 let matrixCases = 0
 let strictNeverReduction = 0
-for (const age of [17, 18]) {
+for (const age of [12, 17, 18]) {
   for (const days of [3, 4, 5, 6, 7]) {
     for (const duration of [45, 60, 75, 90]) {
       const built = new Map<string, ReturnType<typeof generatePlan>>()
@@ -101,7 +101,7 @@ for (const age of [17, 18]) {
     }
   }
 }
-check('matrix executed all 120 cases', matrixCases === 120)
+check('matrix executed all 180 cases', matrixCases === 180)
 check('never receives a strict conservative reduction in at least one matched case', strictNeverReduction > 0)
 
 console.log('\n④ ⚔️ ANTI-BYPASS STRUCTURE')

@@ -40,7 +40,7 @@ check('العمر: مسار الإعداد ومدقّق الملف على نفس
 check('الطول: نفس النطاق (كان 120–220 مقابل 100–230)', FLOW_HEIGHT.min === LIMITS.heightCm.min && FLOW_HEIGHT.max === LIMITS.heightCm.max)
 check('الوزن: نفس النطاق (كان 30–250 مقابل 15–250)', FLOW_WEIGHT.min === LIMITS.weightKg.min && FLOW_WEIGHT.max === LIMITS.weightKg.max)
 check('وزن الهدف يشترك مع الوزن في نفس النطاق', TARGET_WEIGHT_RANGE.min === WEIGHT_RANGE.min && TARGET_WEIGHT_RANGE.max === WEIGHT_RANGE.max)
-check('القيم المعتمدة هي الأضيق (حدود الإعداد)', AGE_RANGE.min === 13 && HEIGHT_RANGE.min === 120 && WEIGHT_RANGE.min === 30)
+check('القيم المعتمدة هي الأضيق (حدود الإعداد)', AGE_RANGE.min === 12 && HEIGHT_RANGE.min === 120 && WEIGHT_RANGE.min === 30)
 
 console.log('\n═══ 2) الرسالة لا تكذب — مبنيّة من نفس الرقم ═══')
 for (const [name, copy, range] of [

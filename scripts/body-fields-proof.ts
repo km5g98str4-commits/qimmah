@@ -51,8 +51,10 @@ check('الخطوة الأولى رقمها 0', validateStep(0, { ...base, ...bo
 check('آخر خطوة إدخال هي 6 (القيود)', LAST_INPUT_STEP === 6)
 
 console.log('\n═══ 2) الحدود تمنع القيم الشاذّة ولا تُقصي أحدًا ═══')
-check('عمر 12 مرفوض', !inRange(12, AGE_RANGE))
-check('عمر 13 مقبول (القاصر يُقبل ثم يُقيَّد)', inRange(13, AGE_RANGE))
+check('عمر 11 مرفوض', !inRange(11, AGE_RANGE))
+check('عمر 12 مقبول (القاصر يُقبل ثم يُقيَّد)', inRange(12, AGE_RANGE))
+check('عمر 17 مقبول', inRange(17, AGE_RANGE))
+check('عمر 18 مقبول', inRange(18, AGE_RANGE))
 check('عمر 101 مرفوض', !inRange(101, AGE_RANGE))
 check('طول 119 مرفوض و120 مقبول', !inRange(119, HEIGHT_RANGE) && inRange(120, HEIGHT_RANGE))
 check('وزن 29 مرفوض و30 مقبول', !inRange(29, WEIGHT_RANGE) && inRange(30, WEIGHT_RANGE))
@@ -90,11 +92,12 @@ check('الفارق معتبر لا تقريبي (>300 سعرة)', Math.abs(t1.t
 check('كلا الرقمين موجب ومنطقي', t1.bmr > 800 && t2.bmr > 800)
 
 console.log('\n═══ 5) حاجز القاصرين يعمل للضيف الجديد ═══')
-check('عمر 15 = قاصر', isMinorAge(15))
+check('عمر 12 = قاصر', isMinorAge(12))
+check('عمر 17 = قاصر', isMinorAge(17))
 check('عمر 18 = بالغ', !isMinorAge(18))
 // قبل الموجة: الضيف الجديد بلا عمر ⇒ undefined ⇒ لا تقييد.
 check('غياب العمر كان يعني «بالغ» (السلوك القديم)', !isMinorAge(undefined))
-check('العمر المُجاب يقود الحاجز الآن', isMinorAge(15) && !isMinorAge(30))
+check('العمر المُجاب يقود الحاجز الآن', isMinorAge(12) && !isMinorAge(30))
 
 console.log('\n═══ 6) النصوص في القواميس بالعربية والإنجليزية (§6) ═══')
 for (const lang of ['ar', 'en'] as const) {

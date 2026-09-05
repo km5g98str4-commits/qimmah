@@ -31,7 +31,7 @@ privacyBody: [
   'وإحصاءات الاستخدام مجهولة بالكامل: لا اسم ولا بريد ولا أي بيانات تعرّف بك، ومعرّفها رقم عشوائي يُولَّد على جهازك وغير مرتبط بحسابك. ولا تُرسَل هذه الإحصاءات إلى أي جهة ما لم تُضبَط للنسخة وجهة إرسال معلنة، ويمكنك إيقافها في كل الأحوال من «الإعدادات ← الخصوصية».',
   'ولا يطلب التطبيق موقعك إلا إذا فعّلت جدولة الوضع الداكن، ولغرض واحد: حساب وقتَي الغروب والشروق في منطقتك. لا يُخزَّن موقعك ولا يُرسَل، ولك بديل كامل باختيار مدينتك يدويًا، ورفض الإذن لا يحجب عنك شيئًا.',
   'وتُستخدم الكاميرا لمسح باركود المنتجات الغذائية فقط. تُقرأ الصورة على جهازك لفكّ الرمز فلا تُحفَظ ولا تُرسَل، ويُرسَل رقم الباركود وحده إلى قاعدة Open Food Facts لجلب بيانات المنتج، دون أي بيانات عنك.',
-  'والحدّ الأدنى لاستخدام قِمّة ثلاث عشرة سنة. ودون الثامنة عشرة تقتصر الخطط على المحافظة على الوزن دون تنشيف أو تضخيم، ولا تُعرَض مؤشّرات كتلة الجسم بتصنيفات البالغين.',
+  'والحدّ الأدنى لاستخدام قِمّة اثنتا عشرة سنة. ولمن أعمارهم من 12 إلى 17 لا تُحسب ولا تُعرض وصفات رقمية مشتقة من نموذج البالغين، وتبقى التمارين وتسجيل الطعام والتقدّم والإرشادات النوعية متاحة.',
   'ويمكنك تصدير نسخة كاملة من بياناتك متى شئت من «الإعدادات ← البيانات»، وحذف حسابك من «الإعدادات ← الحساب ← حذف الحساب». وإذا تعذّر إتمام الحذف على الخادم فلا يُحذَف شيء ولا تُنهى جلستك، ويُعرَض لك تعذّره صراحةً بدل ادّعاء نجاح لم يقع.',
   'ولأي سؤال أو طلب يتعلّق ببياناتك: qimmah.support@gmail.com.',
 ],
@@ -51,7 +51,7 @@ privacyBody: [
   'Usage analytics are fully anonymous: no name, no email, no identifying data. The identifier is a random value generated on your device and unlinked to your account. These analytics are transmitted nowhere unless a declared destination is configured for the build, and you may switch them off in every case from Settings → Privacy.',
   'The app requests your location only if you enable dark-mode scheduling, and for a single purpose: computing your local sunset and sunrise times. Your location is neither stored nor transmitted, you have a full alternative in choosing your city manually, and declining the permission withholds nothing from you.',
   'The camera is used solely to scan food-product barcodes. The image is read on your device to decode the barcode and is neither stored nor transmitted; only the barcode number is sent to the Open Food Facts database to retrieve product data, with no data about you.',
-  'The minimum age to use Qimmah is thirteen. Under eighteen, plans are limited to weight maintenance without cutting or bulking, and body-mass indicators are not shown with adult classifications.',
+  'The minimum age to use Qimmah is twelve. Users aged 12–17 receive no numeric prescriptions derived from the adult model; workouts, food logging, progress tracking, and qualitative guidance remain available.',
   'You may export a full copy of your data at any time from Settings → Data, and delete your account from Settings → Account → Delete account. If the deletion cannot be completed on the server, nothing is deleted and your session is not ended; the failure is shown to you plainly rather than a success that did not occur.',
   'For any question or request concerning your data: qimmah.support@gmail.com.',
 ],
@@ -71,7 +71,7 @@ privacyBody: [
 | ٦ | التحليلات مجهولة · **ولا تُرسَل بلا وجهة** | [`analytics/consent.ts:1-7`](../../src/lib/analytics/consent.ts#L1) معرّف UUID محلي غير مرتبط بالمصادقة · [`analytics/index.ts:37-58`](../../src/lib/analytics/index.ts#L37) المزوّد **no-op** ما لم يكن `VITE_ANALYTICS_ENDPOINT` رابط HTTPS صالحًا · [`.env.example:37`](../../.env.example#L37) القيمة **فارغة** |
 | ٧ | الموقع لجدولة الغروب وحدها | [`geolocation.ts:1-3`](../../src/lib/geolocation.ts#L1) «لجدولة الغروب، شاشة ٦٦… عند الرفض يلجأ المستدعي للبديل اليدوي — لا حجب» · [`appPreferences.ts:13-18`](../../src/lib/appPreferences.ts#L13) · [`Info.plist:31`](../../ios/App/App/Info.plist#L31) `NSLocationWhenInUseUsageDescription` |
 | ٨ | الكاميرا للباركود · ورقم الباركود لطرف ثالث | فكّ الرمز محليًا [`webZxingEngine`](../../src/features/barcode/) عبر `getUserMedia` [`ScanFoodPanel.tsx:57`](../../src/features/barcode/ScanFoodPanel.tsx#L57) · الطلب الشبكي [`openFoodFacts.ts:6`](../../src/features/barcode/openFoodFacts.ts#L6) `https://world.openfoodfacts.org/api/v2/product` و[`:131`](../../src/features/barcode/openFoodFacts.ts#L131) يرسل **الباركود وحده** |
-| ٩ | ١٣ حدًّا أدنى · ١٨ عتبة البلوغ | [`onboardingV2Flow.ts:28`](../../src/lib/onboardingV2Flow.ts#L28) `AGE_RANGE = { min: 13, max: 100 }` · [`calculators.ts:74`](../../src/lib/calculators.ts#L74) `ADULT_MIN_AGE = 18` · [`:200`](../../src/lib/calculators.ts#L200) `MINOR_BMI_LABEL` · [`:366`](../../src/lib/calculators.ts#L366) `MINOR_PLAN_NOTE` |
+| ٩ | ١٢ حدًّا أدنى · ١٨ عتبة مسار البالغين | [`profileDomain.ts`](../../src/config/profileDomain.ts) `AGE_RANGE = { min: 12, max: 100 }` · [`calculators.ts`](../../src/lib/calculators.ts) `ADULT_MIN_AGE = 18` · `MINOR_BMI_LABEL` · `MINOR_PLAN_NOTE` |
 | ١٠ | التصدير · الحذف · **صدق الفشل** | التصدير عبر [`lib/portability`](../../src/lib/portability/) و[`DataManagementPanel.tsx:24`](../../src/components/DataManagementPanel.tsx#L24) · الحذف [`authContext.tsx:398`](../../src/lib/authContext.tsx#L398) · **صدق الفشل** [`:415-419`](../../src/lib/authContext.tsx#L415): فشل حذف مستخدم المصادقة ⇒ لا يُحذف صفّ ولا تُنهى الجلسة |
 | ١١ | بريد الدعم | **قرار مؤسس موقّع** [CTO-21] خامسًا — موثّق في [`APPSTORE-COMPLIANCE-PACK.md:611`](../legal/APPSTORE-COMPLIANCE-PACK.md) |
 
@@ -125,5 +125,5 @@ privacyBody: [
 |---|--------|------------------|
 | ١ | **تصحيح `contact.emailValue` — الآن أم موجة تالية؟** | العنوان القائم وهمي موثّق، والتناقض داخل الشاشة نفسها. القرار توقيت لا مبدأ. |
 | ٢ | **تاريخ «آخر تحديث» للسياسة** | حقل النشر في حزمة الامتثال ما زال `[قرار المالك]`، والمتجر يطلبه. |
-| ٣ | **البند ٩ — هل ١٣ سنة هي الحدّ المُعلَن؟** | الكود يفرض `AGE_RANGE.min = 13`، لكن إعلانه في سياسة منشورة التزام أمام المتجر والنظام. أؤكّد أنه مطابق للكود، ولا أعتمده نيابةً عنك. |
+| ٣ | **البند ٩ — اعتماد الصياغة القانونية لعمر ١٢–١٧** | المؤسس حسم `AGE_RANGE.min = 12` وحدّ البالغين = 18؛ يبقى اعتماد الصياغة القانونية ومسألة غياب موافقة ولي الأمر للمراجع القانوني. |
 | ٤ | **الترتيب مقابل مسار G** | إن كان تفعيل المزامنة قريبًا، فبوّابة G تسبق نشر البند ٣ لا تليه. |

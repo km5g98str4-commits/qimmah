@@ -117,11 +117,21 @@ Status: `LOCKED` · `PENDING_FOUNDER` · `SUPERSEDED`
   (`PLAN-CHANGE-001`); `test:numeral-policy` 69/0.
 - **reopen condition:** none.
 
-### DEC-012 — Age floor is 13, and a minor gate applies to restricted goals
-- **evidence:** `CLAUDE.md §1.4`; gate steps `test:age-13`, `test:minors`, `test:e-guardrail`.
-- **note:** `parseSafeNumber('٢٤',{min:13})` used to return **13**, classifying an adult as a
-  minor and locking cutting/bulking goals. Fixed and guarded (`test:numeral-policy`).
-- **reopen condition:** none (App Store compliance).
+### DEC-012 — Age floor 13 — **SUPERSEDED by DEC-016**
+- **historical decision:** The minimum supported age was 13.
+- **superseded by:** the founder's final age-floor authorisation recorded in DEC-016.
+- **preservation:** this entry remains so the earlier `test:age-13` and App Store evidence are read as history, not current authority.
+
+### DEC-016 — Age floor is 12; adult numeric personalization remains 18+
+- **decision:** supported ages are 12+; ages 12–17 remain minors; age 18 restores the adult numeric path.
+- **safety invariant:** ages 12–17 receive no adult-derived calorie, macro, hydration, BMI/BMR/TDEE,
+  deficit/surplus, weight-change-rate, or numeric forecast prescriptions. Workouts, food logging,
+  progress tracking, and qualitative guidance remain available.
+- **evidence:** `AGE_RANGE` in `src/config/profileDomain.ts`; `ADULT_MIN_AGE` in
+  `src/lib/calculators.ts`; gate steps `test:age-12`, `test:body-fields`, `test:minors`,
+  `test:formula`, and `test:prelaunch-age-beginner`.
+- **owner:** founder · **date:** 2026-09-05.
+- **reopen condition:** a later explicit founder decision.
 
 ### DEC-013 — Founder decisions already locked in the charter stay locked
 1. Nutrition **budget** feature is out of V1.

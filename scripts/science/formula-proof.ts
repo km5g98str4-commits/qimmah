@@ -85,8 +85,8 @@ verifyTargets('female-cut-45', profile({
 })
 
 // Supported minor boundary: no adult-derived numeric prescription is computed or exposed.
-verifyTargets('onboarding-min-age13', profile({
-  gender: 'female', age: 13, heightCm: 120, weightKg: 30, targetWeightKg: 30,
+verifyTargets('onboarding-min-age12', profile({
+  gender: 'female', age: 12, heightCm: 120, weightKg: 30, targetWeightKg: 30,
   activityLevel: 'sedentary', trainingDays: 0, goal: 'maintain', goalType: 'maintenance',
 }), {
   numericNutritionStatus: 'suppressed-under18', bmr: 0, tdee: 0, maintenanceCalories: 0,
@@ -109,7 +109,7 @@ check('seven-day activity multiplier', totalActivityMultiplier('very_active', 7)
 //   1) Water is clamped to [2.5, 4.0] L — the 9 L max-bound output can never return.
 //   2) Under-18 users never receive adult-derived BMI, calorie, macro, hydration, or
 //      forecast numbers. They receive explicit suppression state and qualitative guidance.
-// The matrix covers age 13/17/18, both sexes, min/max weight+height, cut/bulk/maintain,
+// The matrix covers age 12/17/18, both sexes, min/max weight+height, cut/bulk/maintain,
 // and zero activity, as required by the mission.
 console.log('\nSCIENTIFIC GUARDRAIL REGRESSION')
 
@@ -126,7 +126,7 @@ for (const kg of [115, 150, 200, 250]) {
 }
 
 // (2) MINOR NUMERIC GUARDRAIL — under 18 gets no adult-derived numeric prescription.
-for (const age of [13, 15, 17]) {
+for (const age of [12, 15, 17]) {
   for (const gender of ['male', 'female'] as const) {
     const t = targetsFor({ gender, age, heightCm: 160, weightKg: 60, targetWeightKg: 60, goalType: 'maintenance', goal: 'maintain', activityLevel: 'sedentary', trainingDays: 0 })
     check(`minor ${gender} age ${age}: explicit suppression state`, t.numericNutritionStatus, 'suppressed-under18')
@@ -147,15 +147,15 @@ for (const gender of ['male', 'female'] as const) {
 // Minor cut/bulk/maintain all keep suppression (goal must not re-open the adult path).
 for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
   const goal = goalType === 'cutting' ? 'cut' : goalType === 'bulking' ? 'bulk' : 'maintain'
-  const t = targetsFor({ gender: 'male', age: 13, heightCm: 120, weightKg: 30, targetWeightKg: 30, goalType, goal, activityLevel: 'sedentary', trainingDays: 0 })
-  check(`minor age 13 ${goalType}: suppression remains authoritative`, t.numericNutritionStatus, 'suppressed-under18')
+  const t = targetsFor({ gender: 'male', age: 12, heightCm: 120, weightKg: 30, targetWeightKg: 30, goalType, goal, activityLevel: 'sedentary', trainingDays: 0 })
+  check(`minor age 12 ${goalType}: suppression remains authoritative`, t.numericNutritionStatus, 'suppressed-under18')
 }
 
 // ── MINOR NUMERIC SUPPRESSION ───────────────────────────────────────────────
 // Under-18 users receive no numeric prescription for ANY stored goalType, and no
 // weight-change forecast is applied.
 // A non-maintenance target weight is deliberately ignored so no cut/bulk leaks through.
-for (const age of [13, 15, 17]) {
+for (const age of [12, 15, 17]) {
   for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
     const goal = goalType === 'cutting' ? 'cut' : goalType === 'bulking' ? 'bulk' : 'maintain'
     // targetWeightKg set 8kg below current on purpose — a cut/bulk pipeline would react to it.

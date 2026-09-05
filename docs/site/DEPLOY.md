@@ -69,7 +69,7 @@ npx wrangler pages deploy site --project-name qimmah-site
 |---|---|
 | `[OWNER-EMAIL]` · `support@qimmah.app` | `qimmah.support@gmail.com` |
 | `[DATE]` | ٣٠ يوليو ٢٠٢٦ |
-| الحد الأدنى للعمر «١٢» | **١٣** — نهائي |
+| الحد الأدنى للعمر «١٣» | **١٢** — قرار المؤسس النهائي؛ حد البالغين الرقمي يبقى ١٨ |
 | جهة الاختصاص `[OWNER-TO-CONFIRM]` | الجهات القضائية المختصّة في المملكة |
 | وسم «مسوّدة للمراجعة القانونية» | أُزيل |
 
