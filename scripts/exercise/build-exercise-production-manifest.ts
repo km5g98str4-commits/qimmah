@@ -28,15 +28,17 @@ import { exerciseMediaManifest } from '@/data/exerciseMediaManifest.generated'
 import { EXERCISE_VIDEO_REGISTRY } from '@/data/exerciseVideoRegistry'
 import { machineImages } from '@/data/machineImages'
 import { exerciseIllustrations } from '@/data/exerciseIllustrations'
+import { exerciseCards } from '@/data/exerciseCards'
 
 declare const __OUT_DIR__: string
 
 const today = new Date().toISOString().slice(0, 10)
 const diagrams = machineImages as Record<string, string>
 const illustrations = exerciseIllustrations as Record<string, string>
+const cards = exerciseCards as Record<string, string>
 
 interface ImageAsset {
-  kind: 'stills' | 'diagram' | 'illustration'
+  kind: 'stills' | 'diagram' | 'illustration' | 'card'
   start: string
   end: string | null
 }
@@ -70,6 +72,13 @@ for (const ex of exercises) {
   if (img.status === 'stills' && img.stillStart) {
     imageStatus = 'APPROVED'
     image = { kind: 'stills', start: img.stillStart.path, end: img.stillEnd ? img.stillEnd.path : null }
+  } else if (cards[ex.id]) {
+    // بطاقة حركة داخلية (IN-HOUSE) — تعلو على المخطّط والرسم لأنها تصوّر الحركة نفسها
+    // بإطارَي بداية ونهاية داخل لوح واحد، لا شكلًا عامًّا للجهاز. ولا تعلو على `stills`
+    // أبدًا: اللقطة المرخّصة القائمة لا تُزاح ببديل، والترتيب هنا هو ما يضمن ذلك.
+    imageStatus = 'APPROVED'
+    image = { kind: 'card', start: cards[ex.id], end: null }
+    imageNote = 'In-house movement card — original artwork, not photography, and never overrides a licensed still.'
   } else if (img.status === 'placeholder-only' && diagram) {
     imageStatus = 'APPROVED'
     image = { kind: 'diagram', start: diagram, end: null }
@@ -93,11 +102,27 @@ for (const ex of exercises) {
     exerciseId: ex.id,
     image,
     imageStatus,
-    imageSource: image?.kind === 'illustration' ? 'qimmah-inhouse-illustration' : (img.source ?? null),
+    // نَسَب كل نوع يُكتب هنا صراحةً. المخطّط كان يسقط إلى null لأن المولّد كان
+    // يشتقّ المصدر من طبقة الصور القرصية وحدها — وهي لا تعرف الرسوم الداخلية.
+    // فكانت سلسلة الحقوق كاملة في السجلّ ولا يراها التطبيق: نقص واجهة أغلقته
+    // قائمة استثناء معلَنة في media-provenance-proof.ts. هذه هي الأسطر التي
+    // كانت الوثيقة تشير إليها، وبها تنكمش القائمة إلى صفر.
+    imageSource:
+      image?.kind === 'card'
+        ? 'qimmah-inhouse-card'
+        : image?.kind === 'illustration'
+          ? 'qimmah-inhouse-illustration'
+          : image?.kind === 'diagram'
+            ? 'qimmah-inhouse-schematic'
+            : (img.source ?? null),
     imageLicense:
-      image?.kind === 'illustration'
-        ? 'In-house original vector illustration — Qimmah owns full rights'
-        : (img.license ?? null),
+      image?.kind === 'card'
+        ? 'In-house original movement card — Qimmah owns full rights'
+        : image?.kind === 'illustration'
+          ? 'In-house original vector illustration — Qimmah owns full rights'
+          : image?.kind === 'diagram'
+            ? 'In-house original vector schematic — Qimmah owns full rights'
+            : (img.license ?? null),
     imageAttribution: img.attribution ?? null,
     video:
       vid.youtubeVideoId && vid.canonicalUrl
@@ -144,7 +169,7 @@ export type ExerciseAssetStatus = 'APPROVED' | 'NEEDS_REVIEW' | 'REJECTED' | 'MI
  * not imply motion it does not have.
  */
 export interface ExerciseImageAsset {
-  kind: 'stills' | 'diagram' | 'illustration'
+  kind: 'stills' | 'diagram' | 'illustration' | 'card'
   start: string
   end: string | null
 }

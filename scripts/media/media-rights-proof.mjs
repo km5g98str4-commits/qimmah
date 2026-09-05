@@ -137,8 +137,44 @@ function illustrationEntries() {
   })
 }
 
+const CARD_INTAKE = 'assets/exercise-cards-intake/'
+const CARD_SOURCE_ID = 'qimmah-inhouse-card'
+const CARD_LICENSE =
+  'In-house original movement card — Qimmah owns full rights (founder-confirmed 2026-09-06: artwork generated/commissioned for Qimmah, no third-party rights holder)'
+
+// بطاقات الحركة الداخلية — لوح واحد يحمل إطارَي البداية والنهاية للحركة.
+// وصلت مادةً من المؤسس، وأكّد أنها مولَّدة/مُكلَّفة له ولا يملكها طرف ثالث → IN-HOUSE.
+// سجلّ الاستلام (الأصول غير المقصوصة + SHA-256 + سبب كل استبعاد) في assets/exercise-cards-intake/.
+//
+// ⚠️ خلافًا للمخطّطات والرسوم، هذه **نقطية** (JPEG) لأنها وصلت كذلك — فالفحص هنا
+// يشترط JPEG صراحةً. اشتراط .svg كالأخريات كان سيرفضها بسبب شكل الملف لا بسبب حقوقها.
+function cardEntries() {
+  const source = readFileSync(resolve(ROOT, 'src/data/exerciseCards.ts'), 'utf8')
+  return [...source.matchAll(/^[ ]{2}'([^']+)': '([^']+)',/gm)].map(([, slug, localPath]) => {
+    if (!localPath.endsWith('.jpg')) {
+      throw new Error(`${slug}: in-house movement card must be a .jpg, got ${localPath}`)
+    }
+    return {
+      id: `card:${slug}`,
+      localPath,
+      upstreamUrl: null,
+      sourceId: CARD_SOURCE_ID,
+      sourceRepo: null,
+      evidenceUrl: `${CARD_INTAKE}README.md`,
+      evidenceReadmeUrl: 'docs/content/MEDIA-RIGHTS.md',
+      license: CARD_LICENSE,
+      verdict: 'IN-HOUSE',
+      // رسم حركة — لا يدّعي فوتوغرافيا ولا يُصنَّف صورة أبدًا.
+      mediaKind: 'IN_HOUSE_ILLUSTRATION',
+      attributionRequired: false,
+      risk: 'clean',
+      note: `Founder-supplied in-house movement card; intake ledger and untouched original in ${CARD_INTAKE}.`,
+    }
+  })
+}
+
 function liveInventory() {
-  const entries = [...exerciseEntries(), ...machineEntries(), ...illustrationEntries()]
+  const entries = [...exerciseEntries(), ...machineEntries(), ...illustrationEntries(), ...cardEntries()]
   for (const entry of entries) {
     const file = resolve(PUBLIC, entry.localPath.replace(/^\//, ''))
     if (!existsSync(file)) throw new Error(`${entry.id}: local file missing: ${entry.localPath}`)
@@ -247,8 +283,9 @@ const reviewed = [...manifest.entries].sort((a, b) => a.id.localeCompare(b.id))
 
 // كان 274. التغيير المقصود [مهمة الصور]: −8 إطارات أُزيلت (٤ خرائط خاطئة نمط حركة ×٢ إطار)
 // +2 رسما جهازَي ضغط الصدر +37 رسم حركة داخليًا = 305.
-// [MEDIA-IDENTITY-001] −8 إطارات (٤ مطابقات ثبت بالعين أنها هوية/معدّة خاطئة ×٢) = 297. أي انحراف عن هذا الرقم غير مقصود.
-if (live.length !== 297) throw new Error(`inventory count changed: expected 297, found ${live.length}`)
+// [MEDIA-IDENTITY-001] −8 إطارات (٤ مطابقات ثبت بالعين أنها هوية/معدّة خاطئة ×٢) = 297.
+// ثم [CARDS-INTAKE]: +57 بطاقة حركة داخلية من مادة المؤسس = 354. أي انحراف عن هذا الرقم غير مقصود.
+if (live.length !== 354) throw new Error(`inventory count changed: expected 354, found ${live.length}`)
 if (reviewed.length !== live.length) throw new Error(`manifest count ${reviewed.length} != live count ${live.length}`)
 for (let i = 0; i < live.length; i++) {
   const actual = live[i]

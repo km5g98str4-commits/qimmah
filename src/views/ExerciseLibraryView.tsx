@@ -387,6 +387,12 @@ function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
   const legacyMedia = getExerciseMedia(exerciseId)
   const legacy = getExerciseGif(exerciseId) || legacyMedia?.gifUrl || legacyMedia?.img0
   const src = approved?.start || (productionEntryFor(exerciseId) ? undefined : legacy)
+  // ملاءمة الإطار تتبع نوع الأصل، لا نوعًا واحدًا للجميع:
+  // `stills` لقطة لجسد واحد يملأ الكادر ⇒ `cover` يقصّ الهامش ولا يفقد الحركة.
+  // أمّا البطاقة والمخطّط والرسم فألواح **مؤلَّفة** — البطاقة تحمل إطارَي البداية
+  // والنهاية جنبًا إلى جنب — و`cover` في كادر 4:3 يقصّ نحو ٧٪ من كل جانب فيبتر
+  // طرفَي الحركة. `contain` يحفظ اللوح كاملًا، والخلفية تملأ ما تبقّى.
+  const fitClass = approved && approved.kind !== 'stills' ? 'object-contain' : 'object-cover'
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>(src ? 'loading' : 'failed')
 
   if (!src || state === 'failed') {
@@ -419,7 +425,8 @@ function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
         onLoad={() => setState('ready')}
         onError={() => setState('failed')}
         className={cn(
-          'h-full w-full object-cover transition-opacity duration-300 group-hover:scale-[1.03]',
+          'h-full w-full transition-opacity duration-300 group-hover:scale-[1.03]',
+          fitClass,
           state === 'ready' ? 'opacity-100' : 'opacity-0',
         )}
       />
