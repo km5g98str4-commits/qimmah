@@ -53,6 +53,8 @@ const KIND_FOR_PRODUCTION: Record<string, MediaKind> = {
   stills: 'REAL_PHOTO',
   diagram: 'IN_HOUSE_DIAGRAM',
   illustration: 'IN_HOUSE_ILLUSTRATION',
+  // بطاقة حركة داخلية — رسم لا فوتوغرافيا، فتُصنَّف مع الرسوم لا مع اللقطات.
+  card: 'IN_HOUSE_ILLUSTRATION',
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -69,31 +71,9 @@ const KIND_FOR_PRODUCTION: Record<string, MediaKind> = {
 // انظر docs/media/EXERCISE-MEDIA-STATUS.md §الإصلاح المطلوب.
 // ─────────────────────────────────────────────────────────────────────────────
 export const UI_PROVENANCE_NULL_ALLOWLIST: readonly string[] = [
-  'chest-press-machine',
-  'chest-supported-row-machine',
-  'decline-chest-press-machine',
-  'glute-kickback-machine',
-  'glute-machine',
-  'hack-squat-machine',
-  'hip-abduction-machine',
-  'hip-adductor-machine',
-  'incline-chest-press-machine',
-  'iso-lateral-chest-press',
-  'iso-lateral-high-row',
-  'iso-lateral-incline-press',
-  'iso-lateral-pulldown',
-  'lateral-raise-machine',
-  'preacher-curl-machine',
-  'rear-delt-row-machine',
-  'seated-calf-raise-machine',
-  'seated-leg-curl',
-  'shoulder-press-machine',
-  'single-arm-lat-pulldown',
-  'standing-calf-raise-machine',
-  'standing-hip-extension-machine',
-  'standing-leg-curl',
-  'triceps-extension-machine',
-  'wide-grip-iso-lateral-pulldown',
+  // فارغة. [CARDS-INTAKE] كتب نَسَب المخطّط والبطاقة صراحةً في مولّد مانيفست الإنتاج،
+  // فلم يبقَ سجلّ APPROVED واحد بلا مصدر وترخيص يراهما التطبيق. الدَّين مسدَّد.
+  // القائمة **لا تنمو**: أي مُعرَّف جديد بلا نَسَب يسقط بـUI_PROVENANCE_NULL.
 ]
 
 export interface Inputs {
@@ -310,9 +290,18 @@ counter.push([
 ])
 
 counter.push([
-  'a 26th APPROVED entry with null UI provenance',
+  // كانت المحاكاة تقلّص قائمة الاستثناء بـslice(1). وبعد تفريغها صارت slice(1) = []
+  // فلا تُنتج خرقًا، **فتمرّ المحاكاة بلا استحقاق** (§4.2). فتُهاجَم البيانات نفسها:
+  // سجلّ APPROVED يُجرَّد من مصدره يجب أن يسقط، والقائمة فارغة لا تستره.
+  'an APPROVED entry stripped of its UI provenance, with no allowlist to hide behind',
   'UI_PROVENANCE_NULL',
-  () => violations({ ...live, allowlist: UI_PROVENANCE_NULL_ALLOWLIST.slice(1) }),
+  () => {
+    const production = structuredClone(live.production)
+    const victim = Object.values(production).find((e) => e.imageStatus === 'APPROVED')!
+    victim.imageSource = null
+    victim.imageLicense = null
+    return violations({ ...live, production })
+  },
 ])
 
 counter.push([
