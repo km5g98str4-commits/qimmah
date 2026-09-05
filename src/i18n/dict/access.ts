@@ -43,11 +43,26 @@ export interface AccessStrings {
   qaBody: string
   codeTitle: string
   /**
-   * [OVERNIGHT-5] كان النصّ «اكتب الكود اللي وصلك **بعد الشراء**» — ووعدٌ لا
-   * يمكن الوفاء به: `redeem_access_code` تكتب `entitlement_type = 'special'`
-   * بمدّة منتهية **دائمًا**، فالكود عاجز بنيويًا عن منح Premium الدائم. ومسار
-   * الشراء لا يصدر كودًا أصلًا (سجلّ الشراء ← رابط دعوة ← `claim_pending_grants`).
-   * فالكود وسيلة **وصول مؤقّت** — حملة أو دعوة — لا إيصال شراء.
+   * ═══ [FINAL-COPY-RC] النصّ هنا يصف عقد التفعيل V1 — ولا يجوز أن يخالفه ═══
+   *
+   * **تاريخٌ يُقال كي لا يُعاد:** كتب [OVERNIGHT-5] هنا «الشراء من سلة يفتح
+   * حسابك بنفسه — ما يحتاج كود»، وكان **صادقًا يومها**: `redeem_access_code`
+   * تكتب `entitlement_type = 'special'` بمدّة منتهية دائمًا، فالكود كان عاجزًا
+   * بنيويًا عن منح Premium الدائم.
+   *
+   * **ثمّ نُقض ذلك ولم يُنقض النصّ.** هجرة `20260829120001_purchase_credentials`
+   * أضافت `grant_purpose = 'purchase'` وفرع الشراء في `private.redeem_core`،
+   * و`20260830120001_premium_authority_hardening` ثبّتت `grant_premium_from_code`
+   * سلطةً واحدة. فصار الصكّ **يمنح Premium دائمًا** — بينما بقي النصّ يقول للمشتري
+   * ألّا يستعمله، في `PremiumGate` وحدها: اللوحة التي يفتحها وهو ممسك بصكّه.
+   *
+   * ═══ العقد المفروض الآن ═══
+   * سلة في V1 **قناة دفع وتسليم فقط** — لا webhook منشور ولا منح آليّ
+   * (`docs/product/PURCHASE-CREDENTIAL-MODEL.md`). المشتري يستلم صكًّا فريدًا
+   * **ويكتبه هنا** أو لا يحصل على شيء.
+   *
+   * ⛔ **ممنوع في هذا الحقل** — يحرسه `test:activation-contract`:
+   * أن الشراء من سلة يفعّل الحساب تلقائيًّا · أنه لا يحتاج كودًا · أي نقل آليّ.
    */
   codeBody: string
   codeLabel: string
@@ -148,7 +163,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     qaTitle: 'وضع مراجعة المؤسس — تفعيل QA',
     qaBody: 'هذا الكود للمراجعة على هذا الجهاز فقط: يفتح أفعال Premium محليًّا عشان تجرّب التمرين والتغذية والقياسات. ما يمسّ أي حساب ولا خادم، ويروح لو أغلقت التبويب.',
     codeTitle: 'كود التفعيل',
-    codeBody: 'اكتب كود الوصول اللي وصلك من حملة أو دعوة. الشراء من سلة يفتح حسابك بنفسه — ما يحتاج كود.',
+    codeBody: 'اشتريت Premium من سلة؟ الصق هنا صكّ الشراء اللي وصلك بعد الشراء. وكود الوصول من حملة أو دعوة — نفس المكان.',
     codeLabel: 'كود التفعيل',
     codeHint: 'اكتب الكود كما وصلك — الشرطات والمسافات ما تفرق.',
     codePlaceholder: 'QIMMAH-XXXX-XXXX',
@@ -214,7 +229,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     qaTitle: 'Founder review mode — QA activation',
     qaBody: 'Review-only code for this device: it unlocks Premium actions locally so you can test workouts, nutrition and measurements. It touches no account or server, and clears when you close the tab.',
     codeTitle: 'Activation code',
-    codeBody: 'Enter an access code from a campaign or invite. A Salla purchase unlocks your account on its own — no code needed.',
+    codeBody: 'Bought Premium through Salla? Paste the purchase code you received after your purchase here. An access code from a campaign or invite goes in the same place.',
     codeLabel: 'Activation code',
     codeHint: 'Type it exactly as you received it — dashes and spaces are fine.',
     codePlaceholder: 'QIMMAH-XXXX-XXXX',

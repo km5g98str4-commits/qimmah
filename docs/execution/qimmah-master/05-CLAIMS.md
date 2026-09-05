@@ -89,7 +89,7 @@ The implemented grant is a **one-time `no_expiry = true`** with no renewal logic
 | CLM-037 | «مكتبة تمارين **مصوّرة**» | 144/181 images (~80 %). Gaps show an honest empty state, not a fake placeholder |
 | CLM-041 / CLM-045 | «مزايا تعمل **اليوم**» including Apple Health | `healthKit.ts:67` requires native iOS; inert on the only shipped surface (the site's own CTA says «قريبًا على iOS») |
 | CLM-051 | «يعمل قِمّة **بلا إنترنت**» | browsing works offline; **logging does not** — entitlement resolves over the network and `loading` fails closed |
-| CLM-050 | support address | `qimmahsupport@gmail.com` on `support.html`/`press.html` vs `qimmah.support@gmail.com` everywhere else. Gmail ignores dots so both deliver; the published inconsistency is unguarded (`run-site-truth-proof.mjs:59` only checks `privacy.html`) |
+| CLM-050 | support address | **CLOSED [FINAL-COPY-RC].** `support.html` (4) and `press.html` (2) were unified onto the founder-signed `qimmah.support@gmail.com`, and the divergence is now guarded structurally: `run-site-truth-proof.mjs` §٦ requires **every** support-authority address on a published surface to equal the canonical one, with a two-direction counter-assertion. Gmail's dot-insensitivity made the defect invisible — which is why it survived. |
 
 ---
 

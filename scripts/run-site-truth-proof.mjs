@@ -449,6 +449,83 @@ for (const sentence of APPROVED_SENTENCES) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ٦) سلطة بريد الدعم — عنوان واحد، لا عنوانان يتشابهان
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// لماذا أُضيف:
+//   نشر التطبيق `qimmah.support@gmail.com` ونشر الموقع `qimmahsupport@gmail.com`
+//   — بنقطة وبلا نقطة. وGmail يتجاهل النقاط فكلاهما يصل اليوم، **وهذا بعينه
+//   خطر القاعدة**: عيبٌ لا يظهر أثره حتى تتغيّر القناة، فيصير عنوانًا منشورًا
+//   لا يصل. وقد كان مسجَّلًا في `05-CLAIMS.md` بوصفه «غير محروس» — فحُرِس هنا.
+//
+// **والحارس بنيويّ لا قائمة أخطاء إملائية:** لا يمنع تهجئةً بعينها، بل يفرض أن
+// **كل** عنوان دعم على سطح منشور يساوي العنوان المعتمد حرفًا بحرف. فالتهجئة
+// القادمة التي لم تُتوقَّع تسقط هي الأخرى.
+//
+// المعتمد بتوقيع المؤسس ([CTO-21] خامسًا · وأُعيد تأكيده في تكليف [FINAL-COPY-RC]).
+const CANONICAL_SUPPORT = 'qimmah.support@gmail.com'
+
+/** الأسطح المنشورة التي يقرأ عليها المستخدم عنوان التواصل. */
+const SUPPORT_SURFACES = [
+  ...htmlFiles.map((f) => join(SITE_DIR, f)),
+  'src/config/strings.ts',
+  'src/components/ErrorBoundary.tsx',
+]
+
+/**
+ * عنوانٌ يمثّل **سلطة دعم**: أي `@gmail.com` (لا مبرّر لبريد شخصي ثالث على
+ * سطح منشور)، أو أي `support@`/`contact@` على أي نطاق. وما عداه — بريد مورّد
+ * أو مثال — خارج النطاق عمدًا.
+ */
+const SUPPORT_AUTHORITY = /[A-Za-z0-9._%+-]+@gmail\.com|(?:support|contact)@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/gi
+
+const emailViolations = []
+for (const rel of SUPPORT_SURFACES) {
+  let text
+  try { text = readFileSync(rel, 'utf8') } catch { continue }
+  checks++
+  for (const hit of text.match(SUPPORT_AUTHORITY) ?? []) {
+    if (hit.toLowerCase() !== CANONICAL_SUPPORT) {
+      emailViolations.push(`${rel} — «${hit}» ليس العنوان المعتمد «${CANONICAL_SUPPORT}»`)
+    }
+  }
+}
+if (emailViolations.length > 0) {
+  failures.push(
+    `سلطة بريد الدعم تفرّقت على ${emailViolations.length} موضع:\n      ` +
+      emailViolations.join('\n      ') +
+      `\n      السبب: عنوان دعم منشور يجب أن يكون **واحدًا ويعمل**. عنوانان متشابهان يعني أن نصفَ من يراسلنا قد لا يصل.`,
+  )
+}
+
+// وحضورٌ فعليّ — الحارس النافي وحده يُرضى بصفحة دعم بلا عنوان أصلًا.
+checks++
+if (!readFileSync(join(SITE_DIR, 'support.html'), 'utf8').includes(CANONICAL_SUPPORT)) {
+  failures.push(
+    `site/support.html — العنوان المعتمد «${CANONICAL_SUPPORT}» غائب عن صفحة الدعم نفسها.\n` +
+      `      السبب: النفي وحده يمرّ على صفحة خرساء. صفحة الدعم تحمل عنوان الدعم.`,
+  )
+}
+
+// ⚔️ تأكيد مضادّ (§4.2) — الحارس يرصد التهجئة الساقطة، ولا يرصد المعتمدة.
+checks++
+{
+  const planted = 'راسلنا على qimmahsupport@gmail.com للاستفسار'
+  const caught = (planted.match(SUPPORT_AUTHORITY) ?? []).some((h) => h.toLowerCase() !== CANONICAL_SUPPORT)
+  if (!caught) {
+    failures.push('التأكيد المضادّ سقط — التهجئة بلا نقطة لا تُرصد، فالحارس أعلاه يمرّ مجّانًا.')
+  }
+}
+checks++
+{
+  const approved = `للتواصل: ${CANONICAL_SUPPORT}`
+  const falsePositive = (approved.match(SUPPORT_AUTHORITY) ?? []).some((h) => h.toLowerCase() !== CANONICAL_SUPPORT)
+  if (falsePositive) {
+    failures.push('التأكيد المضادّ سقط — الحارس يرصد العنوان المعتمد نفسه، وقاعدة تُسقِط الصحيح قاعدة رخوة.')
+  }
+}
+
 if (failures.length > 0) {
   console.error(`\n❌ إثبات صدق الموقع فشل — ${failures.length} مخالفة من ${checks} فحصًا:\n`)
   for (const f of failures) console.error(`   • ${f}\n`)

@@ -618,7 +618,7 @@ Qimmah App — represented by its owner — **qimmah.support@gmail.com**
 
 **البريد المعتمد بتوقيع المؤسس ([CTO-21] خامسًا): `qimmah.support@gmail.com`** — مملوء في كل مواضع هذه الحزمة (٦ مواضع: السياسة عربي/إنجليزي، الشروط عربي/إنجليزي، وحقلا التواصل).
 
-**يبقى على المنسّق توحيده خارج هذه الحزمة:** `docs/legal/privacy-policy.md:84, 172` (يكتب `support@qimmah.app` صراحةً) · `site/support.html:48, 69, 77, 88` · App Store Connect · «تواصل معنا» داخل التطبيق.
+**~~يبقى على المنسّق توحيده خارج هذه الحزمة~~ — أُغلق في [FINAL-COPY-RC]:** `site/support.html` و`site/press.html` وُحِّدا على العنوان المعتمد، و`docs/legal/privacy-policy.md` لم يعد يحمل بريدًا أصلًا (النصّ الحيّ يقرأ `VITE_LEGAL_CONTACT_EMAIL`). **ويحرسه الآن** `run-site-truth-proof.mjs` §٦ بنيويًّا. **يبقى خارج المستودع:** App Store Connect.
 
 > **وملاحظة تسقط تبعًا:** كنتُ نبّهت أن `support@qimmah.app` يفترض نطاقًا بريديًا مُعدًّا — والاختيار الآن Gmail، فالافتراض ساقط والبريد يعمل فورًا. وهذا يزيل اعتمادًا كان قائمًا على تفعيل `qimmah.app` (ه-١٤ في وثيقة الموقع يبقى قائمًا للنطاق نفسه، لا للبريد).
 
