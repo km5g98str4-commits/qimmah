@@ -105,7 +105,7 @@ try {
   await fillBody(MINOR_AGE)
   await visit('body-15', `الأساسيات — العمر ${MINOR_AGE} سنة`, `Basics — age ${MINOR_AGE}`)
   rec.check('العمر ١٥ مقبول ولا يُطرد المستخدم', (await next.getAttribute('aria-disabled')) === 'false',
-    'الحاجز تقييد لا طرد — الحدّ الأدنى ١٣')
+    'الحاجز تقييد لا طرد — الحدّ الأدنى ١٢')
   await next.click()
   await page.waitForTimeout(400)
 

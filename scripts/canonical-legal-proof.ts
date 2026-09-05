@@ -33,7 +33,7 @@ console.log('\n② PRODUCT FACTS MATCH IN ARABIC AND ENGLISH')
 for (const lang of ['ar', 'en'] as const) {
   const privacy = JSON.stringify(getLegalDocument('privacy', lang))
   const terms = JSON.stringify(getLegalDocument('terms', lang))
-  check(`${lang}: minimum age 13`, privacy.includes('13') && terms.includes('13'))
+  check(`${lang}: minimum age 12`, privacy.includes('12') && terms.includes('12'))
   check(`${lang}: under-18 numeric prescription is suppressed`, /18/.test(privacy) && /calorie|سعرات/.test(privacy) && /water|ماء/.test(privacy))
   check(`${lang}: free account-optional preview is stated`, /without an account|بلا حساب/.test(`${privacy} ${terms}`))
   check(`${lang}: 72-hour verified trial is stated`, /72|٧٢/.test(terms) && /verified|موثّق/.test(terms))

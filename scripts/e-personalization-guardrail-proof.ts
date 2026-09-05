@@ -68,8 +68,8 @@ function ownedText(value: unknown): string {
   return ''
 }
 
-console.log('\n═══ 1) AGES 13/15/17 — CUTTING/BULKING COLLAPSE TO MAINTENANCE ═══')
-for (const age of [13, 15, 17]) {
+console.log('\n═══ 1) AGES 12/15/17 — CUTTING/BULKING COLLAPSE TO MAINTENANCE ═══')
+for (const age of [12, 15, 17]) {
   const minorMaintenance = generatePlan(profileFor(age, 'maintenance'))
   const minorCutting = generatePlan(profileFor(age, 'cutting'))
   const minorBulking = generatePlan(profileFor(age, 'bulking'))

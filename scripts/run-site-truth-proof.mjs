@@ -5,7 +5,8 @@
 // لماذا هذا السكربت موجود:
 //   `site/privacy.html` كان يقول بخطّ عريض إن التطبيق «لا يقرأ Apple Health»
 //   والتطبيق يقرأ ٢٤ نوعًا من HealthKit؛ وكان ينفي طلب الموقع والتطبيق يطلبه؛
-//   وكان ينشر حدًّا أدنى للعمر (١٢) يرفضه مدقّق التطبيق نفسه (١٣).
+//   وكان ينشر حدًّا أدنى للعمر يخالف مدقّق التطبيق نفسه. الاتجاه انعكس
+//   بقرار المؤسس (الحدّ ١٢)، والخطر باقٍ معكوسًا: نصّ متخلّف يقول «13».
 //   هذه ليست صياغات متقادمة بل **نفيٌ صريح لسلوك قائم** على صفحة قانونية منشورة.
 //   الإصلاح اليدوي يُصلح اليوم؛ وهذا الفحص يمنع العودة غدًا.
 //
@@ -41,9 +42,9 @@ const FORBIDDEN = [
     why: 'التطبيق يطلب الموقع لجدولة الوضع الداكن (src/lib/geolocation.ts + NSLocationWhenInUseUsageDescription). الصياغة الصحيحة تستثني هذه الحالة صراحةً.',
   },
   {
-    id: 'ح-٣ · حدّ أدنى للعمر غير الـ١٣',
-    patterns: [/12\s+or\s+older/iu, /١٢\s+سنة/u, /\b12\+/u],
-    why: 'الحدّ الأدنى ١٣ سنة — نهائي. ونشر ١٢ يخالف مدقّق التطبيق (AGE_RANGE في src/lib/onboardingV2Flow.ts) وتصنيف App Store Connect.',
+    id: 'ح-٣ · حدّ أدنى للعمر غير الـ١٢',
+    patterns: [/13\s+or\s+older/iu, /١٣\s+سنة/u, /\b13\+/u],
+    why: 'الحدّ الأدنى ١٢ سنة (قرار المؤسس — AGE 12 SUCCESSOR RC). ونشر ١٣ يخالف مدقّق التطبيق (AGE_RANGE في src/config/profileDomain.ts).',
   },
   {
     id: 'ت-٤ · بريد الدعم القديم',
@@ -60,8 +61,8 @@ const FORBIDDEN = [
 /** التصريحات التي **يجب أن تبقى** — الفحص يعمل في الاتجاهين. */
 const REQUIRED = [
   { file: CANONICAL_LEGAL, root: true, pattern: /configured\(c\.contactEmail/u, what: 'حقل بريد التواصل المحكوم بالإطلاق' },
-  { file: CANONICAL_LEGAL, root: true, pattern: /الحد الأدنى المدعوم 13 سنة/u, what: 'الحدّ الأدنى 13 (عربي)' },
-  { file: CANONICAL_LEGAL, root: true, pattern: /minimum supported age is 13/iu, what: 'الحدّ الأدنى 13 (إنجليزي)' },
+  { file: CANONICAL_LEGAL, root: true, pattern: /الحد الأدنى المدعوم 12 سنة/u, what: 'الحدّ الأدنى 12 (عربي)' },
+  { file: CANONICAL_LEGAL, root: true, pattern: /minimum supported age is 12/iu, what: 'الحدّ الأدنى 12 (إنجليزي)' },
   { file: CANONICAL_LEGAL, root: true, pattern: /Apple Health قراءة فقط/u, what: 'تصريح قراءة HealthKit فقط' },
   { file: CANONICAL_LEGAL, root: true, pattern: /ليس جهة طبية/u, what: 'التنويه الطبي' },
   { file: 'index.html', pattern: /على\s+جهازك\s+أولًا/u, what: 'هوية «محلي أولًا» على الصفحة الرئيسية' },

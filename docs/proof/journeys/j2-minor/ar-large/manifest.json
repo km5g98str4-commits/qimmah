@@ -5,9 +5,9 @@
   "lang": "ar",
   "viewport": "large",
   "ground": {
-    "branch": "codex/qimmah-final-sovereign-convergence-001",
-    "commit": "c99df326",
-    "subject": "feat(gate): [FINAL-CONVERGENCE] قفل الأسطح يصير مكتملًا — ٢٢ سطحًا ميتًا كان يمرّ صامتًا",
+    "branch": "claude/age-12-successor-rc-001",
+    "commit": "d21449f7",
+    "subject": "fix(db): [PROD-DRIFT] ثابت الصلاحيات يصير شاملًا للمخطّط — وتكافؤ الأساس يصير مُثبَتًا",
     "dirty": true
   },
   "frames": [
@@ -86,7 +86,7 @@
     {
       "name": "العمر ١٥ مقبول ولا يُطرد المستخدم",
       "ok": true,
-      "detail": "الحاجز تقييد لا طرد — الحدّ الأدنى ١٣"
+      "detail": "الحاجز تقييد لا طرد — الحدّ الأدنى ١٢"
     },
     {
       "name": "الأهداف الثلاثة معروضة (لا إخفاء صامت)",
@@ -210,8 +210,8 @@
     },
     {
       "name": "لا أخطاء طرف عميل (عدا فشل خلفية الجلسة المزروعة — استثناء معلَن)",
-      "ok": true,
-      "detail": "12 خطأ خلفية مستثنى — بصماته: net::ERR_TUNNEL_CONNECTION_FAILED"
+      "ok": false,
+      "detail": "Access to fetch at 'https://ledlypcyrtnzvjvhykwz.supabase.co/functions/v1/qimmah-gateway' from origin 'http://localhost:5321' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status. | Access to fetch at 'https://ledlypcyrtnzvjvhykwz.supabase.co/functions/v1/qimmah-gateway' from origin 'http://localhost:5321' has been blocked by CORS policy: Response to preflight request doesn't pass access control check: It does not have HTTP ok status."
     }
   ],
   "findings": [],

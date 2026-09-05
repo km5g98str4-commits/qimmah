@@ -1,8 +1,12 @@
-// إثبات حدّ العمر ١٣ — لا سطح أهلية في التطبيق يعرض «12».
+// إثبات حدّ العمر ١٢ — لا سطح أهلية في التطبيق يعرض «13».
 //
-// الفجوة التي يُغلقها: `policyCopy.ts` كان يعلن «عمري 12 سنة أو أكثر» بينما
-// مدقّق الإعداد يرفض ما دون 13 (`AGE_RANGE.min`) — أي أن التطبيق **يَعِد بما
-// يمنعه**. وحزم الامتثال المشحونة تقول 13. القرار مقفل في [CTO-14/٢].
+// الفجوة التي يُغلقها: أسطح الأهلية والمدقّق يجب أن تنطق **رقمًا واحدًا**.
+// حين افترقا من قبل (النصّ يقول ١٢ والمدقّق يرفض دون ١٣) كان التطبيق **يَعِد
+// بما يمنعه**. الاتجاه انعكس بقرار المؤسس (AGE 12 SUCCESSOR RC) والخطر نفسه
+// باقٍ معكوسًا: نصّ متخلّف يقول «13» بينما المدقّق يقبل ١٢.
+//
+// ⚠️ هذا حدّ **الأهلية** لا حدّ **الأمان**. حاجز دون ١٨ (`ADULT_MIN_AGE`) لم
+// يتحرّك، ويحرسه `test:prelaunch-age-beginner` بمصفوفة ١١/١٢/١٧/١٨ السلوكية.
 //
 // فحص ساكن عمدًا: هذه أسطح **نصّية معروضة**، والتحقّق منها يكون على النصّ لا
 // على سلوك وقت التشغيل.
@@ -31,13 +35,13 @@ const flow = read('src/lib/onboardingV2Flow.ts')
 // لم يعد يكفي أن يقول كل ملف «13»؛ صار مطلوبًا ألّا يعلن أي ملف رقمًا خاصًّا به.
 const domain = read('src/config/profileDomain.ts')
 
-console.log('\n═══ 1) مربّع الأهلية يقول ١٣ ═══')
-check('العربية: «عمري 13 سنة أو أكثر»', policy.includes('عمري 13 سنة أو أكثر'))
-check('الإنجليزية: «I am 13 or older»', policy.includes('I am 13 or older'))
-check('رسالة الاشتراط العربية تقول 13', policy.includes('أكّد أن عمرك 13 سنة أو أكثر'))
-check('رسالة الاشتراط الإنجليزية تقول 13', policy.includes('you are 13 or older'))
+console.log('\n═══ 1) مربّع الأهلية يقول ١٢ ═══')
+check('العربية: «عمري 12 سنة أو أكثر»', policy.includes('عمري 12 سنة أو أكثر'))
+check('الإنجليزية: «I am 12 or older»', policy.includes('I am 12 or older'))
+check('رسالة الاشتراط العربية تقول 12', policy.includes('أكّد أن عمرك 12 سنة أو أكثر'))
+check('رسالة الاشتراط الإنجليزية تقول 12', policy.includes('you are 12 or older'))
 
-console.log('\n═══ 2) تلميح الحقل ١٣–١٠٠ ═══')
+console.log('\n═══ 2) تلميح الحقل ١٢–١٠٠ ═══')
 // [CTO-67] البند ٣ — التلميح لم يعد نصًّا صلبًا في القاموس بل يُبنى من النطاق،
 // فالفحص انتقل من مطابقة السلسلة إلى **إعادة بنائها من المصدر ومطابقة الناتج**.
 // هذا شدٌّ لا تليين: السلسلة الصلبة كانت تمرّ ولو خالفت `AGE_RANGE`؛ والآن
@@ -47,26 +51,26 @@ check('نطاق العمر مقروء من مصدر الحقيقة', !!ageMin)
 const [, aMin, aMax] = ageMin ?? [, '', '']
 check('صيغة التلميح تُبنى من حدّي النطاق لا من نصّ مكتوب', /const span = `\$\{range\.min\}–\$\{range\.max\}`/.test(domain))
 check('AGE_HINT مبنيّ من AGE_RANGE بوحدة «سنة»/«years»', /AGE_HINT\s*=\s*rangeHint\(AGE_RANGE,\s*\{\s*ar:\s*'سنة',\s*en:\s*'years'\s*\}\)/.test(domain))
-check(`العربية: الناتج «سنة (${aMin}–${aMax})»`, `سنة (${aMin}–${aMax})` === `سنة (13–100)` && onboarding.includes('bodyAgeHint: AGE_HINT.ar'))
-check(`الإنجليزية: الناتج «years (${aMin}–${aMax})»`, `years (${aMin}–${aMax})` === 'years (13–100)' && onboarding.includes('bodyAgeHint: AGE_HINT.en'))
+check(`العربية: الناتج «سنة (${aMin}–${aMax})»`, `سنة (${aMin}–${aMax})` === `سنة (12–100)` && onboarding.includes('bodyAgeHint: AGE_HINT.ar'))
+check(`الإنجليزية: الناتج «years (${aMin}–${aMax})»`, `years (${aMin}–${aMax})` === 'years (12–100)' && onboarding.includes('bodyAgeHint: AGE_HINT.en'))
 check('ولا رقم عمر صلب باقٍ في القاموس', !/سنة \(\d+–\d+\)|years \(\d+–\d+\)/.test(onboarding))
 // الرسالة لم تعد نصًّا صلبًا — تُبنى من نفس النطاق، فيستحيل أن تذكر رقمًا غيره.
 check('رسالة العمر مبنيّة من النطاق لا مكتوبة', /بين \$\{range\.min\} و\$\{range\.max\} سنة/.test(domain))
 check('validation.ts لا يكتب رسالة عمر بأرقام صلبة', !/بين\s*\d+\s*و\d+\s*سنة/.test(validation))
 
 console.log('\n═══ 3) المدقّق يطابق المعروض — من مصدر واحد ═══')
-check('AGE_RANGE = { min: 13, max: 100 } في مصدر الحقيقة', /AGE_RANGE:\s*NumericRange\s*=\s*\{\s*min:\s*13,\s*max:\s*100\s*\}/.test(domain))
+check('AGE_RANGE = { min: 12, max: 100 } في مصدر الحقيقة', /AGE_RANGE:\s*NumericRange\s*=\s*\{\s*min:\s*12,\s*max:\s*100\s*\}/.test(domain))
 check('validation.ts يقرأ AGE_RANGE ولا يعلن رقمًا', validation.includes('AGE_RANGE') && !/age:\s*\{\s*min:\s*\d+/.test(validation))
 check('onboardingV2Flow.ts يقرأ AGE_RANGE ولا يعلنه', flow.includes("from '@/config/profileDomain'") && !/AGE_RANGE\s*=\s*\{/.test(flow))
 
-console.log('\n═══ 4) التأكيد الحاسم — لا «12» في أي سطح أهلية (§4.2) ═══')
+console.log('\n═══ 4) التأكيد الحاسم — لا «13» في أي سطح أهلية (§4.2) ═══')
 // كل صيغة قد يظهر بها الرقم للمستخدم، عربيةً وإنجليزيةً.
 const FORBIDDEN = [
-  ['عربي: «12 سنة أو أكثر»', /12\s*سنة\s*أو\s*أكثر/],
-  ['إنجليزي: «12 or older»', /\b12\s+or\s+older\b/i],
-  ['نطاق معروض 12–90', /12\s*[–-]\s*90/],
-  ['رسالة «بين 12 و90»', /بين\s*12\s*و\s*90/],
-  ['نطاق مدقّق min: 12', /min:\s*12\b/],
+  ['عربي: «13 سنة أو أكثر»', /13\s*سنة\s*أو\s*أكثر/],
+  ['إنجليزي: «13 or older»', /\b13\s+or\s+older\b/i],
+  ['نطاق معروض 13–100 (الحدّ القديم)', /13\s*[–-]\s*100/],
+  ['رسالة «بين 13 و100»', /بين\s*13\s*و\s*100/],
+  ['نطاق مدقّق min: 13', /min:\s*13\b/],
 ]
 const SURFACES = { 'canonicalLegalContent.ts': policy, 'validation.ts': validation, 'onboarding.ts': onboarding, 'onboardingV2Flow.ts': flow, 'profileDomain.ts': domain }
 for (const [label, re] of FORBIDDEN) {
@@ -79,14 +83,14 @@ console.log('\n═══ 5) تأكيد مضادّ — الإثبات ليس فا
 // لو صار أحد الأسطح فارغًا أو تغيّر مساره لمرّت الفحوص أعلاه مجّانًا.
 check('كل الأسطح الخمسة قُرئت بمحتوى فعلي', Object.values(SURFACES).every((s) => s.length > 500))
 check('سطح الأهلية يحوي فعلًا نصّ الموافقة', policy.includes('eligibilityPrefix'))
-check('جسر التوافق يعيد التصدير من المصدر القانوني ولا ينسخ النص', policyBridge.includes('canonicalLegalContent') && !policyBridge.includes('13 or older'))
+check('جسر التوافق يعيد التصدير من المصدر القانوني ولا ينسخ النص', policyBridge.includes('canonicalLegalContent') && !policyBridge.includes('12 or older'))
 // محاكاة التفاف (§4.2): ملف يستورد النطاق **ثم يعيد إعلانه بأرقامه** يجب أن
 // يسقط. الفحص أعلاه يبحث عن الإعلان لا عن الاستيراد وحده — وهذا يثبت ذلك.
-const SMUGGLED = "import { AGE_RANGE } from '@/config/profileDomain'\nconst AGE_RANGE = { min: 12, max: 100 }"
+const SMUGGLED = "import { AGE_RANGE } from '@/config/profileDomain'\nconst AGE_RANGE = { min: 13, max: 100 }"
 check(
-  'محاكاة التفاف: استيراد + إعادة إعلان min 12 تسقط بفحص مسمّى',
-  /min:\s*12\b/.test(SMUGGLED) && /AGE_RANGE\s*=\s*\{/.test(SMUGGLED),
+  'محاكاة التفاف: استيراد + إعادة إعلان min 13 تسقط بفحص مسمّى',
+  /min:\s*13\b/.test(SMUGGLED) && /AGE_RANGE\s*=\s*\{/.test(SMUGGLED),
 )
 
-console.log(`\n${fails.length === 0 ? '✅' : '❌'} إثبات حدّ العمر ١٣: ${pass} فحصًا، ${fails.length} فشل.`)
+console.log(`\n${fails.length === 0 ? '✅' : '❌'} إثبات حدّ العمر ١٢: ${pass} فحصًا، ${fails.length} فشل.`)
 if (fails.length) { for (const f of fails) console.log('   ✗ ' + f); process.exit(1) }

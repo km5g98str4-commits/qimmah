@@ -1,6 +1,6 @@
 // إثبات وحدة لقاعدة «القاصرون → المحافظة فقط» (Option B، قرار المالك).
 // يُشغَّل عبر esbuild فوق localStorage مُحاكى (بلا متصفح) — انظر run-minors-proof.mjs.
-// يغطّي: حجب الوصفة الرقمية للأعمار 13/15/17، حدّ 18، تماسك حالة التعطيل،
+// يغطّي: حجب الوصفة الرقمية للأعمار 12/15/17، حدّ 18، تماسك حالة التعطيل،
 // هجرة حساب قاصر حالي (ذهابًا وإيابًا/idempotent)، وعزل ختم الهجرة بين مستخدمَين.
 
 import {
@@ -48,8 +48,8 @@ const minorProfile = (over: Partial<Profile>): Profile => ({
 })
 
 // ── (1) الأعمار 12/15/17: مخرجات محافظة فقط، والعجز مستحيل ─────────────────
-console.log('\n(1) MINORS 13/15/17 — NUMERIC PRESCRIPTION SUPPRESSED')
-for (const age of [13, 15, 17]) {
+console.log('\n(1) MINORS 12/15/17 — NUMERIC PRESCRIPTION SUPPRESSED')
+for (const age of [12, 15, 17]) {
   for (const goalType of ['cutting', 'bulking', 'maintenance'] as const) {
     const goal = goalType === 'cutting' ? 'cut' : goalType === 'bulking' ? 'bulk' : 'maintain'
     const t = computeTargets(minorProfile({ age, goalType, goal }))
@@ -77,7 +77,7 @@ console.log('\n(2) AGE-18 BOUNDARY — FULL GOALS RESTORED')
 
 // ── (3) تماسك حالة التعطيل والنسخة الصادقة (يقود aria-disabled/aria-describedby) ──
 console.log('\n(3) DISABLED-GOAL STATE + HONEST COPY')
-eq('isMinorAge(13)', isMinorAge(13), true)
+eq('isMinorAge(12)', isMinorAge(12), true)
 eq('isMinorAge(17)', isMinorAge(17), true)
 eq('isMinorAge(18)', isMinorAge(18), false)
 eq('isMinorAge(0) — unset age not restricted', isMinorAge(0), false)

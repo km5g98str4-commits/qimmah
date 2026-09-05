@@ -3,6 +3,8 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { computeTargets, defaultProfile } from '@/lib/calculators'
+import { initialDraftV2, validateStep } from '@/lib/onboardingV2Flow'
+import { AGE_RANGE } from '@/config/profileDomain'
 import { generatePlan } from '@/lib/planGenerator'
 import { PlanPreview } from '@/components/plan/PlanPreview'
 import { localizeGeneratedWarnings, profileChoiceStrings } from '@/i18n/dict/profileChoices'
@@ -28,8 +30,73 @@ function profile(overrides: Partial<Profile>): Profile {
   }
 }
 
-console.log('\n① UNDER-18 AUTHORITY — 13/17 SUPPRESSED; 18 RESTORED')
-for (const age of [13, 17]) {
+// ═══════════════════════════════════════════════════════════════════════════
+// ⓪ AGE-FLOOR BOUNDARY — الحدّ ١٢، وحاجز الأمان دون ١٨ لم يتحرّك.
+//
+// حدّان مستقلّان لا واحد، وخلطهما هو الخطر الحقيقي في هذه الموجة:
+//   • حدّ الأهلية (AGE_RANGE.min = 12) يقرّر **من يُسجَّل**.
+//   • حدّ الأمان (ADULT_MIN_AGE = 18) يقرّر **من يرى وصفة رقمية للبالغين**.
+// خفض الأوّل يجب ألّا يحرّك الثاني قِيد أنملة — وهذا القسم يثبت الأمرين معًا
+// على المسارين الحقيقيّين: `validateStep` للتسجيل، و`computeTargets` للأرقام.
+// ═══════════════════════════════════════════════════════════════════════════
+console.log('\n⓪ AGE-FLOOR BOUNDARY — 11 REJECTED · 12/17 SUPPRESSED · 18 ENABLED')
+
+/** يبني مسودة إعداد مكتملة عند العمر المطلوب — المسار الحقيقي لا محاكاة. */
+function draftAtAge(age: number) {
+  return { ...initialDraftV2('boundary-proof'), age, gender: 'male' as const, heightCm: 170, weightKg: 60, healthDataConsent: true }
+}
+/** التسجيل مقبول ⇔ خطوة الأساسيات لا تُرجع أي رسالة منع. */
+const registrationAccepted = (age: number) => validateStep(0, draftAtAge(age)) === null
+const registrationVerdict = (age: number) => validateStep(0, draftAtAge(age))
+
+const boundary: Array<{ age: number; register: 'ACCEPTED' | 'REJECTED'; numeric: 'SUPPRESSED' | 'ENABLED' | null }> = [
+  { age: 11, register: 'REJECTED', numeric: null },
+  { age: 12, register: 'ACCEPTED', numeric: 'SUPPRESSED' },
+  { age: 17, register: 'ACCEPTED', numeric: 'SUPPRESSED' },
+  { age: 18, register: 'ACCEPTED', numeric: 'ENABLED' },
+]
+
+for (const row of boundary) {
+  const accepted = registrationAccepted(row.age)
+  check(`AGE_${row.age}_REGISTRATION = ${row.register}`, accepted === (row.register === 'ACCEPTED'))
+  if (row.register === 'REJECTED') {
+    // الرفض يجب أن يكون **مسمّى** (§4.2): «تحت الحدّ» لا «حقول ناقصة».
+    check(`AGE_${row.age}: rejection is the named age reason, not a generic field error`,
+      registrationVerdict(row.age) === 'ageBelowMin')
+    continue
+  }
+  const t = computeTargets(profile({ age: row.age }))
+  const suppressed = t.numericNutritionStatus === 'suppressed-under18'
+  check(`AGE_${row.age}_ADULT_NUMERIC_OUTPUT = ${row.numeric}`,
+    row.numeric === 'SUPPRESSED' ? suppressed : t.numericNutritionStatus === 'available')
+  const adultNumbers = [
+    t.bmi, t.bmr, t.tdee, t.maintenanceCalories, t.cuttingCalories, t.bulkingCalories,
+    t.targetCalories, t.proteinGrams, t.carbsGrams, t.fatGrams, t.waterLiters,
+    t.weeklyWeightChangeKg, t.estimatedWeeksToGoal,
+  ]
+  check(`AGE_${row.age}: every adult-derived number is ${row.numeric === 'SUPPRESSED' ? 'zero' : 'non-zero where prescribed'}`,
+    row.numeric === 'SUPPRESSED'
+      ? adultNumbers.every((v) => v === 0)
+      : t.targetCalories > 0 && t.proteinGrams > 0 && t.waterLiters > 0 && t.bmr > 0 && t.tdee > 0)
+}
+
+// الحدّ الجديد يُقرأ من مصدر واحد — لا رقم مهرَّب.
+check('AGE_RANGE.min === 12 (single source of truth)', AGE_RANGE.min === 12)
+check('the safety boundary did not move: 17 minor, 18 adult', 
+  computeTargets(profile({ age: 17 })).numericNutritionStatus === 'suppressed-under18' &&
+  computeTargets(profile({ age: 18 })).numericNutritionStatus === 'available')
+
+// ⚔️ تأكيد مضادّ (§4.2): الإثبات يجب أن يسقط لو عاد الحدّ ١٣ أو لو زحف حدّ
+// الأمان. نحاكي الحالتين ونتحقّق أن كلًّا منهما **يُكتشف بفحص مسمّى** لا بصدفة.
+check('⚔️ a floor of 13 would fail this proof (age 12 would be rejected)',
+  !(AGE_RANGE.min === 13) && registrationAccepted(12))
+check('⚔️ a safety boundary crawl to 12 would fail this proof (12 must stay suppressed)',
+  computeTargets(profile({ age: 12 })).numericNutritionStatus !== 'available')
+check('⚔️ boundary table is non-empty and covers 11/12/17/18',
+  boundary.length === 4 && boundary.map((r) => r.age).join(',') === '11,12,17,18')
+
+console.log('\n① UNDER-18 AUTHORITY — 12/17 SUPPRESSED; 18 RESTORED')
+for (const age of [12, 17]) {
   const targets = computeTargets(profile({ age }))
   check(`age ${age}: explicit suppressed status`, targets.numericNutritionStatus === 'suppressed-under18')
   check(`age ${age}: no adult energy/macros/hydration/BMI numbers`, [

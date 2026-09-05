@@ -304,8 +304,8 @@ for (const [label, fn, expected] of INPUT_CASES) {
 }
 
 // أخطر سطر في التحقيق: بالغ يُعاد تصنيفه قاصرًا بصمت فتُقفل أهداف التنشيف والتضخيم.
-const age = parseSafeNumber('٢٤', { min: 13, max: 100 })
-check('parseSafeNumber("٢٤",{min:13}) = 24 لا 13 (لا يُعاد تصنيف البالغ قاصرًا)', age === 24, `got=${age}`)
+const age = parseSafeNumber('٢٤', { min: 12, max: 100 })
+check('parseSafeNumber("٢٤",{min:12}) = 24 لا 12 (لا يُعاد تصنيف البالغ قاصرًا)', age === 24, `got=${age}`)
 check('parseSafeNumber("١٥٠",{min:1,max:3000,fallback:100}) = 150', parseSafeNumber('١٥٠', { min: 1, max: 3000, fallback: 100 }) === 150)
 check('parseSafeNumber("٧٨٫٥") = 78.5', parseSafeNumber('٧٨٫٥', { min: 0, max: 500 }) === 78.5)
 
@@ -317,9 +317,9 @@ const printedDec = formatNumber(1234.5, 'ar')
 check('…والرحلة تصمد مع الفواصل: ١٬٢٣٤٫٥ ⇐ 1234.5', sanitizeNumericInput(printedDec, { decimal: true }) === '1234.5', JSON.stringify(sanitizeNumericInput(printedDec, { decimal: true })))
 
 // الصدق: لا مسح صامت ولا قصّ صامت — الحالة تُسمّى.
-check('حقل فارغ يُسمّى «فارغ» لا يُملأ بالحدّ الأدنى', parseNumericField('', { min: 13 }).status === 'empty')
-check('نصّ غير مقروء يُسمّى «غير مقروء»', parseNumericField('كتابة', { min: 13 }).status === 'unreadable')
-const oor = parseNumericField('٩٩٩', { min: 13, max: 100 })
+check('حقل فارغ يُسمّى «فارغ» لا يُملأ بالحدّ الأدنى', parseNumericField('', { min: 12 }).status === 'empty')
+check('نصّ غير مقروء يُسمّى «غير مقروء»', parseNumericField('كتابة', { min: 12 }).status === 'unreadable')
+const oor = parseNumericField('٩٩٩', { min: 12, max: 100 })
 check('رقم خارج النطاق يُسمّى ويحتفظ بقيمته (لا قصّ صامت)', oor.status === 'out-of-range' && oor.value === 999, JSON.stringify(oor))
 
 // نسخة واحدة لا أربع.
@@ -470,7 +470,7 @@ check('① وبنزعه تسقط الحقيقة المسمّاة تحديدًا'
 const attack2 = await helpers([NEUTER_FOLD], 'attack-fold')
 check('② بنزع الطيّ يعود «٢٤» فراغًا (فتسقط ①)', attack2.sanitizeNumericInput('٢٤') === '', JSON.stringify(attack2.sanitizeNumericInput('٢٤')))
 check('② ويعود «78٫5» إلى «785» — الخطأ ×١٠ الصامت', attack2.sanitizeNumericInput('78٫5', { decimal: true }) === '785', attack2.sanitizeNumericInput('78٫5', { decimal: true }))
-check('② ويعود البالغ قاصرًا: parseSafeNumber("٢٤",{min:13}) = 13', attack2.parseSafeNumber('٢٤', { min: 13, max: 100 }) === 13, String(attack2.parseSafeNumber('٢٤', { min: 13, max: 100 })))
+check('② ويعود البالغ قاصرًا: parseSafeNumber("٢٤",{min:12}) = 12', attack2.parseSafeNumber('٢٤', { min: 12, max: 100 }) === 12, String(attack2.parseSafeNumber('٢٤', { min: 12, max: 100 })))
 
 // ③ زرع تسرّب لاتيني في سطح مغطّى
 const attack3 = await screens([PLANT_LEAK], 'attack-leak')

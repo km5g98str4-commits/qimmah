@@ -365,7 +365,7 @@ export function validateStep(step: number, d: Validatable): StepValidation {
     // خصوصية مقصود يحرسه `test:policy`، لا مجرّد ترتيب واجهة.
     if (!d.healthDataConsent) return 'healthConsent'
     // ن٢: العمر تحت الحدّ الأدنى سببٌ مسمّى لا «حقل غير صالح». يُفصل قبل الفحص
-    // العام حتى تصل الرسالة الصحيحة؛ رقم مكتمل تحت ١٣ فقط — الحقل الفارغ أو
+    // العام حتى تصل الرسالة الصحيحة؛ رقم مكتمل تحت ١٢ فقط — الحقل الفارغ أو
     // النصّ غير الرقمي يبقى على رسالة الحقول العامة، فلا يُتّهم من لم يكتب بعد.
     if (d.age !== null && Number.isFinite(d.age) && d.age > 0 && d.age < AGE_RANGE.min) return 'ageBelowMin'
     const ok =

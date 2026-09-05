@@ -51,8 +51,8 @@ check('الخطوة الأولى رقمها 0', validateStep(0, { ...base, ...bo
 check('آخر خطوة إدخال هي 6 (القيود)', LAST_INPUT_STEP === 6)
 
 console.log('\n═══ 2) الحدود تمنع القيم الشاذّة ولا تُقصي أحدًا ═══')
-check('عمر 12 مرفوض', !inRange(12, AGE_RANGE))
-check('عمر 13 مقبول (القاصر يُقبل ثم يُقيَّد)', inRange(13, AGE_RANGE))
+check('عمر 12 مقبول (القاصر يُقبل ثم يُقيَّد)', inRange(12, AGE_RANGE))
+check('عمر 11 مرفوض (تحت حدّ الأهلية)', !inRange(11, AGE_RANGE))
 check('عمر 101 مرفوض', !inRange(101, AGE_RANGE))
 check('طول 119 مرفوض و120 مقبول', !inRange(119, HEIGHT_RANGE) && inRange(120, HEIGHT_RANGE))
 check('وزن 29 مرفوض و30 مقبول', !inRange(29, WEIGHT_RANGE) && inRange(30, WEIGHT_RANGE))
