@@ -4,6 +4,7 @@
 // لفتح GIF المتحرّك (اختياري):  WORKOUTX_API_KEY=xxxx node scripts/build-exercise-media.mjs
 //
 // التغطية تُقاس من exerciseProductionManifest.generated.ts (الحاكم) — هذا الملف طبقة أدلّة اللقطات فقط.
+// [MEDIA-IDENTITY-001] أُزيلت أيضًا cable-hammer-curl · machine-fly · machine-rdl · side-plank (NEVER_MATCH — هوية/معدّة خاطئة بالعين).
 // أُزيلت أربع خرائط خاطئة نمط حركة (single-leg-rdl · nordic-curl · جهازا ضغط الصدر) — انظر NEVER_MATCH في المولّد.
 // (استُبعِدت بطاقات الأجهزة في PLACEHOLDER_ONLY_EXERCISE_IDS — لا تُطابَق بصور وزن حرّ خاطئة.)
 // الصور مُنزَّلة محليًا في public/exercise-images/ (لا اعتماد على شبكة وقت التشغيل)؛ الروابط البعيدة تبقى كـ fallback.
@@ -111,12 +112,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
   "cable-curl": {
     "img0": "/exercise-images/cable-curl/0.jpg",
     "img1": "/exercise-images/cable-curl/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Preacher_Curl/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Preacher_Curl/1.jpg"
-  },
-  "cable-hammer-curl": {
-    "img0": "/exercise-images/cable-hammer-curl/0.jpg",
-    "img1": "/exercise-images/cable-hammer-curl/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Preacher_Curl/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Preacher_Curl/1.jpg"
   },
@@ -492,18 +487,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Bicep_Curl/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Bicep_Curl/1.jpg"
   },
-  "machine-fly": {
-    "img0": "/exercise-images/machine-fly/0.jpg",
-    "img1": "/exercise-images/machine-fly/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flat_Bench_Cable_Flyes/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Flat_Bench_Cable_Flyes/1.jpg"
-  },
-  "machine-rdl": {
-    "img0": "/exercise-images/machine-rdl/0.jpg",
-    "img1": "/exercise-images/machine-rdl/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/1.jpg"
-  },
   "machine-row": {
     "img0": "/exercise-images/machine-row/0.jpg",
     "img1": "/exercise-images/machine-row/1.jpg",
@@ -629,12 +612,6 @@ export const exerciseMedia: Record<string, ExerciseMedia> = {
     "img1": "/exercise-images/seated-lateral-raise/1.jpg",
     "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Side_Lateral_Raise/0.jpg",
     "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Side_Lateral_Raise/1.jpg"
-  },
-  "side-plank": {
-    "img0": "/exercise-images/side-plank/0.jpg",
-    "img1": "/exercise-images/side-plank/1.jpg",
-    "img0Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push_Up_to_Side_Plank/0.jpg",
-    "img1Remote": "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Push_Up_to_Side_Plank/1.jpg"
   },
   "single-arm-cable-row": {
     "img0": "/exercise-images/single-arm-cable-row/0.jpg",

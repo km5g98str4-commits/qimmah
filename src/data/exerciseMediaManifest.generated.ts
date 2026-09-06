@@ -1,6 +1,6 @@
 // ⚙️ ملف مُولّد آليًا — لا تُحرّره يدويًا. المولّد: scripts/build-media-manifest.mjs
 // إعادة التوليد: node scripts/build-media-manifest.mjs · الحارس: npm run test:media-pipeline
-// التغطية: 119/181 تمرينًا بإطارَي بداية/نهاية حقيقيَّين (المقاسات مفحوصة من الملفات).
+// التغطية: 115/181 تمرينًا بإطارَي بداية/نهاية حقيقيَّين (المقاسات مفحوصة من الملفات).
 // gif/video = null بصدق — لا مصدر متحرّك نظيف الحقوق حاليًا (روابط «بحث يوتيوب» ليست وسائط).
 // الحقوق من سجلّ scripts/media/provenance-manifest.json المُراجَع — أصل بلا صف = 'unverified'.
 
@@ -35,23 +35,26 @@ export interface ExerciseMediaManifestEntry {
 }
 
 /** عدد التمارين المغطاة بإطارات حقيقية. */
-export const MEDIA_STILLS_COVERAGE = 119
+export const MEDIA_STILLS_COVERAGE = 115
 /** إجمالي تمارين الكتالوج وقت التوليد. */
 export const MEDIA_CATALOG_TOTAL = 181
 /** تمارين بلا وسائط مطابقة بعد (لا تشمل بطاقات placeholder-only المتعمّدة). */
 export const MEDIA_MISSING_IDS: readonly string[] = [
   "cable-shoulder-press",
+  "side-plank",
   "mountain-climber",
   "treadmill-run",
   "stationary-bike",
   "rowing-machine",
   "elliptical",
   "jump-rope",
+  "machine-fly",
   "pendlay-row",
   "chest-supported-row",
   "meadows-row",
   "landmine-press",
   "pike-push-up",
+  "cable-hammer-curl",
   "single-arm-pushdown",
   "belt-squat",
   "wall-sit",
@@ -75,6 +78,7 @@ export const MEDIA_MISSING_IDS: readonly string[] = [
   "shoulder-dislocates",
   "thoracic-rotation",
   "ankle-mobility",
+  "machine-rdl",
   "dumbbell-sumo-squat",
   "cable-hip-adduction"
 ]
@@ -160,7 +164,7 @@ export const exerciseMediaManifest: Record<string, ExerciseMediaManifestEntry> =
   "seated-calf-raise-machine": { "id": "seated-calf-raise-machine", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "bodyweight-calf-raise": { "id": "bodyweight-calf-raise", "status": "stills", "stillStart": { "path": "/exercise-images/bodyweight-calf-raise/0.jpg", "width": 850, "height": 567, "bytes": 49640 }, "stillEnd": { "path": "/exercise-images/bodyweight-calf-raise/1.jpg", "width": 850, "height": 567, "bytes": 49784 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "plank": { "id": "plank", "status": "stills", "stillStart": { "path": "/exercise-images/plank/0.jpg", "width": 850, "height": 567, "bytes": 43296 }, "stillEnd": { "path": "/exercise-images/plank/1.jpg", "width": 850, "height": 567, "bytes": 43135 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
-  "side-plank": { "id": "side-plank", "status": "stills", "stillStart": { "path": "/exercise-images/side-plank/0.jpg", "width": 850, "height": 567, "bytes": 40866 }, "stillEnd": { "path": "/exercise-images/side-plank/1.jpg", "width": 850, "height": 567, "bytes": 42449 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
+  "side-plank": { "id": "side-plank", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "hanging-leg-raise": { "id": "hanging-leg-raise", "status": "stills", "stillStart": { "path": "/exercise-images/hanging-leg-raise/0.jpg", "width": 850, "height": 567, "bytes": 51687 }, "stillEnd": { "path": "/exercise-images/hanging-leg-raise/1.jpg", "width": 850, "height": 567, "bytes": 56061 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "crunch": { "id": "crunch", "status": "stills", "stillStart": { "path": "/exercise-images/crunch/0.jpg", "width": 850, "height": 567, "bytes": 69289 }, "stillEnd": { "path": "/exercise-images/crunch/1.jpg", "width": 850, "height": 567, "bytes": 69225 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "russian-twist": { "id": "russian-twist", "status": "stills", "stillStart": { "path": "/exercise-images/russian-twist/0.jpg", "width": 850, "height": 567, "bytes": 70925 }, "stillEnd": { "path": "/exercise-images/russian-twist/1.jpg", "width": 850, "height": 567, "bytes": 70973 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
@@ -179,7 +183,7 @@ export const exerciseMediaManifest: Record<string, ExerciseMediaManifestEntry> =
   "incline-cable-fly": { "id": "incline-cable-fly", "status": "stills", "stillStart": { "path": "/exercise-images/incline-cable-fly/0.jpg", "width": 850, "height": 567, "bytes": 60351 }, "stillEnd": { "path": "/exercise-images/incline-cable-fly/1.jpg", "width": 850, "height": 567, "bytes": 59411 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "chest-dip": { "id": "chest-dip", "status": "stills", "stillStart": { "path": "/exercise-images/chest-dip/0.jpg", "width": 850, "height": 567, "bytes": 73206 }, "stillEnd": { "path": "/exercise-images/chest-dip/1.jpg", "width": 850, "height": 567, "bytes": 72525 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "svend-press": { "id": "svend-press", "status": "stills", "stillStart": { "path": "/exercise-images/svend-press/0.jpg", "width": 800, "height": 1200, "bytes": 118136 }, "stillEnd": { "path": "/exercise-images/svend-press/1.jpg", "width": 800, "height": 1200, "bytes": 114175 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
-  "machine-fly": { "id": "machine-fly", "status": "stills", "stillStart": { "path": "/exercise-images/machine-fly/0.jpg", "width": 850, "height": 567, "bytes": 71850 }, "stillEnd": { "path": "/exercise-images/machine-fly/1.jpg", "width": 850, "height": 567, "bytes": 70322 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
+  "machine-fly": { "id": "machine-fly", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "knee-push-up": { "id": "knee-push-up", "status": "stills", "stillStart": { "path": "/exercise-images/knee-push-up/0.jpg", "width": 750, "height": 500, "bytes": 35420 }, "stillEnd": { "path": "/exercise-images/knee-push-up/1.jpg", "width": 750, "height": 500, "bytes": 34586 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "pendlay-row": { "id": "pendlay-row", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "chest-supported-row": { "id": "chest-supported-row", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
@@ -203,7 +207,7 @@ export const exerciseMediaManifest: Record<string, ExerciseMediaManifestEntry> =
   "incline-dumbbell-curl": { "id": "incline-dumbbell-curl", "status": "stills", "stillStart": { "path": "/exercise-images/incline-dumbbell-curl/0.jpg", "width": 850, "height": 567, "bytes": 53708 }, "stillEnd": { "path": "/exercise-images/incline-dumbbell-curl/1.jpg", "width": 850, "height": 567, "bytes": 54063 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "ez-bar-curl": { "id": "ez-bar-curl", "status": "stills", "stillStart": { "path": "/exercise-images/ez-bar-curl/0.jpg", "width": 850, "height": 567, "bytes": 67123 }, "stillEnd": { "path": "/exercise-images/ez-bar-curl/1.jpg", "width": 850, "height": 567, "bytes": 68174 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "spider-curl": { "id": "spider-curl", "status": "stills", "stillStart": { "path": "/exercise-images/spider-curl/0.jpg", "width": 850, "height": 567, "bytes": 49046 }, "stillEnd": { "path": "/exercise-images/spider-curl/1.jpg", "width": 850, "height": 567, "bytes": 47314 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
-  "cable-hammer-curl": { "id": "cable-hammer-curl", "status": "stills", "stillStart": { "path": "/exercise-images/cable-hammer-curl/0.jpg", "width": 850, "height": 567, "bytes": 88090 }, "stillEnd": { "path": "/exercise-images/cable-hammer-curl/1.jpg", "width": 850, "height": 567, "bytes": 87322 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
+  "cable-hammer-curl": { "id": "cable-hammer-curl", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "reverse-curl": { "id": "reverse-curl", "status": "stills", "stillStart": { "path": "/exercise-images/reverse-curl/0.jpg", "width": 850, "height": 567, "bytes": 57755 }, "stillEnd": { "path": "/exercise-images/reverse-curl/1.jpg", "width": 850, "height": 567, "bytes": 58110 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "machine-curl": { "id": "machine-curl", "status": "stills", "stillStart": { "path": "/exercise-images/machine-curl/0.jpg", "width": 850, "height": 567, "bytes": 96958 }, "stillEnd": { "path": "/exercise-images/machine-curl/1.jpg", "width": 850, "height": 567, "bytes": 97022 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "assisted-dip-machine": { "id": "assisted-dip-machine", "status": "stills", "stillStart": { "path": "/exercise-images/triceps-dip-machine/0.jpg", "width": 850, "height": 567, "bytes": 71969 }, "stillEnd": { "path": "/exercise-images/triceps-dip-machine/1.jpg", "width": 850, "height": 567, "bytes": 73290 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
@@ -255,7 +259,7 @@ export const exerciseMediaManifest: Record<string, ExerciseMediaManifestEntry> =
   "hamstring-stretch": { "id": "hamstring-stretch", "status": "stills", "stillStart": { "path": "/exercise-images/hamstring-stretch/0.jpg", "width": 850, "height": 567, "bytes": 33541 }, "stillEnd": { "path": "/exercise-images/hamstring-stretch/1.jpg", "width": 850, "height": 567, "bytes": 33541 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "child-pose": { "id": "child-pose", "status": "stills", "stillStart": { "path": "/exercise-images/child-pose/0.jpg", "width": 850, "height": 567, "bytes": 33306 }, "stillEnd": { "path": "/exercise-images/child-pose/1.jpg", "width": 850, "height": 567, "bytes": 33259 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
   "decline-chest-press-machine": { "id": "decline-chest-press-machine", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
-  "machine-rdl": { "id": "machine-rdl", "status": "stills", "stillStart": { "path": "/exercise-images/machine-rdl/0.jpg", "width": 850, "height": 567, "bytes": 59859 }, "stillEnd": { "path": "/exercise-images/machine-rdl/1.jpg", "width": 850, "height": 567, "bytes": 57367 }, "gif": null, "video": null, "source": "yuhonas/free-exercise-db", "license": "Unlicense / public-domain dedication", "attribution": null },
+  "machine-rdl": { "id": "machine-rdl", "status": "missing", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "glute-kickback-machine": { "id": "glute-kickback-machine", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "standing-hip-extension-machine": { "id": "standing-hip-extension-machine", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },
   "hip-adductor-machine": { "id": "hip-adductor-machine", "status": "placeholder-only", "stillStart": null, "stillEnd": null, "gif": null, "video": null, "source": null, "license": null, "attribution": null },

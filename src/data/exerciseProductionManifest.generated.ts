@@ -11,7 +11,7 @@
 // Honesty: a status is never optimistic. MISSING means the user gets an honest empty state,
 // not a wrong picture. NEEDS_REVIEW never reaches a user surface.
 //
-// Coverage at generation time — images APPROVED 181/181 · MISSING 0
+// Coverage at generation time — images APPROVED 177/181 · MISSING 4
 //                              video  APPROVED 176/181 · NEEDS_REVIEW 5 · MISSING 0
 
 /** Review state of one asset. Only APPROVED may be shown to a user. */
@@ -52,16 +52,21 @@ export interface ExerciseProductionEntry {
 }
 
 /** Exercises a user may be shown a picture for. */
-export const PRODUCTION_IMAGE_APPROVED = 181
+export const PRODUCTION_IMAGE_APPROVED = 177
 /** Exercises with no visual asset of any kind — the real image gap. */
-export const PRODUCTION_IMAGE_MISSING = 0
+export const PRODUCTION_IMAGE_MISSING = 4
 /** Exercises a user may be shown a video reference for. */
 export const PRODUCTION_VIDEO_APPROVED = 176
 /** Catalog total at generation time. */
 export const PRODUCTION_CATALOG_TOTAL = 181
 
 /** The exact image gap — every id with no approved visual. Drives the generation spec. */
-export const PRODUCTION_IMAGE_GAP_IDS: readonly string[] = []
+export const PRODUCTION_IMAGE_GAP_IDS: readonly string[] = [
+  "side-plank",
+  "machine-fly",
+  "cable-hammer-curl",
+  "machine-rdl"
+]
 
 export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntry> = {
   "barbell-bench-press": {
@@ -1821,14 +1826,10 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "side-plank": {
     "exerciseId": "side-plank",
-    "image": {
-      "kind": "stills",
-      "start": "/exercise-images/side-plank/0.jpg",
-      "end": "/exercise-images/side-plank/1.jpg"
-    },
-    "imageStatus": "APPROVED",
-    "imageSource": "yuhonas/free-exercise-db",
-    "imageLicense": "Unlicense / public-domain dedication",
+    "image": null,
+    "imageStatus": "MISSING",
+    "imageSource": null,
+    "imageLicense": null,
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "44ND4bOB-T0",
@@ -1839,7 +1840,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "NASM is on the approved reputable-source list. Exact exercise named in title."
+    "notes": "No rights-cleared visual matched this movement yet. | NASM is on the approved reputable-source list. Exact exercise named in title."
   },
   "hanging-leg-raise": {
     "exerciseId": "hanging-leg-raise",
@@ -2239,14 +2240,10 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "machine-fly": {
     "exerciseId": "machine-fly",
-    "image": {
-      "kind": "stills",
-      "start": "/exercise-images/machine-fly/0.jpg",
-      "end": "/exercise-images/machine-fly/1.jpg"
-    },
-    "imageStatus": "APPROVED",
-    "imageSource": "yuhonas/free-exercise-db",
-    "imageLicense": "Unlicense / public-domain dedication",
+    "image": null,
+    "imageStatus": "MISSING",
+    "imageSource": null,
+    "imageLicense": null,
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "sAeDw6xhFFw",
@@ -2257,7 +2254,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "medium",
     "reviewedAt": "2026-08-27",
-    "notes": "Overlaps heavily with pec-deck-machine. No separate verified machine-fly video from a reputable channel. Consider reusing the pec deck reference (H4mVGHaK2f4) if the app treats them as the same movement - a human should decide. | [مهمة الصقل §3] رُشّح ببحث موثَّق (العنوان يطابق صيغة قناة Hammer Strength الرسمية المعتمدة في السجلّ («Hammer Strength Select X»). جهاز Select Pectoral Fly تفتيح بمقابض — يطابق cue التطبيق «seat height and handle position». الثقة medium لأن نسبة القناة استدلال صيغة لا نصّ صريح.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
+    "notes": "No rights-cleared visual matched this movement yet. | Overlaps heavily with pec-deck-machine. No separate verified machine-fly video from a reputable channel. Consider reusing the pec deck reference (H4mVGHaK2f4) if the app treats them as the same movement - a human should decide. | [مهمة الصقل §3] رُشّح ببحث موثَّق (العنوان يطابق صيغة قناة Hammer Strength الرسمية المعتمدة في السجلّ («Hammer Strength Select X»). جهاز Select Pectoral Fly تفتيح بمقابض — يطابق cue التطبيق «seat height and handle position». الثقة medium لأن نسبة القناة استدلال صيغة لا نصّ صريح.) وتحقّق عبر CI (video-verify.yml) — الدليل في video-candidates.verified.json."
   },
   "knee-push-up": {
     "exerciseId": "knee-push-up",
@@ -2762,14 +2759,10 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "cable-hammer-curl": {
     "exerciseId": "cable-hammer-curl",
-    "image": {
-      "kind": "stills",
-      "start": "/exercise-images/cable-hammer-curl/0.jpg",
-      "end": "/exercise-images/cable-hammer-curl/1.jpg"
-    },
-    "imageStatus": "APPROVED",
-    "imageSource": "yuhonas/free-exercise-db",
-    "imageLicense": "Unlicense / public-domain dedication",
+    "image": null,
+    "imageStatus": "MISSING",
+    "imageSource": null,
+    "imageLicense": null,
     "imageAttribution": null,
     "video": {
       "youtubeVideoId": "VY4walmoM-I",
@@ -2780,7 +2773,7 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
     "videoStatus": "APPROVED",
     "videoConfidence": "high",
     "reviewedAt": "2026-08-14",
-    "notes": "Buff Dudes is on the approved-source list; exact-match single-exercise tutorial."
+    "notes": "No rights-cleared visual matched this movement yet. | Buff Dudes is on the approved-source list; exact-match single-exercise tutorial."
   },
   "reverse-curl": {
     "exerciseId": "reverse-curl",
@@ -3896,20 +3889,16 @@ export const EXERCISE_PRODUCTION_MANIFEST: Record<string, ExerciseProductionEntr
   },
   "machine-rdl": {
     "exerciseId": "machine-rdl",
-    "image": {
-      "kind": "stills",
-      "start": "/exercise-images/machine-rdl/0.jpg",
-      "end": "/exercise-images/machine-rdl/1.jpg"
-    },
-    "imageStatus": "APPROVED",
-    "imageSource": "yuhonas/free-exercise-db",
-    "imageLicense": "Unlicense / public-domain dedication",
+    "image": null,
+    "imageStatus": "MISSING",
+    "imageSource": null,
+    "imageLicense": null,
     "imageAttribution": null,
     "video": null,
     "videoStatus": "NEEDS_REVIEW",
     "videoConfidence": null,
     "reviewedAt": "2026-08-14",
-    "notes": "The exercise name is ambiguous — 'RDL machine' is used for at least three different things (a dedicated plate-loaded RDL/hip-hinge machine, a Smith-machine RDL, and a seated/cable RDL), and no reputable instructional channel has a video that clearly matches a single one of them. The closest verified hit (Hpnfqiik0i8) is a plate-loaded machine demo from a Zumba channel — not trustworthy instructional strength content. ACTION: confirm with the product team which machine the app entry means, then re-search. Shipping a wrong machine here would teach the wrong movement."
+    "notes": "No rights-cleared visual matched this movement yet. | The exercise name is ambiguous — 'RDL machine' is used for at least three different things (a dedicated plate-loaded RDL/hip-hinge machine, a Smith-machine RDL, and a seated/cable RDL), and no reputable instructional channel has a video that clearly matches a single one of them. The closest verified hit (Hpnfqiik0i8) is a plate-loaded machine demo from a Zumba channel — not trustworthy instructional strength content. ACTION: confirm with the product team which machine the app entry means, then re-search. Shipping a wrong machine here would teach the wrong movement."
   },
   "glute-kickback-machine": {
     "exerciseId": "glute-kickback-machine",

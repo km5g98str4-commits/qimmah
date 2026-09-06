@@ -47,6 +47,9 @@ export interface LibraryStrings {
   equipKettlebell: string
   equipSmith: string
   equipEzBar: string
+  equipBand: string
+  equipPlate: string
+  equipRope: string
   // ExerciseDetail — tabs
   tabAbout: string
   tabHistory: string
@@ -147,6 +150,9 @@ const ar: LibraryStrings = {
   equipKettlebell: 'كيتل بل',
   equipSmith: 'سميث',
   equipEzBar: 'إيزي بار',
+  equipBand: 'مطاط',
+  equipPlate: 'قرص',
+  equipRope: 'حبل',
   tabAbout: 'عن التمرين',
   tabHistory: 'التاريخ',
   tabCharts: 'الرسوم',
@@ -237,6 +243,9 @@ const en: LibraryStrings = {
   equipKettlebell: 'Kettlebell',
   equipSmith: 'Smith',
   equipEzBar: 'EZ bar',
+  equipBand: 'Band',
+  equipPlate: 'Plate',
+  equipRope: 'Rope',
   tabAbout: 'About',
   tabHistory: 'History',
   tabCharts: 'Charts',

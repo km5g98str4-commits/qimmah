@@ -92,8 +92,10 @@ for (const entry of Object.values(EXERCISE_PRODUCTION_MANIFEST)) {
   const rows = paths.map((p) => byPath.get(p)).filter((r): r is Row => Boolean(r))
   const kinds = new Set(rows.map((r) => r.mediaKind))
   const kind = entry.imageStatus !== 'APPROVED' || rows.length === 0 ? 'NONE' : [...kinds].join('+')
+  // [MEDIA-IDENTITY-001] بلا أصل مشحون لا شيء يُثبَت: الحالة NONE تُعدّ فوق، ولا تُحسب «غير مثبتة الحقوق»
+  // — وهو تعريف الإثبات نفسه (media-provenance-proof: rows.length === paths.length).
   const rights =
-    rows.length === 0 ? 'UNRESOLVED' : rows.every((r) => r.rightsStatus === 'VERIFIED') ? 'VERIFIED' : 'UNRESOLVED'
+    rows.length === 0 ? 'VERIFIED' : rows.every((r) => r.rightsStatus === 'VERIFIED') ? 'VERIFIED' : 'UNRESOLVED'
   lines.push({
     id: entry.exerciseId,
     nameAr: ex ? ex.nameAr : '—',

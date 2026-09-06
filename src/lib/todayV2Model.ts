@@ -8,6 +8,7 @@
 // pillar «مسار اليوم» track, and verb+destination cards. Every value is real or
 // an honest fallback; never a fake number, never an empty ring. Pure/read-only.
 
+import { isMinorAge } from '@/lib/calculators'
 import type { Customization } from '@/lib/customization'
 import type { Lang } from '@/lib/appPreferences'
 import type { CalorieGoal } from '@/types/profile'
@@ -327,7 +328,7 @@ export function buildTodayV2Model(customization: Customization, lang: Lang, user
   // ── Cards: setup guides (new user) or actionable nudges (normal/after) ──
   const cards =
     state === 'newUser'
-      ? buildSetupCards(t)
+      ? buildSetupCards(t, isMinorAge(customization.profile.age))
       : state === 'afterWorkout'
         ? buildAfterWorkoutNudges({ t, recoveryAvailable, proteinRemaining })
         : state === 'returnAfterBreak'
@@ -476,9 +477,12 @@ function buildHero(a: {
 // ── Card builders ────────────────────────────────────────────────────────────
 
 /** New-user setup guides — always the three first-steps, never empty rings. */
-function buildSetupCards(t: (ar: string, en: string) => string): TodayCard[] {
+function buildSetupCards(t: (ar: string, en: string) => string, minor = false): TodayCard[] {
   return [
-    { label: t('سجّل أول وجبة عشان نضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' },
+    // [MINOR-COPY-001] دون 18 لا سعرات تُضبط أصلًا — البطاقة تدعو للتسجيل بلا وعد رقمي.
+    minor
+      ? { label: t('سجّل أول وجبة · نبدأ سجلّك', 'Log your first meal · start your log'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' }
+      : { label: t('سجّل أول وجبة عشان نضبط سعراتك', 'Log your first meal to set your calories'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'Utensils', tone: 'nutrition', destination: 'nutrition' },
     { label: t('سجّل وزنك الحالي · نقطة البداية', 'Log your current weight · your baseline'), hint: null, actionLabel: t('سجّل', 'Log'), icon: 'TrendingUp', tone: 'progress', destination: 'progress' },
     { label: t('فعّل التذكيرات · لا يفوتك تمرين', 'Turn on reminders · never miss a workout'), hint: null, actionLabel: t('فعّل', 'Enable'), icon: 'Bell', tone: 'recover', destination: 'settings' },
   ]

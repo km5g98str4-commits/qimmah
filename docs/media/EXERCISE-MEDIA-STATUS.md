@@ -7,8 +7,8 @@
 ## ١. الأرقام الأربعة
 
 ```
-REAL_PHOTO_COUNT = 119
-VERIFIED_LICENSE_COUNT = 181
+REAL_PHOTO_COUNT = 115
+VERIFIED_LICENSE_COUNT = 177
 FALLBACK_COUNT = 62
 UNRESOLVED_COUNT = 0
 ```
@@ -17,33 +17,33 @@ UNRESOLVED_COUNT = 0
 
 | القيمة | العدد | ما تعنيه بالضبط |
 |---|---:|---|
-| `REAL_PHOTO_COUNT` | 119 | تمارين تعرض **فوتوغرافيا لشخص حقيقي** يؤدّي الحركة. |
+| `REAL_PHOTO_COUNT` | 115 | تمارين تعرض **فوتوغرافيا لشخص حقيقي** يؤدّي الحركة. |
 | `FALLBACK_COUNT` | 62 | تمارين تعرض **رسمًا متجهيًا داخليًا** — 37 رسم حركة + 25 مخطّط جهاز. |
-| `VERIFIED_LICENSE_COUNT` | 181 | تمارين كلّ أصولها المشحونة تحمل ترخيصًا معلنًا ودليلًا قابلًا للفتح. |
+| `VERIFIED_LICENSE_COUNT` | 177 | تمارين كلّ أصولها المشحونة تحمل ترخيصًا معلنًا ودليلًا قابلًا للفتح. |
 | `UNRESOLVED_COUNT` | 0 | تمارين تُعرض بأصل لا يمكن إثبات حقوقه. |
-| بلا وسائط | 0 | تمارين لا تعرض شيئًا (حالة فارغة صادقة). |
+| بلا وسائط | 4 | تمارين لا تعرض شيئًا (حالة فارغة صادقة). |
 
-وعلى مستوى **الملف** (305 أصلًا في سجلّ الحقوق):
+وعلى مستوى **الملف** (297 أصلًا في سجلّ الحقوق):
 
 | النوع | عدد الملفات |
 |---|---:|
-| `REAL_PHOTO` | 242 |
+| `REAL_PHOTO` | 234 |
 | `IN_HOUSE_ILLUSTRATION` | 37 |
 | `IN_HOUSE_DIAGRAM` | 26 |
-| `rightsStatus = VERIFIED` | 305 |
+| `rightsStatus = VERIFIED` | 297 |
 | `rightsStatus = UNRESOLVED` | 0 |
 
 ### ما يقوله هذا عن الالتزام السابق
 
 التزام `39fd151` أعلن «صورة لكل تمرين — ١٨١/١٨١ بنمط داخلي موحّد». **الرقم صحيح
 والوصف صحيح**: ١٨١ تمرينًا تعرض شيئًا، و«بنمط داخلي موحّد» تصف الرسوم. لكن من يقرأ
-«صورة لكل تمرين» يفهم فوتوغرافيا. الحقيقة المقيسة: **119 فوتوغرافيا و62 رسمًا**.
+«صورة لكل تمرين» يفهم فوتوغرافيا. الحقيقة المقيسة: **115 فوتوغرافيا و62 رسمًا**.
 
 ## ٢. سلّم المصادر المطلوب — وأين نقف منه
 
 | الرتبة | المصدر المطلوب | ما لدينا اليوم |
 |---|---|---|
-| ١ | فوتوغرافيا حقيقية نظيفة الحقوق | 119 تمرينًا من `yuhonas/free-exercise-db` (Unlicense معلن) |
+| ١ | فوتوغرافيا حقيقية نظيفة الحقوق | 115 تمرينًا من `yuhonas/free-exercise-db` (Unlicense معلن) |
 | ٢ | أصول مصنّع رسمية بإذن إعادة استخدام | **صفر** — لا اتفاق مع أي مصنّع |
 | ٣ | صور نظيفة الحقوق من مصدر معتبر | **صفر** |
 | ٤ | رسم محايد كبديل معلَن | 62 تمرينًا (رسوم داخلية نملك حقوقها كاملة) |
@@ -52,7 +52,7 @@ UNRESOLVED_COUNT = 0
 
 الرتبة ١ تستند إلى **ترخيص المستودع المُعلن** (`Unlicense` على `yuhonas/free-exercise-db`،
 وجذره `wrkout/exercises.json`). **لا يوجد في المستودع إقرار عارض ولا منحة مصوّر** لأيٍّ من
-الـ242 لقطة. الوسم `REAL_PHOTO` يصف **شكل الأصل** (فوتوغرافيا لا رسمًا) ولا يدّعي
+الـ234 لقطة. الوسم `REAL_PHOTO` يصف **شكل الأصل** (فوتوغرافيا لا رسمًا) ولا يدّعي
 أكثر. إن كان الإطلاق التجاري يتطلّب سلسلة حقوق أقوى من «ترخيص مستودع»، فهذه مراجعة
 قانونية مفتوحة — تُحسم بقرار مؤسس لا باجتهاد وكيل.
 
@@ -96,36 +96,36 @@ UNRESOLVED_COUNT = 0
 
 | # | التمرين | الاسم الإنجليزي | المعدّات | النوع الحالي | ظهور في القوالب |
 |---:|---|---|---|---|---:|
-| 1 | جهاز ضغط الصدر | Chest Press Machine | machine | مخطّط جهاز داخلي | 14 |
-| 2 | ثني أرجل جالس | Seated Leg Curl | machine | مخطّط جهاز داخلي | 14 |
-| 3 | جهاز ضغط كتف | Shoulder Press Machine | machine | مخطّط جهاز داخلي | 14 |
-| 4 | جهاز ضغط صدر علوي | Incline Chest Press Machine | machine | مخطّط جهاز داخلي | 13 |
-| 5 | جهاز رفرفة جانبية | Lateral Raise Machine | machine | مخطّط جهاز داخلي | 13 |
-| 6 | جهاز مرجحة بايسبس | Preacher Curl Machine | machine | مخطّط جهاز داخلي | 12 |
-| 7 | جهاز مد ترايسبس | Triceps Extension Machine | machine | مخطّط جهاز داخلي | 12 |
-| 8 | تجديف بمسند صدر | Chest-Supported Row Machine | machine | مخطّط جهاز داخلي | 10 |
-| 9 | رفع بطات جالس | Seated Calf Raise Machine | machine | مخطّط جهاز داخلي | 10 |
-| 10 | تجديف كتف خلفي | Rear Delt Row Machine | machine | مخطّط جهاز داخلي | 9 |
-| 11 | جهاز الألوية | Glute Machine | machine | مخطّط جهاز داخلي | 8 |
-| 12 | جهاز مباعدة الأرجل | Hip Abduction Machine | machine | مخطّط جهاز داخلي | 8 |
-| 13 | هاك سكوات جهاز | Hack Squat Machine | machine | مخطّط جهاز داخلي | 4 |
-| 14 | رفع بطات واقف | Standing Calf Raise Machine | machine | مخطّط جهاز داخلي | 4 |
-| 15 | مرونة الكاحل | Ankle Mobility Drill | bodyweight | رسم حركة داخلي | 0 |
-| 16 | الدراجة الهوائية (أسولت) | Assault Bike | machine | رسم حركة داخلي | 0 |
-| 17 | مشي جانبي بالمطاط | Banded Lateral Walk | band | رسم حركة داخلي | 0 |
-| 18 | حبال القتال | Battle Ropes | rope | رسم حركة داخلي | 0 |
-| 19 | سكوات بالحزام | Belt Squat | machine | رسم حركة داخلي | 0 |
-| 20 | كرنش الدراجة | Bicycle Crunch | bodyweight | رسم حركة داخلي | 0 |
-| 21 | بيربي | Burpees | bodyweight | رسم حركة داخلي | 0 |
-| 22 | ضم الفخذ كيبل | Cable Hip Adduction | cable | رسم حركة داخلي | 0 |
-| 23 | ضغط كتف كيبل | Cable Shoulder Press | cable | رسم حركة داخلي | 0 |
-| 24 | قطع الخشب كيبل | Cable Woodchop | cable | رسم حركة داخلي | 0 |
-| 25 | تجديف بإسناد الصدر | Chest-Supported Row | dumbbell/bench | رسم حركة داخلي | 0 |
-| 26 | جهاز ضغط صدر سفلي | Decline Chest Press Machine | machine | مخطّط جهاز داخلي | 0 |
-| 27 | سكوات سومو دمبل | Dumbbell Sumo Squat | dumbbell | رسم حركة داخلي | 0 |
-| 28 | الإليبتيكال | Elliptical | machine | رسم حركة داخلي | 0 |
-| 29 | ضخّ الضفدع للجلوت | Frog Pump | bodyweight | رسم حركة داخلي | 0 |
-| 30 | جهاز ركل خلفي | Glute Kickback Machine | machine | مخطّط جهاز داخلي | 0 |
+| 1 | تجديف كتف خلفي | Rear Delt Row Machine | machine | مخطّط جهاز داخلي | 9 |
+| 2 | جهاز الألوية | Glute Machine | machine | مخطّط جهاز داخلي | 8 |
+| 3 | جهاز مباعدة الأرجل | Hip Abduction Machine | machine | مخطّط جهاز داخلي | 8 |
+| 4 | جهاز ضغط صدر علوي | Incline Chest Press Machine | machine | مخطّط جهاز داخلي | 8 |
+| 5 | جهاز مرجحة بايسبس | Preacher Curl Machine | machine | مخطّط جهاز داخلي | 8 |
+| 6 | رفع بطات جالس | Seated Calf Raise Machine | machine | مخطّط جهاز داخلي | 8 |
+| 7 | ثني أرجل جالس | Seated Leg Curl | machine | مخطّط جهاز داخلي | 8 |
+| 8 | جهاز مد ترايسبس | Triceps Extension Machine | machine | مخطّط جهاز داخلي | 8 |
+| 9 | جهاز ضغط الصدر | Chest Press Machine | machine | مخطّط جهاز داخلي | 7 |
+| 10 | تجديف بمسند صدر | Chest-Supported Row Machine | machine | مخطّط جهاز داخلي | 7 |
+| 11 | جهاز رفرفة جانبية | Lateral Raise Machine | machine | مخطّط جهاز داخلي | 7 |
+| 12 | جهاز ضغط كتف | Shoulder Press Machine | machine | مخطّط جهاز داخلي | 7 |
+| 13 | مرونة الكاحل | Ankle Mobility Drill | bodyweight | رسم حركة داخلي | 0 |
+| 14 | الدراجة الهوائية (أسولت) | Assault Bike | machine | رسم حركة داخلي | 0 |
+| 15 | مشي جانبي بالمطاط | Banded Lateral Walk | band | رسم حركة داخلي | 0 |
+| 16 | حبال القتال | Battle Ropes | rope | رسم حركة داخلي | 0 |
+| 17 | سكوات بالحزام | Belt Squat | machine | رسم حركة داخلي | 0 |
+| 18 | كرنش الدراجة | Bicycle Crunch | bodyweight | رسم حركة داخلي | 0 |
+| 19 | بيربي | Burpees | bodyweight | رسم حركة داخلي | 0 |
+| 20 | تمرير مطرقة كيبل (حبل) | Cable Hammer Curl | cable | لا وسائط | 0 |
+| 21 | ضم الفخذ كيبل | Cable Hip Adduction | cable | رسم حركة داخلي | 0 |
+| 22 | ضغط كتف كيبل | Cable Shoulder Press | cable | رسم حركة داخلي | 0 |
+| 23 | قطع الخشب كيبل | Cable Woodchop | cable | رسم حركة داخلي | 0 |
+| 24 | تجديف بإسناد الصدر | Chest-Supported Row | dumbbell/bench | رسم حركة داخلي | 0 |
+| 25 | جهاز ضغط صدر سفلي | Decline Chest Press Machine | machine | مخطّط جهاز داخلي | 0 |
+| 26 | سكوات سومو دمبل | Dumbbell Sumo Squat | dumbbell | رسم حركة داخلي | 0 |
+| 27 | الإليبتيكال | Elliptical | machine | رسم حركة داخلي | 0 |
+| 28 | ضخّ الضفدع للجلوت | Frog Pump | bodyweight | رسم حركة داخلي | 0 |
+| 29 | جهاز ركل خلفي | Glute Kickback Machine | machine | مخطّط جهاز داخلي | 0 |
+| 30 | هاك سكوات جهاز | Hack Squat Machine | machine | مخطّط جهاز داخلي | 0 |
 | 31 | رفع الركب (جري ثابت) | High Knees | bodyweight | رسم حركة داخلي | 0 |
 | 32 | جهاز ضم الفخذ | Hip Adductor Machine | machine | مخطّط جهاز داخلي | 0 |
 | 33 | ثبات الجسم المقعّر | Hollow Body Hold | bodyweight | رسم حركة داخلي | 0 |
@@ -137,27 +137,31 @@ UNRESOLVED_COUNT = 0
 | 39 | نط الحبل | Jump Rope | bodyweight | رسم حركة داخلي | 0 |
 | 40 | ضغط لاندماين | Landmine Press | barbell | رسم حركة داخلي | 0 |
 | 41 | أرجحة الأرجل (إحماء) | Leg Swings | bodyweight | رسم حركة داخلي | 0 |
-| 42 | تجديف ميدوز | Meadows Row | barbell | رسم حركة داخلي | 0 |
-| 43 | تسلق الجبل | Mountain Climber | bodyweight | رسم حركة داخلي | 0 |
-| 44 | نوردك كيرل | Nordic Hamstring Curl | bodyweight | رسم حركة داخلي | 0 |
-| 45 | مشي خارجي | Outdoor Walk | bodyweight | رسم حركة داخلي | 0 |
-| 46 | تجديف بندلاي | Pendlay Row | barbell | رسم حركة داخلي | 0 |
-| 47 | ضغط بايك | Pike Push-Up | bodyweight | رسم حركة داخلي | 0 |
-| 48 | جهاز التجديف | Rowing Machine | machine | رسم حركة داخلي | 0 |
-| 49 | مرونة الكتف بالعصا/المطاط | Shoulder Dislocates | band | رسم حركة داخلي | 0 |
-| 50 | سحب علوي بذراع واحدة | Single-Arm Lat Pulldown | machine | مخطّط جهاز داخلي | 0 |
-| 51 | دفع ترايسبس بذراع واحدة | Single-Arm Pushdown | cable | رسم حركة داخلي | 0 |
-| 52 | دفع الورك برجل واحدة | Single-Leg Hip Thrust | bodyweight | رسم حركة داخلي | 0 |
-| 53 | رفعة رومانية برجل واحدة | Single-Leg RDL | dumbbell | رسم حركة داخلي | 0 |
-| 54 | جهاز الدرج (ستيرماستر) | Stairmaster | machine | رسم حركة داخلي | 0 |
-| 55 | مد ورك واقف | Standing Hip Extension Machine | machine | مخطّط جهاز داخلي | 0 |
-| 56 | ثني أرجل واقف | Standing Leg Curl | machine | مخطّط جهاز داخلي | 0 |
-| 57 | دراجة ثابتة | Stationary Bike | machine | رسم حركة داخلي | 0 |
-| 58 | تدوير الفقرات الصدرية | Thoracic Rotation | bodyweight | رسم حركة داخلي | 0 |
-| 59 | أصابع للبار | Toes to Bar | bodyweight | رسم حركة داخلي | 0 |
-| 60 | جري على السير | Treadmill Run | machine | رسم حركة داخلي | 0 |
-| 61 | جلسة الحائط | Wall Sit | bodyweight | رسم حركة داخلي | 0 |
-| 62 | سحب أيزو-لاترال واسع | Wide-Grip Iso-Lateral Pulldown | machine | مخطّط جهاز داخلي | 0 |
+| 42 | تفتيح جهاز | Machine Fly | machine | لا وسائط | 0 |
+| 43 | الرفعة الرومانية بالجهاز | RDL Machine | machine | لا وسائط | 0 |
+| 44 | تجديف ميدوز | Meadows Row | barbell | رسم حركة داخلي | 0 |
+| 45 | تسلق الجبل | Mountain Climber | bodyweight | رسم حركة داخلي | 0 |
+| 46 | نوردك كيرل | Nordic Hamstring Curl | bodyweight | رسم حركة داخلي | 0 |
+| 47 | مشي خارجي | Outdoor Walk | bodyweight | رسم حركة داخلي | 0 |
+| 48 | تجديف بندلاي | Pendlay Row | barbell | رسم حركة داخلي | 0 |
+| 49 | ضغط بايك | Pike Push-Up | bodyweight | رسم حركة داخلي | 0 |
+| 50 | جهاز التجديف | Rowing Machine | machine | رسم حركة داخلي | 0 |
+| 51 | مرونة الكتف بالعصا/المطاط | Shoulder Dislocates | band | رسم حركة داخلي | 0 |
+| 52 | بلانك جانبي | Side Plank | bodyweight | لا وسائط | 0 |
+| 53 | سحب علوي بذراع واحدة | Single-Arm Lat Pulldown | machine | مخطّط جهاز داخلي | 0 |
+| 54 | دفع ترايسبس بذراع واحدة | Single-Arm Pushdown | cable | رسم حركة داخلي | 0 |
+| 55 | دفع الورك برجل واحدة | Single-Leg Hip Thrust | bodyweight | رسم حركة داخلي | 0 |
+| 56 | رفعة رومانية برجل واحدة | Single-Leg RDL | dumbbell | رسم حركة داخلي | 0 |
+| 57 | جهاز الدرج (ستيرماستر) | Stairmaster | machine | رسم حركة داخلي | 0 |
+| 58 | رفع بطات واقف | Standing Calf Raise Machine | machine | مخطّط جهاز داخلي | 0 |
+| 59 | مد ورك واقف | Standing Hip Extension Machine | machine | مخطّط جهاز داخلي | 0 |
+| 60 | ثني أرجل واقف | Standing Leg Curl | machine | مخطّط جهاز داخلي | 0 |
+| 61 | دراجة ثابتة | Stationary Bike | machine | رسم حركة داخلي | 0 |
+| 62 | تدوير الفقرات الصدرية | Thoracic Rotation | bodyweight | رسم حركة داخلي | 0 |
+| 63 | أصابع للبار | Toes to Bar | bodyweight | رسم حركة داخلي | 0 |
+| 64 | جري على السير | Treadmill Run | machine | رسم حركة داخلي | 0 |
+| 65 | جلسة الحائط | Wall Sit | bodyweight | رسم حركة داخلي | 0 |
+| 66 | سحب أيزو-لاترال واسع | Wide-Grip Iso-Lateral Pulldown | machine | مخطّط جهاز داخلي | 0 |
 
 ## ٦. مكتبة المؤسس الخارجية — الكلفة الحقيقية للاستيراد
 
@@ -239,7 +243,7 @@ UNRESOLVED_COUNT = 0
 | `burpees` | بيربي | رسم حركة داخلي | qimmah-inhouse-schematic | In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark) | VERIFIED | نعم |
 | `cable-biceps-curl` | مرجحة بايسبس كيبل | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
 | `cable-crossover` | تفتيح كيبل | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
-| `cable-hammer-curl` | تمرير مطرقة كيبل (حبل) | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
+| `cable-hammer-curl` | تمرير مطرقة كيبل (حبل) | لا وسائط | — | — | VERIFIED | لا |
 | `cable-hip-adduction` | ضم الفخذ كيبل | رسم حركة داخلي | qimmah-inhouse-schematic | In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark) | VERIFIED | نعم |
 | `cable-kickback` | رفسة كيبل للجلوت | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
 | `cable-lateral-raise` | رفرفة جانبي كيبل | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
@@ -328,8 +332,8 @@ UNRESOLVED_COUNT = 0
 | `low-cable-fly` | تفتيح كيبل سفلي | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
 | `lying-leg-curl` | ثني أرجل مستلقي | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
 | `machine-curl` | تمرير جهاز | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
-| `machine-fly` | تفتيح جهاز | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
-| `machine-rdl` | الرفعة الرومانية بالجهاز | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
+| `machine-fly` | تفتيح جهاز | لا وسائط | — | — | VERIFIED | لا |
+| `machine-rdl` | الرفعة الرومانية بالجهاز | لا وسائط | — | — | VERIFIED | لا |
 | `meadows-row` | تجديف ميدوز | رسم حركة داخلي | qimmah-inhouse-schematic | In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark) | VERIFIED | نعم |
 | `mountain-climber` | تسلق الجبل | رسم حركة داخلي | qimmah-inhouse-schematic | In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark) | VERIFIED | نعم |
 | `neutral-grip-pulldown` | سحب قبضة محايدة | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
@@ -364,7 +368,7 @@ UNRESOLVED_COUNT = 0
 | `seated-row-machine` | جهاز تجديف جالس | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
 | `shoulder-dislocates` | مرونة الكتف بالعصا/المطاط | رسم حركة داخلي | qimmah-inhouse-schematic | In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark) | VERIFIED | نعم |
 | `shoulder-press-machine` | جهاز ضغط كتف | مخطّط جهاز داخلي | qimmah-inhouse-schematic | In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark) | VERIFIED | لا |
-| `side-plank` | بلانك جانبي | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
+| `side-plank` | بلانك جانبي | لا وسائط | — | — | VERIFIED | لا |
 | `single-arm-cable-row` | تجديف كيبل بذراع واحدة | صورة حقيقية | yuhonas/free-exercise-db | Unlicense / public-domain dedication | VERIFIED | نعم |
 | `single-arm-lat-pulldown` | سحب علوي بذراع واحدة | مخطّط جهاز داخلي | qimmah-inhouse-schematic | In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark) | VERIFIED | لا |
 | `single-arm-pushdown` | دفع ترايسبس بذراع واحدة | رسم حركة داخلي | qimmah-inhouse-schematic | In-house original vector illustration — Qimmah owns full rights (no third-party source, no watermark) | VERIFIED | نعم |

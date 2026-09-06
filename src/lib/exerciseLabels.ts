@@ -15,6 +15,9 @@ const EQUIP_KEY: Record<string, keyof LibraryStrings> = {
   kettlebell: 'equipKettlebell',
   smith: 'equipSmith',
   'ez-bar': 'equipEzBar',
+  band: 'equipBand',
+  plate: 'equipPlate',
+  rope: 'equipRope',
 }
 
 /** Localized equipment label for a raw equipment id; falls back to the id itself. */

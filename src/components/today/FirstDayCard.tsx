@@ -22,7 +22,7 @@ import type { TodayCard } from '@/lib/todayV2Model'
  * تختفي عند **أول** إشارة في اليوم (كوب ماء يكفي) — لأنها تشرح البداية، ومن
  * بدأ لا يحتاج شرحها. القرار في `TodayV2` عبر `blankSlate`.
  */
-export function FirstDayCard({ lang, cards, onOpenCard }: { lang: Lang; cards: readonly TodayCard[]; onOpenCard: (card: TodayCard) => void }) {
+export function FirstDayCard({ lang, cards, onOpenCard, minor = false }: { lang: Lang; cards: readonly TodayCard[]; onOpenCard: (card: TodayCard) => void; minor?: boolean }) {
   const ar = lang !== 'en'
   const d = todayHomeStrings[lang]
   const loc = (text: string) => formatNumeralsIn(text, lang)
@@ -50,7 +50,7 @@ export function FirstDayCard({ lang, cards, onOpenCard }: { lang: Lang; cards: r
       </ul>
 
       {/* ③ معنى الأرقام — سطر واحد هادئ، لا كتلة تعليمية تُتخطّى بالنظر. */}
-      <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-ink-500">{d.firstDayNumbers}</p>
+      <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed text-ink-500">{minor ? d.firstDayNumbersMinor : d.firstDayNumbers}</p>
     </section>
   )
 }

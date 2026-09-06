@@ -246,8 +246,9 @@ const manifest = JSON.parse(readFileSync(MANIFEST, 'utf8'))
 const reviewed = [...manifest.entries].sort((a, b) => a.id.localeCompare(b.id))
 
 // كان 274. التغيير المقصود [مهمة الصور]: −8 إطارات أُزيلت (٤ خرائط خاطئة نمط حركة ×٢ إطار)
-// +2 رسما جهازَي ضغط الصدر +37 رسم حركة داخليًا = 305. أي انحراف عن هذا الرقم غير مقصود.
-if (live.length !== 305) throw new Error(`inventory count changed: expected 305, found ${live.length}`)
+// +2 رسما جهازَي ضغط الصدر +37 رسم حركة داخليًا = 305.
+// [MEDIA-IDENTITY-001] −8 إطارات (٤ مطابقات ثبت بالعين أنها هوية/معدّة خاطئة ×٢) = 297. أي انحراف عن هذا الرقم غير مقصود.
+if (live.length !== 297) throw new Error(`inventory count changed: expected 297, found ${live.length}`)
 if (reviewed.length !== live.length) throw new Error(`manifest count ${reviewed.length} != live count ${live.length}`)
 for (let i = 0; i < live.length; i++) {
   const actual = live[i]

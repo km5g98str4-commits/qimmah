@@ -38,11 +38,14 @@ export function WaterCard({
   lang,
   consumedMl,
   targetMl,
+  minor = false,
   onAdd,
 }: {
   lang: Lang
   consumedMl: number
   targetMl: number
+  /** [MINOR-COPY-001] دون 18: لا هدف رقمي بالتصميم — النصّ يقولها بدل «كمّل إعدادك». */
+  minor?: boolean
   /** نتيجة مسمّاة — لا `boolean` يبتلع الفرق بين تعذّر الحفظ وطلب التأكيد. */
   onAdd: AddWaterFn
 }) {
@@ -105,7 +108,7 @@ export function WaterCard({
             ) : consumedMl > 0 ? (
               d.waterLoggedOnly(n(consumedMl))
             ) : (
-              d.waterNoTarget
+              (minor ? d.waterNoTargetMinor : d.waterNoTarget)
             )}
           </span>
           {/* طلب المؤسس ١ — مستهلك / هدف · باقي، باللتر، في سطر واحد مضغوط. */}

@@ -221,6 +221,44 @@ for (const place of ['gym', 'home', 'machines'] as V2Place[]) {
 }
 check('resolveGymAccess is untouched by the equipment authority', resolveGymAccess(baseProfile('home', 4, 60)) === 'home')
 
+
+// ————————————————————————————————————————————————————————————————
+// [HOME-PULL-001] الظهر لا يغيب عن يوم «علوي» — انحدار مقيس على المولّد النهائي
+// ————————————————————————————————————————————————————————————————
+// كان إعداد المنزل الافتراضي (دمبل + مطاط + وزن الجسم) يُخرج يومَي «علوي» دفعًا خالصًا لأن
+// كل سحب الظهر في الكتالوج اشترط مقعدًا أو تجهيزة مثبَّتة. الفحص يسأل الخطة النهائية نفسها.
+console.log('\n== [HOME-PULL-001] سحب الظهر في كل يوم علوي ==')
+{
+  const HOME_PULL_PERSONAS: Array<{ name: string; equipment: Equipment[] }> = [
+    { name: 'home-default (dumbbell+bands+bodyweight)', equipment: ['dumbbell', 'bands', 'bodyweight'] },
+    { name: 'dumbbells-only', equipment: ['dumbbell'] },
+  ]
+  for (const persona of HOME_PULL_PERSONAS) {
+    let upperDays = 0
+    let upperWithoutPull = 0
+    for (const days of [4, 5]) {
+      for (const duration of [30, 45, 60]) {
+        const p: Profile = { ...baseProfile('home', days, duration), equipment: persona.equipment }
+        for (const day of generatePlan(p).workoutPlan.days) {
+          if (!/upper/i.test(day.nameEn)) continue
+          upperDays++
+          const hasPull = day.exercises.some((e) => {
+            const ex = getExercise(e.exerciseId)
+            return !!ex && ex.primaryMuscle === 'back' && ex.movementPattern === 'pull'
+          })
+          if (!hasPull) upperWithoutPull++
+        }
+      }
+    }
+    check(`[${persona.name}] the proof actually saw upper days`, upperDays >= 6)
+    check(`[${persona.name}] every upper day carries a back pull (${upperWithoutPull}/${upperDays} without)`, upperWithoutPull === 0)
+    // التأكيد المضادّ: السحب المُدخَل لا يطلب أداة غير مُعلَنة (المقعد لم يُعد شرطًا، لا أنه صار مفترَضًا).
+    const p: Profile = { ...baseProfile('home', 4, 45), equipment: persona.equipment }
+    const leaks = planIds(p).map((id) => unavailableReason(id, persona.equipment)).filter((x): x is string => !!x)
+    check(`[${persona.name}] the added pull does not smuggle an undeclared tool (${leaks.join(' | ') || 'none'})`, leaks.length === 0)
+  }
+}
+
 console.log(`\nequipment-capability proof: ${pass} passed, ${fail} failed`)
 if (fail > 0) {
   console.log('failed checks:')

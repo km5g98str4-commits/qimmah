@@ -6,6 +6,7 @@ import { MinorGoalNotice } from '@/components/MinorGoalNotice'
 import type { Lang } from '@/lib/appPreferences'
 import type { AppRoute } from '@/lib/appRoutes'
 import { useCustomization } from '@/lib/customizationContext'
+import { isMinorAge } from '@/lib/calculators'
 import { loadLogs } from '@/lib/measurementLog'
 import { formatNumeralsIn } from '@/lib/numberFormat'
 import { getDayStamp } from '@/lib/today'
@@ -87,6 +88,8 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   // الذي يقرأه `buildNutritionV2Model`، لا اشتقاق ثانٍ.
   const { state: dayLog, totals, addWater } = useNutritionToday()
   const plan = customization.nutritionPlan
+  // [MINOR-COPY-001] دون 18 لا أهداف رقمية بالتصميم (§8 الميثاق) — النصوص تصدق ذلك ولا تعد بحلقات أو هدف ماء.
+  const minor = isMinorAge(customization.profile.age)
   const calories = { consumed: totals.calories, target: plan?.targetCalories ?? 0 }
   const protein = { consumed: totals.protein, target: plan?.targetProtein ?? 0 }
   const carbs = { consumed: totals.carbs, target: plan?.targetCarbs ?? 0 }
@@ -361,11 +364,11 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         )}
 
         {blankSlate ? (
-          <FirstDayCard lang={lang} cards={model.cards} onOpenCard={openCard} />
+          <FirstDayCard lang={lang} cards={model.cards} onOpenCard={openCard} minor={minor} />
         ) : !showRings ? (
           <section aria-labelledby="today-setup-title" className="rounded-3xl border border-line bg-surface p-4 shadow-card">
             <h2 id="today-setup-title" className="text-lg font-black">{d.noTargetsTitle}</h2>
-            <p className="mt-1 text-base leading-relaxed text-ink-500">{d.noTargetsBody}</p>
+            <p className="mt-1 text-base leading-relaxed text-ink-500">{minor ? d.noTargetsBodyMinor : d.noTargetsBody}</p>
             <ul className="mt-3 space-y-2">
               {model.cards.map((card) => (
                 <li key={card.label}>
@@ -407,7 +410,7 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
         <CoachTodayEntry lang={lang} onOpen={() => onNavigate('coach')} />
 
         {/* ④ كيف ماشي معي؟ */}
-        <WaterCard lang={lang} consumedMl={dayLog.waterMl} targetMl={waterTargetMl} onAdd={addWater} />
+        <WaterCard lang={lang} consumedMl={dayLog.waterMl} targetMl={waterTargetMl} onAdd={addWater} minor={minor} />
 
         {/* [R4-UX-STEPS] الخطوات تُكتب هنا لا في مكان آخر. `StepsView` تعرض ثم
             تحيل إلى الإعدادات، وزرّها «حدّث من Apple Health» لا يفعل شيئًا في

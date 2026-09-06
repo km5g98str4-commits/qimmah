@@ -28,6 +28,7 @@ export interface TodayHomeStrings {
   ringAria: (label: string, remaining: string, consumed: string, target: string) => string
   noTargetsTitle: string
   noTargetsBody: string
+  noTargetsBodyMinor: string
   openNutrition: string
 
   // — اليوم الأول (يُعرض للقادم الجديد قبل أي رقم) —
@@ -39,6 +40,8 @@ export interface TodayHomeStrings {
   firstDayPickOne: string
   /** **وش تعني الأرقام** — يُقال قبل أن يظهر أول رقم لا بعده. */
   firstDayNumbers: string
+  /** [MINOR-COPY-001] لمن هم دون 18: لا حلقات سعرات ولا أهداف رقمية — النصّ لا يعد بما لا يصل. */
+  firstDayNumbersMinor: string
 
   // — الإجراء التالي —
   nextStepEyebrow: string
@@ -55,6 +58,7 @@ export interface TodayHomeStrings {
   /** «٥ من ٨ أكواب» — النصّان منسَّقان مسبقًا. */
   waterCups: (consumed: string, target: string) => string
   waterNoTarget: string
+  waterNoTargetMinor: string
   /** بلا هدف محسوب — يُقال المسجَّل فعلًا حتى لا تكون الضغطة بلا أثر مرئي. */
   waterLoggedOnly: (ml: string) => string
   waterAdd: string
@@ -101,12 +105,14 @@ const ar: TodayHomeStrings = {
   ringAria: (label, remaining, consumed, target) => `${label} · باقي ${remaining} · استهلكت ${consumed} من ${target}`,
   noTargetsTitle: 'لنضبط يومك أولًا',
   noTargetsBody: 'سجّل أول وجبة ووزنك الحالي، ونعرض لك حلقات السعرات والماكروز على طول.',
+  noTargetsBodyMinor: 'لعمرك ما نعرض حلقات سعرات أو ماكروز — سجّل أكلك وتمرينك ووزنك، والإرشاد النوعي معك.',
   openNutrition: 'افتح التغذية',
 
   firstDayTitle: 'يومك الأول في قِمّة',
   firstDayExpect: 'اليوم ما نبي منك إلا بداية صغيرة — خطوة وحدة تكفي، وباقي اليوم يجي وراها.',
   firstDayPickOne: 'اختر اللي يناسبك الحين:',
   firstDayNumbers: 'أول ما تسجّل، تبدأ الأرقام تظهر: حلقة السعرات تبيّن اللي استهلكته والرقم داخلها الباقي. وكل هدف تقديري مبني على بياناتك — ما فيه رقم يجي من فراغ.',
+  firstDayNumbersMinor: 'لعمرك ما نحسب أهداف سعرات أو ماكروز أو ماء رقمية — نركّز على العادات والتسجيل والتمرين. أول ما تسجّل، يظهر سجلّك بدون أهداف رقمية.',
 
   nextStepEyebrow: 'خطوتك الجاية · الحين',
   restDayChip: 'يوم راحة',
@@ -119,6 +125,7 @@ const ar: TodayHomeStrings = {
   waterTitle: 'الماء',
   waterCups: (consumed, target) => `${consumed} من ${target} أكواب`,
   waterNoTarget: 'كمّل إعدادك عشان نحسب هدف مويتك.',
+  waterNoTargetMinor: 'ما نحسب هدف ماء رقمي لعمرك — سجّل مويتك وتابعها بنفسك.',
   waterLoggedOnly: (ml) => `سجّلت ${ml} مل اليوم`,
   waterAdd: 'أضف كوب ماء',
   waterDone: 'كمّلت هدف مويتك',
@@ -168,12 +175,14 @@ const en: TodayHomeStrings = {
   ringAria: (label, remaining, consumed, target) => `${label} · ${remaining} left · ${consumed} of ${target} used`,
   noTargetsTitle: 'Let us set up your day first',
   noTargetsBody: 'Log your first meal and your current weight, and we will show your calorie and macro rings right away.',
+  noTargetsBodyMinor: 'At your age we don’t show calorie or macro rings — log your food, training and weight, and the qualitative guidance stays with you.',
   openNutrition: 'Open nutrition',
 
   firstDayTitle: 'Your first day on Qimmah',
   firstDayExpect: 'All we want today is a small start — one step is enough, the rest follows.',
   firstDayPickOne: 'Pick whatever suits you right now:',
   firstDayNumbers: 'Once you log something, the numbers show up: the calorie ring shows what you have used, and the number inside is what is left. Every target is an estimate built from your data — no number comes out of nowhere.',
+  firstDayNumbersMinor: 'At your age we don’t set calorie, macro or water targets — we focus on habits, logging and training. Once you log something, your log shows up without numeric targets.',
 
   nextStepEyebrow: 'Your next step · now',
   restDayChip: 'Rest day',
@@ -186,6 +195,7 @@ const en: TodayHomeStrings = {
   waterTitle: 'Water',
   waterCups: (consumed, target) => `${consumed} of ${target} cups`,
   waterNoTarget: 'Finish your setup so we can work out your water target.',
+  waterNoTargetMinor: 'We don’t set a numeric water target at your age — log your water and track it yourself.',
   waterLoggedOnly: (ml) => `${ml} ml logged today`,
   waterAdd: 'Add a cup of water',
   waterDone: 'Water goal reached',

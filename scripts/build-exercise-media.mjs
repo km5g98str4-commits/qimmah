@@ -88,7 +88,6 @@ const MANUAL_OVERRIDE = {
   'pec-deck': 'Butterfly',
   'reverse-pec-deck': 'Reverse_Machine_Flyes',
   'dumbbell-rdl': 'Romanian_Deadlift',
-  'machine-rdl': 'Romanian_Deadlift',
   // تمارين أساسية — نضمن الصورة الأكثر تمثيلًا (لا أشكالًا غريبة).
   'barbell-bench-press': 'Barbell_Bench_Press_-_Medium_Grip',
   'lat-pulldown': 'Wide-Grip_Lat_Pulldown',
@@ -102,7 +101,10 @@ const MANUAL_OVERRIDE = {
 // تعطي single-leg-rdl صورة جسر ألوية، وnordic-curl صورة ثني أوتار جالسًا. صورة
 // «تشبه» التمرين وليست إيّاه تكذب على المستخدم (§5) — فهذان يأخذان رسم الحركة
 // الداخلي من build-exercise-illustrations.mjs ولا يطابَقان بصور أبدًا.
-const NEVER_MATCH = new Set(['single-leg-rdl', 'nordic-curl'])
+// [MEDIA-IDENTITY-001] أربع مطابقات ثبت بالعين أنها تكذب: cable-hammer-curl ⇐ Cable_Preacher_Curl
+// (قضيب مستقيم لا حبل)، machine-fly ⇐ Flat_Bench_Cable_Flyes (كيبل لا جهاز)، machine-rdl ⇐
+// Romanian_Deadlift (بار لا جهاز)، side-plank ⇐ Push_Up_to_Side_Plank (الإطاران ضغط). لا صورة أشرف من صورة خاطئة.
+const NEVER_MATCH = new Set(['single-leg-rdl', 'nordic-curl', 'cable-hammer-curl', 'machine-fly', 'machine-rdl', 'side-plank'])
 
 const STOP = new Set(['the', 'a', 'with', 'and', 'of', 'to', 'for', 'on', 'machine'])
 

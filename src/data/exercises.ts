@@ -360,7 +360,10 @@ export const exercises: Exercise[] = [
   // ===== الظهر =====
   ex({ id: 'deadlift', nameAr: 'رفعة ميتة', nameEn: 'Deadlift', primaryMuscle: 'back', equipment: ['barbell'], level: 'advanced', movementPattern: 'hinge', environment: 'gym', defaultReps: '4–6', defaultRestSec: 150, jointLoads: ['spinal_axial', 'spinal_hinge'] }),
   ex({ id: 'barbell-row', nameAr: 'تجديف بار', nameEn: 'Barbell Row', primaryMuscle: 'back', equipment: ['barbell'], level: 'intermediate', movementPattern: 'pull', environment: 'gym', defaultReps: '8–10', defaultRestSec: 120, jointLoads: ['spinal_hinge'] }),
-  ex({ id: 'dumbbell-row', nameAr: 'تجديف دمبل', nameEn: 'Dumbbell Row', primaryMuscle: 'back', equipment: ['dumbbell', 'bench'], level: 'beginner', movementPattern: 'pull', environment: 'gym', jointLoads: [] }),
+  // [HOME-PULL-001] كان يشترط `bench` فيغيب **كل** سحب الظهر عن خطة المنزل بدمبل+مطاط+وزن الجسم
+  // (المقعد غير مُعلَن، والتجديف المقلوب تجهيزة مثبَّتة): يوما «علوي» دفعٌ خالص. التجديف بذراع واحدة
+  // يُسند على أي سطح ثابت (كرسي/طاولة) — الدمبل وحده هو الأداة الحقيقية.
+  ex({ id: 'dumbbell-row', nameAr: 'تجديف دمبل', nameEn: 'Dumbbell Row', primaryMuscle: 'back', equipment: ['dumbbell'], level: 'beginner', movementPattern: 'pull', environment: 'both', jointLoads: [] }),
   ex({ id: 'lat-pulldown-machine', nameAr: 'جهاز سحب علوي', nameEn: 'Lat Pulldown Machine (Seated/Lever)', primaryMuscle: 'back', equipment: ['machine'], level: 'beginner', movementPattern: 'pull', environment: 'gym', defaultReps: '10–12', alternatives: ['dumbbell-row', 'close-grip-pulldown'], jointLoads: ['overhead'] }),
   ex({ id: 'single-arm-lat-pulldown', nameAr: 'سحب علوي بذراع واحدة', nameEn: 'Single-Arm Lat Pulldown', primaryMuscle: 'back', equipment: ['machine'], level: 'beginner', movementPattern: 'pull', environment: 'gym', defaultReps: '10–12', alternatives: ['dumbbell-row', 'single-arm-cable-row'], jointLoads: ['overhead'] }),
   ex({ id: 'iso-lateral-pulldown', nameAr: 'سحب أيزو-لاترال', nameEn: 'Iso-Lateral Pulldown', primaryMuscle: 'back', equipment: ['machine'], level: 'beginner', movementPattern: 'pull', environment: 'gym', defaultReps: '10–12', alternatives: ['dumbbell-row', 'close-grip-pulldown'], jointLoads: ['overhead'] }),
