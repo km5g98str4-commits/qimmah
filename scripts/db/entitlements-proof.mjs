@@ -65,7 +65,9 @@ const GATEWAY_ENFORCE = '20260827120004_gateway_stamp_enforcement.sql'
 // (تحصّنها FIX) بجسدها الحيّ + قفل الكاتب — مشتقّةٌ بحكم الحارس، فتُستبعَد
 // من البيئة «القديمة» كبقيّة السلالة.
 const WRITER_SERIALIZATION = '20260906120001_entitlement_writer_serialization.sql'
-const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, RATE_LIMIT, ACTIVATION_HARDENING, CAMPAIGN_CODES, GATEWAY_ENFORCE, WRITER_SERIALIZATION]
+// [RELEASE-REVIEW-002] وهذه تعيد تعريف `public.claim_pending_grants` بربط صفّ الشراء.
+const CLAIM_BINDING = '20260906120002_claim_binds_purchase_ledger.sql'
+const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, RATE_LIMIT, ACTIVATION_HARDENING, CAMPAIGN_CODES, GATEWAY_ENFORCE, WRITER_SERIALIZATION, CLAIM_BINDING]
 
 /**
  * [OVERNIGHT-5] السلسلة **المطبَّقة فعلًا** في هذا الإثبات — بالترتيب.

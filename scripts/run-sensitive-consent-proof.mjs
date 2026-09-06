@@ -134,6 +134,18 @@ for (const path of [
 // ── (7) الإثبات موصول بالبوابة (وإلا كان حارسًا نائمًا) ──
 check('test:sensitive-consent موصول في test:gate', /npm run test:sensitive-consent/.test(pkg))
 
+// ── [RELEASE-REVIEW-003] بوّابة الإكمال (مزامنة مطفأة) تمرّ بالمنقّي — بنيويًّا ──
+{
+  const ob = read('src/lib/onboardingSync.ts')
+  const fn = block(ob, 'export async function persistOnboardingToProfile(')
+  const upsertIdx = fn.indexOf(".upsert(")
+  check('onboardingSync: مسار المزامنة المطفأة يرفع شكلًا منقًّى لا الملف الخام',
+    upsertIdx !== -1 && fn.slice(0, upsertIdx).includes('cloudOnboardingSnapshot(stamped, hasSensitiveHealthConsent(userId))')
+      && !/onboarding:\s*stamped\b/.test(fn))
+  check('⚔️ ومحاكاة إعادة الملف الخام تسقط بفحص مسمّى',
+    /onboarding:\s*stamped\b/.test(fn.replace('cloudOnboardingSnapshot(stamped, hasSensitiveHealthConsent(userId))', 'stamped')))
+}
+
 console.log(`\n  ── بنيوي: ${pass} فحصًا ──\n`)
 
 // ══════ الشقّ السلوكي — بالعلم مفعّلًا داخل الصندوق ══════

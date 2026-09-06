@@ -152,7 +152,14 @@ export function SettingsView({
               </div>
             </div>
             {auth.user ? (
-              <button type="button" onClick={() => auth.signOut()} className="btn-ghost px-4 py-2 text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  // [RELEASE-REVIEW-004] الخروج يمسح بيانات الجهاز (عزل الحساب) — لا يُنفَّذ بلا تأكيد صريح.
+                  if (window.confirm(t.auth.logoutConfirm)) void auth.signOut()
+                }}
+                className="btn-ghost px-4 py-2 text-xs"
+              >
                 <Icon name="LogOut" className="h-4 w-4" />
                 {t.auth.logout}
               </button>

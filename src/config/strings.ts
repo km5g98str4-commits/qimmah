@@ -38,6 +38,7 @@ export interface ShellStrings {
     login: string
     createAccount: string
     logout: string
+    logoutConfirm: string
     // استعادة كلمة المرور (Sprint UI 1)
     forgotLink: string
     forgotTitle: string
@@ -529,6 +530,7 @@ const ar: ShellStrings = {
     login: 'تسجيل الدخول',
     createAccount: 'افتح حساب جديد',
     logout: 'تسجيل الخروج',
+    logoutConfirm: 'تسجيل الخروج يحذف بياناتك من هذا الجهاز. لو ما فعّلت المزامنة أو صدّرت نسخة، ما تقدر ترجّعها. تكمّل؟',
     forgotLink: 'نسيت كلمة المرور؟',
     forgotTitle: 'استعادة كلمة المرور',
     forgotSubtitle: 'اكتب بريدك، وبنرسل لك رابط تغيير كلمة المرور.',
@@ -989,6 +991,7 @@ const en: ShellStrings = {
     login: 'Log in',
     createAccount: 'Create account',
     logout: 'Log out',
+    logoutConfirm: 'Signing out removes your data from this device. Unless sync is on or you exported a copy, it cannot be recovered. Continue?',
     forgotLink: 'Forgot your password?',
     forgotTitle: 'Reset your password',
     forgotSubtitle: "Enter your email and we'll send you a link to reset your password.",

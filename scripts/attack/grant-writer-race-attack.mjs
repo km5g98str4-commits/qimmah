@@ -13,6 +13,9 @@
 //      إلى `trial` — الصفّ لا يتغيّر. والمنتهية أو الملغاة تُستبدل (لا حجر زائد).
 //   ③ التأكيد المضادّ (§4.2): بحذف الهجرة نفسها يمرّ الإنزال في ② — فالحارس
 //      هو ما يمنع، لا الصدفة.
+//   ④ [RELEASE-REVIEW-002] إعادة تدوير البريد عبر claim_pending_grants: شراءٌ
+//      واحد لا يمنح Premium حيّة ثانية؛ وحذف الحساب ثم إعادة التسجيل بنفس البريد
+//      يسترجع الشراء لصاحبه (الباب الشرعي مفتوح). والتأكيد المضادّ بحذف الهجرة.
 //
 // التخطّي معلَن (لا نجاح صامت): بلا عنقود على QIMMAH_PG_URL يُعلَن السبب ويخرج 0.
 // ═══════════════════════════════════════════════════════════════════════════
@@ -20,6 +23,7 @@ import { clusterAvailable, createStaging, provision, makeUser } from '../db/lib/
 
 const ITER = Number(process.env.RACE_ITER || 12)
 const FIX = '20260906120001_entitlement_writer_serialization.sql'
+const CLAIM_FIX = '20260906120002_claim_binds_purchase_ledger.sql'
 let pass = 0, fail = 0
 const check = (label, ok, detail = '') => {
   console.log(`  ${ok ? '🛡️  PASS' : '❌ FAIL'} — ${label}${detail ? `  ⟨${detail}⟩` : ''}`)
@@ -108,6 +112,53 @@ console.log(`③ ⚔️ التأكيد المضادّ: بدون ${FIX} يمرّ 
     provision(stg)
     const r = tableGuardProbe(stg)
     check('⚔️ التصميم القديم يُنزل special حيّة إلى trial — فالحارس هو المانع', (r.live || '').startsWith('trial|'), r.live)
+  } finally { stg.drop() }
+}
+
+// ── ④ إعادة تدوير البريد عبر المطالبة — شراءٌ واحد ⇒ منحة حيّة واحدة ────────
+console.log('④ claim_pending_grants بعد تبديل بريد المشتري: لا Premium ثانية من نفس الشراء')
+const recycleProbe = (stg) => {
+  const founder = makeUser(stg, 'founder@example.com')
+  provision(stg, { founderEmail: 'founder@example.com' })
+  const batch = JSON.parse(stg.one(
+    `select public.founder_issue_purchase_batch('race probe', 'RECYCLE', 1, null)::text;`,
+    { role: 'authenticated', uid: founder }))
+  const code = batch.codes[0]
+  const a = makeUser(stg, 'buyer@example.com')
+  const redeem = stg.one(`select public.redeem_access_code_v2('${code}')::text;`, { role: 'authenticated', uid: a })
+  stg.sql(`update auth.users set email = 'moved@example.com' where id = '${a}';`)
+  const b = makeUser(stg, 'buyer@example.com')
+  let claim
+  try { claim = stg.one('select public.claim_pending_grants();', { role: 'authenticated', uid: b }) }
+  catch (e) { claim = 'ERR ' + (String(e.stderr).split('\n').find((l) => /ERROR/.test(l)) || '') }
+  const live = Number(stg.one(`select count(*) from public.entitlements where entitlement_type = 'premium' and revoked_at is null;`))
+  // الباب الشرعي: صاحب الشراء يحذف حسابه ويعود بنفس البريد — الصفّ المحذوف حرّر الشراء.
+  stg.sql(`delete from auth.users where id = '${a}';`)
+  stg.sql(`delete from auth.users where id = '${b}';`)
+  const a2 = makeUser(stg, 'buyer@example.com')
+  let reclaim
+  try { reclaim = stg.one('select public.claim_pending_grants();', { role: 'authenticated', uid: a2 }) }
+  catch (e) { reclaim = 'ERR ' + (String(e.stderr).split('\n').find((l) => /ERROR/.test(l)) || '') }
+  const bound = stg.one(`select (purchase_ledger_id is not null)::text from public.entitlements where user_id = '${a2}';`)
+  return { redeem, claim, live, reclaim, bound }
+}
+{
+  const stg = createStaging()
+  try {
+    const r = recycleProbe(stg)
+    check('المشتري الأصلي نال Premium', /premiumActive/.test(r.redeem || ''), r.redeem)
+    check('حساب جديد بالبريد المدوَّر لا ينال Premium من نفس الشراء', r.claim === 'noAccess', r.claim)
+    check('منحة Premium حيّة واحدة لا اثنتان', r.live === 1, `${r.live}`)
+    check('⟲ وحذف الحساب ثم العودة بنفس البريد يسترجع الشراء لصاحبه', r.reclaim === 'premiumActive', r.reclaim)
+    check('⟲ والمنحة المستعادة مربوطة بصفّ الشراء', r.bound === 'true', r.bound)
+  } finally { stg.drop() }
+}
+console.log(`⚔️ التأكيد المضادّ: بدون ${CLAIM_FIX} تُمنح Premium ثانية`)
+{
+  const stg = createStaging(undefined, { exclude: [CLAIM_FIX] })
+  try {
+    const r = recycleProbe(stg)
+    check('⚔️ التصميم القديم يمنح Premium ثانية من نفس الشراء — فالربط هو المانع', r.live === 2 && r.claim === 'premiumActive', `${r.claim} · ${r.live}`)
   } finally { stg.drop() }
 }
 

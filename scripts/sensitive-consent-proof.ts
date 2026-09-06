@@ -20,6 +20,8 @@ import {
 } from '@/lib/syncQueue'
 import { setCloudSyncConsent, setSensitiveHealthConsent, hasSensitiveHealthConsent } from '@/lib/syncConsent'
 import { auditSyncPayload, sanitizeSyncPayload, SYNC_TABLE_POLICIES } from '@/lib/syncFieldPolicy'
+import { cloudOnboardingSnapshot } from '@/lib/onboardingSync'
+import type { OnboardingProfile } from '@/types/onboarding'
 import { stampDataOwner } from '@/lib/dataOwnership'
 import { setEntitlement } from '@/lib/access/entitlementStore'
 import { saveSupplementLog, saveMedicationLog, saveNutritionLog, saveWaterLog } from '@/lib/historyStore'
@@ -281,5 +283,26 @@ check(
   leaks(uploadedDaily?.rows).length === 0,
 )
 check('وغير الحسّاس رُفع كما هو', obj(obj(uploadedDaily?.rows?.[0]).data).water !== undefined)
+
+// ══════ ⑤ [RELEASE-REVIEW-003] بوّابة الإكمال (مزامنة مطفأة) لا ترفع صحّة ══════
+console.log('\n⑤ مسار بوّابة الإكمال بلا مزامنة — الشكل المرفوع منقًّى بنفس قائمة السماح')
+const fullProfile = {
+  _meta: { completed: true, updatedAt: '2026-09-06T00:00:00.000Z' },
+  goal: { type: 'fat_loss' },
+  bodyMetrics: { currentWeightKg: 80, heightCm: 175 },
+  limitations: { injuries: ['knee'], notes: 'ألم في الركبة اليسرى' },
+  wellnessTracking: { mode: 'both', medications: ['metformin'], supplements: ['creatine'] },
+  foodPreferences: { dietPattern: 'balanced', allergies: ['peanut'] },
+} as unknown as OnboardingProfile
+const strict = cloudOnboardingSnapshot(fullProfile, false)
+const strictText = JSON.stringify(strict)
+check('بلا موافقة صحّية: لا إصابات ولا أدوية ولا حساسيات ولا ملاحظات في الشكل المرفوع',
+  !/knee|metformin|creatine|peanut|الركبة/.test(strictText))
+check('وبوّابة الإكمال سليمة: _meta.completed والهدف والوزن باقية',
+  obj(strict._meta).completed === true && obj(strict.goal).type === 'fat_loss' && obj(strict.bodyMetrics).currentWeightKg === 80)
+const permissive = cloudOnboardingSnapshot(fullProfile, true)
+check('بالموافقة الثانية: الحقول الحسّاسة تُضاف — وهي الإضافة الوحيدة', /metformin/.test(JSON.stringify(permissive)))
+// ⚔️ محاكاة الالتفاف: الشكل الخام (ما كان يُرفع قبل الإصلاح) يحمل الحسّاس — فالفحص أعلاه يميّز فعلًا.
+check('⚔️ الشكل الخام كان يحمل الحسّاس (المحاكاة تميّز الإصلاح عن غيابه)', /metformin/.test(JSON.stringify(fullProfile)))
 
 console.log(`\n✅ إثبات حراسة الحمولة بالموافقة الصحّية: ${pass} فحصًا، 0 فشل.`)
