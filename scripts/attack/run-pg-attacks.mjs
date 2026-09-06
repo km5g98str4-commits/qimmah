@@ -23,7 +23,9 @@ const SUITES = ['test:attack-trial-race', 'test:attack-redeem-race', 'test:attac
   // [COMMERCE-W1-HARDENING] شراءٌ واحد ⇒ منحة واحدة · ولا هبوط عن Premium.
   'test:attack-premium-authority',
   // [RELEASE-REVIEW-001] كتّاب المنحة مُسلسَلون — لا هبوط special→trial تحت السباق.
-  'test:attack-grant-race']
+  'test:attack-grant-race',
+  // [RELEASE-REVIEW-SEC] حدود السلطة السبعة على عنقود حقيقي.
+  'test:attack-authority']
 
 if (!clusterAvailable()) {
   console.error('❌ لا عنقود Postgres — وهذه الخطوة **تفشل** بغيابه ولا تتخطّاه.')
