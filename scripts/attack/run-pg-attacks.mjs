@@ -21,7 +21,9 @@ const SUITES = ['test:attack-trial-race', 'test:attack-redeem-race', 'test:attac
   // [COMMERCE-W1] ذرّية صكّ الشراء تحت التزامن — منحة Premium دائمة، فالسباق أثمن.
   'test:attack-purchase-race',
   // [COMMERCE-W1-HARDENING] شراءٌ واحد ⇒ منحة واحدة · ولا هبوط عن Premium.
-  'test:attack-premium-authority']
+  'test:attack-premium-authority',
+  // [RELEASE-REVIEW-001] كتّاب المنحة مُسلسَلون — لا هبوط special→trial تحت السباق.
+  'test:attack-grant-race']
 
 if (!clusterAvailable()) {
   console.error('❌ لا عنقود Postgres — وهذه الخطوة **تفشل** بغيابه ولا تتخطّاه.')

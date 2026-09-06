@@ -61,7 +61,11 @@ const RATE_LIMIT = '20260824120001_roles_and_redeem_rate_limit.sql'
 // تحصّنها FIX — يعيد `gtin_check_digit_valid` وحدها — فلا يدخل السلالة؛ وتأكيده
 // المضادّ محروسٌ بفحص وجود الدالّة فيمرّ نظيفًا في التاريخ المبتور.)
 const GATEWAY_ENFORCE = '20260827120004_gateway_stamp_enforcement.sql'
-const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, RATE_LIMIT, ACTIVATION_HARDENING, CAMPAIGN_CODES, GATEWAY_ENFORCE]
+// [RELEASE-REVIEW-001] 20260906120001 يعيد تعريف `public.claim_pending_grants`
+// (تحصّنها FIX) بجسدها الحيّ + قفل الكاتب — مشتقّةٌ بحكم الحارس، فتُستبعَد
+// من البيئة «القديمة» كبقيّة السلالة.
+const WRITER_SERIALIZATION = '20260906120001_entitlement_writer_serialization.sql'
+const HARDENING_LINEAGE = [FIX, SALLA_INGEST, INTEGRITY, RATE_LIMIT, ACTIVATION_HARDENING, CAMPAIGN_CODES, GATEWAY_ENFORCE, WRITER_SERIALIZATION]
 
 /**
  * [OVERNIGHT-5] السلسلة **المطبَّقة فعلًا** في هذا الإثبات — بالترتيب.
@@ -79,6 +83,7 @@ const APPLIED_CHAIN = [DEL, CORE, RPCS, REVK, RECV, PUBX, FIX, SALLA_INGEST, INT
  */
 const DECLARED_EXCLUSIONS = new Map([
   [PRIV, 'يشترط جداول الأساس (public.profiles) ولا يبنيها هذا الصندوق — يغطّيه test:privileges بصندوق كامل'],
+  [WRITER_SERIALIZATION, 'ينقل أجساد 20260827120004 و20260829120001 (gate_enforce · grant_premium_from_code) وهي خارج سلسلة عصر FIX هنا — يغطّيه test:attack-grant-race على Postgres حقيقي وtest:purchase-credential بصندوق كامل'],
 ])
 
 const results = []

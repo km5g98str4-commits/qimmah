@@ -13,12 +13,19 @@
 // التشغيل: node scripts/attack/gateway-stamp-enforcement-attack.mjs
 //   (يتطلّب عنقود Postgres على QIMMAH_PG_URL؛ يتخطّى معلنًا إن غاب.)
 // ============================================================================
-import { clusterAvailable, createStaging, provision, makeUser, mintStampSync } from '../db/lib/pg-staging.mjs'
+import { clusterAvailable, createStaging, provision, makeUser, mintStampSync, migrationFiles, MIGRATIONS_DIR } from '../db/lib/pg-staging.mjs'
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
 // الختم الحقيقي كما تسكّه البوّابة (Web Crypto، غير متزامن) — إثبات أن القاعدة
 // تقبل مُخرَج البوّابة الفعليّ لا نسخةً موازية.
 import { mintStamp } from '../../supabase/functions/qimmah-gateway/contract.mjs'
 
 const GATE_MIG = '20260827120004_gateway_stamp_enforcement.sql'
+// «قبل الهجرة» = بلا الختم **وبلا كل مُعرِّف لاحق ينقل جسدًا يستدعي الحارس**
+// (وإلا فالمُعرِّف اللاحق ينادي دالّةً لا وجود لها فيسقط الشكل الأحمر بخطأ
+// غير مسمّى بدل أن يُثبت الثغرة). يُحسب من الملفات لا من قائمة تشيخ.
+const RED_EXCLUDE = migrationFiles().filter((f) => f === GATE_MIG
+  || (f > GATE_MIG && /gate_enforce\(/.test(readFileSync(join(MIGRATIONS_DIR, f), 'utf8'))))
 const NOW = () => Date.now()
 const WMS = 120 * 1000
 
@@ -43,7 +50,7 @@ if (!clusterAvailable()) {
 
 // ═══════════════════ RED — قبل الهجرة: الالتفاف قائم ═══════════════════
 {
-  const before = createStaging(undefined, { exclude: [GATE_MIG] })
+  const before = createStaging(undefined, { exclude: RED_EXCLUDE })
   if (before.failed.length) { console.log('RED build failed:', JSON.stringify(before.failed)); process.exit(1) }
   provision(before, {})
   check('RED before: gate_stamp_valid لا وجود لها',
