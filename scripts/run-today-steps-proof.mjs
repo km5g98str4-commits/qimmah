@@ -156,7 +156,9 @@ const swallowing = card.replace('const written: StepWriteResult = writeSteps(ste
 check('العودة إلى الكتابة التي تبتلع الفشل تُسقط الفحص باسمه', !swallowing.includes('writeSteps(stepsDraft)') && card.includes('writeSteps(stepsDraft)'))
 
 // (د) حذف شرح معنى الأرقام يُسقط فحص اليوم الأول.
-const unexplained = firstDay.replace('{d.firstDayNumbers}', '{null}')
+// [MINOR-COPY-001] الشرح صار تعبيرًا شرطيًّا (بالغ/قاصر) — المحاكاة تحذف التعبير كلّه لا لفظًا واحدًا.
+const unexplained = firstDay.replace(/\{[^{}]*d\.firstDayNumbers[^{}]*\}/, '{null}')
+if (unexplained === firstDay) throw new Error('FAIL: محاكاة حذف الشرح لم تُغيّر شيئًا — الإثبات نفسه معطوب')
 check('حذف شرح معنى الأرقام يُسقط فحص اليوم الأول باسمه', !unexplained.includes('d.firstDayNumbers') && firstDay.includes('d.firstDayNumbers'))
 
 // (هـ) حارس النصّ الصلب يُهاجَم: نصّ عربي **داخل الكود** يجب أن يقلبه.
