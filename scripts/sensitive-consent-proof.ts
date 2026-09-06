@@ -20,7 +20,8 @@ import {
 } from '@/lib/syncQueue'
 import { setCloudSyncConsent, setSensitiveHealthConsent, hasSensitiveHealthConsent } from '@/lib/syncConsent'
 import { auditSyncPayload, sanitizeSyncPayload, SYNC_TABLE_POLICIES } from '@/lib/syncFieldPolicy'
-import { cloudOnboardingSnapshot } from '@/lib/onboardingSync'
+import { cloudOnboardingSnapshot, persistOnboardingToProfile } from '@/lib/onboardingSync'
+import { __setSupabaseForTests } from '@/lib/supabaseClient'
 import type { OnboardingProfile } from '@/types/onboarding'
 import { stampDataOwner } from '@/lib/dataOwnership'
 import { setEntitlement } from '@/lib/access/entitlementStore'
@@ -304,5 +305,38 @@ const permissive = cloudOnboardingSnapshot(fullProfile, true)
 check('بالموافقة الثانية: الحقول الحسّاسة تُضاف — وهي الإضافة الوحيدة', /metformin/.test(JSON.stringify(permissive)))
 // ⚔️ محاكاة الالتفاف: الشكل الخام (ما كان يُرفع قبل الإصلاح) يحمل الحسّاس — فالفحص أعلاه يميّز فعلًا.
 check('⚔️ الشكل الخام كان يحمل الحسّاس (المحاكاة تميّز الإصلاح عن غيابه)', /metformin/.test(JSON.stringify(fullProfile)))
+
+// ══════ ⑥ المسار الحقيقي: persistOnboardingToProfile بمزامنة مطفأة ⇒ ما يصل upsert ══════
+console.log('\n⑥ persistOnboardingToProfile (المزامنة مطفأة) — حمولة upsert الفعلية تُسجَّل وتُفحص')
+const upserts: Array<{ table: string; row: Record<string, unknown> }> = []
+const stubSupabase = {
+  from(table: string) {
+    return {
+      select() { return { eq() { return { maybeSingle: async () => ({ data: null, error: null }) } } } },
+      upsert: async (row: Record<string, unknown>) => { upserts.push({ table, row }); return { error: null } },
+    }
+  },
+}
+__setSupabaseForTests(stubSupabase as never)
+const OB_USER = '00000000-0000-4000-8000-00000000c0de'
+setSyncRuntime(OB_USER, false)
+setSensitiveHealthConsent(OB_USER, false)
+await persistOnboardingToProfile(OB_USER, fullProfile)
+const offRow = upserts.find((u) => u.table === 'profiles')
+const offText = JSON.stringify(offRow?.row ?? {})
+check('المسار الحقيقي كتب صفّ profiles واحدًا', upserts.length === 1 && offRow !== undefined)
+check('بلا موافقة: لا إصابات ولا أدوية ولا حساسيات ولا ملاحظات في الصفّ المرفوع', !/knee|metformin|creatine|peanut|الركبة/.test(offText))
+check('وبوّابة الإكمال وصلت: _meta.completed والهدف', /"completed":true/.test(offText) && /"fat_loss"/.test(offText))
+upserts.length = 0
+// الموافقة الثانية لا تقوم بلا الأولى (hasSensitiveHealthConsent تشترطهما معًا).
+setCloudSyncConsent(OB_USER, true)
+setSensitiveHealthConsent(OB_USER, true)
+// مع العلم مفعّلًا في هذا الصندوق تصير المزامنة مسموحة فيسلك الطابور؛ نُبقي
+// المسار المطفأ (كما في الإنتاج: العلم مطفأ) بإخراج الهوية من وقت التشغيل.
+setSyncRuntime(null, false)
+await persistOnboardingToProfile(OB_USER, fullProfile)
+const onText = JSON.stringify(upserts.find((u) => u.table === 'profiles')?.row ?? {})
+check('بالموافقة الصحّية: الحقول الحسّاسة تُرفع على المسار الحقيقي', /metformin/.test(onText) && /knee/.test(onText))
+__setSupabaseForTests(null)
 
 console.log(`\n✅ إثبات حراسة الحمولة بالموافقة الصحّية: ${pass} فحصًا، 0 فشل.`)

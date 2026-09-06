@@ -116,6 +116,15 @@ export type TypedSupabaseClient = SupabaseClient
 let clientPromise: Promise<TypedSupabaseClient | null> | null = null
 
 /**
+ * منفذ اختبار فقط: يستبدل العميل المُخزَّن بعميل مُسجِّل (أو يُعيده إلى الصفر بـnull)
+ * كي تُثبَت مسارات الكتابة الحقيقية من Node بلا شبكة (`test:sensitive-consent` ⑥).
+ * لا يغيّر سلوك الإنتاج: لا مستدعي له داخل `src/` سوى هذا التصدير.
+ */
+export function __setSupabaseForTests(client: TypedSupabaseClient | null): void {
+  clientPromise = client === null ? null : Promise.resolve(client)
+}
+
+/**
  * يعيد عميل Supabase أو null إن لم يُضبط. لا يرمي استثناء أبدًا.
  * async: المكتبة تُحمَّل عند أول استدعاء فقط (خارج مسار الإقلاع الحرج).
  */
