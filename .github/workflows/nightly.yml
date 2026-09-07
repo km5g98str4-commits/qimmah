@@ -60,8 +60,11 @@ jobs:
       - name: Lint (--max-warnings 0)
         run: npx eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0
 
+      # [RELEASE-REVIEW] نفس خطوة CI حرفيًّا: `npm run build` يشغّل ensure-search-assets
+      # قبل vite build فيولّد public/food/search/ (غير ملتزَم). النداء المباشر لـvite
+      # كان يترك حزم البحث غائبة، فسقط test:search-quality ليلًا وهو أخضر في CI.
       - name: Production build
-        run: npx tsc -b && npx vite build
+        run: npm run build
 
       - name: Perf budget (informational, non-gating)
         continue-on-error: true
