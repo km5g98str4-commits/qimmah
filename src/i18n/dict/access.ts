@@ -97,6 +97,8 @@ export interface AccessStrings {
   /** [OVERNIGHT-5] حالتان من الخادم لم تكونا موجودتين قبل وصول العقد. */
   codeRevoked: string
   codeNeedsAccount: string
+  /** [AUTH-DISCOVERABILITY-001] زرّ يفتح شاشة الدخول تحت رسالة «سجّل دخولك أول» — الرسالة لا تكفي بلا باب. */
+  signInCta: string
 
   /**
    * ═══ التجربة (٧٢ ساعة) — نفس التصنيف ═══
@@ -180,6 +182,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     codeOffline: 'يبدو ما فيه اتصال بالنت. تأكّد من اتصالك وجرّب مرة ثانية.',
     codeRevoked: 'وصولك موقوف حاليًا. راسل الدعم وبنساعدك.',
     codeNeedsAccount: 'سجّل دخولك أول عشان نربط الكود بحسابك.',
+    signInCta: 'تسجيل الدخول',
 
     trialStarting: 'نجهّز تجربتك…',
     trialStarted: 'تجربتك بدأت — ٧٢ ساعة كاملة.',
@@ -246,6 +249,7 @@ export const accessStrings: Record<Lang, AccessStrings> = {
     codeOffline: "Looks like there's no internet connection. Check it and try again.",
     codeRevoked: 'Your access is currently suspended. Contact support and we will help.',
     codeNeedsAccount: 'Sign in first so we can link the code to your account.',
+    signInCta: 'Sign in',
 
     trialStarting: 'Starting your trial…',
     trialStarted: 'Your trial has started — a full 72 hours.',

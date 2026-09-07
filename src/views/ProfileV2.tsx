@@ -418,7 +418,7 @@ function Settings({ lang, model, onBack, onCanonicalSettings, onPrivacy, onNotif
       {model.user.signedIn && (
         <Group title={t('الحساب', 'Account')}>
           <InfoRow icon="User" title={t('الملف والبيانات', 'Profile & data')} sub={model.user.email ?? ''} onClick={onCanonicalSettings} />
-          <InfoRow icon="LogOut" title={t('تسجيل الخروج · حذف الحساب', 'Log out · delete account')} sub={t('من إعدادات الحساب', 'in account settings')} onClick={onCanonicalSettings} />
+          <InfoRow icon="LogOut" title={t('تسجيل الخروج · حذف الحساب', 'Sign out · delete account')} sub={t('من إعدادات الحساب', 'in account settings')} onClick={onCanonicalSettings} />
         </Group>
       )}
     </SubScreen>

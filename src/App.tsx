@@ -112,7 +112,7 @@ function LoadingFallback() {
  * الإغلاق مشروط بـ**تبدّل** المسار لا بتشغيل الأثر: البوّابة تُفتح فوق مسارها،
  * فلو أغلقنا عند كل تشغيل لأغلقناها في نفس اللحظة التي فُتحت فيها.
  */
-function PremiumGateLayer({ lang, route }: { lang: Lang; route: AppRoute }) {
+function PremiumGateLayer({ lang, route, onSignIn }: { lang: Lang; route: AppRoute; onSignIn: () => void }) {
   const { blockedAction, closeGate } = useAccess()
   const lastRoute = useRef(route)
   useEffect(() => {
@@ -123,7 +123,7 @@ function PremiumGateLayer({ lang, route }: { lang: Lang; route: AppRoute }) {
   if (!blockedAction) return null
   return (
     <Suspense fallback={null}>
-      <PremiumGate lang={lang} />
+      <PremiumGate lang={lang} onSignIn={onSignIn} />
     </Suspense>
   )
 }
@@ -152,6 +152,11 @@ function guardRoute(route: AppRoute, userId: string | null): AppRoute {
     if (!isOnboardingComplete(userId)) return 'setup'
   }
   return route
+}
+
+/** مسارات يُعاد إليها بعد تسجيل الدخول من داخل التطبيق — لا شاشات الدخول/البداية/الإعداد. */
+function isAuthReturnTarget(route: AppRoute): boolean {
+  return !['start', 'login', 'signup', 'forgot', 'reset', 'setup', 'accountRequired', 'notfound'].includes(route)
 }
 
 function initialRoute(userId: string | null): AppRoute {
@@ -260,6 +265,17 @@ export default function App() {
   const goAuth = useCallback((mode: 'login' | 'signup' | 'forgot') => {
     setView(mode === 'signup' ? 'signup' : mode === 'forgot' ? 'forgot' : 'login')
   }, [])
+  /**
+   * [AUTH-DISCOVERABILITY-001] من دخل شاشة الحساب **من داخل التطبيق** (التقدّم ·
+   * بوّابة Premium · الإعدادات) يعود بعد الدخول إلى حيث كان، لا إلى «اليوم».
+   * يُحفظ المسار الأصلي هنا، ويُستهلك مرّة واحدة في `enterApp`/الرجوع. شاشات
+   * الدخول والبداية والإعداد ليست مقصدًا للعودة.
+   */
+  const authReturnRef = useRef<AppRoute | null>(null)
+  const goAuthFrom = useCallback((from: AppRoute, mode: 'login' | 'signup' | 'forgot') => {
+    authReturnRef.current = isAuthReturnTarget(from) ? from : null
+    goAuth(mode)
+  }, [goAuth])
 
   /**
    * وجهة الضيف من شاشة البداية/الحساب.
@@ -377,7 +393,9 @@ export default function App() {
     // من أكمل إعداده كضيف ثم أنشأ حسابًا لحفظ تقدّمه يدخل على خطته، لا على معالج جديد.
     if (!onboarded) onboarded = adoptGuestOnboarding(signedInId)
     if (!onboarded) onboarded = await hydrateOnboardingFromProfile(signedInId)
-    if (onboarded) setView('dashboard')
+    const back = authReturnRef.current
+    authReturnRef.current = null
+    if (onboarded) setView(back ? guardRoute(back, signedInId) : 'dashboard')
     else openSetup()
   }, [openSetup, goAuth])
 
@@ -503,7 +521,11 @@ export default function App() {
         mode={authMode}
         onModeChange={goAuth}
         onSuccess={enterApp}
-        onBack={() => setView('start')}
+        onBack={() => {
+          const back = authReturnRef.current
+          authReturnRef.current = null
+          setView(back ? guardRoute(back, uid) : 'start')
+        }}
       />
     )
     // ملاحظة: مسار 'reset' يُعالَج في بوّابة الاستعادة أعلى الدالة (فوق كل البوّابات).
@@ -548,7 +570,7 @@ export default function App() {
         lang={LANG}
         onNavigate={navigate}
         onEditPlan={openSetup}
-        onLogin={() => goAuth('login')}
+        onLogin={() => goAuthFrom('settings', 'login')}
         onOpenPrivacy={() => setView('privacy')}
         onOpenTerms={() => setView('terms')}
         onOpenProductReview={() => setView('productReview')}
@@ -635,7 +657,7 @@ export default function App() {
           )}
           {view === 'progress' && (
             <Suspense fallback={<ProgressSkeleton />}>
-              <V.ProgressView lang={LANG} onNavigate={navigate} />
+              <V.ProgressView lang={LANG} onNavigate={navigate} onSignIn={() => goAuthFrom('progress', 'login')} />
             </Suspense>
           )}
           {view === 'measurements' && (
@@ -745,7 +767,7 @@ export default function App() {
         */}
         {/* بوّابة Premium — نداء واحد لكل فعل محجوب، من أي شاشة. تُرسم هنا مرّة
             واحدة فلا يبني كل سطح نافذته الخاصّة فتتفرّق الرسالة. */}
-        <PremiumGateLayer lang={LANG} route={view} />
+        <PremiumGateLayer lang={LANG} route={view} onSignIn={() => goAuthFrom(view, 'login')} />
       </RouteErrorBoundary>
     </>
   )

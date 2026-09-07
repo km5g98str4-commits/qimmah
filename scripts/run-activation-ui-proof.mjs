@@ -296,7 +296,7 @@ check('★ الطبقة تراقب المسار وتغلق عند **تبدّله
   layer.slice(0, 160))
 check('والإغلاق مشروط بالتبدّل لا بكل تشغيل — وإلا أُغلقت لحظة فتحها',
   /if \(lastRoute\.current === route\) return/.test(layer))
-check('والطبقة تُمرَّر المسار الحيّ من الجذر', /<PremiumGateLayer lang=\{LANG\} route=\{view\} \/>/.test(app))
+check('والطبقة تُمرَّر المسار الحيّ من الجذر', /<PremiumGateLayer lang=\{LANG\} route=\{view\}[\s\S]{0,120}?\/>/.test(app))
 check('محاكاة الالتفاف: نزع شرط التبدّل يُكتشف باسمه',
   !/if \(lastRoute\.current === route\) return/.test(layer.replace('if (lastRoute.current === route) return', '')))
 
