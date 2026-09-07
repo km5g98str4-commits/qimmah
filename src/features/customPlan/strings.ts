@@ -68,6 +68,15 @@ export interface CustomPlanStrings {
   reviewTitle: string
   reviewHint: string
   reviewEmptyWarning: string
+  /**
+   * [CUSTOM-PLAN-DEADEND-001] المراجعة بلا تمارين كانت تعطّل زرّ الحفظ وتترك
+   * السبب أسفل القائمة — جدولٌ ظاهر وباب مقفل. الآن لكل يوم فارغ فعل، وللزرّ
+   * الرئيسي فعلٌ دائمًا: تعبئة الأيام الفارغة أو الذهاب لإضافة التمارين.
+   */
+  reviewEmptyTitle: string
+  reviewEmptyBody: string
+  fillEmptyDays: string
+  addExercisesToDay: string
   totalExercises: string
 
   // — أزرار التنقّل —
@@ -163,6 +172,10 @@ const ar: CustomPlanStrings = {
   reviewTitle: 'راجع جدولك',
   reviewHint: 'تأكد من كل يوم وتمارينه قبل الحفظ.',
   reviewEmptyWarning: 'أضف تمرين واحد على الأقل في يوم واحد قبل الحفظ.',
+  reviewEmptyTitle: 'جدولك ما فيه تمارين بعد',
+  reviewEmptyBody: 'عبّي الأيام بتمارين مقترحة بضغطة، أو أضف تمارينك بنفسك لكل يوم.',
+  fillEmptyDays: 'عبّي الأيام الفارغة',
+  addExercisesToDay: 'أضف تمارين',
   totalExercises: 'إجمالي التمارين',
 
   next: 'التالي',
@@ -265,6 +278,10 @@ const en: CustomPlanStrings = {
   reviewTitle: 'Review your plan',
   reviewHint: 'Check each day and its exercises before saving.',
   reviewEmptyWarning: 'Add at least one exercise to one day before saving.',
+  reviewEmptyTitle: 'Your plan has no exercises yet',
+  reviewEmptyBody: 'Fill the days with suggested exercises in one tap, or add your own to each day.',
+  fillEmptyDays: 'Fill empty days',
+  addExercisesToDay: 'Add exercises',
   totalExercises: 'Total exercises',
 
   next: 'Next',

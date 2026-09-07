@@ -137,6 +137,11 @@ jobs:
       - name: Auth discoverability browser E2E
         run: npm run test:e2e:auth-discoverability
 
+      # [CUSTOM-PLAN-DEADEND-001] رحلة الجدول المخصّص كاملة: أيام → بناء → مراجعة
+      # بلا تمارين لها فعل لا زرّ معطَّل → حفظ → ثبات → تعديل بلا تكرار → إلغاء آمن.
+      - name: Custom plan browser E2E
+        run: npm run test:e2e:custom-plan
+
       # فحص المؤسس اليدوي أسقط ادّعاءً آليًا أخضر: الحقول تقبل ٢٤ و١٧٧ و١٠٦
       # بصريًّا ثمّ تردّ «أكمل الأربعة». والبوّابة كانت خضراء بصدق — تفحص
       # `foldDigits` لا مستهلكها. فهذا الفحص **يقود المتصفّح** على الأرتيفكت.

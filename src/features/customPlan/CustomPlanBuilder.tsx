@@ -119,9 +119,21 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
   const duplicateWholeWeek = () => applyEngineResult(duplicateWeek(plan))
 
   // — تنقّل —
+  // [CUSTOM-PLAN-DEADEND-001] يوم فارغ ⇒ فعلٌ يوصله، لا زرٌّ معطَّل.
+  const firstEmptyDay = plan.days.findIndex((pd) => pd.exercises.length === 0)
+  const canSeedEmpty = seedRecipe.length > 0 && plan.days.some((pd, i) => pd.exercises.length === 0 && seedRecipe[i] !== undefined)
+  const goToBuildDay = (i: number) => {
+    setActiveDay(Math.max(0, i))
+    setStepIndex(STEPS.indexOf('build'))
+  }
+  const fillEmptyDays = () => {
+    if (canSeedEmpty && applyEngineResult(seedPlanFromSplit(plan))) return
+    goToBuildDay(firstEmptyDay)
+  }
   const goNext = () => {
     if (step === 'review') {
       if (saveable) onSave(plan)
+      else fillEmptyDays()
       return
     }
     // H-1: التعبئة تُطبَّق هنا فقط — بعد اختيار المستخدم البطاقة صراحةً في خطوة الأيام.
@@ -139,7 +151,7 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
     setStepIndex((s) => Math.max(0, s - 1))
   }
 
-  const nextLabel = step === 'review' ? d.save : d.next
+  const nextLabel = step === 'review' ? (saveable ? d.save : canSeedEmpty ? d.fillEmptyDays : d.addExercisesToDay) : d.next
 
   const day = plan.days[activeDay]
   // H-3ب أثناء البناء: تحذير طول الجلسة لليوم النشط وحده (اليوم الفارغ له حالته المرئية أصلًا).
@@ -415,6 +427,27 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
 
           {step === 'review' && (
             <Section title={d.reviewTitle} hint={d.reviewHint}>
+              {!saveable && (
+                <div data-testid="plan-review-empty" className="mb-4 rounded-2xl border border-primary/40 bg-primary-soft/40 p-4">
+                  <p className="flex items-center gap-1.5 text-sm font-black text-ink-900">
+                    <Icon name="AlertTriangle" className="h-4 w-4 shrink-0 text-gold-600" />
+                    {d.reviewEmptyTitle}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-ink-600">{d.reviewEmptyBody}</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {canSeedEmpty && (
+                      <button type="button" onClick={fillEmptyDays} data-testid="plan-review-fill" className="btn-primary min-h-[44px] px-4 text-xs">
+                        <Icon name="Sparkles" className="h-4 w-4" />
+                        {d.fillEmptyDays}
+                      </button>
+                    )}
+                    <button type="button" onClick={() => goToBuildDay(firstEmptyDay)} data-testid="plan-review-add" className="btn-ghost min-h-[44px] px-4 text-xs">
+                      <Icon name="Plus" className="h-4 w-4" />
+                      {d.addExercisesToDay}
+                    </button>
+                  </div>
+                </div>
+              )}
               <div className="mb-4 flex items-center justify-between rounded-2xl border border-line bg-surface px-4 py-3">
                 <span className="text-sm font-bold text-ink-500">{d.totalExercises}</span>
                 <span className="text-lg font-black text-primary-c">{totalExercises(plan)}</span>
@@ -441,7 +474,12 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
                       </span>
                     </div>
                     {pd.exercises.length === 0 ? (
-                      <p className="text-xs text-ink-400">{d.emptyDayTitle}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs text-ink-400">{d.emptyDayTitle}</p>
+                        <button type="button" onClick={() => goToBuildDay(i)} data-testid="plan-review-day-add" className="shrink-0 text-xs font-black text-primary-c">
+                          {d.addExercisesToDay}
+                        </button>
+                      </div>
                     ) : (
                       <ul className="space-y-1.5">
                         {pd.exercises.map((pe) => {
@@ -481,8 +519,8 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
               )}
 
               {!saveable && (
-                <p className="mt-4 flex items-center gap-1.5 text-sm font-bold text-danger">
-                  <Icon name="AlertTriangle" className="h-4 w-4 shrink-0" />
+                <p className="mt-4 flex items-center gap-1.5 text-sm font-bold text-ink-700">
+                  <Icon name="AlertTriangle" className="h-4 w-4 shrink-0 text-gold-600" />
                   {d.reviewEmptyWarning}
                 </p>
               )}
@@ -504,10 +542,10 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
           <button
             type="button"
             onClick={goNext}
-            disabled={step === 'review' && !saveable}
-            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-lg font-black text-white disabled:cursor-not-allowed disabled:opacity-40"
+            data-testid="plan-builder-primary"
+            className="flex flex-1 items-center justify-center gap-2 rounded-2xl bg-primary py-4 text-lg font-black text-white"
           >
-            {step === 'review' && <Icon name="Save" className="h-5 w-5" />}
+            {step === 'review' && <Icon name={saveable ? 'Save' : canSeedEmpty ? 'Sparkles' : 'Plus'} className="h-5 w-5" />}
             {nextLabel}
             {step !== 'review' && <Icon name={lang === 'ar' ? 'ChevronLeft' : 'ChevronRight'} className="h-5 w-5" />}
           </button>

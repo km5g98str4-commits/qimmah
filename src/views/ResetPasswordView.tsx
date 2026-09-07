@@ -198,6 +198,11 @@ export function ResetPasswordView({ lang, onDone }: ResetPasswordViewProps) {
                 <Icon name={busy ? 'RefreshCw' : 'Check'} className={busy ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} aria-hidden="true" />
                 {t.auth.resetSave}
               </button>
+              {/* [DEAD-END-AUDIT] النموذج كان بلا مخرج إلا بحفظ كلمة مرور — رجوعٌ صريح إلى الدخول. */}
+              <button type="button" onClick={onDone} data-testid="reset-back" className="btn-ghost mt-3 w-full py-3 text-sm">
+                <Icon name="ChevronLeft" className="h-4 w-4 rtl:rotate-180" />
+                {t.auth.back}
+              </button>
             </form>
           </>
         ) : (
