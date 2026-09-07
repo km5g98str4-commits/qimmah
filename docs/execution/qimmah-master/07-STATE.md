@@ -3,7 +3,42 @@
 > **Canonical owner of one fact only: where execution stands right now.**
 > A zero-context session reads `README.md` → `00-GROUND.md` → this file, and can continue.
 
-**Last updated:** 2026-09-06 · **by:** مراجعة الجاهزية النهائية [RELEASE-REVIEW]
+**Last updated:** 2026-09-07 · **by:** تسليم المؤسس [FOUNDER-HANDOFF]
+
+---
+
+## 0-س. تسليم المؤسس — [FOUNDER-HANDOFF] (٧ سبتمبر)
+
+```
+main       : 06fa54a  (1ffa400 ← 5963446 RR-003 hotfix ← 06fa54a nightly parity)
+             CI #590 (hotfix) أخضر · CI #591 (parity) أخضر · CI #592 (main) يعمل
+الواجهة   : تتغيّر — SHA البناء الحيّ المتوقّع 06fa54a (التحقّق من BUILD_LABEL بيد المؤسس؛ pages.dev محجوب من بيئة العمل)
+الفرع     : claude/qimmah-production-readiness-13cyt7 @ 257b77b = main + RR-004 + مقعد اختبار + أطقم المراجعة + وثائق (fast-follow، لا يُدمج تلقائيًّا)
+الإنتاج   : ٤٦ هجرة · مؤسس واحد cf8f41f0 · ١٩ مستخدمًا · منحة حيّة واحدة (Premium المؤسس، مربوطة بالسجلّ) · صفر خطأ ٢٤ ساعة
+الاحتياطي : FOUNDER-RESERVE-001 = ١٠٠٠/١٠٠٠ مُصدَرة · ١٠٠٠ بصمة مطابقة · ٠ مستردّ · ١٠٠٠ مفعَّلة · بلا انتهاء · ملف CSV واحد سُلِّم للمؤسس خارج المستودع
+```
+
+### ما رُقّي إلى `main` — الحدّ الأدنى فقط (P1)
+
+| الالتزام | الملفات | السلوك |
+|---|---|---|
+| `5963446` RR-003 | `src/lib/onboardingSync.ts` (+`cloudOnboardingSnapshot`، سطر الكتابة الوحيد المتغيّر) · `scripts/consent/*` · `scripts/run-rr003-consent-upload-proof.mjs` · `scripts/sensitive-consent-proof.ts` ⑤ · `scripts/run-sensitive-consent-proof.mjs` (بنيوي) · `package.json` (`test:consent-upload` في البوابة) | بوّابة الإكمال بمزامنة مطفأة ترفع لقطة منقّاة؛ الحقول الصحّية بالموافقة الثانية فقط. **التراجع:** `git revert 5963446` (لا هجرة، لا بيانات). |
+| `06fa54a` | `.github/workflows/nightly.yml` | Nightly يبني بـ`npm run build` كما CI (يولّد `public/food/search/`). Nightly #35 كان أحمر على `test:search-quality` ١٦/٦٧ لهذا السبب وحده — أُعيد إنتاجه محلّيًّا بإزالة الأصول (١٦/٦٧) وإعادتها (٠ فشل). |
+
+**لم يُرقَّ (fast-follow على فرع المراجعة):** RR-004 تأكيد الخروج (P2) · `__setSupabaseForTests` · `test:attack-grant-race` · `test:attack-authority` · `test:engine-matrix` · حزم staging المُعاد توليدها · `12-ZERO-COST-RECOVERY.md` · `SALLA-V1-LAUNCH-RUNBOOK.md`.
+
+### مسح ثانٍ للإنتاج (٧ سبتمبر)
+
+- مستشارو Supabase: لا جديد — `rls_enabled_no_policy` (٧ جداول لا يصلها العميل إلا عبر RPC مُعرِّف؛ مقصود) · تحذيرات SECURITY DEFINER القابلة للنداء (نموذج RPC نفسه، كلّها محروسة بـ`require_founder`/ختم البوّابة) · حماية كلمات المرور المسرّبة (P2 قيد الخطّة).
+- السجلّات ٢٤ ساعة: صفر سطر خطأ/5xx في كل المصادر.
+
+### الحارة الإدارية — ما يلزم المؤسس
+
+`ADMIN_URL = https://qimmah-8qp.pages.dev/#/admin` (يُكتب يدويًّا؛ لا رابط ملاحة — **fast-follow P3**: رابط يظهر للمؤسس وحده في الإعدادات). الحساب المعتمد: حساب المؤسس القائم `cf8f41f0…` بدور `founder` في `raw_app_meta_data` (يُضبط بـ`admin_set_role` من `service_role` فقط). القدرات: ٢٠ دالّة founder_* (المستخدمون · التفاصيل · المنح حسب المصدر · اللقطة التنفيذية · إصدار كود/دفعة/دفعة شراء · تفعيل/تعطيل كود · تعطيل دفعة شراء · سحب الوصول · صحّة البريد · الطلبات المعلّقة/الفاشلة · طلبات الطعام ومراجعتها).
+
+### سلة — مُعدّة لا حاجبة
+
+`docs/product/SALLA-V1-LAUNCH-RUNBOOK.md`: بطاقة رقمية · ١٩٫٩٩ · تصدير `code` عمودًا واحدًا · تسوية بالـSQL · فشل/إعادة/تراجع · تعليمات AR/EN · تسلسل ١٣ خطوة بعد الترقية. **`SALLA-LAUNCH-001` لا تُصدَر** قبل تأكيد قالب استيراد سلة (الخطوة ٣).
 
 ---
 
