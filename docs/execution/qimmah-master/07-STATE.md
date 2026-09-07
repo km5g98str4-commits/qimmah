@@ -10,9 +10,9 @@
 ## 0-س. تسليم المؤسس — [FOUNDER-HANDOFF] (٧ سبتمبر)
 
 ```
-main       : 0f8c9c7  (1ffa400 ← 5963446 RR-003 ← 06fa54a nightly parity ← 0f8c9c7 AUTH-DISCOVERABILITY-001)
-             CI #590 · #591 · #592 · #595 كلّها خضراء
-الواجهة   : تتغيّر — SHA البناء الحيّ المتوقّع 0f8c9c7 (التحقّق من BUILD_LABEL بيد المؤسس؛ pages.dev محجوب من بيئة العمل)
+main       : 4a1328e  (… ← 0f8c9c7 AUTH-DISCOVERABILITY-001 ← 4a1328e CUSTOM-PLAN-DEADEND-001)
+             CI #590 · #591 · #592 · #595 · #598 كلّها خضراء
+الواجهة   : تتغيّر — SHA البناء الحيّ المتوقّع 4a1328e (التحقّق من BUILD_LABEL بيد المؤسس؛ pages.dev محجوب من بيئة العمل)
 الفرع     : claude/qimmah-production-readiness-13cyt7 @ 257b77b = main + RR-004 + مقعد اختبار + أطقم المراجعة + وثائق (fast-follow، لا يُدمج تلقائيًّا)
 الإنتاج   : ٤٦ هجرة · مؤسس واحد cf8f41f0 · ١٩ مستخدمًا · منحة حيّة واحدة (Premium المؤسس، مربوطة بالسجلّ) · صفر خطأ ٢٤ ساعة
 الاحتياطي : FOUNDER-RESERVE-001 = ١٠٠٠/١٠٠٠ مُصدَرة · ١٠٠٠ بصمة مطابقة · ٠ مستردّ · ١٠٠٠ مفعَّلة · بلا انتهاء · ملف CSV واحد سُلِّم للمؤسس خارج المستودع
@@ -26,6 +26,8 @@ main       : 0f8c9c7  (1ffa400 ← 5963446 RR-003 ← 06fa54a nightly parity ←
 | `06fa54a` | `.github/workflows/nightly.yml` | Nightly يبني بـ`npm run build` كما CI (يولّد `public/food/search/`). Nightly #35 كان أحمر على `test:search-quality` ١٦/٦٧ لهذا السبب وحده — أُعيد إنتاجه محلّيًّا بإزالة الأصول (١٦/٦٧) وإعادتها (٠ فشل). |
 
 | `0f8c9c7` AUTH-DISCOVERABILITY-001 | `AccountStateCard` جديد + `accountState.ts` · `ProgressV2/ProgressView` · `PremiumGate` (زرّ دخول عند `not_authenticated`) · `App` (العودة إلى المصدر بعد الدخول) · `SettingsView` (تأكيد الخروج) · `strings.ts` (Sign in/Sign out + `logoutConfirm`) · `access.ts` (`signInCta`) · `labels.ts` · `ProfileV2` · CI خطوة e2e | الضيف يجد «تسجيل الدخول» في التقدّم وفي بوّابة Premium حيث يُقال له «سجّل دخولك أول»؛ المسجَّل يجد الخروج والعضوية. **التراجع:** `git revert 0f8c9c7`. الإثبات: `test:auth-discoverability` ٣٠ + `test:e2e:auth-discoverability` ٣١ (في CI). |
+
+| `4a1328e` CUSTOM-PLAN-DEADEND-001 | `CustomPlanBuilder.tsx` · `customPlan/strings.ts` · `ResetPasswordView.tsx` (رجوع) · `package.json` (`test:custom-plan-deadend` في البوابة) · CI خطوة e2e | مراجعة الجدول المخصّص بلا تمارين كانت تعطّل «حفظ الجدول» وتُخفي السبب تحت الطيّة. الآن الزرّ الرئيسي له فعل دائمًا: حفظ · «عبّي الأيام الفارغة» · «أضف تمارين»؛ والتنبيه أوّل الشاشة؛ ولكل يوم فارغ رابط. **التراجع:** `git revert 4a1328e`. الإثبات ١٨ + ٢٨ (متصفّح). |
 
 **لم يُرقَّ (fast-follow على فرع المراجعة):** `__setSupabaseForTests` · `test:attack-grant-race` · `test:attack-authority` · `test:engine-matrix` · حزم staging المُعاد توليدها · `12-ZERO-COST-RECOVERY.md` · `SALLA-V1-LAUNCH-RUNBOOK.md`.
 
