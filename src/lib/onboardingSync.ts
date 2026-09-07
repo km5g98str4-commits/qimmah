@@ -19,6 +19,8 @@ import { getSupabase } from './supabaseClient'
 import { markAccountOnboarded } from './onboarding'
 import { enqueueOnboardingProfileUpsert } from './onboardingProfile'
 import { syncAllowedFor } from './syncQueue'
+import { sanitizeOnboardingForSync } from './syncFieldPolicy'
+import { hasSensitiveHealthConsent } from './syncConsent'
 import type { OnboardingProfile } from '@/types/onboarding'
 
 /** الشكل القديم المختزل — يبقى مقروءًا للتوافق (صفوف كتبتها إصدارات سابقة). */
@@ -71,6 +73,15 @@ export async function currentUserId(): Promise<string | null> {
  * الإكمال وحدها) يكتب مباشرة بالشكل الكامل، محروسًا بالأحدثية: onboarding
  * سحابي بطابع أحدث لا يُداس.
  */
+/**
+ * الشكل الوحيد الذي يجوز أن يبلغ السحابة من ملف الإعداد على مسار بوّابة الإكمال:
+ * قائمة السماح نفسها التي يطبّقها الطابور، والحقول الحسّاسة بالموافقة الثانية فقط.
+ * دالّة خالصة كي تُثبَت من Node بلا شبكة (`test:sensitive-consent`).
+ */
+export function cloudOnboardingSnapshot(op: OnboardingProfile, allowSensitive: boolean): Record<string, unknown> {
+  return sanitizeOnboardingForSync(op, allowSensitive)
+}
+
 export async function persistOnboardingToProfile(userId: string, op: OnboardingProfile): Promise<void> {
   if (!userId) return
   const stamped: OnboardingProfile = {
@@ -101,7 +112,10 @@ export async function persistOnboardingToProfile(userId: string, op: OnboardingP
     // حارس LWW: لا نكتب فوق onboarding سحابي أحدث طابعًا (جهاز آخر أكمل بعده).
     const ourStamp = Date.parse(stamped._meta.updatedAt ?? '') || 0
     if (cloudOnboardingStampMs(prevData.onboarding) > ourStamp) return
-    const nextData = { ...prevData, onboarding: stamped }
+    // [RELEASE-REVIEW-003] بوّابة الإكمال لا تحمل صحّة: الشكل المرفوع هنا يمرّ
+    // بنفس منقّي الطابور — الحقول الحسّاسة (إصابات · أدوية · حساسيات · ملاحظات)
+    // لا تغادر الجهاز إلا بالموافقة الصحّية الصريحة (القرار المقفل §8-5).
+    const nextData = { ...prevData, onboarding: cloudOnboardingSnapshot(stamped, hasSensitiveHealthConsent(userId)) }
     await supabase.from('profiles').upsert({ user_id: userId, data: nextData }, { onConflict: 'user_id' })
   } catch {
     /* السجلّ المحلي هو مصدر الحقيقة للبوابة — تجاهل فشل السحابة */
