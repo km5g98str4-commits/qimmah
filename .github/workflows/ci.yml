@@ -131,6 +131,12 @@ jobs:
       - name: Onboarding v2 browser E2E
         run: npm run test:e2e:onboarding
 
+      # [AUTH-DISCOVERABILITY-001] الرحلة الحقيقية: ضيف على «التقدّم» يجد «تسجيل
+      # الدخول»، يدخل ويعود إلى التقدّم نفسه؛ بوّابة Premium تعطي زرّ دخول لا
+      # نصًّا؛ الخروج بتأكيد ولا أثر جلسة بعده؛ #/admin كما هو. Supabase مُستبدَل.
+      - name: Auth discoverability browser E2E
+        run: npm run test:e2e:auth-discoverability
+
       # فحص المؤسس اليدوي أسقط ادّعاءً آليًا أخضر: الحقول تقبل ٢٤ و١٧٧ و١٠٦
       # بصريًّا ثمّ تردّ «أكمل الأربعة». والبوّابة كانت خضراء بصدق — تفحص
       # `foldDigits` لا مستهلكها. فهذا الفحص **يقود المتصفّح** على الأرتيفكت.

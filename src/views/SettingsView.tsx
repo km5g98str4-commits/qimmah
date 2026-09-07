@@ -155,7 +155,7 @@ export function SettingsView({
               <button
                 type="button"
                 onClick={() => {
-                  // [RELEASE-REVIEW-004] الخروج يمسح بيانات الجهاز (عزل الحساب) — لا يُنفَّذ بلا تأكيد صريح.
+                  // [RELEASE-REVIEW-004] الخروج يمسح بيانات الجهاز — لا يُنفَّذ بلا تأكيد صريح.
                   if (window.confirm(t.auth.logoutConfirm)) void auth.signOut()
                 }}
                 className="btn-ghost px-4 py-2 text-xs"

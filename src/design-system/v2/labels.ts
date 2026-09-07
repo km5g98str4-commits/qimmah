@@ -463,7 +463,7 @@ export const V2_WELCOME: Record<'ar' | 'en', V2WelcomeCopy> = {
     headline: ['Train with clarity.', 'Progress with confidence.'],
     support: 'Your training, nutrition, and progress in one place — Arabic-first, in clear steps.',
     primary: 'Start now',
-    secondary: 'Have an account? Log in',
+    secondary: 'Have an account? Sign in',
     trust: 'No ads. No hype.',
   },
 } as const

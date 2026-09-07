@@ -38,6 +38,7 @@ export interface ShellStrings {
     login: string
     createAccount: string
     logout: string
+    /** [RELEASE-REVIEW-004] الخروج يمسح بيانات الجهاز — يُؤكَّد قبل التنفيذ. */
     logoutConfirm: string
     // استعادة كلمة المرور (Sprint UI 1)
     forgotLink: string
@@ -976,22 +977,22 @@ const en: ShellStrings = {
     note: 'Your data is saved on your device. You can edit anything later.',
     positioning: 'Your calm guide to better health.',
     trust: 'No ads. No hype.',
-    login: 'Log in',
+    login: 'Sign in',
     continueGuest: 'Continue as guest',
     guestNote: 'Guest data is stored on this device only.',
   },
   auth: {
-    title: 'Log in',
-    subtitle: 'Log in to back up your data to the cloud and access it from any device.',
+    title: 'Sign in',
+    subtitle: 'Sign in to back up your data to the cloud and access it from any device.',
     signupTitle: 'Create account',
     signupSubtitle: 'Create your account once to save your progress and reach it from any device.',
     name: 'Name',
     email: 'Email',
     password: 'Password',
-    login: 'Log in',
+    login: 'Sign in',
     createAccount: 'Create account',
-    logout: 'Log out',
-    logoutConfirm: 'Signing out removes your data from this device. Unless sync is on or you exported a copy, it cannot be recovered. Continue?',
+    logout: 'Sign out',
+    logoutConfirm: "Signing out removes your data from this device. If you haven't turned on sync or exported a copy, it can't be recovered. Continue?",
     forgotLink: 'Forgot your password?',
     forgotTitle: 'Reset your password',
     forgotSubtitle: "Enter your email and we'll send you a link to reset your password.",
@@ -1014,7 +1015,7 @@ const en: ShellStrings = {
     noAccount: 'No account?',
     haveAccount: 'Have an account?',
     switchToSignup: 'Create one',
-    switchToLogin: 'Log in',
+    switchToLogin: 'Sign in',
     savePrompt: 'Sign up to save your progress',
     disabledTitle: "Accounts don't work in this build",
     disabledBody: "This build has no account server, so we can't create an account for you here. Accounts work in the live version.",
@@ -1138,8 +1139,8 @@ const en: ShellStrings = {
   },
   accountRequired: {
     title: 'This path needs an account',
-    body: 'Log in or continue as a guest to open the app and keep your data on this device.',
-    login: 'Log in',
+    body: 'Sign in or continue as a guest to open the app and keep your data on this device.',
+    login: 'Sign in',
     guest: 'Continue as guest',
     back: 'Back to start',
   },

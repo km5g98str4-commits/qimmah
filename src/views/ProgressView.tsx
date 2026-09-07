@@ -5,6 +5,7 @@ import type { AppRoute } from '@/lib/appRoutes'
 interface ProgressViewProps {
   lang: Lang
   onNavigate?: (route: AppRoute) => void
+  onSignIn?: () => void
 }
 
 /**

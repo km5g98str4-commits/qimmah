@@ -25,7 +25,12 @@ function actionLabel(action: PaidAction, s: ReturnType<() => typeof accessString
   return s.actions.recovery
 }
 
-export function PremiumGate({ lang }: { lang: Lang }) {
+/**
+ * [AUTH-DISCOVERABILITY-001] `onSignIn`: حين يردّ الخادم `not_authenticated`
+ * كانت الرسالة تقول «سجّل دخولك أول» بلا باب. الزرّ يفتح شاشة الدخول نفسها،
+ * والبوّابة تُغلق بتبدّل المسار (السلوك القائم).
+ */
+export function PremiumGate({ lang, onSignIn }: { lang: Lang; onSignIn?: () => void }) {
   const { blockedAction, closeGate, redeem, beginTrial, recordTrialIntent, entitlement, notePurchaseAttempt } = useAccess()
   const s = accessStrings[lang] ?? accessStrings.ar
   const [codeOpen, setCodeOpen] = useState(false)
@@ -177,6 +182,11 @@ export function PremiumGate({ lang }: { lang: Lang }) {
               {trialMessage(trialState, lang)}
             </p>
           ) : null}
+          {trialState === 'not_authenticated' && onSignIn ? (
+            <button type="button" onClick={onSignIn} data-testid="premium-gate-trial-sign-in" className="btn-primary min-h-[44px] w-full justify-center text-sm">
+              {s.signInCta}
+            </button>
+          ) : null}
 
           {!codeOpen && (
             <button type="button" onClick={() => setCodeOpen(true)} data-testid="premium-gate-have-code" className="btn-ghost min-h-[44px] w-full text-sm">
@@ -241,6 +251,11 @@ export function PremiumGate({ lang }: { lang: Lang }) {
               >
                 {message ?? ''}
               </p>
+              {state === 'not_authenticated' && onSignIn ? (
+                <button type="button" onClick={onSignIn} data-testid="premium-gate-sign-in" className="btn-primary mt-2.5 min-h-[44px] w-full justify-center text-sm">
+                  {s.signInCta}
+                </button>
+              ) : null}
             </div>
           )}
 

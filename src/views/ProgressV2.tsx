@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState, type FormEvent } from 'react'
+import { AccountStateCard } from '@/components/AccountStateCard'
 import { Icon } from '@/components/Icon'
 import { ScreenHeader } from '@/components/ScreenHeader'
 import { StateBlock } from '@/components/StateBlock'
@@ -36,6 +37,8 @@ const BodyModel3D = lazy(() => import('@/components/BodyModel3D').then((mod) => 
 interface ProgressV2Props {
   lang: Lang
   onNavigate?: (route: AppRoute) => void
+  /** [AUTH-DISCOVERABILITY-001] مدخل تسجيل الدخول من بطاقة حالة الحساب. */
+  onSignIn?: () => void
 }
 
 // لوحة الهوية الكلاسيكية بأدوار دلالية: الأخضر يؤكّد تقدّمًا مقاسًا، ولون الهوية
@@ -56,7 +59,7 @@ const TONE_TEXT: Record<RowTone, string> = { good: '', neutral: 'text-ink-500', 
  * history; where there is none we say so. No fake weight loss / PRs / body-fat
  * / steps.
  */
-export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
+export function ProgressV2({ lang, onNavigate, onSignIn }: ProgressV2Props) {
   const { customization } = useCustomization()
   const ar = lang !== 'en'
   const t = (a: string, e: string) => (ar ? a : e)
@@ -214,6 +217,10 @@ export function ProgressV2({ lang, onNavigate }: ProgressV2Props) {
           </span>
           <Icon name="ChevronLeft" className="h-4 w-4 shrink-0 text-ink-400 rtl:rotate-0 ltr:rotate-180" />
         </button>
+
+        {/* [AUTH-DISCOVERABILITY-001] حالة الحساب في نفس رحلة «خطواتك»: الضيف يرى أنه
+            غير مسجَّل ويجد الباب هنا، والمسجَّل يجد الخروج والعضوية بلا بحث. */}
+        {onSignIn ? <AccountStateCard lang={lang} onSignIn={onSignIn} onOpenMembership={() => go('premium')} /> : null}
 
         <p className="mt-6 flex items-start gap-2 text-[11px] text-ink-400"><Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />{model.disclaimer}</p>
       </div>
