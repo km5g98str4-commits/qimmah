@@ -77,7 +77,7 @@
 ```sql
 select label,
        count(*)                                  as issued,
-       count(*) filter (where redeemed_count > 0) as redeemed,
+       count(*) filter (where redemption_count > 0) as redeemed,
        count(*) filter (where not enabled)        as disabled
 from public.access_codes
 where grant_purpose = 'purchase' and label = 'SALLA-LAUNCH-001'
