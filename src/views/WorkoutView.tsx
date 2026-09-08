@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { Icon } from '@/components/Icon'
 import { WorkoutMode } from '@/components/WorkoutMode'
 import { WorkoutSummary } from '@/components/WorkoutSummary'
@@ -587,9 +588,14 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
             وبلا واجهة — وصلُه موجة ميزة لا بند تنظيف. */}
       </div>
 
-      {/* باني الجدول المخصّص — إنشاء/تعديل، يعتمد الجدول لهذا الحساب عند الحفظ */}
-      {builderOpen && (
-        <div className="fixed inset-0 z-[65]">
+      {/* باني الجدول المخصّص — إنشاء/تعديل، يعتمد الجدول لهذا الحساب عند الحفظ.
+          [CUSTOM-PLAN-IOS-OVERLAY] يُرسم في `document.body` لا داخل متمرّر القشرة:
+          WebKit على iOS يحصر `position: fixed` داخل حاوية `-webkit-overflow-scrolling: touch`
+          (متمرّر `MobileShell`)، فكان الباني يُرسم بين رأس القشرة وشريطها السفلي
+          وذيله (إلغاء/التالي/حفظ) يُقصّ خارج الشاشة — المؤسس رآه على آيفون حقيقي.
+          Chromium لا يعيد إنتاجه فلم تلتقطه الرحلات. البوّابة تُخرجه من كل حاوية. */}
+      {builderOpen && createPortal(
+        <div className="fixed inset-0 z-[65]" data-testid="custom-plan-portal">
           <CustomPlanBuilder
             lang={lang}
             initialPlan={builderOpen === 'edit' ? customRec?.plan : undefined}
@@ -624,7 +630,8 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
               </div>
             </div>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* إشعار حفظ الجدول المخصّص */}
