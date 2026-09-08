@@ -406,7 +406,7 @@ function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
     )
   }
   return (
-    <span data-testid="exercise-card-media" data-media-state={state} className="relative block aspect-[4/3] w-full overflow-hidden bg-beige">
+    <span data-testid="exercise-card-media" data-media-state={state} data-media-kind={approved?.kind ?? 'legacy'} className={cn('relative block aspect-[4/3] w-full overflow-hidden', approved?.kind === 'card' ? 'bg-[#141a2a]' : 'bg-beige')}>
       {state === 'loading' && (
         <span aria-hidden="true" className="absolute inset-0 animate-pulse bg-gradient-to-br from-beige to-line" />
       )}
@@ -419,7 +419,8 @@ function ExerciseCardMedia({ exerciseId }: { exerciseId: string }) {
         onLoad={() => setState('ready')}
         onError={() => setState('failed')}
         className={cn(
-          'h-full w-full object-cover transition-opacity duration-300 group-hover:scale-[1.03]',
+          // [FOUNDER-CARDS-001] البطاقة تحمل عنوانها داخل الصورة — contain لا cover كي لا يُقصّ.
+          approved?.kind === 'card' ? 'h-full w-full object-contain transition-opacity duration-300' : 'h-full w-full object-cover transition-opacity duration-300 group-hover:scale-[1.03]',
           state === 'ready' ? 'opacity-100' : 'opacity-0',
         )}
       />

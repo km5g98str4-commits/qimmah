@@ -53,6 +53,8 @@ const KIND_FOR_PRODUCTION: Record<string, MediaKind> = {
   stills: 'REAL_PHOTO',
   diagram: 'IN_HOUSE_DIAGRAM',
   illustration: 'IN_HOUSE_ILLUSTRATION',
+  // [FOUNDER-CARDS-001] بطاقة المؤسس: تصيير داخلي — تُسجَّل رسمًا داخليًّا لا فوتوغرافيا.
+  card: 'IN_HOUSE_ILLUSTRATION',
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -69,31 +71,7 @@ const KIND_FOR_PRODUCTION: Record<string, MediaKind> = {
 // انظر docs/media/EXERCISE-MEDIA-STATUS.md §الإصلاح المطلوب.
 // ─────────────────────────────────────────────────────────────────────────────
 export const UI_PROVENANCE_NULL_ALLOWLIST: readonly string[] = [
-  'chest-press-machine',
-  'chest-supported-row-machine',
-  'decline-chest-press-machine',
-  'glute-kickback-machine',
-  'glute-machine',
-  'hack-squat-machine',
-  'hip-abduction-machine',
-  'hip-adductor-machine',
-  'incline-chest-press-machine',
-  'iso-lateral-chest-press',
-  'iso-lateral-high-row',
-  'iso-lateral-incline-press',
-  'iso-lateral-pulldown',
-  'lateral-raise-machine',
-  'preacher-curl-machine',
-  'rear-delt-row-machine',
-  'seated-calf-raise-machine',
-  'seated-leg-curl',
-  'shoulder-press-machine',
-  'single-arm-lat-pulldown',
-  'standing-calf-raise-machine',
-  'standing-hip-extension-machine',
-  'standing-leg-curl',
-  'triceps-extension-machine',
-  'wide-grip-iso-lateral-pulldown',
+  // [FOUNDER-CARDS-001] فرغت القائمة: كل مخطّطات الأجهزة الـ٢٥ استُبدلت ببطاقات المؤسس التي تحمل مصدرها وترخيصها.
 ]
 
 export interface Inputs {
@@ -309,10 +287,15 @@ counter.push([
   },
 ])
 
+// [FOUNDER-CARDS-001] قائمة الاستثناء فارغة الآن، فالمحاكاة تُفرغ مصدرَ مدخلٍ معتمد بدل
+// أن تقتطع من القائمة — الالتفاف الواقعي: بطاقة بلا مصدر ولا ترخيص تصل الواجهة.
 counter.push([
-  'a 26th APPROVED entry with null UI provenance',
+  'an APPROVED entry with null UI provenance and no allowlist exception',
   'UI_PROVENANCE_NULL',
-  () => violations({ ...live, allowlist: UI_PROVENANCE_NULL_ALLOWLIST.slice(1) }),
+  () => {
+    const production = { ...live.production, 'barbell-bench-press': { ...live.production['barbell-bench-press'], imageSource: null, imageLicense: null } }
+    return violations({ ...live, production })
+  },
 ])
 
 counter.push([
@@ -328,7 +311,8 @@ counter.push([
     const rows = clone()
     // الالتفاف الواقعي: تبديل النوع في السجلّ دون لمس المسار — من يستنتج النوع من
     // امتداد الملف يمرّ، ومن يقرأ الحقل يسقط. الحارس يقرأ الحقل.
-    for (const r of rows) if (r.mediaKind === 'IN_HOUSE_DIAGRAM') r.mediaKind = 'IN_HOUSE_ILLUSTRATION'
+    // [FOUNDER-CARDS-001] لم يعد أي مدخل إنتاج بنوع diagram، فالمحاكاة تلبس بطاقة مؤسس ثوب الفوتوغرافيا.
+    for (const r of rows) if (r.id.startsWith('card:')) r.mediaKind = 'REAL_PHOTO'
     return violations({ ...live, rows })
   },
 ])
