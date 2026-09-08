@@ -71,6 +71,16 @@ const strings = read('src/features/customPlan/strings.ts')
   check('لا تعبئة خارج seedPlanFromSplit', (builder.match(/seedPlanFromSplit\(/g) ?? []).length === 2)
 }
 
+// ——— ٤ب) [CUSTOM-PLAN-IOS-OVERLAY] الباني خارج متمرّر القشرة ومنغمس ———
+{
+  const workout = stripComments(read('src/views/WorkoutView.tsx'))
+  check('WorkoutView يرسم الباني ببوّابة إلى document.body', /\{builderOpen && createPortal\(\s*<div className="fixed inset-0 z-\[65\]" data-testid="custom-plan-portal">[\s\S]*?document\.body,\s*\)\}/.test(workout))
+  check('الباني يعلن الانغماس عند التركيب ويرفعه عند التفكيك', /window\.dispatchEvent\(new CustomEvent\('qimmah:immersive', \{ detail: true \}\)\)\s*return \(\) => \{ window\.dispatchEvent\(new CustomEvent\('qimmah:immersive', \{ detail: false \}\)\) \}/.test(builder))
+  // ⚔️ محاكاة الالتفاف: إعادة الباني إلى داخل الشجرة (بلا بوّابة) تُكتشف.
+  const inline = workout.replace('createPortal(', '(')
+  check('⚔️ محاكاة: نزع البوّابة يُكتشف', !/builderOpen && createPortal\(/.test(inline))
+}
+
 // ——— ٥) القاموس ———
 {
   for (const k of ['reviewEmptyTitle', 'reviewEmptyBody', 'fillEmptyDays', 'addExercisesToDay']) {

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import { Icon } from '@/components/Icon'
 import { ExerciseName } from '@/components/ExerciseName'
@@ -69,6 +69,12 @@ export function CustomPlanBuilder({ lang, initialPlan, onSave, onCancel }: Custo
 
   const step = STEPS[stepIndex]
   const total = STEPS.length
+  // [CUSTOM-PLAN-IOS-OVERLAY] سطح ملء الشاشة يعلن الانغماس كما تفعل الجلسة النشطة:
+  // القشرة تُزيل رأسها وشريطها السفلي من التخطيط، فلا كروم يعلو الباني ولا يقصّ ذيله.
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('qimmah:immersive', { detail: true }))
+    return () => { window.dispatchEvent(new CustomEvent('qimmah:immersive', { detail: false })) }
+  }, [])
   const saveable = isPlanSaveable(plan)
   // H-1: وصفة التعبئة تُعرض قبل التطبيق — المستخدم يرى ما سيحدث لكل يوم.
   const seedRecipe = useMemo(() => seedRecipeForDayCount(plan.days.length), [plan.days.length])
