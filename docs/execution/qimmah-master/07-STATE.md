@@ -10,9 +10,9 @@
 ## 0-س. تسليم المؤسس — [FOUNDER-HANDOFF] (٧ سبتمبر)
 
 ```
-main       : 4a1328e  (… ← 0f8c9c7 AUTH-DISCOVERABILITY-001 ← 4a1328e CUSTOM-PLAN-DEADEND-001)
-             CI #590 · #591 · #592 · #595 · #598 كلّها خضراء
-الواجهة   : تتغيّر — SHA البناء الحيّ المتوقّع 4a1328e (التحقّق من BUILD_LABEL بيد المؤسس؛ pages.dev محجوب من بيئة العمل)
+main       : 6477b94  (… ← 4a1328e CUSTOM-PLAN-DEADEND-001 ← 6477b94 CUSTOM-PLAN-IOS-OVERLAY)
+             CI #590 · #591 · #592 · #595 · #598 · #601 كلّها خضراء
+الواجهة   : تتغيّر — SHA البناء الحيّ المتوقّع 6477b94 (التحقّق من BUILD_LABEL بيد المؤسس؛ pages.dev محجوب من بيئة العمل)
 الفرع     : claude/qimmah-production-readiness-13cyt7 @ 257b77b = main + RR-004 + مقعد اختبار + أطقم المراجعة + وثائق (fast-follow، لا يُدمج تلقائيًّا)
 الإنتاج   : ٤٦ هجرة · مؤسس واحد cf8f41f0 · ١٩ مستخدمًا · منحة حيّة واحدة (Premium المؤسس، مربوطة بالسجلّ) · صفر خطأ ٢٤ ساعة
 الاحتياطي : FOUNDER-RESERVE-001 = ١٠٠٠/١٠٠٠ مُصدَرة · ١٠٠٠ بصمة مطابقة · ٠ مستردّ · ١٠٠٠ مفعَّلة · بلا انتهاء · ملف CSV واحد سُلِّم للمؤسس خارج المستودع
@@ -28,6 +28,8 @@ main       : 4a1328e  (… ← 0f8c9c7 AUTH-DISCOVERABILITY-001 ← 4a1328e CUST
 | `0f8c9c7` AUTH-DISCOVERABILITY-001 | `AccountStateCard` جديد + `accountState.ts` · `ProgressV2/ProgressView` · `PremiumGate` (زرّ دخول عند `not_authenticated`) · `App` (العودة إلى المصدر بعد الدخول) · `SettingsView` (تأكيد الخروج) · `strings.ts` (Sign in/Sign out + `logoutConfirm`) · `access.ts` (`signInCta`) · `labels.ts` · `ProfileV2` · CI خطوة e2e | الضيف يجد «تسجيل الدخول» في التقدّم وفي بوّابة Premium حيث يُقال له «سجّل دخولك أول»؛ المسجَّل يجد الخروج والعضوية. **التراجع:** `git revert 0f8c9c7`. الإثبات: `test:auth-discoverability` ٣٠ + `test:e2e:auth-discoverability` ٣١ (في CI). |
 
 | `4a1328e` CUSTOM-PLAN-DEADEND-001 | `CustomPlanBuilder.tsx` · `customPlan/strings.ts` · `ResetPasswordView.tsx` (رجوع) · `package.json` (`test:custom-plan-deadend` في البوابة) · CI خطوة e2e | مراجعة الجدول المخصّص بلا تمارين كانت تعطّل «حفظ الجدول» وتُخفي السبب تحت الطيّة. الآن الزرّ الرئيسي له فعل دائمًا: حفظ · «عبّي الأيام الفارغة» · «أضف تمارين»؛ والتنبيه أوّل الشاشة؛ ولكل يوم فارغ رابط. **التراجع:** `git revert 4a1328e`. الإثبات ١٨ + ٢٨ (متصفّح). |
+
+| `6477b94` CUSTOM-PLAN-IOS-OVERLAY | `WorkoutView.tsx` (بوّابة إلى body) · `CustomPlanBuilder.tsx` (انغماس) | صورة المؤسس على آيفون: WebKit يحصر `fixed` داخل متمرّر القشرة فيُقصّ ذيل الباني (إلغاء/التالي) ويبقى شريط التنقّل ظاهرًا. الباني الآن خارج كل حاوية والقشرة منغمسة أثناءه. **التراجع:** `git revert 6477b94`. **درس:** رحلات Chromium لا تلتقط حصر WebKit — أُضيفت محاكاة تحويل على `main` في الرحلة. |
 
 **لم يُرقَّ (fast-follow على فرع المراجعة):** `__setSupabaseForTests` · `test:attack-grant-race` · `test:attack-authority` · `test:engine-matrix` · حزم staging المُعاد توليدها · `12-ZERO-COST-RECOVERY.md` · `SALLA-V1-LAUNCH-RUNBOOK.md`.
 
