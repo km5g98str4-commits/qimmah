@@ -5,6 +5,7 @@ import { getExerciseMedia } from '@/data/exerciseMedia'
 import { getExerciseGif } from '@/data/exerciseGifs'
 import { getMachineImage } from '@/data/machineImages'
 import { getExerciseIllustration } from '@/data/exerciseIllustrations'
+import { getExerciseCard } from '@/data/exerciseCards'
 import { LEGACY_EXERCISE_ID_MAP, canonicalExerciseId, isPlaceholderOnlyMedia, getExercise } from '@/data/exercises'
 import { muscleLabelAr } from '@/data/muscleGroups'
 import { exerciseMediaStrings } from '@/i18n/dict/exerciseMedia'
@@ -120,6 +121,9 @@ export function ExerciseMedia({
   const name = (lang === 'en' ? ex?.nameEn : ex?.nameAr) ?? ''
 
   // بطاقات الأجهزة بلا لقطة مرخّصة: رسم الجهاز الداخلي فقط — لا صورة وزن حرّ مُنسوبة خطأً.
+  // [FOUNDER-CARDS-001] بطاقة المؤسس تسبق كل الطبقات — صورة التمرين نفسه بعنوانه.
+  const card = getExerciseCard(canonical) ?? getExerciseCard(exerciseId)
+  const [cardFailed, setCardFailed] = useState(false)
   const placeholderOnly = isPlaceholderOnlyMedia(exerciseId)
   const machineImg = placeholderOnly
     ? getMachineImage(canonical) ?? `/exercise-machine-images/${canonical}.svg`
@@ -137,6 +141,7 @@ export function ExerciseMedia({
   const [illustrationFailed, setIllustrationFailed] = useState(false)
 
   useEffect(() => {
+    setCardFailed(false)
     setStartFailed(false)
     setEndFailed(false)
     setMachineFailed(false)
@@ -166,6 +171,24 @@ export function ExerciseMedia({
     ) : null
 
   // ————— لا وسيط موثوق → الحالة الصادقة —————
+  if (card && !cardFailed) {
+    // خلفية داكنة ثابتة: البطاقة نفسها داكنة بعنوانها، فلا تُقصّ (contain) ولا تنقلب مع الثيم.
+    if (variant === 'thumb') {
+      return (
+        <div className={cn('relative w-full overflow-hidden bg-[#141a2a]', heightClass)}>
+          <FallbackImg srcs={[card]} alt={name} onExhausted={() => setCardFailed(true)} className="absolute inset-0 h-full w-full object-contain" />
+        </div>
+      )
+    }
+    return (
+      <Shell heightClass={heightClass} chips={chips}>
+        <figure className="relative h-full w-full bg-[#141a2a]" data-testid="exercise-card-figure">
+          <FallbackImg srcs={[card]} alt={name} onExhausted={() => setCardFailed(true)} className="absolute inset-0 h-full w-full object-contain" />
+        </figure>
+      </Shell>
+    )
+  }
+
   if (placeholderOnly ? !hasMachine : !hasGif && !hasStart && !hasIllustration) {
     return (
       <Shell heightClass={heightClass} chips={chips}>

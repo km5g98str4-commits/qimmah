@@ -137,8 +137,38 @@ function illustrationEntries() {
   })
 }
 
+// [FOUNDER-CARDS-001] بطاقات المؤسس: تصيير أصلي أنتجه المؤسس بنفسه (لا مصدر طرف ثالث،
+// لا علامة مائية، لا أشخاص حقيقيين). الدليل: وثيقة الإدخال بتعيين كل بطاقة وبصمتها.
+const CARD_SOURCE_ID = 'qimmah-founder-card'
+const CARD_EVIDENCE = 'docs/content/exercise-cards/INTAKE-2026-09-08.md'
+const CARD_LICENSE = 'Founder-produced original exercise card (3D render with muscle highlight and bilingual title) — Qimmah owns full rights (no third-party source, no watermark)'
+
+function cardEntries() {
+  const source = readFileSync(resolve(ROOT, 'src/data/exerciseCards.ts'), 'utf8')
+  return [...source.matchAll(/^[ ]{2}'([^']+)': '([^']+)',/gm)].map(([, slug, localPath]) => {
+    if (!localPath.endsWith('.jpg')) {
+      throw new Error(`${slug}: founder card must be a .jpg, got ${localPath}`)
+    }
+    return {
+      id: `card:${slug}`,
+      localPath,
+      upstreamUrl: null,
+      sourceId: CARD_SOURCE_ID,
+      sourceRepo: null,
+      evidenceUrl: CARD_EVIDENCE,
+      evidenceReadmeUrl: 'docs/content/MEDIA-RIGHTS.md',
+      license: CARD_LICENSE,
+      verdict: 'IN-HOUSE',
+      mediaKind: 'IN_HOUSE_ILLUSTRATION',
+      attributionRequired: false,
+      risk: 'clean',
+      note: 'Original founder-produced exercise card delivered via the 2026-09-08 DOCX intake; mapping and digest recorded in the intake document.',
+    }
+  })
+}
+
 function liveInventory() {
-  const entries = [...exerciseEntries(), ...machineEntries(), ...illustrationEntries()]
+  const entries = [...exerciseEntries(), ...machineEntries(), ...illustrationEntries(), ...cardEntries()]
   for (const entry of entries) {
     const file = resolve(PUBLIC, entry.localPath.replace(/^\//, ''))
     if (!existsSync(file)) throw new Error(`${entry.id}: local file missing: ${entry.localPath}`)
@@ -248,7 +278,8 @@ const reviewed = [...manifest.entries].sort((a, b) => a.id.localeCompare(b.id))
 // كان 274. التغيير المقصود [مهمة الصور]: −8 إطارات أُزيلت (٤ خرائط خاطئة نمط حركة ×٢ إطار)
 // +2 رسما جهازَي ضغط الصدر +37 رسم حركة داخليًا = 305.
 // [MEDIA-IDENTITY-001] −8 إطارات (٤ مطابقات ثبت بالعين أنها هوية/معدّة خاطئة ×٢) = 297. أي انحراف عن هذا الرقم غير مقصود.
-if (live.length !== 297) throw new Error(`inventory count changed: expected 297, found ${live.length}`)
+// [FOUNDER-CARDS-001] 297 + 63 بطاقة مؤسس = 360
+if (live.length !== 360) throw new Error(`inventory count changed: expected 360, found ${live.length}`)
 if (reviewed.length !== live.length) throw new Error(`manifest count ${reviewed.length} != live count ${live.length}`)
 for (let i = 0; i < live.length; i++) {
   const actual = live[i]
