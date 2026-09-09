@@ -20,6 +20,7 @@
 
 import { useState } from 'react'
 import { Icon } from '@/components/Icon'
+import { StandaloneAppScreen } from '@/components/StandaloneAppScreen'
 import { product } from '@/config/product'
 import { premiumStrings } from '@/i18n/dict/premium'
 import { accessStrings } from '@/i18n/dict/access'
@@ -106,16 +107,13 @@ export function PremiumView({ lang, signedIn, onBack, onSignIn }: PremiumViewPro
   const endingSoon = shownRemaining !== null && shownRemaining <= TRIAL_ENDING_SOON_MS
 
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="container-page py-4" data-testid="premium-view" data-access-kind={kind}>
-      <div className="mb-4 flex items-center gap-2">
-        <button type="button" onClick={onBack} aria-label={s.back} data-testid="premium-back" className="grid h-11 w-11 place-items-center rounded-lg text-ink-500 hover:bg-beige hover:text-ink-900">
-          <Icon name={lang === 'en' ? 'ChevronLeft' : 'ChevronRight'} className="h-5 w-5" />
-        </button>
-        <div className="min-w-0">
-          <h1 className="text-lg font-black text-ink-900">{s.title}</h1>
-          <p className="text-xs font-bold text-ink-500">{s.subtitle}</p>
-        </div>
-      </div>
+    /* [STANDALONE-CHROME-001] الغلاف المعتمد للشاشات المستقلّة: رأسه يحترم النتوء
+       (`var(--safe-top)`) وله متمرّره الخاص بحشوة سفلية آمنة. كان هذا السطح يبني
+       رأسه بنفسه بـ`container-page py-4` بلا أيّ منهما، فيقع العنوان وزرّ الرجوع
+       تحت شريط الحالة على آيفون ويبدو السطح معلّقًا — وهي الواقعة التي رصدها المؤسس. */
+    <StandaloneAppScreen lang={lang} title={s.title} backLabel={s.back} onBack={onBack}>
+      <div data-testid="premium-view" data-access-kind={kind}>
+        <p className="mb-4 text-xs font-bold text-ink-500">{s.subtitle}</p>
 
       {/* ═══ لا حجب للسطح خلف المصادقة ═══
           `PremiumGate` — وهي السابقة القائمة — لا تحجب نداءاتها خلف `auth.user`
@@ -279,6 +277,7 @@ export function PremiumView({ lang, signedIn, onBack, onSignIn }: PremiumViewPro
             </section>
           ) : null}
       </>
-    </div>
+      </div>
+    </StandaloneAppScreen>
   )
 }

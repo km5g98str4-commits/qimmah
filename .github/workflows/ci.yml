@@ -142,6 +142,11 @@ jobs:
       - name: Custom plan browser E2E
         run: npm run test:e2e:custom-plan
 
+      # [STANDALONE-CHROME-001] الشاشات خارج القشرة تحت نتوء محاكًى: الرأس وزرّ
+      # الرجوع تحت شريط الحالة، متمرّر خاص للعضوية، والرجوع يعود إلى المصدر.
+      - name: Standalone screen chrome browser E2E
+        run: npm run test:e2e:standalone-chrome
+
       # فحص المؤسس اليدوي أسقط ادّعاءً آليًا أخضر: الحقول تقبل ٢٤ و١٧٧ و١٠٦
       # بصريًّا ثمّ تردّ «أكمل الأربعة». والبوّابة كانت خضراء بصدق — تفحص
       # `foldDigits` لا مستهلكها. فهذا الفحص **يقود المتصفّح** على الأرتيفكت.
