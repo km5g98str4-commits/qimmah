@@ -298,6 +298,20 @@ export default function App() {
   useEffect(() => {
     if (view !== 'calc') beforeCalcRef.current = view
   }, [view])
+  /**
+   * [STANDALONE-CHROME-001] العضوية والتعافي يُدخَل إليهما من أكثر من مكان
+   * (الإعدادات · الملف · التقدّم · بطاقة الحساب · اليوم)، وكان رجوعهما مثبَّتًا
+   * على وجهة واحدة — فمن دخل العضوية من «التقدّم» يجد نفسه في «الإعدادات».
+   * نفس نمط `beforeLegalRef`/`beforeCalcRef`: نتذكّر المصدر ونعود إليه.
+   */
+  const beforePremiumRef = useRef<AppRoute>('settings')
+  useEffect(() => {
+    if (view !== 'premium') beforePremiumRef.current = view
+  }, [view])
+  const beforeRecoveryRef = useRef<AppRoute>('dashboard')
+  useEffect(() => {
+    if (view !== 'recovery') beforeRecoveryRef.current = view
+  }, [view])
 
   // view → hash (نُبقي مسار 404 على hash الخاطئ كما هو حتى لا نطمس الرابط الأصلي).
   // مهم: لا نكتب الـ hash قبل حسم مسار الإقلاع الأول بعد استعادة الجلسة، وإلّا طمسنا
@@ -585,7 +599,7 @@ export default function App() {
       <V.PremiumView
         lang={LANG}
         signedIn={Boolean(auth.user)}
-        onBack={() => navigate('settings')}
+        onBack={() => navigate(beforePremiumRef.current)}
         onSignIn={() => goAuth('login')}
       />
     )
@@ -615,7 +629,7 @@ export default function App() {
       />
     )
   } else if (view === 'recovery') {
-    content = <V.RecoveryView lang={LANG} onBack={() => navigate('dashboard')} onNavigate={navigate} />
+    content = <V.RecoveryView lang={LANG} onBack={() => navigate(beforeRecoveryRef.current)} onNavigate={navigate} />
   } else if (view === 'steps') {
     content = <V.StepsView lang={LANG} onBack={() => navigate('progress')} onOpenSettings={() => navigate('settings')} />
   } else {

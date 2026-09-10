@@ -30,10 +30,12 @@ export function StandaloneAppScreen({
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-page">
+    <div dir={ar ? 'rtl' : 'ltr'} data-standalone-screen="" className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-page">
       <header
         className="z-20 shrink-0 border-b border-line bg-page/95 backdrop-blur-xl"
-        style={{ paddingTop: 'env(safe-area-inset-top)' }}
+        // [STANDALONE-CHROME-001] `var(--safe-top)` لا `env()` خامًا: نفس المتغيّر الذي
+        // تستعمله القشرة وAppNav، فيبقى موضعٌ واحد يحكم النتوء — ويصير قابلًا للقياس.
+        style={{ paddingTop: 'var(--safe-top)' }}
       >
         <div className="mx-auto flex h-14 w-full max-w-2xl items-center gap-2 px-3">
           <button
@@ -50,7 +52,7 @@ export function StandaloneAppScreen({
 
       <main
         className="app-scroll min-h-0 flex-1 overflow-y-auto overscroll-y-contain px-4 py-5"
-        style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}
+        style={{ paddingBottom: 'calc(1.5rem + var(--safe-bottom))' }}
       >
         <div className={cn('mx-auto w-full max-w-2xl', contentClassName)}>{children}</div>
       </main>

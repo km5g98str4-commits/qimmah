@@ -87,7 +87,12 @@ export function StepsView({ lang, onBack, onOpenSettings }: StepsViewProps) {
     : copy.healthNotConnected
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="v2-surface-light min-h-[100dvh] bg-page px-4 pb-8 pt-3 text-ink-900">
+    // [STANDALONE-CHROME-001] `pt-3` وحدها كانت تضع الرأس تحت النتوء/شريط الحالة على آيفون.
+    <div
+      dir={ar ? 'rtl' : 'ltr'}
+      className="v2-surface-light min-h-[100dvh] bg-page px-4 pb-8 text-ink-900"
+      style={{ paddingTop: 'max(0.75rem, var(--safe-top))' }}
+    >
       <div className="v2-screen-enter mx-auto w-full max-w-md space-y-5">
         <header className="flex items-center gap-3 pt-1">
           <button
