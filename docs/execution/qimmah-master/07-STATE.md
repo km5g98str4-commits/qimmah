@@ -10,9 +10,9 @@
 ## 0-س. تسليم المؤسس — [FOUNDER-HANDOFF] (٧ سبتمبر)
 
 ```
-main       : e22250b  (… ← 6477b94 CUSTOM-PLAN-IOS-OVERLAY ← e22250b FOUNDER-CARDS-001)
-             CI #590 · #591 · #592 · #595 · #598 · #601 · #604 كلّها خضراء
-الواجهة   : تتغيّر — SHA البناء الحيّ المتوقّع e22250b (التحقّق من BUILD_LABEL بيد المؤسس؛ pages.dev محجوب من بيئة العمل)
+main       : 59106ad  (… ← e22250b FOUNDER-CARDS-001 ← 59106ad STANDALONE-CHROME-001)
+             CI #590 · #591 · #592 · #595 · #598 · #601 · #604 · #607 كلّها خضراء
+الواجهة   : تتغيّر — SHA البناء الحيّ المتوقّع 59106ad (التحقّق من BUILD_LABEL بيد المؤسس؛ pages.dev محجوب من بيئة العمل)
 الفرع     : claude/qimmah-production-readiness-13cyt7 @ 257b77b = main + RR-004 + مقعد اختبار + أطقم المراجعة + وثائق (fast-follow، لا يُدمج تلقائيًّا)
 الإنتاج   : ٤٦ هجرة · مؤسس واحد cf8f41f0 · ١٩ مستخدمًا · منحة حيّة واحدة (Premium المؤسس، مربوطة بالسجلّ) · صفر خطأ ٢٤ ساعة
 الاحتياطي : FOUNDER-RESERVE-001 = ١٠٠٠/١٠٠٠ مُصدَرة · ١٠٠٠ بصمة مطابقة · ٠ مستردّ · ١٠٠٠ مفعَّلة · بلا انتهاء · ملف CSV واحد سُلِّم للمؤسس خارج المستودع
@@ -32,6 +32,8 @@ main       : e22250b  (… ← 6477b94 CUSTOM-PLAN-IOS-OVERLAY ← e22250b FOUND
 | `6477b94` CUSTOM-PLAN-IOS-OVERLAY | `WorkoutView.tsx` (بوّابة إلى body) · `CustomPlanBuilder.tsx` (انغماس) | صورة المؤسس على آيفون: WebKit يحصر `fixed` داخل متمرّر القشرة فيُقصّ ذيل الباني (إلغاء/التالي) ويبقى شريط التنقّل ظاهرًا. الباني الآن خارج كل حاوية والقشرة منغمسة أثناءه. **التراجع:** `git revert 6477b94`. **درس:** رحلات Chromium لا تلتقط حصر WebKit — أُضيفت محاكاة تحويل على `main` في الرحلة. |
 
 | `e22250b` FOUNDER-CARDS-001 | `public/exercise-cards/` (٦٣ jpg) · `exerciseCards.ts` · مانيفست الإنتاج (نوع `card` يسبق الكل) · `ExerciseMedia` · `ExerciseLibraryView` · سجلّ الحقوق (٣٦٠ صفًّا) · `INTAKE-2026-09-08.md` | بطاقات المؤسس المصوَّرة (DOCX ٢٠٢٦-٠٩-٠٨) تحلّ محلّ ٢٥ مخطّط جهاز و٣٧ رسم حركة ولقطات سكوات البار. IN-HOUSE. **التراجع:** `git revert e22250b`. الفجوة الباقية ٤ (ليست في الملف). |
+
+| `59106ad` STANDALONE-CHROME-001 | `PremiumView` (يمرّ بالغلاف) · `StepsView` · `StandaloneAppScreen` (var--safe-top) · `App.tsx` (رجوع العضوية/التعافي إلى المصدر) | صورة المؤسس: رأس العضوية وزرّ رجوعها تحت شريط الحالة، ورجوعها مثبَّت على الإعدادات. **التراجع:** `git revert 59106ad`. الإثبات ٢٢ + ٣٩ (نتوء محاكًى ٤٧بكسل). **درس:** الشاشات خارج القشرة تملك كرومها، فمن يبنيه ارتجالًا يفقد منطقة الأمان — الحارس الآن يمنع ذلك. |
 
 **لم يُرقَّ (fast-follow على فرع المراجعة):** `__setSupabaseForTests` · `test:attack-grant-race` · `test:attack-authority` · `test:engine-matrix` · حزم staging المُعاد توليدها · `12-ZERO-COST-RECOVERY.md` · `SALLA-V1-LAUNCH-RUNBOOK.md`.
 
