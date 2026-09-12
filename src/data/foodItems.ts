@@ -1,6 +1,7 @@
 import { saudiTraditionalFoods } from './saudiFoods'
 import { gccStaples } from './gccStaples'
 import { foodR2EatingOut } from './foodR2EatingOut'
+import { genericFoods, GENERIC_COVERED_IDS, GENERIC_COVERED_KEYWORDS } from './genericFoods.generated'
 
 export type FoodCategory =
   | 'بروتين'
@@ -56,6 +57,12 @@ export interface FoodItem {
    * وهذه القائمة تتيح اختيار الحجم الفعلي بماكروزه الخاصة عند التسجيل.
    */
   sizes?: FoodSize[]
+  /**
+   * [FOOD-GENERIC-001] صنف عامّ (صدر دجاج · توست · رز مطبوخ) لا طبق مطعم ولا منتج
+   * معبّأ. يقود ترتيب «النيّة العامّة»: كلمة مفتاحية تساوي الاستعلام كلّه على صنف
+   * عامّ تسبق بادئة اسم طبق مركّب («توست» ⇒ خبز التوست قبل «توست بالبيض»).
+   */
+  generic?: boolean
 }
 
 export const FOOD_ESTIMATE_NOTE =
@@ -81,7 +88,7 @@ export const foodCategoryEn: Record<FoodCategory, string> = {
   'منتج ممسوح بالباركود': 'Scanned product',
 }
 
-export const foodItems: FoodItem[] = [
+const foodItemsSource: FoodItem[] = [
   // ===== بروتين =====
   {
     id: 'chicken-breast-grilled',
@@ -5756,7 +5763,15 @@ export const foodItems: FoodItem[] = [
   ...gccStaples,
   // ===== Food R2: 60 Saudi/GCC eating-out estimates =====
   ...foodR2EatingOut,
+  // ===== [FOOD-GENERIC-001] أطعمة عامّة مُتحقَّق منها من USDA — ملف مولَّد =====
+  ...genericFoods,
 ]
+
+export const foodItems: FoodItem[] = foodItemsSource.map((f) => {
+  if (!GENERIC_COVERED_IDS.has(f.id) || f.generic) return f
+  const extra = GENERIC_COVERED_KEYWORDS[f.id] ?? []
+  return { ...f, generic: true, keywords: [...new Set([...(f.keywords ?? []), ...extra])] }
+})
 
 export const foodMap: Record<string, FoodItem> = Object.fromEntries(
   foodItems.map((f) => [f.id, f]),
@@ -5935,8 +5950,25 @@ function canonicalizeTransliterations(normalized: string): string {
 }
 
 /** التطبيع الكامل للبحث: عربي عام ← مقابلات دخيلة ← نقل صوتي عبر الخطّين. */
+/**
+ * [FOOD-GENERIC-001] مقابلات **لكلمات عربية أصيلة** بصيغ متعدّدة شائعة — تُطبَّق على
+ * الرمز كاملًا لا على جزء منه (خلاف الدخيلة أعلاه)، فلا تمسّ كلمة أخرى تحويها:
+ *   «أرز/ارز» ≡ «رز» (كلاهما سعودي شائع) · «بيضة/بيضه» ≡ «بيض» (مفرد/جمع).
+ * القائمة مغلقة ومقيسة: كل زوج له استعلام حقيقي كان يُرجع صفرًا (test:generic-foods).
+ */
+export const NATIVE_TOKEN_SPELLINGS: readonly (readonly string[])[] = [
+  ['رز', 'أرز', 'ارز'],
+  ['بيض', 'بيضة', 'بيضه'],
+]
+const NATIVE_TOKEN_MAP: ReadonlyMap<string, string> = new Map(
+  NATIVE_TOKEN_SPELLINGS.flatMap(([canonical, ...variants]) => variants.map((v) => [normalizeSearch(v), normalizeSearch(canonical)] as const)),
+)
+function canonicalizeNativeTokens(normalized: string): string {
+  return normalized.split(' ').map((t) => NATIVE_TOKEN_MAP.get(t) ?? t).join(' ')
+}
+
 function canonicalizeForSearch(text: string): string {
-  return canonicalizeTransliterations(canonicalizeLoanwords(normalizeSearch(text)))
+  return canonicalizeNativeTokens(canonicalizeTransliterations(canonicalizeLoanwords(normalizeSearch(text))))
 }
 
 /** صنف مع **قوّة** مطابقته — الأصغر أقوى. سلّم `searchFood` نفسه، معلَنًا لا مضمَرًا. */
@@ -5960,7 +5992,7 @@ export interface ScoredFoodItem {
 }
 
 /** درجة «بلا استعلام» — أضعف من كل مطابقة حقيقية، فلا تُخلط بها في أي ترتيب. */
-export const NO_QUERY_SCORE = 7
+export const NO_QUERY_SCORE = 8
 
 /**
  * أدنى طول رمز يدخل مطابقة الرموز — دونه يطابق الرمز كل شيء تقريبًا فيصير ضجيجًا.
@@ -6004,11 +6036,22 @@ function nameForms(text: string): string[] {
   return canonical === raw ? [canonical] : [canonical, raw]
 }
 
+/** رؤوس «شكل الطعام»: الصنف الذي يبدأ بأحدها يُستدعى بالرأس لا بما بعده (خبز برجر ⇏ برجر). */
+const GENERIC_FORM_HEADS: ReadonlySet<string> = new Set(['خبز', 'صلصه', 'زيت', 'عصير', 'مشروب', 'زبده', 'دقيق', 'شراب', 'معجون', 'مسحوق', 'حبوب', 'نودلز', 'مكرونه', 'رقائق', 'بسكويت', 'كيك', 'كعك'].map((w) => normalizeSearch(w)))
+
 function searchText(): ItemSearchText[] {
   if (SEARCH_TEXT) return SEARCH_TEXT
   SEARCH_TEXT = foodItems.map((f) => {
     const names = [...new Set([...nameForms(f.nameAr), ...nameForms(f.nameEn)])]
-    const kws = [...new Set((f.keywords ?? []).flatMap((k) => nameForms(k)))]
+    // [FOOD-GENERIC-001] الصنف العامّ يُستدعى بكلمة واحدة من اسمه («توست» · «دجاج» ·
+    // «رز»): رموز اسمه كلمات مفتاحية له، فيبلغه استعلامٌ من كلمة (الدرجة ١) قبل
+    // الأطباق المركّبة التي تبدأ بها. لا يُطبَّق على الأطباق والمنتجات.
+    // «خبز برجر» ليس جوابًا لمن كتب «برجر»: حين يكون رأس الاسم كلمة **شكل** (خبز · صلصة ·
+    // زيت · عصير…) فالصنف «شكلٌ من X» ويُستدعى بالرأس وحده، لا بالمكمّل الذي يسمّي طعامًا آخر.
+    const nameTokenKws = f.generic
+      ? names.flatMap((n) => { const t = searchTokens(n); return GENERIC_FORM_HEADS.has(t[0]) ? t.slice(0, 1) : t }).filter((t) => t.length >= 3)
+      : []
+    const kws = [...new Set([...(f.keywords ?? []).flatMap((k) => nameForms(k)), ...nameTokenKws])]
     return { names, kws, tokens: searchTokens(`${names.join(' ')} ${kws.join(' ')}`) }
   })
   return SEARCH_TEXT
@@ -6052,15 +6095,21 @@ export function searchFoodScored(query: string): ScoredFoodItem[] {
 
     let score = Infinity
     if (names.some((n) => n === q)) score = 0
-    else if (names.some((n) => n.startsWith(q))) score = 1
-    else if (names.some((n) => n.includes(q))) score = 2
-    // [FOOD-GENERIC-001] كلمة مفتاحية **تساوي الاستعلام كلّه** مرادفٌ تحريري
-    // («مكسرات» على اللوز والكاجو) — أقوى من بادئة كلمة، وتُرتَّب في الاتحاد فوق
-    // بادئة اسم منتج معبّأ ودون اسمه التامّ (unifiedSearch.CURATED_STRENGTH).
-    else if (kws.some((k) => k === q)) score = 3
-    else if (kws.some((k) => k.startsWith(q))) score = 4
-    else if (kws.some((k) => k.includes(q))) score = 5
-    else if (useTokens && qTokens.every((qt) => tokens.some((t) => t.startsWith(qt)))) score = 6
+    // [FOOD-GENERIC-001] النيّة العامّة: استعلام يساوي كلمةً مفتاحية لصنف **عامّ**
+    // («توست» · «دجاج» · «رز») يسبق بادئة اسم طبق مركّب («توست بالبيض»). الصنف
+    // العامّ هو ما يقصده من يكتب كلمة واحدة، والطبق يبقى بعده لا مخفيًّا.
+    else if (f.generic && kws.some((k) => k === q)) score = 1
+    else if (names.some((n) => n.startsWith(q))) score = 2
+    else if (names.some((n) => n.includes(q))) score = 3
+    // كلمة مفتاحية **تساوي الاستعلام كلّه** مرادفٌ تحريري («مكسرات» على اللوز
+    // والكاجو) — أقوى من بادئة كلمة، وتُرتَّب في الاتحاد فوق بادئة اسم منتج معبّأ
+    // ودون اسمه التامّ (unifiedSearch.CURATED_STRENGTH).
+    else if (kws.some((k) => k === q)) score = 4
+    else if (kws.some((k) => k.startsWith(q))) score = 5
+    else if (kws.some((k) => k.includes(q))) score = 6
+    // صفة مؤنّثة في الاستعلام («مسلوقة» ⇐ «مسلوقه» بعد التطبيع) تطابق مذكّرها في
+    // الاسم («مسلوق») — توسيع فقط: لا يُسقط مطابقة كانت تنجح.
+    else if (useTokens && qTokens.every((qt) => tokens.some((t) => t.startsWith(qt) || (qt.endsWith('ه') && qt.length > 3 && t.startsWith(qt.slice(0, -1)))))) score = 7
 
     if (score !== Infinity) scored.push({ item: f, score })
   }

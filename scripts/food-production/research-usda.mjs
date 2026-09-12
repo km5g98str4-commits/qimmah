@@ -18,6 +18,7 @@
 //   • حصص USDA (`foodPortions`) تُنسخ كلّها بوزنها؛ اختيار ما يُعرض قرار محلّي لاحق.
 //   • لا قيمة تُخترع: صفٌّ بلا مطابقة يبقى بلا قيم ويُعلَن `unmatched`.
 
+/* global process */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { resolve, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
