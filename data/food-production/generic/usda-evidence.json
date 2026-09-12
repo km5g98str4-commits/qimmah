@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T22:46:31.104Z",
+  "generated_at": "2026-09-12T22:51:53.719Z",
   "source": "USDA FoodData Central (SR Legacy 2018-04 · Foundation Foods · FNDDS 2021-2023) — public domain (CC0)",
   "datasets": [
     {
@@ -16,12 +16,12 @@
     }
   ],
   "stats": {
-    "matched": 365,
+    "matched": 389,
     "exact": 308,
-    "single": 57,
-    "ambiguous": 21,
-    "unmatched": 23,
-    "skipped": 191
+    "single": 81,
+    "ambiguous": 6,
+    "unmatched": 7,
+    "skipped": 198
   },
   "results": [
     {
@@ -90,61 +90,61 @@
           "grams": 120,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64699"
+          "modifier": "1 medium breast"
         },
         {
           "grams": 85,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61039"
+          "modifier": "1 large or thick slice"
         },
         {
           "grams": 105,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64698"
+          "modifier": "1 small breast"
         },
         {
           "grams": 135,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10049"
+          "modifier": "1 cup, cooked, diced"
         },
         {
           "grams": 120,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 28.35,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "40040"
+          "modifier": "1 oz, cooked"
         },
         {
           "grams": 155,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60453"
+          "modifier": "1 breast quarter (yield after cooking, bone removed)"
         },
         {
           "grams": 135,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64700"
+          "modifier": "1 large breast"
         },
         {
           "grams": 30,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62138"
+          "modifier": "1 small or thin slice"
         },
         {
           "grams": 60,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61398"
+          "modifier": "1 medium slice"
         }
       ]
     },
@@ -173,61 +173,61 @@
           "grams": 135,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10049"
+          "modifier": "1 cup, cooked, diced"
         },
         {
           "grams": 140,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 60,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61398"
+          "modifier": "1 medium slice"
         },
         {
           "grams": 140,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64697"
+          "modifier": "1 breast, NS as to size"
         },
         {
           "grams": 155,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64700"
+          "modifier": "1 large breast"
         },
         {
           "grams": 140,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64699"
+          "modifier": "1 medium breast"
         },
         {
           "grams": 120,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64698"
+          "modifier": "1 small breast"
         },
         {
           "grams": 28.35,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "40040"
+          "modifier": "1 oz, cooked"
         },
         {
           "grams": 30,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62138"
+          "modifier": "1 small or thin slice"
         },
         {
           "grams": 85,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61039"
+          "modifier": "1 large or thick slice"
         }
       ]
     },
@@ -332,43 +332,43 @@
           "grams": 90,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64713"
+          "modifier": "1 large thigh"
         },
         {
           "grams": 65,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64711"
+          "modifier": "1 small thigh"
         },
         {
           "grams": 28.35,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "40040"
+          "modifier": "1 oz, cooked"
         },
         {
           "grams": 70,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64710"
+          "modifier": "1 thigh, NS as to size"
         },
         {
           "grams": 70,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 70,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64712"
+          "modifier": "1 medium thigh"
         },
         {
           "grams": 135,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10049"
+          "modifier": "1 cup, cooked, diced"
         }
       ]
     },
@@ -397,43 +397,43 @@
           "grams": 80,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 28.35,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "40040"
+          "modifier": "1 oz, cooked"
         },
         {
           "grams": 135,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10049"
+          "modifier": "1 cup, cooked, diced"
         },
         {
           "grams": 75,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64711"
+          "modifier": "1 small thigh"
         },
         {
           "grams": 80,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64712"
+          "modifier": "1 medium thigh"
         },
         {
           "grams": 105,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64713"
+          "modifier": "1 large thigh"
         },
         {
           "grams": 80,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64710"
+          "modifier": "1 thigh, NS as to size"
         }
       ]
     },
@@ -649,27 +649,72 @@
     },
     {
       "id": "QF0014",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2705834,
+      "dataType": "FNDDS",
+      "description": "Beef, steak, sirloin, lean only eaten",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "21102170",
+      "per100g": {
+        "kcal": 216,
+        "protein": 28,
+        "carbs": 0,
+        "fat": 11.3,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 361,
+        "satFat": 4.35
+      },
+      "portions": [
         {
-          "fdcId": 2705830,
-          "dataType": "FNDDS",
-          "description": "Beef, steak, ribeye, lean only eaten"
+          "grams": 17,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cubic inch"
         },
         {
-          "fdcId": 2705834,
-          "dataType": "FNDDS",
-          "description": "Beef, steak, sirloin, lean only eaten"
+          "grams": 20,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 oz yields"
         },
         {
-          "fdcId": 2705837,
-          "dataType": "FNDDS",
-          "description": "Beef, steak, strip, lean only eaten"
+          "grams": 240,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 thick"
         },
         {
-          "fdcId": 2705840,
-          "dataType": "FNDDS",
-          "description": "Beef, steak, T-bone, lean only eaten"
+          "grams": 160,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
+        },
+        {
+          "grams": 120,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 thin"
+        },
+        {
+          "grams": 30,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece/slice, any size"
+        },
+        {
+          "grams": 135,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cup"
+        },
+        {
+          "grams": 160,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 regular"
         }
       ]
     },
@@ -710,59 +755,102 @@
     },
     {
       "id": "QF0016",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172142,
+      "dataType": "SR Legacy",
+      "description": "Beef, rib eye steak, boneless, lip off, separable lean only, trimmed to 0\" fat, all grades, cooked, grilled",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 23174,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 206,
+        "protein": 28.1,
+        "carbs": 0,
+        "fat": 10.4,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 59,
+        "satFat": 4.2
+      },
+      "portions": [
         {
-          "fdcId": 170839,
-          "dataType": "SR Legacy",
-          "description": "Beef, rib eye steak/roast, boneless, lip-on, separable lean only, trimmed to 1/8\" fat, all grades, raw"
-        },
-        {
-          "fdcId": 171209,
-          "dataType": "SR Legacy",
-          "description": "Beef, rib eye steak, boneless, lip-on, separable lean only, trimmed to 1/8\" fat, all grades, cooked, grilled"
-        },
-        {
-          "fdcId": 172142,
-          "dataType": "SR Legacy",
-          "description": "Beef, rib eye steak, boneless, lip off, separable lean only, trimmed to 0\" fat, all grades, cooked, grilled"
-        },
-        {
-          "fdcId": 172143,
-          "dataType": "SR Legacy",
-          "description": "Beef, rib eye steak, boneless, lip off, separable lean only, trimmed to 0\" fat, all grades, raw"
+          "grams": 85,
+          "amount": 3,
+          "unit": "undetermined",
+          "modifier": "oz"
         }
       ]
     },
     {
       "id": "QF0017",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "single",
+      "fdcId": 174054,
+      "dataType": "SR Legacy",
+      "description": "Beef, top sirloin, steak, separable lean only, trimmed to 1/8\" fat, all grades, cooked, broiled",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 23610,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 178,
+        "protein": 29.4,
+        "carbs": 0,
+        "fat": 5.84,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 61,
+        "satFat": 2.22
+      },
+      "portions": [
         {
-          "fdcId": 172170,
-          "dataType": "SR Legacy",
-          "description": "Beef, loin, top sirloin cap steak, boneless, separable lean only, trimmed to 1/8\" fat, all grades, cooked, grilled"
+          "grams": 85,
+          "amount": 3,
+          "unit": "undetermined",
+          "modifier": "oz"
         },
         {
-          "fdcId": 172173,
-          "dataType": "SR Legacy",
-          "description": "Beef, loin, top sirloin cap steak, boneless, separable lean only, trimmed to 1/8\" fat, all grades, raw"
-        },
-        {
-          "fdcId": 174054,
-          "dataType": "SR Legacy",
-          "description": "Beef, top sirloin, steak, separable lean only, trimmed to 1/8\" fat, all grades, cooked, broiled"
-        },
-        {
-          "fdcId": 174055,
-          "dataType": "SR Legacy",
-          "description": "Beef, top sirloin, steak, separable lean only, trimmed to 1/8\" fat, all grades, raw"
+          "grams": 453.6,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "lb"
         }
       ]
     },
     {
       "id": "QF0018",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 174050,
+      "dataType": "SR Legacy",
+      "description": "Beef, chuck, arm pot roast, separable lean only, trimmed to 1/8\" fat, all grades, cooked, braised",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 23602,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 214,
+        "protein": 34.7,
+        "carbs": 0,
+        "fat": 7.36,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 56,
+        "satFat": 2.79
+      },
+      "portions": [
+        {
+          "grams": 85,
+          "amount": 3,
+          "unit": "undetermined",
+          "modifier": "oz"
+        },
+        {
+          "grams": 453.6,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "lb"
+        }
+      ]
     },
     {
       "id": "QF0019",
@@ -1020,59 +1108,108 @@
           "grams": 140,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64761"
+          "modifier": "1 small/regular fillet"
         },
         {
           "grams": 210,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64009"
+          "modifier": "1 large fillet"
         },
         {
           "grams": 140,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 135,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 17,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "51000"
+          "modifier": "1 cubic inch"
         },
         {
           "grams": 210,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62898"
+          "modifier": "1 steak"
         },
         {
           "grams": 20,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "40016"
+          "modifier": "1 oz yields"
         }
       ]
     },
     {
       "id": "QF0030",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2706286,
+      "dataType": "FNDDS",
+      "description": "Fish, salmon, baked or broiled",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "26137120",
+      "per100g": {
+        "kcal": 274,
+        "protein": 25.4,
+        "carbs": 0.01,
+        "fat": 18.4,
+        "fiber": 0,
+        "sugar": 0.01,
+        "sodium": 294,
+        "satFat": 4.28
+      },
+      "portions": [
         {
-          "fdcId": 2706286,
-          "dataType": "FNDDS",
-          "description": "Fish, salmon, baked or broiled"
+          "grams": 210,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 large fillet"
         },
         {
-          "fdcId": 2706288,
-          "dataType": "FNDDS",
-          "description": "Fish, salmon, baked or broiled, coated"
+          "grams": 20,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 oz yields"
+        },
+        {
+          "grams": 140,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 small/regular fillet"
+        },
+        {
+          "grams": 135,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cup"
+        },
+        {
+          "grams": 210,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 steak"
+        },
+        {
+          "grams": 140,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
+        },
+        {
+          "grams": 17,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cubic inch"
         }
       ]
     },
@@ -1311,37 +1448,37 @@
           "grams": 135,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 15,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64763"
+          "modifier": "1 large/jumbo shrimp"
         },
         {
           "grams": 10,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64745"
+          "modifier": "1 small/medium shrimp"
         },
         {
           "grams": 85,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 5,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62320"
+          "modifier": "1 tiny shrimp"
         },
         {
           "grams": 20,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61784"
+          "modifier": "1 prawn"
         }
       ]
     },
@@ -1826,99 +1963,112 @@
     },
     {
       "id": "QF0050",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2707208,
+      "dataType": "FNDDS",
+      "description": "Egg omelet or scrambled egg, with cheese, made with oil",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "32130110",
+      "per100g": {
+        "kcal": 212,
+        "protein": 12.6,
+        "carbs": 1.4,
+        "fat": 17.4,
+        "fiber": 0,
+        "sugar": 0.51,
+        "sodium": 324,
+        "satFat": 5.39
+      },
+      "portions": [
         {
-          "fdcId": 2707207,
-          "dataType": "FNDDS",
-          "description": "Egg omelet or scrambled egg, with cheese, made with margarine"
+          "grams": 135,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cup"
         },
         {
-          "fdcId": 2707208,
-          "dataType": "FNDDS",
-          "description": "Egg omelet or scrambled egg, with cheese, made with oil"
+          "grams": 65,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 egg"
         },
         {
-          "fdcId": 2707209,
-          "dataType": "FNDDS",
-          "description": "Egg omelet or scrambled egg, with cheese, made with butter"
-        },
-        {
-          "fdcId": 2707211,
-          "dataType": "FNDDS",
-          "description": "Egg omelet or scrambled egg, with cheese, made with cooking spray"
-        },
-        {
-          "fdcId": 2707212,
-          "dataType": "FNDDS",
-          "description": "Egg omelet or scrambled egg, with cheese, no added fat"
-        },
-        {
-          "fdcId": 2707241,
-          "dataType": "FNDDS",
-          "description": "Egg omelet or scrambled egg, with cheese and tomatoes, fat added"
-        },
-        {
-          "fdcId": 2707242,
-          "dataType": "FNDDS",
-          "description": "Egg omelet or scrambled egg, with cheese and tomatoes, no added fat"
-        },
-        {
-          "fdcId": 2707243,
-          "dataType": "FNDDS",
-          "description": "Egg omelet or scrambled egg, with cheese and tomatoes, NS as to fat"
+          "grams": 130,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
         }
       ]
     },
     {
       "id": "QF0051",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 174516,
+      "dataType": "SR Legacy",
+      "description": "Turkey, retail parts, breast, meat only, cooked, roasted",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 5711,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 136,
+        "protein": 29.5,
+        "carbs": 0,
+        "fat": 1.97,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 114,
+        "satFat": 0.66
+      },
+      "portions": [
         {
-          "fdcId": 171496,
-          "dataType": "SR Legacy",
-          "description": "Turkey, whole, breast, meat only, cooked, roasted"
+          "grams": 863,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "breast"
         },
         {
-          "fdcId": 174514,
-          "dataType": "SR Legacy",
-          "description": "Turkey, retail parts, breast, meat only, with added solution, cooked, roasted"
-        },
-        {
-          "fdcId": 174516,
-          "dataType": "SR Legacy",
-          "description": "Turkey, retail parts, breast, meat only, cooked, roasted"
-        },
-        {
-          "fdcId": 174519,
-          "dataType": "SR Legacy",
-          "description": "Turkey, breast, from whole bird, meat only, with added solution, roasted"
+          "grams": 85,
+          "amount": 3,
+          "unit": "undetermined",
+          "modifier": "oz"
         }
       ]
     },
     {
       "id": "QF0052",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 174516,
+      "dataType": "SR Legacy",
+      "description": "Turkey, retail parts, breast, meat only, cooked, roasted",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 5711,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 136,
+        "protein": 29.5,
+        "carbs": 0,
+        "fat": 1.97,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 114,
+        "satFat": 0.66
+      },
+      "portions": [
         {
-          "fdcId": 171496,
-          "dataType": "SR Legacy",
-          "description": "Turkey, whole, breast, meat only, cooked, roasted"
+          "grams": 863,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "breast"
         },
         {
-          "fdcId": 174514,
-          "dataType": "SR Legacy",
-          "description": "Turkey, retail parts, breast, meat only, with added solution, cooked, roasted"
-        },
-        {
-          "fdcId": 174516,
-          "dataType": "SR Legacy",
-          "description": "Turkey, retail parts, breast, meat only, cooked, roasted"
-        },
-        {
-          "fdcId": 174519,
-          "dataType": "SR Legacy",
-          "description": "Turkey, breast, from whole bird, meat only, with added solution, roasted"
+          "grams": 85,
+          "amount": 3,
+          "unit": "undetermined",
+          "modifier": "oz"
         }
       ]
     },
@@ -1997,19 +2147,19 @@
           "grams": 154,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 202,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61911"
+          "modifier": "1 shishkabob"
         },
         {
           "grams": 115,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -2038,19 +2188,19 @@
           "grams": 154,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 202,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61911"
+          "modifier": "1 shishkabob"
         },
         {
           "grams": 154,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -2079,19 +2229,19 @@
           "grams": 154,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 202,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61911"
+          "modifier": "1 shishkabob"
         },
         {
           "grams": 154,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -2120,19 +2270,19 @@
           "grams": 154,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 202,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61911"
+          "modifier": "1 shishkabob"
         },
         {
           "grams": 115,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -3135,13 +3285,13 @@
           "grams": 70,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 57,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60636"
+          "modifier": "1 croissant"
         }
       ]
     },
@@ -3170,13 +3320,13 @@
           "grams": 70,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 77,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61667"
+          "modifier": "1 piece"
         }
       ]
     },
@@ -3350,15 +3500,90 @@
     },
     {
       "id": "QF0102",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 168878,
+      "dataType": "SR Legacy",
+      "description": "Rice, white, long-grain, regular, enriched, cooked",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20045,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 130,
+        "protein": 2.69,
+        "carbs": 28.2,
+        "fat": 0.28,
+        "fiber": 0.4,
+        "sugar": 0.05,
+        "sodium": 1,
+        "satFat": 0.077
+      },
+      "portions": [
+        {
+          "grams": 158,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0103",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 168877,
+      "dataType": "SR Legacy",
+      "description": "Rice, white, long-grain, regular, raw, enriched",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20044,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 365,
+        "protein": 7.13,
+        "carbs": 80,
+        "fat": 0.66,
+        "fiber": 1.3,
+        "sugar": 0.12,
+        "sodium": 5,
+        "satFat": 0.18
+      },
+      "portions": [
+        {
+          "grams": 185,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0104",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 168878,
+      "dataType": "SR Legacy",
+      "description": "Rice, white, long-grain, regular, enriched, cooked",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20045,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 130,
+        "protein": 2.69,
+        "carbs": 28.2,
+        "fat": 0.28,
+        "fiber": 0.4,
+        "sugar": 0.05,
+        "sodium": 1,
+        "satFat": 0.077
+      },
+      "portions": [
+        {
+          "grams": 158,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0105",
@@ -3420,21 +3645,59 @@
     },
     {
       "id": "QF0107",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 168878,
+      "dataType": "SR Legacy",
+      "description": "Rice, white, long-grain, regular, enriched, cooked",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20045,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 130,
+        "protein": 2.69,
+        "carbs": 28.2,
+        "fat": 0.28,
+        "fiber": 0.4,
+        "sugar": 0.05,
+        "sodium": 1,
+        "satFat": 0.077
+      },
+      "portions": [
+        {
+          "grams": 158,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0108",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 168932,
+      "dataType": "SR Legacy",
+      "description": "Rice, white, short-grain, cooked, unenriched",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20453,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 130,
+        "protein": 2.36,
+        "carbs": 28.7,
+        "fat": 0.19,
+        "fiber": null,
+        "sugar": null,
+        "sodium": 0,
+        "satFat": 0.051
+      },
+      "portions": [
         {
-          "fdcId": 168882,
-          "dataType": "SR Legacy",
-          "description": "Rice, white, short-grain, enriched, cooked"
-        },
-        {
-          "fdcId": 168932,
-          "dataType": "SR Legacy",
-          "description": "Rice, white, short-grain, cooked, unenriched"
+          "grams": 205,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
         }
       ]
     },
@@ -3626,7 +3889,29 @@
     },
     {
       "id": "QF0120",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2708383,
+          "dataType": "FNDDS",
+          "description": "Oatmeal, regular or quick, made with milk, no added fat"
+        },
+        {
+          "fdcId": 2708384,
+          "dataType": "FNDDS",
+          "description": "Oatmeal, regular or quick, made with milk, fat added"
+        },
+        {
+          "fdcId": 2708385,
+          "dataType": "FNDDS",
+          "description": "Oatmeal, regular or quick, made with non-dairy milk, no added fat"
+        },
+        {
+          "fdcId": 2708386,
+          "dataType": "FNDDS",
+          "description": "Oatmeal, regular or quick, made with non-dairy milk, fat added"
+        }
+      ]
     },
     {
       "id": "QF0121",
@@ -3694,7 +3979,8 @@
     },
     {
       "id": "QF0123",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0124",
@@ -3964,22 +4250,72 @@
     },
     {
       "id": "QF0128",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 168910,
+      "dataType": "SR Legacy",
+      "description": "Pasta, whole-wheat, cooked (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20125,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 149,
+        "protein": 5.99,
+        "carbs": 30.1,
+        "fat": 1.71,
+        "fiber": 3.9,
+        "sugar": 0.75,
+        "sodium": 4,
+        "satFat": 0.243
+      },
+      "portions": [
         {
-          "fdcId": 168910,
-          "dataType": "SR Legacy",
-          "description": "Pasta, whole-wheat, cooked (Includes foods for USDA's Food Distribution Program)"
+          "grams": 107,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup farfalle"
         },
         {
-          "fdcId": 168916,
-          "dataType": "SR Legacy",
-          "description": "Pasta, whole grain, 51% whole wheat, remaining unenriched semolina, cooked"
+          "grams": 117,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup spaghetti not packed"
         },
         {
-          "fdcId": 172024,
-          "dataType": "SR Legacy",
-          "description": "Pasta, whole grain, 51% whole wheat, remaining enriched semolina, cooked (Includes foods for USDA's Food Distribution Program)"
+          "grams": 97,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup penne"
+        },
+        {
+          "grams": 151,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup spaghetti packed"
+        },
+        {
+          "grams": 117,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup elbows"
+        },
+        {
+          "grams": 116,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup lasagne"
+        },
+        {
+          "grams": 105,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup shells"
+        },
+        {
+          "grams": 107,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup rotini"
         }
       ]
     },
@@ -4014,23 +4350,37 @@
     },
     {
       "id": "QF0130",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 169732,
+      "dataType": "SR Legacy",
+      "description": "Noodles, egg, enriched, cooked",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20110,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 138,
+        "protein": 4.54,
+        "carbs": 25.2,
+        "fat": 2.07,
+        "fiber": 1.2,
+        "sugar": 0.4,
+        "sodium": 5,
+        "satFat": 0.419
+      },
+      "portions": [
         {
-          "fdcId": 168919,
-          "dataType": "SR Legacy",
-          "description": "Noodles, egg, cooked, enriched, with added salt"
-        },
-        {
-          "fdcId": 169732,
-          "dataType": "SR Legacy",
-          "description": "Noodles, egg, enriched, cooked"
+          "grams": 160,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
         }
       ]
     },
     {
       "id": "QF0131",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0132",
@@ -4111,7 +4461,8 @@
     },
     {
       "id": "QF0133",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0134",
@@ -4321,17 +4672,36 @@
     },
     {
       "id": "QF0142",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 173912,
+      "dataType": "SR Legacy",
+      "description": "Cereals ready-to-eat, rice, puffed, fortified",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 8156,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 402,
+        "protein": 6.3,
+        "carbs": 89.8,
+        "fat": 0.5,
+        "fiber": 1.7,
+        "sugar": null,
+        "sodium": 3,
+        "satFat": 0.13
+      },
+      "portions": [
         {
-          "fdcId": 171651,
-          "dataType": "SR Legacy",
-          "description": "Cereals ready-to-eat, QUAKER, QUAKER Puffed Rice"
+          "grams": 14.2,
+          "amount": 0.5,
+          "unit": "undetermined",
+          "modifier": "oz"
         },
         {
-          "fdcId": 173912,
-          "dataType": "SR Legacy",
-          "description": "Cereals ready-to-eat, rice, puffed, fortified"
+          "grams": 14,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
         }
       ]
     },
@@ -5675,19 +6045,19 @@
           "grams": 150,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64039"
+          "modifier": "1 bottle"
         },
         {
           "grams": 245,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 150,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -7759,13 +8129,13 @@
           "grams": 64,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 128,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         }
       ]
     },
@@ -8298,7 +8668,8 @@
     },
     {
       "id": "QF0235",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0236",
@@ -11078,19 +11449,19 @@
           "grams": 15,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "21000"
+          "modifier": "1 tablespoon"
         },
         {
           "grams": 60,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 70,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60868"
+          "modifier": "1 individual container"
         }
       ]
     },
@@ -13446,19 +13817,19 @@
           "grams": 28,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64353"
+          "modifier": "1 dipping-size container"
         },
         {
           "grams": 16,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "21000"
+          "modifier": "1 tablespoon"
         },
         {
           "grams": 32,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -13492,19 +13863,19 @@
           "grams": 70,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60868"
+          "modifier": "1 individual container"
         },
         {
           "grams": 15,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "21000"
+          "modifier": "1 tablespoon"
         },
         {
           "grams": 60,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -13708,23 +14079,67 @@
     },
     {
       "id": "QF0380",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2710386,
+      "dataType": "FNDDS",
+      "description": "Coffee, Latte",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "92101900",
+      "per100g": {
+        "kcal": 43,
+        "protein": 2.81,
+        "carbs": 4.35,
+        "fat": 1.61,
+        "fiber": 0,
+        "sugar": 4.06,
+        "sodium": 35,
+        "satFat": 0.938
+      },
+      "portions": [
+        {
+          "grams": 480,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 medium"
+        },
+        {
+          "grams": 360,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
+        },
+        {
+          "grams": 240,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cup (8 fl oz)"
+        },
+        {
+          "grams": 600,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 large"
+        },
+        {
+          "grams": 360,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 small"
+        },
+        {
+          "grams": 30,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 fl oz"
+        }
+      ]
     },
     {
       "id": "QF0381",
-      "status": "ambiguous",
-      "candidates": [
-        {
-          "fdcId": 2710386,
-          "dataType": "FNDDS",
-          "description": "Coffee, Latte"
-        },
-        {
-          "fdcId": 2710392,
-          "dataType": "FNDDS",
-          "description": "Coffee, Latte, decaffeinated"
-        }
-      ]
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0382",
@@ -13751,83 +14166,96 @@
           "grams": 30,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "30000"
+          "modifier": "1 fl oz"
         },
         {
           "grams": 240,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10215"
+          "modifier": "1 cup (8 fl oz)"
         },
         {
           "grams": 360,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 360,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62015"
+          "modifier": "1 small"
         },
         {
           "grams": 480,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61238"
+          "modifier": "1 medium"
         },
         {
           "grams": 600,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60919"
+          "modifier": "1 large"
         }
       ]
     },
     {
       "id": "QF0383",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2710410,
+      "dataType": "FNDDS",
+      "description": "Coffee, Cafe Mocha",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "92101950",
+      "per100g": {
+        "kcal": 64,
+        "protein": 2.56,
+        "carbs": 10.2,
+        "fat": 1.47,
+        "fiber": 0,
+        "sugar": 9.3,
+        "sodium": 46,
+        "satFat": 0.855
+      },
+      "portions": [
         {
-          "fdcId": 2710410,
-          "dataType": "FNDDS",
-          "description": "Coffee, Cafe Mocha"
+          "grams": 372,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 small"
         },
         {
-          "fdcId": 2710411,
-          "dataType": "FNDDS",
-          "description": "Coffee, Cafe Mocha, nonfat"
+          "grams": 248,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cup (8 fl oz)"
         },
         {
-          "fdcId": 2710412,
-          "dataType": "FNDDS",
-          "description": "Coffee, Cafe Mocha, with non-dairy milk"
+          "grams": 372,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
         },
         {
-          "fdcId": 2710413,
-          "dataType": "FNDDS",
-          "description": "Coffee, Cafe Mocha, decaffeinated"
+          "grams": 620,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 large"
         },
         {
-          "fdcId": 2710414,
-          "dataType": "FNDDS",
-          "description": "Coffee, Cafe Mocha, decaffeinated, nonfat"
+          "grams": 31,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 fl oz"
         },
         {
-          "fdcId": 2710415,
-          "dataType": "FNDDS",
-          "description": "Coffee, Cafe Mocha, decaffeinated, with non-dairy milk"
-        },
-        {
-          "fdcId": 2710416,
-          "dataType": "FNDDS",
-          "description": "Frozen mocha coffee drink"
-        },
-        {
-          "fdcId": 2710417,
-          "dataType": "FNDDS",
-          "description": "Frozen mocha coffee drink, nonfat"
+          "grams": 496,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 medium"
         }
       ]
     },
@@ -13909,7 +14337,8 @@
     },
     {
       "id": "QF0386",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0387",
@@ -13936,37 +14365,37 @@
           "grams": 240,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 30,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "30000"
+          "modifier": "1 fl oz"
         },
         {
           "grams": 600,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60919"
+          "modifier": "1 large"
         },
         {
           "grams": 360,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62015"
+          "modifier": "1 small"
         },
         {
           "grams": 360,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 480,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61238"
+          "modifier": "1 medium"
         }
       ]
     },
@@ -14174,31 +14603,31 @@
           "grams": 30.5,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "30000"
+          "modifier": "1 fl oz"
         },
         {
           "grams": 244,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 244,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 2.5,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "63480"
+          "modifier": "Guideline amount per fl oz of beverage"
         },
         {
           "grams": 61,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "63546"
+          "modifier": "Guideline amount per cup of hot cereal"
         }
       ]
     },
@@ -14285,43 +14714,43 @@
           "grams": 372,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60422"
+          "modifier": "1 bottle (12 fl oz)"
         },
         {
           "grams": 31,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "30000"
+          "modifier": "1 fl oz"
         },
         {
           "grams": 524,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64090"
+          "modifier": "1 bottle (16.9 fl oz or 500 ml)"
         },
         {
           "grams": 992,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64518"
+          "modifier": "1 bottle (32 fl oz)"
         },
         {
           "grams": 248,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 496,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 620,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "63999"
+          "modifier": "1 bottle (20 fl oz)"
         }
       ]
     },
@@ -14512,11 +14941,80 @@
     },
     {
       "id": "QF0406",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170700,
+      "dataType": "SR Legacy",
+      "description": "BURGER KING, Vanilla Shake",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21141,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 168,
+        "protein": 3.19,
+        "carbs": 19,
+        "fat": 8.74,
+        "fiber": 0,
+        "sugar": 11.7,
+        "sodium": 100,
+        "satFat": 5.34
+      },
+      "portions": [
+        {
+          "grams": 298,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small 12 fl oz"
+        },
+        {
+          "grams": 24.8,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "fl oz"
+        },
+        {
+          "grams": 397,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium 16 fl oz"
+        }
+      ]
     },
     {
       "id": "QF0407",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2705503,
+          "dataType": "FNDDS",
+          "description": "Milk shake, home recipe, chocolate"
+        },
+        {
+          "fdcId": 2705504,
+          "dataType": "FNDDS",
+          "description": "Milk shake, home recipe, flavors other than chocolate"
+        },
+        {
+          "fdcId": 2705505,
+          "dataType": "FNDDS",
+          "description": "Milk shake, home recipe, chocolate, light"
+        },
+        {
+          "fdcId": 2705506,
+          "dataType": "FNDDS",
+          "description": "Milk shake, home recipe, flavors other than chocolate, light"
+        },
+        {
+          "fdcId": 2705510,
+          "dataType": "FNDDS",
+          "description": "Milk shake, bottled, chocolate"
+        },
+        {
+          "fdcId": 2705511,
+          "dataType": "FNDDS",
+          "description": "Milk shake, bottled, flavors other than chocolate"
+        }
+      ]
     },
     {
       "id": "QF0408",
@@ -14719,19 +15217,19 @@
           "grams": 25,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64770"
+          "modifier": "1 small/individual"
         },
         {
           "grams": 100,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61109"
+          "modifier": "1 regular/large"
         },
         {
           "grams": 75,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -14747,7 +15245,8 @@
     },
     {
       "id": "QF0439",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0440",
@@ -14784,13 +15283,13 @@
           "grams": 245,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 245,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         }
       ]
     },
@@ -14829,13 +15328,13 @@
           "grams": 56,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 56,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61823"
+          "modifier": "1 roll"
         }
       ]
     },
@@ -15144,48 +15643,89 @@
     },
     {
       "id": "QF0484",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 172112,
+      "dataType": "SR Legacy",
+      "description": "Chicken, nuggets, white meat, precooked, frozen, not reheated",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 22975,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 261,
+        "protein": 14.4,
+        "carbs": 16.2,
+        "fat": 15.4,
+        "fiber": 0.7,
+        "sugar": 1.27,
+        "sodium": 538,
+        "satFat": 3.37
+      },
+      "portions": [
         {
-          "fdcId": 172111,
-          "dataType": "SR Legacy",
-          "description": "Chicken, nuggets, dark and white meat, precooked, frozen, not reheated"
+          "grams": 20,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "piece"
         },
         {
-          "fdcId": 172112,
-          "dataType": "SR Legacy",
-          "description": "Chicken, nuggets, white meat, precooked, frozen, not reheated"
+          "grams": 82,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving"
         }
       ]
     },
     {
       "id": "QF0485",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2706098,
+      "dataType": "FNDDS",
+      "description": "Chicken tenders or strips, NFS",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "24198739",
+      "per100g": {
+        "kcal": 271,
+        "protein": 19.2,
+        "carbs": 17.2,
+        "fat": 14,
+        "fiber": 1.2,
+        "sugar": 0.4,
+        "sodium": 769,
+        "satFat": 2.49
+      },
+      "portions": [
         {
-          "fdcId": 2706098,
-          "dataType": "FNDDS",
-          "description": "Chicken tenders or strips, NFS"
+          "grams": 10,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 popcorn chicken"
         },
         {
-          "fdcId": 2706100,
-          "dataType": "FNDDS",
-          "description": "Chicken tenders or strips, breaded, from restaurant"
+          "grams": 140,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cup"
         },
         {
-          "fdcId": 2706101,
-          "dataType": "FNDDS",
-          "description": "Chicken tenders or strips, breaded, from school lunch"
+          "grams": 100,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
         },
         {
-          "fdcId": 2706102,
-          "dataType": "FNDDS",
-          "description": "Chicken tenders or strips, breaded, from frozen"
+          "grams": 50,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 tender, strip, or finger"
         },
         {
-          "fdcId": 2706103,
-          "dataType": "FNDDS",
-          "description": "Chicken tenders or strips, breaded, from other sources"
+          "grams": 14,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 chicken fry"
         }
       ]
     },
@@ -15249,31 +15789,31 @@
           "grams": 14,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10134"
+          "modifier": "1 cup, popped"
         },
         {
           "grams": 193,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10189"
+          "modifier": "1 cup, unpopped, yields"
         },
         {
           "grams": 35,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 25,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "40066"
+          "modifier": "1 oz, unpopped, yields"
         },
         {
           "grams": 0.2,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64031"
+          "modifier": "1 kernel"
         }
       ]
     },
@@ -15384,31 +15924,31 @@
           "grams": 5,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64233"
+          "modifier": "1 miniature/bite size"
         },
         {
           "grams": 20,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62015"
+          "modifier": "1 small"
         },
         {
           "grams": 30,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61238"
+          "modifier": "1 medium"
         },
         {
           "grams": 45,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60919"
+          "modifier": "1 large"
         },
         {
           "grams": 60,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -15442,31 +15982,31 @@
           "grams": 45,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "60919"
+          "modifier": "1 large"
         },
         {
           "grams": 60,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 30,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61238"
+          "modifier": "1 medium"
         },
         {
           "grams": 5,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64233"
+          "modifier": "1 miniature/bite size"
         },
         {
           "grams": 20,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62015"
+          "modifier": "1 small"
         }
       ]
     },
@@ -15641,17 +16181,42 @@
     },
     {
       "id": "QF0497",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2707861,
+      "dataType": "FNDDS",
+      "description": "Cheesecake, plain",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "53104500",
+      "per100g": {
+        "kcal": 399,
+        "protein": 5.29,
+        "carbs": 34.8,
+        "fat": 26.5,
+        "fiber": 0.5,
+        "sugar": 26.6,
+        "sodium": 277,
+        "satFat": 14.4
+      },
+      "portions": [
         {
-          "fdcId": 2707861,
-          "dataType": "FNDDS",
-          "description": "Cheesecake, plain"
+          "grams": 175,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
         },
         {
-          "fdcId": 2707862,
-          "dataType": "FNDDS",
-          "description": "Cheesecake, fruit"
+          "grams": 180,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cup"
+        },
+        {
+          "grams": 175,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece/slice, any size"
         }
       ]
     },
@@ -15852,13 +16417,13 @@
           "grams": 160,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         },
         {
           "grams": 80,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -15894,47 +16459,30 @@
     },
     {
       "id": "QF0513",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "single",
+      "fdcId": 169026,
+      "dataType": "SR Legacy",
+      "description": "Restaurant, family style, coleslaw",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 36035,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 159,
+        "protein": 0.88,
+        "carbs": 12.4,
+        "fat": 11.8,
+        "fiber": 1.9,
+        "sugar": 9.54,
+        "sodium": 221,
+        "satFat": 1.91
+      },
+      "portions": [
         {
-          "fdcId": 168109,
-          "dataType": "SR Legacy",
-          "description": "Salad Dressing, coleslaw, reduced fat"
-        },
-        {
-          "fdcId": 169020,
-          "dataType": "SR Legacy",
-          "description": "APPLEBEE'S, coleslaw"
-        },
-        {
-          "fdcId": 169023,
-          "dataType": "SR Legacy",
-          "description": "DENNY'S, coleslaw"
-        },
-        {
-          "fdcId": 169056,
-          "dataType": "SR Legacy",
-          "description": "Salad dressing, coleslaw"
-        },
-        {
-          "fdcId": 169843,
-          "dataType": "SR Legacy",
-          "description": "CRACKER BARREL, coleslaw"
-        },
-        {
-          "fdcId": 170300,
-          "dataType": "SR Legacy",
-          "description": "Fast foods, coleslaw"
-        },
-        {
-          "fdcId": 170340,
-          "dataType": "SR Legacy",
-          "description": "KFC, Coleslaw"
-        },
-        {
-          "fdcId": 172087,
-          "dataType": "SR Legacy",
-          "description": "POPEYES, Coleslaw"
+          "grams": 108,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving"
         }
       ]
     },
@@ -16214,7 +16762,38 @@
     },
     {
       "id": "QF0558",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172469,
+      "dataType": "SR Legacy",
+      "description": "Peanut butter, chunk style, without salt",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 16397,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 589,
+        "protein": 24.1,
+        "carbs": 21.6,
+        "fat": 49.9,
+        "fiber": 8,
+        "sugar": 8.41,
+        "sodium": 17,
+        "satFat": 7.61
+      },
+      "portions": [
+        {
+          "grams": 32,
+          "amount": 2,
+          "unit": "undetermined",
+          "modifier": "tbsp"
+        },
+        {
+          "grams": 258,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0559",
@@ -16251,61 +16830,61 @@
           "grams": 9,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64017"
+          "modifier": "1 cracker-size slice"
         },
         {
           "grams": 113,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10159"
+          "modifier": "1 cup, shredded"
         },
         {
           "grams": 21,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 28.35,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "62239"
+          "modifier": "1 stick"
         },
         {
           "grams": 17,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "51000"
+          "modifier": "1 cubic inch"
         },
         {
           "grams": 132,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10310"
+          "modifier": "1 cup, cubed"
         },
         {
           "grams": 244,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10120"
+          "modifier": "1 cup, melted"
         },
         {
           "grams": 113,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10010"
+          "modifier": "1 cup, NFS"
         },
         {
           "grams": 132,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10066"
+          "modifier": "1 cup, diced"
         },
         {
           "grams": 21,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "61935"
+          "modifier": "1 slice"
         }
       ]
     },
@@ -16434,19 +17013,19 @@
           "grams": 25,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "64729"
+          "modifier": "1 slice/chunk"
         },
         {
           "grams": 75,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "90000"
+          "modifier": "Quantity not specified"
         },
         {
           "grams": 150,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "10205"
+          "modifier": "1 cup"
         }
       ]
     },
