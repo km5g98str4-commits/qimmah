@@ -979,7 +979,9 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 
       {/* تأكيد إنهاء التمرين (داخل التطبيق — لا confirm متصفح) */}
       {confirmOpen && (
-        <AppOverlay className="z-40 flex items-end justify-center bg-ink-900/40 p-4 sm:items-center" role="dialog" aria-modal="true">
+        // [MOBILE-SHELL-001] كان z-40 داخل سطح الجلسة (z-50) فيعلوه بحكم التداخل؛
+        // صار شقيقًا له في body، فيحتاج رتبة أعلى صراحةً (٧٠ < حارس الجلسة ٨٠).
+        <AppOverlay className="z-[70] flex items-end justify-center bg-ink-900/40 p-4 sm:items-center" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-card">
             <span className="grid h-12 w-12 place-items-center rounded-full bg-primary-soft text-primary-c">
               <Icon name="CheckCircle2" className="h-6 w-6" />

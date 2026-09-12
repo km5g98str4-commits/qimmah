@@ -75,7 +75,10 @@ async function waitForServer(ms = 40000) {
 const INSTRUMENT = () => {
   window.__C = { roots: 0, rootSeen: null }
   const probe = () => {
-    const el = document.querySelector('div.fixed.inset-0.z-50')
+    // [MOBILE-SHELL-001] سطح الجلسة يمرّ الآن بـ`AppOverlay` (بوّابة إلى body، وسم
+    // `data-app-overlay`) — نفس الحاوية الواحدة، بنية أخرى. الاحتمال المقيس هو
+    // عدد مرّات تركيبها لا اسم صنفها.
+    const el = document.querySelector('div[data-app-overlay].z-50')
     if (el && el !== window.__C.rootSeen) { window.__C.rootSeen = el; window.__C.roots += 1 }
   }
   new MutationObserver(probe).observe(document.body, { childList: true, subtree: true })

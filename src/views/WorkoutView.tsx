@@ -40,6 +40,7 @@ import { weeklyAdherenceStreak } from '@/lib/streaks'
 import type { WorkoutSession } from '@/lib/workoutSessions'
 import type { PlanDay } from '@/types/workout'
 import { useAccess } from '@/lib/access/useAccess'
+import { AppOverlay } from '@/components/AppOverlay'
 
 /**
  * ما اقتُطع من جلسة اليوم ولماذا — يسافر من موضع الاقتطاع إلى موضع الإخبار.
@@ -648,7 +649,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
           فوق الشريط السفلي وتحت وضع الجلسة. تُغلق بالدخول أو بالتخطّي، ولا
           تُعرض لجلسة مُستأنَفة (تلك بدأت أصلًا فالإحماء ورائها). */}
       {pendingWarmup && !activeDay && (
-        <div className="fixed inset-0 z-[60]">
+        <AppOverlay className="z-[60]">
           <WarmupScreen
             lang={lang}
             plan={pendingWarmup.plan}
@@ -666,12 +667,15 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
               beginSession(pendingWarmup.day, pendingWarmup.trimmed)
             }}
           />
-        </div>
+        </AppOverlay>
       )}
 
-      {/* وضع التمرين — فوق الشريط السفلي */}
+      {/* وضع التمرين — فوق الشريط السفلي.
+          [MOBILE-SHELL-001] `WorkoutMode` يرسم نفسه ببوّابة إلى body، فهذا الغلاف
+          لم يعد سطحه بل **طبقة لتنبيه فشل الحفظ فوقه**. يبقى `pointer-events-none`
+          وإلا صار طبقة فارغة داخل #root تبتلع لمسات الجلسة (وقع في CI #610). */}
       {activeDay && (
-        <div className="fixed inset-0 z-[60]">
+        <div className="pointer-events-none fixed inset-0 z-[60]">
           <WorkoutMode lang={lang} day={activeDay} userId={userId} resume={resumeFrom} trimmed={trimmed ?? undefined} onClose={requestClose} onFinish={finish} onSaveError={setSaveError} />
           {/* [CTO-71] البند ٢ — فشل الحفظ يُقال صراحةً فوق الجلسة القائمة.
               لا شاشة ملخّص ولا «أحسنت»: العمل لم يُحفَظ، والجلسة باقية للمحاولة. */}
@@ -694,7 +698,7 @@ export function WorkoutView({ lang, onNavigate }: WorkoutViewProps) {
 
       {/* ملخّص نهاية التمرين — المدة وعدد التمارين والحجم والأرقام القياسية */}
       {summary && (
-        <div className="fixed inset-0 z-[70]">
+        <div className="pointer-events-none fixed inset-0 z-[70]">
           <WorkoutSummary
             lang={lang}
             session={summary.session}
