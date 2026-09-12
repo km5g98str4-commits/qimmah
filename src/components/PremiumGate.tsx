@@ -15,6 +15,7 @@ import type { PaidAction } from '@/lib/access/paidActions'
 import { outcomeTone, redeemMessage, trialMessage, type RedeemUiState, type TrialUiState } from '@/lib/access/outcomeMessages'
 import { founderQaEntitlementEnabled, FOUNDER_QA_CODE } from '@/lib/access/entitlementSource'
 import type { Lang } from '@/lib/appPreferences'
+import { AppOverlay } from '@/components/AppOverlay'
 
 /** الفعل المحجوب ⇒ اسمه بلغة المستخدم. الكود لا يظهر للمستخدم أبدًا. */
 function actionLabel(action: PaidAction, s: ReturnType<() => typeof accessStrings.ar>): string {
@@ -106,7 +107,7 @@ export function PremiumGate({ lang, onSignIn }: { lang: Lang; onSignIn?: () => v
   const tone = outcomeTone(state)
 
   return (
-    <div dir={lang === 'en' ? 'ltr' : 'rtl'} className="fixed inset-0 z-[85] flex items-end justify-center bg-ink-900/50 px-4 pb-4 backdrop-blur-sm sm:items-center">
+    <AppOverlay dir={lang === 'en' ? 'ltr' : 'rtl'} className="z-[85] flex items-end justify-center bg-ink-900/50 px-4 pb-4 backdrop-blur-sm sm:items-center">
       <div
         ref={dialogRef}
         role="dialog"
@@ -265,6 +266,6 @@ export function PremiumGate({ lang, onSignIn }: { lang: Lang; onSignIn?: () => v
           <p className="pt-0.5 text-center text-[0.7rem] leading-relaxed text-ink-400">{s.gateBrowseNote}</p>
         </div>
       </div>
-    </div>
+    </AppOverlay>
   )
 }

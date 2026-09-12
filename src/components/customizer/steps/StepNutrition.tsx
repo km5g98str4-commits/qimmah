@@ -174,7 +174,7 @@ export function StepNutrition({ ctx }: { ctx: WizardCtx }) {
           <div className="mt-3 rounded-2xl border border-line bg-surface p-3">
             <div className="mb-2 flex flex-wrap gap-2">
               <input className={inputCls + ' max-w-[12rem]'} value={tplQ} onChange={(e) => setTplQ(e.target.value)} placeholder={d.nutSearchPlaceholder} />
-              <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700" value={tplType} onChange={(e) => setTplType(e.target.value as MealType | 'all')}>
+              <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-base font-bold text-ink-700" value={tplType} onChange={(e) => setTplType(e.target.value as MealType | 'all')}>
                 <option value="all">{d.nutAllTypes}</option>
                 {(Object.keys(mealTypeLabels) as MealType[]).map((mt) => (
                   <option key={mt} value={mt}>{mealTypeLabels[mt][ctx.lang]}</option>

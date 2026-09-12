@@ -10,6 +10,8 @@ import { V2_QUICK_LOG, V2_TAB_LABELS } from '@/design-system/v2/labels'
 import type { AppRoute } from '@/lib/appRoutes'
 import type { AppBadge } from './AppNav'
 import { playHaptic } from '@/lib/nativeFeedback'
+import { useKeyboardViewport } from '@/lib/useKeyboardViewport'
+import { AppOverlay } from './AppOverlay'
 
 export type MainTab = 'dashboard' | 'workout' | 'nutrition' | 'progress' | 'profile'
 
@@ -64,7 +66,12 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
     // بلا أثر — وهو ما كان يحدث في القياس.
     if (justClosed) quickLogTriggerRef.current?.focus()
   }, [quickLogOpen])
-  const [keyboardOpen, setKeyboardOpen] = useState(false)
+  // [MOBILE-SHELL-001] لوحة المفاتيح من مصدرين: جسر Capacitor (أصلي) **و**
+  // `visualViewport` (الويب — Safari/Chrome على الجوال). بلا الثاني كان الشريط
+  // السفلي يجلس فوق اللوحة على الويب، والقشرة تبقى بطول الشاشة تحتها.
+  const [nativeKeyboardOpen, setKeyboardOpen] = useState(false)
+  const { keyboardOpen: webKeyboardOpen } = useKeyboardViewport()
+  const keyboardOpen = nativeKeyboardOpen || webKeyboardOpen
   const scrollerRef = useRef<HTMLElement>(null)
   const previousTabRef = useRef<MainTab>(tab)
   const scrollPositionsRef = useRef<Partial<Record<MainTab, number>>>({})
@@ -181,7 +188,7 @@ export function MobileShell({ lang, tab, badge: _badge, onNavigate, onOpenSettin
   }, [lg, tab, t.brand])
 
   return (
-    <div className="qimmah-app-shell h-[100dvh] overflow-hidden bg-page">
+    <div className="qimmah-app-shell app-viewport-h overflow-hidden bg-page">
       <div className="app-container flex h-full min-h-0 flex-col border-x border-line/60">
         {/* هيدر مدمج */}
         {/* الهيدر يملك منطقة الأمان العلوية: مع تراكب شريط الحالة على iOS يمتد سطحه
@@ -366,7 +373,7 @@ function QuickLogSheet({ lang, routineLabel, onClose, onSelect }: { lang: Lang; 
   }, [onClose])
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center" role="presentation">
+    <AppOverlay className="z-[80] flex items-end justify-center" role="presentation">
       <button type="button" tabIndex={-1} aria-hidden="true" className="absolute inset-0 bg-black/55 backdrop-blur-[2px]" onClick={onClose} />
       <section
         ref={dialogRef}
@@ -389,7 +396,7 @@ function QuickLogSheet({ lang, routineLabel, onClose, onSelect }: { lang: Lang; 
           <QuickLogAction icon="Pill" label={routineLabel || copy.routineEmpty} onClick={() => onSelect('routine')} />
         </div>
       </section>
-    </div>
+    </AppOverlay>
   )
 }
 

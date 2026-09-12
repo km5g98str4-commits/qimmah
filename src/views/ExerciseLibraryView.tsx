@@ -176,7 +176,7 @@ export function ExerciseLibraryView({ lang }: ExerciseLibraryViewProps) {
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={d.searchPlaceholder}
-              className="min-h-[44px] w-full bg-transparent text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none"
+              className="min-h-[44px] w-full bg-transparent text-base text-ink-900 placeholder:text-ink-400 focus:outline-none"
               aria-label={d.searchAria}
               data-testid="exercise-library-search"
             />

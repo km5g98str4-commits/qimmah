@@ -451,7 +451,7 @@ function MealCard({
                           decimal: editing.unit === 'serving',
                         }),
                       })}
-                      className="mt-1 block min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 text-sm text-ink-900 outline-none focus:border-primary-c"
+                      className="mt-1 block min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 text-base text-ink-900 outline-none focus:border-primary-c"
                     />
                   </label>
                   {editing.value !== '' && (!Number.isFinite(Number(editing.value)) || Number(editing.value) <= 0) && (
@@ -590,7 +590,7 @@ function WaterPanel({ lang, waterMl, targetMl, onAdd: rawAdd, onReset, focusRequ
           onChange={(e) => setMl(sanitizeNumericInput(e.target.value))}
           onKeyDown={(e) => { if (e.key === 'Enter') submit() }}
           placeholder={formatNumeralsIn(t.customWaterPlaceholder, lang)}
-          className="min-h-[44px] w-40 rounded-lg border border-line bg-page px-3 py-2 text-xs text-ink-900 outline-none focus:border-primary-c"
+          className="min-h-[44px] w-40 rounded-lg border border-line bg-page px-3 py-2 text-base text-ink-900 outline-none focus:border-primary-c"
         />
         <button type="button" onClick={submit} disabled={!valid} className="btn-primary min-h-[44px] px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">{t.customWaterAdd}</button>
       </div>

@@ -6,6 +6,7 @@ import type { WorkoutSession } from '@/lib/workoutSessions'
 import { getExercise } from '@/data/exercises'
 import { muscleLabel } from '@/lib/muscles'
 import { foldDigits, formatNumber } from '@/lib/numberFormat'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface WorkoutSummaryProps {
   lang: Lang
@@ -55,7 +56,7 @@ export function WorkoutSummary({ lang, session, prs, nextDayLabel, streakWeeks, 
   }, [session, lang])
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-page">
+    <AppOverlay className="z-50 flex flex-col overflow-y-auto bg-page">
       <div className="container-page flex min-h-full flex-col justify-center py-10">
         <div className="mx-auto w-full max-w-md">
           {/* عنوان احتفائي */}
@@ -133,7 +134,7 @@ export function WorkoutSummary({ lang, session, prs, nextDayLabel, streakWeeks, 
           </div>
         </div>
       </div>
-    </div>
+    </AppOverlay>
   )
 }
 

@@ -318,7 +318,7 @@ function Field({
         type={numeric ? 'number' : 'text'}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
+        className="rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400/60"
       />
     </label>
   )

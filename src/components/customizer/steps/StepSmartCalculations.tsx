@@ -200,7 +200,7 @@ function TextField({
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full rounded-lg border border-line bg-beige px-3 py-2 text-sm text-ink-900 transition-colors focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+        className="w-full rounded-lg border border-line bg-beige px-3 py-2 text-base text-ink-900 transition-colors focus:border-brand-500/50 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
       />
     </div>
   )

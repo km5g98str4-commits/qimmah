@@ -203,7 +203,7 @@ export function PurchaseBatchPanel({
                 id={`${uid}-label`} data-testid="purchase-label-input" value={label}
                 onChange={(e) => { setLabel(e.target.value); setError(null) }}
                 placeholder={t.labelPlaceholder} dir="ltr" autoComplete="off"
-                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-900 outline-none focus:border-primary-c"
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-base font-bold text-ink-900 outline-none focus:border-primary-c"
               />
             </div>
             <div>
@@ -212,7 +212,7 @@ export function PurchaseBatchPanel({
                 id={`${uid}-count`} data-testid="purchase-count-input" value={count}
                 onChange={(e) => { setCount(e.target.value); setError(null) }}
                 type="number" min={1} max={PURCHASE_BATCH_MAX} inputMode="numeric" dir="ltr"
-                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-900 outline-none focus:border-primary-c"
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-base font-bold text-ink-900 outline-none focus:border-primary-c"
               />
               <p className="mt-1 text-[0.7rem] font-bold text-ink-400">{t.countHint(PURCHASE_BATCH_MAX)}</p>
             </div>
@@ -222,7 +222,7 @@ export function PurchaseBatchPanel({
                 id={`${uid}-reason`} data-testid="purchase-reason-input" value={reason}
                 onChange={(e) => { setReason(e.target.value); setError(null) }}
                 placeholder={t.reasonPlaceholder} autoComplete="off"
-                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-900 outline-none focus:border-primary-c"
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-base font-bold text-ink-900 outline-none focus:border-primary-c"
               />
             </div>
             <div>
@@ -231,7 +231,7 @@ export function PurchaseBatchPanel({
                 id={`${uid}-expires`} data-testid="purchase-expires-input" value={expiresAt}
                 onChange={(e) => { setExpiresAt(e.target.value); setError(null) }}
                 type="datetime-local" dir="ltr"
-                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-900 outline-none focus:border-primary-c"
+                className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-base font-bold text-ink-900 outline-none focus:border-primary-c"
               />
               <p className="mt-1 text-[0.7rem] leading-relaxed text-ink-400">{t.expiresHint}</p>
             </div>
@@ -332,7 +332,7 @@ export function PurchaseBatchPanel({
             onChange={(e) => { setDisableReason(e.target.value); setDisableLocalError(null) }}
             placeholder={t.batchDisableReasonPlaceholder}
             autoComplete="off"
-            className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-sm font-bold text-ink-900 outline-none focus:border-danger"
+            className="mt-1.5 min-h-11 w-full rounded-xl border border-line bg-page px-3 py-2.5 text-base font-bold text-ink-900 outline-none focus:border-danger"
           />
           <div className="mt-3 flex flex-wrap gap-2">
             <button

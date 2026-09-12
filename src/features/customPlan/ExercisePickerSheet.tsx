@@ -199,7 +199,7 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
 
   return (
     <div className="fixed inset-0 z-[80] flex items-end justify-center bg-page/70 p-0 backdrop-blur-sm sm:items-center sm:p-6">
-      <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className="flex max-h-[92vh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-line bg-surface shadow-elevated sm:rounded-3xl">
+      <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className="flex max-h-[92dvh] w-full max-w-lg flex-col overflow-hidden rounded-t-3xl border border-line bg-surface shadow-elevated sm:rounded-3xl">
         {/* رأس */}
         <div className="flex items-center justify-between border-b border-line p-4">
           <h3 className="text-base font-black text-ink-900">{d.pickerTitle}</h3>
@@ -222,7 +222,7 @@ export function ExercisePickerSheet({ lang, onAdd, onClose }: ExercisePickerShee
               onChange={(e) => setQ(e.target.value)}
               placeholder={d.searchPlaceholder}
               aria-label={d.searchPlaceholder}
-              className="w-full bg-transparent py-2.5 text-sm text-ink-900 placeholder:text-ink-400 focus:outline-none"
+              className="w-full bg-transparent py-2.5 text-base text-ink-900 placeholder:text-ink-400 focus:outline-none"
             />
           </div>
           {/* فلتر العضلات — رقائق أفقية قابلة للتمرير */}

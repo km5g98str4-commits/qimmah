@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { sessionGuardStrings } from '@/i18n/dict/sessionGuard'
+import { AppOverlay } from '@/components/AppOverlay'
 
 export type SessionGuardKind = 'stop' | 'discard'
 
@@ -47,12 +48,12 @@ export function SessionGuardDialog({ lang, kind, sets, onConfirm, onCancel }: Se
   }, [onCancel])
 
   return (
-    <div
+    <AppOverlay
       dir={ar ? 'rtl' : 'ltr'}
       role="dialog"
       aria-modal="true"
       aria-label={s.dialogLabel}
-      className="fixed inset-0 z-[80] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="z-[80] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
     >
       <section className="card w-full max-w-md rounded-b-none p-5 sm:rounded-b-3xl">
         <span
@@ -87,6 +88,6 @@ export function SessionGuardDialog({ lang, kind, sets, onConfirm, onCancel }: Se
           </button>
         </div>
       </section>
-    </div>
+    </AppOverlay>
   )
 }

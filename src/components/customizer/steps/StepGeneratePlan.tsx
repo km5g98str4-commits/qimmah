@@ -167,7 +167,7 @@ export function StepGeneratePlan({ ctx }: { ctx: WizardCtx }) {
               </label>
               <label className="flex flex-col gap-1">
                 <span className="text-[11px] font-bold text-ink-500">{d.genNutritionStyle}</span>
-                <select className="w-full rounded-lg border border-line bg-beige px-2.5 py-2 text-sm text-ink-900 focus:outline-none" value={p.nutritionStyle} onChange={(e) => setNutPref({ nutritionStyle: e.target.value as Profile['nutritionStyle'] })}>
+                <select className="w-full rounded-lg border border-line bg-beige px-2.5 py-2 text-base text-ink-900 focus:outline-none" value={p.nutritionStyle} onChange={(e) => setNutPref({ nutritionStyle: e.target.value as Profile['nutritionStyle'] })}>
                   {nutritionStyleOptions.map((o) => <option key={o.value} value={o.value}>{choices.nutritionStyle[o.value]}</option>)}
                 </select>
               </label>

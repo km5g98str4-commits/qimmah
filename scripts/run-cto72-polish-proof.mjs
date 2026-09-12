@@ -396,7 +396,9 @@ check('التركيز يبدأ على الخيار **الآمن** (Enter بلا 
 check('Esc = البقاء لا الفعل', /e\.key === 'Escape'\) onCancel\(\)/.test(guardDialog))
 check('هدفا لمس ≥44px', (guardDialog.match(/min-h-\[44px\]/g) || []).length >= 2)
 check('الفعل المدمّر مميَّز بنصّه لا بلونه وحده (§4)', /destructive \? s\.discardConfirm : s\.stopConfirm/.test(guardDialog))
-check('الحارس فوق وضع الجلسة والملخّص (z-80 > 70 > 60)', /className="fixed inset-0 z-\[80\]/.test(guardDialog))
+// [MOBILE-SHELL-001] الحارس يمرّ ببوّابة `AppOverlay` (الثابت فيها) — فالمقيس هنا
+// رتبته z-[80] على جذر التراكب، لا صيغة `fixed inset-0` التي صارت داخل البوّابة.
+check('الحارس فوق وضع الجلسة والملخّص (z-80 > 70 > 60)', /<AppOverlay[\s\S]{0,240}?className="z-\[80\]/.test(guardDialog))
 
 // و) الرصد لا يكذب: لا يُسجَّل قطعٌ لم يقع لأن المستخدم تراجع.
 check(

@@ -55,8 +55,16 @@
   }
 
   body.qimmah-shell-mounted #root {
-    height: 100dvh;
+    height: var(--qimmah-vvh, 100dvh);
     overflow: hidden;
+  }
+
+  /* [MOBILE-SHELL-001] ارتفاع «المنطقة المرئية» لا الشاشة: `--qimmah-vvh` تنشرها
+     `useKeyboardViewport` حين تفتح لوحة المفاتيح (= visualViewport.height)، وتُزال
+     عند إغلاقها فيعود `100dvh`. كل سطح بطول الشاشة (القشرة · الشاشات المستقلّة ·
+     التراكبات) يقرأ هذا الصنف، فينكمش فوق اللوحة بدل أن يختبئ تحتها. */
+  .app-viewport-h {
+    height: var(--qimmah-vvh, 100dvh);
   }
 
   /* عناصر واجهة التطبيق (أزرار/روابط/تنقّل/أيقونات): لا تحديد نص ولا قائمة لمس مطوّل —

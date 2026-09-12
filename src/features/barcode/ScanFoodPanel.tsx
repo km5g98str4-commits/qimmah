@@ -6,6 +6,7 @@ import type { FoodItem } from '@/data/foodItems'
 import { lookupBarcode } from './openFoodFacts'
 import { catalogProductToFoodItem, getAppCatalog } from '@/lib/food/catalog/appCatalog'
 import { BarcodeCamera, type CameraFailure } from './BarcodeCamera'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface ScanFoodPanelProps {
   lang: Lang
@@ -120,8 +121,8 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
     status !== 'scanning' && status !== 'looking-up' && status !== 'not-found' ? failureView(status, d) : null
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
-      <div className="flex max-h-[90vh] w-full max-w-md flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
+    <AppOverlay className="z-[70] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
+      <div className="flex max-h-[90dvh] w-full max-w-md flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-line p-4">
           <h3 className="text-base font-bold text-ink-900">{d.scanTitle}</h3>
           <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-lg text-ink-500 hover:bg-beige">
@@ -195,6 +196,6 @@ export function ScanFoodPanel({ lang, onResolved, onManualFallback, onClose }: S
           {d.scanAttribution}
         </p>
       </div>
-    </div>
+    </AppOverlay>
   )
 }

@@ -8,6 +8,7 @@ import { exercises } from '@/data/exercises'
 import { approvedVideoFor } from '@/lib/exerciseProductionMedia'
 import { ExerciseName } from './ExerciseName'
 import type { ExEnvironment, ExLevel, Muscle } from '@/types/workout'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface ExerciseLibraryPickerProps {
   lang: Lang
@@ -66,8 +67,8 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
   }, [q, muscle, env, level])
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
+    <AppOverlay className="z-[60] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
+      <div className="flex max-h-[90dvh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         {/* رأس */}
         <div className="flex items-center justify-between border-b border-line p-4">
           <h3 className="text-base font-bold text-ink-900">{d.pickerTitle}</h3>
@@ -84,7 +85,7 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder={d.pickerSearchPlaceholder}
-              className="w-full bg-transparent py-2.5 text-sm text-ink-900 focus:outline-none"
+              className="w-full bg-transparent py-2.5 text-base text-ink-900 focus:outline-none"
             />
           </div>
           <div className="flex flex-wrap gap-2">
@@ -150,6 +151,6 @@ export function ExerciseLibraryPicker({ lang, onAdd, onClose }: ExerciseLibraryP
           )}
         </div>
       </div>
-    </div>
+    </AppOverlay>
   )
 }

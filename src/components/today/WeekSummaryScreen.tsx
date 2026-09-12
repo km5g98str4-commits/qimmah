@@ -11,6 +11,7 @@ import { Icon } from '@/components/Icon'
 import type { Lang } from '@/lib/appPreferences'
 import { firstWeekStrings } from '@/i18n/dict/firstWeek'
 import type { WeekSummaryStats } from '@/lib/weekSummary'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface WeekSummaryScreenProps {
   lang: Lang
@@ -28,9 +29,9 @@ export function WeekSummaryScreen({ lang, stats, weightKg, showAccountOffer, onC
   const t = firstWeekStrings[ar ? 'ar' : 'en']
 
   return (
-    <div
+    <AppOverlay
       dir={ar ? 'rtl' : 'ltr'}
-      className="fixed inset-0 z-[90] overflow-y-auto bg-page px-5 py-8 text-ink-900"
+      className="z-[90] overflow-y-auto bg-page px-5 py-8 text-ink-900"
       role="dialog"
       aria-modal="true"
       aria-labelledby="week-summary-title"
@@ -80,6 +81,6 @@ export function WeekSummaryScreen({ lang, stats, weightKg, showAccountOffer, onC
           {t.weekClose}
         </button>
       </div>
-    </div>
+    </AppOverlay>
   )
 }
