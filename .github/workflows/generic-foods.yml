@@ -1,0 +1,81 @@
+# بحث USDA للأطعمة العامّة في CI — [FOOD-GENERIC-001]
+#
+# مضيفو USDA FoodData Central محجوبون في بيئة الوكلاء (نفس ما وُثّق لـOFF والسلاسل)،
+# وعدّاء GitHub Actions شبكته مفتوحة. فالتنزيل والمطابقة (research-usda.mjs) هنا،
+# والدليل الناتج يُدفع إلى الفرع نفسه. **ليس استيرادًا آليًا**: التحويل إلى صنف
+# قِمّة (promote-generic.mjs) موجة محلّية تقرأ الدليل وتمرّ ببوابات الجودة.
+#
+# الإطلاق: يدويًّا أو بدفع تعديل على ملف الطلب — ولا حلقة: دفعة الدليل لا تلمسه.
+name: Generic foods (USDA evidence)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/qimmah-production-readiness-13cyt7
+    paths:
+      - .github/generic-foods-request
+      - docs/data-factory/generic/USDA-MAP.json
+
+permissions:
+  contents: write
+
+concurrency:
+  group: generic-foods-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Download USDA FoodData Central datasets (public domain)
+        run: |
+          mkdir -p .usda && cd .usda
+          curl -sSL --retry 5 --retry-delay 10 -o sr.zip "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_json_2018-04.zip"
+          curl -sSL --retry 5 --retry-delay 10 -o foundation.zip "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_json_2025-04-24.zip"
+          curl -sSL --retry 5 --retry-delay 10 -o fndds.zip "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_survey_food_json_2024-10-31.zip"
+          for z in sr foundation fndds; do unzip -o -q $z.zip -d $z || echo "unzip $z failed"; done
+          ls -la . sr foundation fndds || true
+          find . -name '*.json' -size +1M | head
+
+      - name: Match the generic-600 map against the datasets
+        run: |
+          SR=$(find .usda/sr -name '*.json' | head -1)
+          FO=$(find .usda/foundation -name '*.json' | head -1)
+          FN=$(find .usda/fndds -name '*.json' | head -1)
+          echo "sr=$SR foundation=$FO fndds=$FN"
+          node --max-old-space-size=6144 scripts/food-production/research-usda.mjs --sr "$SR" --foundation "$FO" --fndds "$FN"
+
+      - name: Commit and push the evidence to this branch
+        run: |
+          git config user.name 'qimmah-usda-research'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/food-production/generic
+          if git diff --cached --quiet; then
+            echo 'no evidence change - nothing to push.'
+            exit 0
+          fi
+          {
+            echo "data(food): [FOOD-GENERIC-001] دليل USDA للأطعمة العامّة"
+            echo ""
+            echo "مطابقة USDA-MAP.json على SR Legacy · Foundation · FNDDS داخل CI (شبكة مفتوحة)."
+            echo "القيم منسوخة كما هي لكل ١٠٠غ مع fdcId والحصص — لا استيراد آلي؛ الترقية"
+            echo "موجة محلّية تمرّ ببوابات الجودة."
+            echo ""
+            echo "Generated-by: .github/workflows/generic-foods.yml"
+          } > /tmp/usda-commit-msg
+          git commit -F /tmp/usda-commit-msg
+          for i in 1 2 3; do
+            git push origin "HEAD:${{ github.ref_name }}" && exit 0
+            git pull --rebase origin "${{ github.ref_name }}"
+          done
+          git push origin "HEAD:${{ github.ref_name }}"
