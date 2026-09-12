@@ -83,11 +83,12 @@ for (const row of map.rows) {
       const hit = set.find((f) => f.__norm === ex)
       if (hit) { chosen = hit; how = 'exact'; break }
     }
-    if (row.q) {
-      const need = norm(row.q).split(' ').filter(Boolean)
+    const query = row.q ?? (row.exact ? row.exact.replace(/[(),"]/g, ' ').split(/\s+/).filter((t) => t.length > 2 && !/^(and|or|with|without|the|of|to|as|in|from|includes|type|all)$/i.test(t)).slice(0, 5).join(' ') : null)
+    if (query) {
+      const need = norm(query).split(' ').filter(Boolean)
       const ban = (row.not ?? []).map((t) => norm(t))
       const c = set.filter((f) => need.every((t) => (` ${f.__norm} `).includes(` ${t} `)) && !ban.some((t) => (` ${f.__norm} `).includes(` ${t} `)))
-      if (c.length === 1) { chosen = c[0]; how = 'single'; break }
+      if (c.length === 1 && row.q) { chosen = c[0]; how = 'single'; break }
       if (c.length > 1) { candidates = c.slice(0, 8).map((f) => ({ fdcId: f.fdcId, dataType: f.__dt, description: f.__desc })); if (row.pick) { const p = c.find((f) => f.__norm === norm(row.pick)); if (p) { chosen = p; how = 'pick'; break } } }
     }
   }
