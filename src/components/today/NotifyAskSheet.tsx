@@ -16,6 +16,7 @@ import { firstWeekStrings } from '@/i18n/dict/firstWeek'
 import { notificationSettingsCopy } from '@/data/notificationCopy'
 import { isValidNotificationTime } from '@/lib/notifications/prefs'
 import type { NotificationPrefs } from '@/lib/notifications/types'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface NotifyAskSheetProps {
   lang: Lang
@@ -50,7 +51,7 @@ export function NotifyAskSheet({ lang, prefs, onAccept, onDecline }: NotifyAskSh
   }
 
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center" role="dialog" aria-modal="true" aria-labelledby="notify-ask-title">
+    <AppOverlay className="z-[80] flex items-end justify-center" role="dialog" aria-modal="true" aria-labelledby="notify-ask-title">
       <button type="button" aria-label={t.notifyAskNo} onClick={onDecline} className="absolute inset-0 bg-black/40" />
       <div className="relative w-full max-w-md rounded-t-3xl border-t border-line bg-surface p-5 pb-8 shadow-card">
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-line" aria-hidden="true" />
@@ -97,6 +98,6 @@ export function NotifyAskSheet({ lang, prefs, onAccept, onDecline }: NotifyAskSh
         {/* البيت الدائم يبقى الإعدادات — الرفض هنا لا يغلق الباب. */}
         <p className="mt-3 text-center text-xs font-bold text-ink-400">{t.notifyAskHome}</p>
       </div>
-    </div>
+    </AppOverlay>
   )
 }

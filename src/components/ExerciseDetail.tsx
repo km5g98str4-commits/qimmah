@@ -16,6 +16,7 @@ import { ExerciseMedia } from './ExerciseMedia'
 import { equipmentLabel } from '@/lib/exerciseLabels'
 import { approvedVideoFor, videoEmbedUrl } from '@/lib/exerciseProductionMedia'
 import { exerciseVideoStrings } from '@/i18n/dict/exerciseVideo'
+import { AppOverlay } from '@/components/AppOverlay'
 
 type DetailTab = 'about' | 'history' | 'charts' | 'records'
 
@@ -99,7 +100,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
   if (!ex) return null
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-900/50 p-0 sm:items-center sm:p-6">
+    <AppOverlay className="z-[60] flex items-end justify-center bg-ink-900/50 p-0 sm:items-center sm:p-6">
       <div
         ref={dialogRef}
         role="dialog"
@@ -108,7 +109,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
         tabIndex={-1}
         data-testid="exercise-detail"
         data-exercise-id={exerciseId}
-        className="flex max-h-[92vh] w-full max-w-xl flex-col rounded-t-3xl bg-page shadow-card sm:rounded-3xl"
+        className="flex max-h-[92dvh] w-full max-w-xl flex-col rounded-t-3xl bg-page shadow-card sm:rounded-3xl"
       >
         {/* رأس بطاقة مع صورة بديلة داكنة فاخرة */}
         <div className="relative shrink-0 overflow-hidden rounded-t-3xl">
@@ -174,7 +175,7 @@ export function ExerciseDetail({ lang, exerciseId, onClose, onAddToPlan }: Exerc
           {tab === 'records' && <RecordsTab stats={stats} d={d} />}
         </div>
       </div>
-    </div>
+    </AppOverlay>
   )
 }
 

@@ -14,6 +14,7 @@ import { achievementsStrings } from '@/i18n/dict/achievements'
 import type { Lang } from '@/lib/appPreferences'
 import { useAchievements } from './useAchievements'
 import type { AchievementProgress } from './engine'
+import { AppOverlay } from '@/components/AppOverlay'
 
 /**
  * بطاقة الأوسمة على الرئيسية — تحفيزية لا مزدحمة.
@@ -115,7 +116,7 @@ function AchievementsSheet({
   const categories = Object.keys(CATEGORY_LABELS) as AchievementCategory[]
 
   return (
-    <div className="fixed inset-0 z-[75] flex flex-col bg-page/95 backdrop-blur-sm">
+    <AppOverlay className="z-[75] flex flex-col bg-page/95 backdrop-blur-sm">
       {/* سطح ملء الشاشة يبدأ من أعلى الشاشة تحت شريط الحالة: تُؤخَذ الحشوة العلوية من
           منطقة الأمان حتى لا يُقصّ العنوان/زر الإغلاق خلف الساعة والبطارية. */}
       <div className="flex items-center justify-between border-b border-line px-4 pb-4" style={{ paddingTop: 'calc(1rem + var(--safe-top))' }}>
@@ -156,7 +157,7 @@ function AchievementsSheet({
           })}
         </div>
       </div>
-    </div>
+    </AppOverlay>
   )
 }
 

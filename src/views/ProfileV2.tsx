@@ -561,7 +561,7 @@ function ThemeControl({ lang }: { lang: Lang }) {
         {showCities && !schedule.enabled && (
           <div className="mt-2">
             <p className="mb-1 text-[0.7rem] font-bold text-ink-500">{t('تعذّر تحديد موقعك — اختر مدينة:', 'Couldn’t get your location — pick a city:')}</p>
-            <select aria-label={t('اختر مدينة', 'Pick a city')} defaultValue="" onChange={(e) => chooseCity(e.target.value)} className="w-full rounded-xl border border-line bg-page px-3 py-2 text-sm font-bold text-ink-900">
+            <select aria-label={t('اختر مدينة', 'Pick a city')} defaultValue="" onChange={(e) => chooseCity(e.target.value)} className="w-full rounded-xl border border-line bg-page px-3 py-2 text-base font-bold text-ink-900">
               <option value="" disabled>{t('اختر مدينة…', 'Choose a city…')}</option>
               {SCHEDULE_CITIES.map((c) => (
                 <option key={c.id} value={c.id}>{ar ? c.nameAr : c.nameEn}</option>

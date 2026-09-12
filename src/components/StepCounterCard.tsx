@@ -111,7 +111,7 @@ export function StepCounterCard({ className, lang }: { className?: string; lang:
               onChange={(e) => setGoalDraft(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && commitGoal()}
               aria-label={dict.goalDailyAria}
-              className="w-20 rounded-lg border border-line bg-page px-2 py-1 text-sm text-ink-900 outline-none focus:border-primary-c"
+              className="w-20 rounded-lg border border-line bg-page px-2 py-1 text-base text-ink-900 outline-none focus:border-primary-c"
             />
             <button
               type="button"

@@ -23,6 +23,7 @@ import type { Difficulty, SetLog, WorkoutSession } from '@/lib/workoutSessions'
 import { saveActiveWorkout, type ActiveWorkout } from '@/lib/activeWorkout'
 import type { WriteResult } from '@/lib/safeStorage'
 import { foldDigits, formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface WorkoutModeProps {
   lang: Lang
@@ -289,7 +290,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
   // حارس: يوم بلا تمارين (مثل «تمرين فارغ») — لا نلمس مرجعًا غير موجود؛ نعرض حالة آمنة.
   if (day.exercises.length === 0) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col bg-page">
+      <AppOverlay className="z-50 flex flex-col bg-page">
         <header className="sticky top-0 z-10 glass border-b border-line">
           <div className="container-page flex h-16 items-center justify-between gap-3">
             <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-xl border border-line bg-surface text-ink-700">
@@ -309,7 +310,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
             {t.backToToday}
           </button>
         </main>
-      </div>
+      </AppOverlay>
     )
   }
 
@@ -519,7 +520,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
       : t.finish
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-page">
+    <AppOverlay className="z-50 flex flex-col bg-page">
       {/* الترويسة + شريط التقدّم */}
       <header className="sticky top-0 z-10 glass border-b border-line">
         <div className="container-page flex h-16 items-center justify-between gap-3">
@@ -899,8 +900,8 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
                   ))}
                 </div>
               </div>
-              <input className="w-full rounded-lg border border-line bg-beige px-3 py-2.5 text-sm text-ink-900 focus:outline-none" value={s.painNote} onChange={(e) => setMeta({ painNote: e.target.value })} placeholder={t.painLabel} />
-              <input className="w-full rounded-lg border border-line bg-beige px-3 py-2.5 text-sm text-ink-900 focus:outline-none" value={s.notes} onChange={(e) => setMeta({ notes: e.target.value })} placeholder={t.notes} />
+              <input className="w-full rounded-lg border border-line bg-beige px-3 py-2.5 text-base text-ink-900 focus:outline-none" value={s.painNote} onChange={(e) => setMeta({ painNote: e.target.value })} placeholder={t.painLabel} />
+              <input className="w-full rounded-lg border border-line bg-beige px-3 py-2.5 text-base text-ink-900 focus:outline-none" value={s.notes} onChange={(e) => setMeta({ notes: e.target.value })} placeholder={t.notes} />
             </div>
           )}
         </div>
@@ -978,7 +979,7 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
 
       {/* تأكيد إنهاء التمرين (داخل التطبيق — لا confirm متصفح) */}
       {confirmOpen && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center bg-ink-900/40 p-4 sm:items-center" role="dialog" aria-modal="true">
+        <AppOverlay className="z-40 flex items-end justify-center bg-ink-900/40 p-4 sm:items-center" role="dialog" aria-modal="true">
           <div className="w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-card">
             <span className="grid h-12 w-12 place-items-center rounded-full bg-primary-soft text-primary-c">
               <Icon name="CheckCircle2" className="h-6 w-6" />
@@ -995,9 +996,9 @@ export function WorkoutMode({ lang, day, onClose, onFinish, onSwapExercise, user
               </button>
             </div>
           </div>
-        </div>
+        </AppOverlay>
       )}
-    </div>
+    </AppOverlay>
   )
 }
 

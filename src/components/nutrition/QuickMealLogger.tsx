@@ -335,7 +335,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                     value={query}
                     onChange={(e) => { setQuery(e.target.value); setSelected(null); setSizeId(null) }}
                     placeholder={t.searchFood}
-                    className="min-h-[44px] w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-sm text-ink-900 outline-none focus:border-primary-c"
+                    className="min-h-[44px] w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-base text-ink-900 outline-none focus:border-primary-c"
                   />
                 </div>
                 <button
@@ -498,7 +498,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                             ? setGrams(sanitizeNumericInput(e.target.value, { max: 3000 }))
                             : setServingsInput(sanitizeNumericInput(e.target.value, { max: 20, decimal: true }))
                         }
-                        className="min-h-[44px] w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-sm text-ink-900 outline-none focus:border-primary-c"
+                        className="min-h-[44px] w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-base text-ink-900 outline-none focus:border-primary-c"
                       />
                       <span className="text-xs text-ink-400">{unit === 'g' ? t.gramsUnit : d.servingsUnit}</span>
                     </div>
@@ -535,7 +535,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                   value={cName}
                   onChange={(e) => setCName(e.target.value)}
                   placeholder={d.foodNameExample}
-                  className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
+                  className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink-900 outline-none focus:border-primary-c"
                 />
               </div>
               <Field label={`${t.calories} (0–${NUM_LIMITS.quickCalories.max})`} value={cCal} onChange={setCCal} max={NUM_LIMITS.quickCalories.max} placeholder="0" />
@@ -638,7 +638,7 @@ function Field({ label, value, onChange, placeholder, max }: { label: string; va
         value={value}
         onChange={(e) => onChange(sanitizeNumericInput(e.target.value, { max }))}
         placeholder={placeholder}
-        className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm text-ink-900 outline-none focus:border-primary-c"
+        className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink-900 outline-none focus:border-primary-c"
       />
     </label>
   )

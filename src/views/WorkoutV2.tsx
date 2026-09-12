@@ -79,6 +79,7 @@ import {
   generateWarmup, loadWarmupPref, saveWarmupPref, type WarmupSet,
   detectPRsForSession, toPRCelebrations, type StrengthPR,
 } from '@/lib/strength'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface WorkoutV2Props {
   lang: Lang
@@ -654,7 +655,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
   const disableHydration = () => { setHydrationPref(saveHydrationPref({ ...hydrationPref, enabled: false })); setHydrationUndo(null) }
 
   return (
-    <div role="dialog" aria-modal="true" aria-label={t('التمرين النشط', 'Active workout')} dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
+    <AppOverlay role="dialog" aria-modal="true" aria-label={t('التمرين النشط', 'Active workout')} dir={ar ? 'rtl' : 'ltr'} className="z-[60] flex flex-col bg-page text-ink-900" style={{ paddingTop: 'max(0.75rem, var(--safe-top))', paddingBottom: 'var(--safe-bottom)' }}>
       <header className="flex items-center justify-between gap-3 px-5 py-2">
         <button type="button" onClick={() => setConfirmDiscard(true)} aria-label={t('إغلاق التمرين', 'Close workout')} className="grid h-11 w-11 place-items-center rounded-xl" style={{ background: FOCUS.card, border: `1px solid ${FOCUS.line}`, color: FOCUS.ink }}>
           <Icon name="X" className="h-5 w-5" />
@@ -801,7 +802,7 @@ export function WorkoutV2({ lang, onNavigate }: WorkoutV2Props) {
 
       {/* تجاهل التمرين؟ — guarded destructive close (screen 27). */}
       {confirmDiscard && <DiscardConfirmSheet lang={lang} onDiscard={discardWorkout} onCancel={() => setConfirmDiscard(false)} />}
-    </div>
+    </AppOverlay>
   )
 }
 
@@ -822,7 +823,7 @@ function RecoveryDecisionSheet({
   const t = (a: string, e: string) => (ar ? a : e)
   const ageHours = prompt.kind === 'abandoned' ? Math.max(1, Math.floor(prompt.ageMs / 3_600_000)) : 0
   return (
-    <div className="fixed inset-0 z-[80] flex items-end bg-black/45 p-3" role="dialog" aria-modal="true" aria-label={t('استعادة تمرين سابق', 'Recover an earlier workout')}>
+    <AppOverlay className="z-[80] flex items-end bg-black/45 p-3" role="dialog" aria-modal="true" aria-label={t('استعادة تمرين سابق', 'Recover an earlier workout')}>
       <section className="card mx-auto w-full max-w-md p-5">
         <span className="grid h-11 w-11 place-items-center rounded-xl bg-primary-soft text-primary-c">
           <Icon name="History" className="h-5 w-5" />
@@ -859,7 +860,7 @@ function RecoveryDecisionSheet({
           )}
         </div>
       </section>
-    </div>
+    </AppOverlay>
   )
 }
 
@@ -990,7 +991,7 @@ function HydrationReminder({ lang, intervalMin, onLog, onSnooze, onSetInterval, 
       </div>
       {customOpen && (
         <div className="mt-2 flex items-center gap-2">
-          <input type="number" inputMode="numeric" min={0} value={custom} onChange={(e) => setCustom(e.target.value)} aria-label={t('كمية مخصّصة بالمل', 'Custom amount in ml')} placeholder={t('مل', 'ml')} className="w-24 rounded-xl bg-transparent px-3 py-1.5 text-sm font-bold tabular-nums" style={{ border: '1px solid var(--c-primary)', color: 'var(--c-primary)' }} />
+          <input type="number" inputMode="numeric" min={0} value={custom} onChange={(e) => setCustom(e.target.value)} aria-label={t('كمية مخصّصة بالمل', 'Custom amount in ml')} placeholder={t('مل', 'ml')} className="w-24 rounded-xl bg-transparent px-3 py-1.5 text-base font-bold tabular-nums" style={{ border: '1px solid var(--c-primary)', color: 'var(--c-primary)' }} />
           <button type="button" onClick={() => { const v = Number(custom); if (Number.isFinite(v) && v > 0) { onLog(v); setCustom(''); setCustomOpen(false) } }} className="press rounded-xl px-3 py-1.5 text-xs font-black" style={{ background: 'var(--c-primary)', color: '#fff' }}>{t('سجّل', 'Log')}</button>
         </div>
       )}
@@ -1174,7 +1175,7 @@ function CompleteScreen({ model, lang, stats, prs, canUndo, onUndo, onDone }: { 
   const prByLift = new Map<string, StrengthPR[]>()
   for (const pr of prs) { const a = prByLift.get(pr.exerciseId) ?? []; a.push(pr); prByLift.set(pr.exerciseId, a) }
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} className="fixed inset-0 z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
+    <AppOverlay dir={ar ? 'rtl' : 'ltr'} className="z-[60] flex flex-col items-center justify-center bg-page px-6 text-center text-ink-900">
       {/* success moment — green */}
       <span className="v2-earned-moment grid h-16 w-16 place-items-center rounded-2xl" style={{ background: FOCUS.success, color: FOCUS.onColor }}><Icon name="Check" className="h-8 w-8" strokeWidth={3} /></span>
       <h1 className="mt-5 text-3xl font-black">{ar ? 'أنهيت الجلسة' : 'Session complete'}</h1>
@@ -1203,7 +1204,7 @@ function CompleteScreen({ model, lang, stats, prs, canUndo, onUndo, onDone }: { 
       {undoLive
         ? <button type="button" onClick={onUndo} className="mt-3 flex items-center gap-1.5 text-sm font-bold underline underline-offset-4" style={{ color: FOCUS.inkMuted }}><Icon name="RotateCcw" className="h-4 w-4" />{ar ? 'تراجع عن الحفظ' : 'Undo save'}</button>
         : <p className="mt-3 text-[0.7rem]" style={{ color: FOCUS.inkFaint }}>{ar ? 'محفوظ على هذا الجهاز فقط.' : 'Saved on this device only.'}</p>}
-    </div>
+    </AppOverlay>
   )
 }
 
@@ -1221,7 +1222,7 @@ function FinishConfirmSheet({ lang, pending, saveError, onConfirm, onCancel }: {
   // نصّ صادق يميّز «المساحة ممتلئة» عن «التخزين محجوب» عن خطأ غير معروف.
   const failureBody = saveError === 'quota' ? d.saveFailedQuota : saveError === 'unavailable' ? d.saveFailedBlocked : d.saveFailedGeneric
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('تأكيد إنهاء التمرين', 'Confirm finish workout')}>
+    <AppOverlay className="z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('تأكيد إنهاء التمرين', 'Confirm finish workout')}>
       <button type="button" aria-label={t('إلغاء', 'Cancel')} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
       <div dir={ar ? 'rtl' : 'ltr'} className="relative w-full max-w-md rounded-t-2xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
         <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: FOCUS.line }} />
@@ -1251,7 +1252,7 @@ function FinishConfirmSheet({ lang, pending, saveError, onConfirm, onCancel }: {
         <button type="button" onClick={onConfirm} className="press mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.ember, color: FOCUS.onColor }}>{saveError ? d.saveRetry : ar ? 'نعم، احفظ وأنهِ' : 'Yes, save & finish'}</button>
         <button type="button" onClick={onCancel} className="press mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
       </div>
-    </div>
+    </AppOverlay>
   )
 }
 
@@ -1273,7 +1274,7 @@ function SubstitutionSheet({ lang, profile, currentExerciseId, onChoose, onCance
     { id: 'home', ar: 'في المنزل', en: 'At home' },
   ]
   return (
-    <div className="fixed inset-0 z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('استبدال التمرين', 'Replace exercise')}>
+    <AppOverlay className="z-[70] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={t('استبدال التمرين', 'Replace exercise')}>
       <button type="button" aria-label={t('إلغاء', 'Cancel')} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
       <div dir={ar ? 'rtl' : 'ltr'} className="relative flex w-full max-w-md flex-col rounded-t-2xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, maxHeight: '82vh', paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
         <div className="mx-auto mb-4 h-1 w-10 shrink-0 rounded-full" style={{ background: FOCUS.line }} />
@@ -1324,7 +1325,7 @@ function SubstitutionSheet({ lang, profile, currentExerciseId, onChoose, onCance
 
         <button type="button" onClick={onCancel} className="press mt-4 w-full shrink-0 rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'إلغاء' : 'Cancel'}</button>
       </div>
-    </div>
+    </AppOverlay>
   )
 }
 
@@ -1349,7 +1350,7 @@ function UndoSubToast({ lang, toName, onUndo, onClose }: { lang: Lang; toName: s
 function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDiscard: () => void; onCancel: () => void }) {
   const ar = lang !== 'en'
   return (
-    <div className="fixed inset-0 z-[80] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={ar ? 'تأكيد تجاهل التمرين' : 'Confirm discard workout'}>
+    <AppOverlay className="z-[80] flex items-end justify-center" role="dialog" aria-modal="true" aria-label={ar ? 'تأكيد تجاهل التمرين' : 'Confirm discard workout'}>
       <button type="button" aria-label={ar ? 'إلغاء' : 'Cancel'} onClick={onCancel} className="absolute inset-0 h-full w-full" style={{ background: 'rgba(0,0,0,0.55)' }} />
       <div dir={ar ? 'rtl' : 'ltr'} className="relative w-full max-w-md rounded-t-2xl px-6 pb-8 pt-5 text-ink-900" style={{ background: FOCUS.card, borderTop: `1px solid ${FOCUS.line}`, paddingBottom: 'calc(2rem + var(--safe-bottom))' }}>
         <div className="mx-auto mb-4 h-1 w-10 rounded-full" style={{ background: FOCUS.line }} />
@@ -1358,7 +1359,7 @@ function DiscardConfirmSheet({ lang, onDiscard, onCancel }: { lang: Lang; onDisc
         <button type="button" onClick={onDiscard} className="press mt-5 w-full rounded-2xl py-4 text-[1.1875rem] font-black" style={{ background: FOCUS.error, color: FOCUS.onColor }}>{ar ? 'نعم، تجاهل' : 'Yes, discard'}</button>
         <button type="button" onClick={onCancel} className="press mt-3 w-full rounded-2xl py-3 text-sm font-bold" style={{ background: 'transparent', border: `1px solid ${FOCUS.line}`, color: FOCUS.inkMuted }}>{ar ? 'لا، أكمل التمرين' : 'No, keep training'}</button>
       </div>
-    </div>
+    </AppOverlay>
   )
 }
 

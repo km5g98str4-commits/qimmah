@@ -5,6 +5,7 @@ import type { Lang } from '@/lib/appPreferences'
 import { useAuth } from '@/lib/authContext'
 import { resetQimmah } from '@/lib/resetQimmah'
 import { cn } from '@/lib/cn'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface DeleteAccountDialogProps {
   lang: Lang
@@ -79,9 +80,9 @@ export function DeleteAccountDialog({ lang, onClose, onContact }: DeleteAccountD
   }
 
   return (
-    <div
+    <AppOverlay
       dir={ar ? 'rtl' : 'ltr'}
-      className="fixed inset-0 z-[70] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+      className="z-[70] flex items-end justify-center bg-black/60 p-0 backdrop-blur-sm sm:items-center sm:p-4"
       role="presentation"
       onClick={(e) => {
         if (e.target === e.currentTarget && !busy) onClose()
@@ -194,6 +195,6 @@ export function DeleteAccountDialog({ lang, onClose, onContact }: DeleteAccountD
           </>
         )}
       </div>
-    </div>
+    </AppOverlay>
   )
 }

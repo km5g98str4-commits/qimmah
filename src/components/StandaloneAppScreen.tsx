@@ -30,7 +30,7 @@ export function StandaloneAppScreen({
   }
 
   return (
-    <div dir={ar ? 'rtl' : 'ltr'} data-standalone-screen="" className="flex h-[100dvh] min-h-0 flex-col overflow-hidden bg-page">
+    <div dir={ar ? 'rtl' : 'ltr'} data-standalone-screen="" className="app-viewport-h flex min-h-0 flex-col overflow-hidden bg-page">
       <header
         className="z-20 shrink-0 border-b border-line bg-page/95 backdrop-blur-xl"
         // [STANDALONE-CHROME-001] `var(--safe-top)` لا `env()` خامًا: نفس المتغيّر الذي

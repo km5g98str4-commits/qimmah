@@ -117,7 +117,7 @@ export function TodoWidget({ lang }: { lang: Lang }) {
               }}
               placeholder={s.inputPlaceholder}
               aria-label={s.fieldAria}
-              className="min-h-[44px] flex-1 rounded-xl border border-line bg-page px-3 text-sm text-ink-900 outline-none transition-colors focus:border-primary-soft"
+              className="min-h-[44px] flex-1 rounded-xl border border-line bg-page px-3 text-base text-ink-900 outline-none transition-colors focus:border-primary-soft"
             />
             <button
               type="button"

@@ -5,6 +5,7 @@ import { getStrings } from '@/config/strings'
 import { wellnessScreenStrings } from '@/i18n/dict/wellnessScreen'
 import { supplementLibrary } from '@/data/supplementLibrary'
 import type { SupplementCategory } from '@/types/wellness'
+import { AppOverlay } from '@/components/AppOverlay'
 
 interface Props {
   lang: Lang
@@ -41,8 +42,8 @@ export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
   }, [q, cat])
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
-      <div className="flex max-h-[90vh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
+    <AppOverlay className="z-[60] flex items-end justify-center bg-ink-900/40 p-0 sm:items-center sm:p-6">
+      <div className="flex max-h-[90dvh] w-full max-w-lg flex-col rounded-t-3xl bg-surface shadow-card sm:rounded-3xl">
         <div className="flex items-center justify-between border-b border-line p-4">
           <h3 className="text-base font-bold text-ink-900">{d.supplementLibraryTitle}</h3>
           <button type="button" onClick={onClose} aria-label={d.close} className="grid h-11 w-11 place-items-center rounded-lg text-ink-500 hover:bg-beige"><Icon name="X" className="h-5 w-5" /></button>
@@ -50,9 +51,9 @@ export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
         <div className="space-y-2 border-b border-line p-4">
           <div className="flex items-center gap-2 rounded-xl border border-line bg-page px-3">
             <Icon name="Pill" className="h-4 w-4 text-ink-400" />
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.search} className="w-full bg-transparent py-2.5 text-sm text-ink-900 focus:outline-none" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.search} className="w-full bg-transparent py-2.5 text-base text-ink-900 focus:outline-none" />
           </div>
-          <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-xs font-bold text-ink-700" value={cat} onChange={(e) => setCat(e.target.value as SupplementCategory | 'all')}>
+          <select className="rounded-lg border border-line bg-surface px-2.5 py-2 text-base font-bold text-ink-700" value={cat} onChange={(e) => setCat(e.target.value as SupplementCategory | 'all')}>
             {catOptions(d).map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
           </select>
         </div>
@@ -80,6 +81,6 @@ export function SupplementLibraryPicker({ lang, onAdd, onClose }: Props) {
           )}
         </div>
       </div>
-    </div>
+    </AppOverlay>
   )
 }

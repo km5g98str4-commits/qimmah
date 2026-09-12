@@ -217,7 +217,7 @@ export function NotificationsSettingsV2({ lang, onBack }: Props) {
                 value={prefs.water.cadenceHours}
                 disabled={kindsDisabled}
                 onChange={(e) => persist({ ...prefs, water: { ...prefs.water, cadenceHours: Number(e.target.value) } })}
-                className="rounded-lg border border-line bg-page px-3 py-1.5 text-sm text-ink-900 outline-none focus:border-[color:var(--v2-blue)] disabled:opacity-40"
+                className="rounded-lg border border-line bg-page px-3 py-1.5 text-base text-ink-900 outline-none focus:border-[color:var(--v2-blue)] disabled:opacity-40"
               >
                 {[1, 2, 3, 4, 5, 6].map((h) => (
                   <option key={h} value={h}>{ar ? `${h} ساعة` : `${h}h`}</option>
@@ -265,7 +265,7 @@ export function NotificationsSettingsV2({ lang, onBack }: Props) {
                   value={prefs.weeklyBrief.time}
                   disabled={kindsDisabled}
                   onChange={(e) => persist({ ...prefs, weeklyBrief: { ...prefs.weeklyBrief, time: e.target.value } })}
-                  className="rounded-lg border border-line bg-page px-3 py-1.5 text-sm text-ink-900 outline-none focus:border-[color:var(--v2-blue)] disabled:opacity-40"
+                  className="rounded-lg border border-line bg-page px-3 py-1.5 text-base text-ink-900 outline-none focus:border-[color:var(--v2-blue)] disabled:opacity-40"
                 />
               </div>
             </div>
@@ -298,7 +298,7 @@ function TimeField({ id, label, value, disabled, onChange }: { id: string; label
         value={value}
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-line bg-page px-2.5 py-1.5 text-sm text-ink-900 outline-none focus:border-[color:var(--v2-blue)] disabled:opacity-40"
+        className="rounded-lg border border-line bg-page px-2.5 py-1.5 text-base text-ink-900 outline-none focus:border-[color:var(--v2-blue)] disabled:opacity-40"
       />
     </span>
   )
@@ -372,7 +372,7 @@ function KindRow({
             value={time}
             disabled={disabled}
             onChange={(e) => onTime(e.target.value)}
-            className="rounded-lg border border-line bg-page px-3 py-1.5 text-sm text-ink-900 outline-none focus:border-[color:var(--v2-blue)] disabled:opacity-40"
+            className="rounded-lg border border-line bg-page px-3 py-1.5 text-base text-ink-900 outline-none focus:border-[color:var(--v2-blue)] disabled:opacity-40"
           />
         </div>
       )}
