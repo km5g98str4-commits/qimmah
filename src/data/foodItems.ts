@@ -5960,7 +5960,7 @@ export interface ScoredFoodItem {
 }
 
 /** درجة «بلا استعلام» — أضعف من كل مطابقة حقيقية، فلا تُخلط بها في أي ترتيب. */
-export const NO_QUERY_SCORE = 6
+export const NO_QUERY_SCORE = 7
 
 /**
  * أدنى طول رمز يدخل مطابقة الرموز — دونه يطابق الرمز كل شيء تقريبًا فيصير ضجيجًا.
@@ -6054,9 +6054,13 @@ export function searchFoodScored(query: string): ScoredFoodItem[] {
     if (names.some((n) => n === q)) score = 0
     else if (names.some((n) => n.startsWith(q))) score = 1
     else if (names.some((n) => n.includes(q))) score = 2
-    else if (kws.some((k) => k === q || k.startsWith(q))) score = 3
-    else if (kws.some((k) => k.includes(q))) score = 4
-    else if (useTokens && qTokens.every((qt) => tokens.some((t) => t.startsWith(qt)))) score = 5
+    // [FOOD-GENERIC-001] كلمة مفتاحية **تساوي الاستعلام كلّه** مرادفٌ تحريري
+    // («مكسرات» على اللوز والكاجو) — أقوى من بادئة كلمة، وتُرتَّب في الاتحاد فوق
+    // بادئة اسم منتج معبّأ ودون اسمه التامّ (unifiedSearch.CURATED_STRENGTH).
+    else if (kws.some((k) => k === q)) score = 3
+    else if (kws.some((k) => k.startsWith(q))) score = 4
+    else if (kws.some((k) => k.includes(q))) score = 5
+    else if (useTokens && qTokens.every((qt) => tokens.some((t) => t.startsWith(qt)))) score = 6
 
     if (score !== Infinity) scored.push({ item: f, score })
   }

@@ -238,8 +238,11 @@ ok(`الجسر يعمل على كل المجموعات المقيسة: ${bridged
     `خام ${rawHits.length} · مجسَّر ${bridgedHits.length} · الفارق ${bridgedHits.length - rawHits.length}`,
   )
   // وحالة ما زالت صفرًا بلا الجسر — كي لا يصير الفحص «أكبر بواحد» ويكفي.
-  const zeroCase = await catalog.searchRanked(normalizeProductKey('بربيكان'), { limit: 12, deep: true })
-  const zeroBridged = await catalog.searchRanked('barbican', { limit: 12, deep: true })
+  // كانت «بربيكان» — ثم حمل كتالوج OFF السعودي (docs/data-factory/off-market) اسمًا
+  // عربيًا لمنتج بربيكان واحد فصار الخام ١ لا ٠. والشاهد الصفري الآن «نسكافيه»:
+  // ٤٧ سجلًا لاتينيًا وصفر بالعربية — مقيس على الشرائح عند التبديل (٢٠٢٦-٠٩-١٢).
+  const zeroCase = await catalog.searchRanked(normalizeProductKey('نسكافيه'), { limit: 12, deep: true })
+  const zeroBridged = await catalog.searchRanked('nescafe', { limit: 12, deep: true })
   counter(
     'وحالةٌ بلا اسم عربي في الكتالوج تبقى صفرًا خامًا — فالجسر ليس تجميلًا',
     zeroCase.length === 0 && zeroBridged.length > 0,

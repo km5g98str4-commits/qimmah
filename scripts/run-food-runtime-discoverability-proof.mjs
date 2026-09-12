@@ -85,8 +85,12 @@ const directory = JSON.parse(await readFile(resolve(FOOD, 'search/directory.json
 // §٠ — الأصول حاضرة، والطقم الساخن **مقيس** لا مُعلَن.
 // ═════════════════════════════════════════════════════════════════════════
 ok(`الطقم الساخن محمَّل ومقيس (${hotCount} سجلًا) — لا ٥٩٩ المكتوبة في تعليق`, cat.getStats().hotSetLoaded && hotCount > 0, `hotSetCount=${hotCount}`)
-ok(`البيان يعلن ${manifest.shard_count} شريحة / ${directory.total_records} سجلًا`, manifest.shard_count === 41 && directory.total_records === 59941, `shards=${manifest.shard_count} declared=${directory.total_records}`)
-ok(`دليل الحزم حاضر: ${searchManifest.buckets} حزمة · ${searchManifest.files} ملفًا · merkle ${String(searchManifest.merkle_root).slice(0, 12)}…`, searchManifest.buckets > 4000 && searchManifest.total_records === 59941)
+// المرساة **بيان الشرائح** (مجموع عدّاداتها) لا رقم مكتوب: الكتالوج يُعاد بناؤه
+// (٥٩٬٩٤١ ⇒ ٦٢٬٩٤٠ مع كتالوج OFF السعودي) ورقمٌ مثبَّت يحوّل كل تحديث بيانات إلى
+// إخفاق زائف. ما يُحرَس هو **التطابق**: بيان = دليل = حزم = مسح فعلي.
+const DECLARED = manifest.shards.reduce((a, s) => a + (s.count ?? 0), 0)
+ok(`البيان يعلن ${manifest.shard_count} شريحة / ${DECLARED} سجلًا ويطابقه الدليل`, manifest.shard_count === manifest.shards.length && manifest.shard_count >= 40 && directory.total_records === DECLARED, `shards=${manifest.shard_count} declared=${directory.total_records}`)
+ok(`دليل الحزم حاضر: ${searchManifest.buckets} حزمة · ${searchManifest.files} ملفًا · merkle ${String(searchManifest.merkle_root).slice(0, 12)}…`, searchManifest.buckets > 4000 && searchManifest.total_records === DECLARED)
 
 // ═════════════════════════════════════════════════════════════════════════
 // §١ — بطارية الذيل الطويل العدائية عبر **المسار الحيّ نفسه** (rankPackaged).
@@ -232,18 +236,18 @@ for (const f of pageFiles) {
 const scanMs = Date.now() - t0
 ok(
   `الحزم تحوي ${distinctAll.size} سجلًا مميّزًا فعلًا — لا رقم بيانٍ مُعلَن (مسح ${pageFiles.length} صفحة/${scanMs}م.ث)`,
-  distinctAll.size === 59941,
+  distinctAll.size === DECLARED,
   `distinctAll=${distinctAll.size}`,
 )
 ok(
   `القابل للاكتشاف بميزانية ٤ صفحات = ${withinBudget.size} — كل سجل يبلغه المستخدم بكلمة واحدة`,
-  withinBudget.size === 59941,
+  withinBudget.size === DECLARED,
   `withinBudget=${withinBudget.size} · declared=${directory.total_records}`,
 )
 // نطبع حساسية الميزانية: صفحة واحدة أقلّ من الكل، فالميزانية **تُقيّد** فعلًا.
 ok(
-  `الميزانية تُقيّد فعلًا: صفحة واحدة تبلغ ${withinCaps[1].size} فقط (<59941) — القياس ليس صحيحًا بلا معنى`,
-  withinCaps[1].size < 59941 && withinCaps[1].size > 0,
+  `الميزانية تُقيّد فعلًا: صفحة واحدة تبلغ ${withinCaps[1].size} فقط (<${DECLARED}) — القياس ليس صحيحًا بلا معنى`,
+  withinCaps[1].size < DECLARED && withinCaps[1].size > 0,
   `1p=${withinCaps[1].size} · 2p=${withinCaps[2].size} · 4p=${withinBudget.size}`,
 )
 
@@ -277,13 +281,13 @@ await unified.rankPackaged(cat, 'radiatori')
 const avail = cat.longTailAvailability()
 ok(
   `القابل للبحث المقيس (${avail.searchableRecords}) = المعلَن (${avail.declaredRecords}) — لأن الحزم مشحونة ومحمَّلة`,
-  avail.searchableRecords === 59941 && avail.corpusRecords === 59941 && avail.verdict === 'available',
+  avail.searchableRecords === DECLARED && avail.corpusRecords === DECLARED && avail.verdict === 'available',
   `searchable=${avail.searchableRecords} · corpus=${avail.corpusRecords} · verdict=${avail.verdict}`,
 )
 ok(`ولا يتجاوز القابلُ المعلَنَ أبدًا (${avail.searchableRecords} ≤ ${avail.declaredRecords})`, avail.searchableRecords <= avail.declaredRecords)
 
 // ⟲ الفخّ مكشوفًا: كتالوج بلا حزم ولا شرائح (يخدم الطقم الساخن والبيان فقط)
-// **يهبط بأمانة إلى 594** ولا يدّعي 59941 — والاستعلام العميق يعود صفرًا.
+// **يهبط بأمانة إلى 594** ولا يدّعي العدد المعلَن — والاستعلام العميق يعود صفرًا.
 const starvedFetch = async (url) => {
   const rel = url.replace(/^\/food\//, '')
   if (rel === 'manifest.json' || rel === 'hot-set.json') return diskFetch(FOOD)(url)
@@ -294,7 +298,7 @@ await starved.init()
 const starvedDeep = await unified.rankPackaged(starved, 'radiatori')
 const starvedAvail = starved.longTailAvailability()
 counter(
-  `تدهور صادق: بلا حزم، القابل للبحث = ${starvedAvail.searchableRecords} (=الساخن ${hotCount}) لا 59941 — «لم نجرّب» ليست «متاح»`,
+  `تدهور صادق: بلا حزم، القابل للبحث = ${starvedAvail.searchableRecords} (=الساخن ${hotCount}) لا ${DECLARED} — «لم نجرّب» ليست «متاح»`,
   starvedAvail.searchableRecords === hotCount && starvedAvail.corpusRecords === 0 && starvedDeep.length === 0,
   `searchable=${starvedAvail.searchableRecords} · corpus=${starvedAvail.corpusRecords} · deep«radiatori»=${starvedDeep.length}`,
 )

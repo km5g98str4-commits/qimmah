@@ -1,8 +1,78 @@
 {
   "_note": "تعارضات مرفوعة لا مدموجة — العدد الكامل في _total، والقائمة كاملةً تُولَّد بإعادة تشغيل الخطّ.",
-  "_total": 1997,
+  "_total": 2080,
   "_sample_size": 200,
   "sample": [
+    {
+      "gtin": "00628678440395",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "0628678440395",
+        "kcal": 384.62
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "0628678440395",
+        "kcal": 384.62
+      }
+    },
+    {
+      "gtin": "00628678617544",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "0628678617544",
+        "kcal": 375
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "0628678617544",
+        "kcal": 375
+      }
+    },
+    {
+      "gtin": "00628678617582",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "0628678617582",
+        "kcal": 375
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "0628678617582",
+        "kcal": 295
+      }
+    },
+    {
+      "gtin": "05000396008784",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "5000396008784",
+        "kcal": 321.43
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "5000396008784",
+        "kcal": 447
+      }
+    },
+    {
+      "gtin": "05760466738040",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "5760466738040",
+        "kcal": 287
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "5760466738040",
+        "kcal": 324
+      }
+    },
     {
       "gtin": "06281007047654",
       "reason": "nutrition_divergence",
@@ -15,6 +85,20 @@
         "source": "openfoodfacts",
         "id": "6281007047654",
         "kcal": 256.67
+      }
+    },
+    {
+      "gtin": "06281007069939",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "6281007069939",
+        "kcal": 186
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281007069939",
+        "kcal": 372
       }
     },
     {
@@ -60,6 +144,34 @@
       }
     },
     {
+      "gtin": "06281018297987",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "6281018297987",
+        "kcal": 69.38
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281018297987",
+        "kcal": 111
+      }
+    },
+    {
+      "gtin": "06281022126839",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "6281022126839",
+        "kcal": 70.59
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281022126839",
+        "kcal": 141
+      }
+    },
+    {
       "gtin": "06281057005918",
       "reason": "nutrition_divergence",
       "a": {
@@ -71,6 +183,62 @@
         "source": "openfoodfacts",
         "id": "6281057005918",
         "kcal": 104
+      }
+    },
+    {
+      "gtin": "06281063462088",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "6281063462088",
+        "kcal": 130.43
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281063462088",
+        "kcal": 30
+      }
+    },
+    {
+      "gtin": "06281100081036",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "qimmah_curated",
+        "id": "PKG-002:6281100081036",
+        "kcal": 263.33
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281100081036",
+        "kcal": 250
+      }
+    },
+    {
+      "gtin": "06281100356554",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "6281100356554",
+        "kcal": 620
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "6281100356554",
+        "kcal": 640
+      }
+    },
+    {
+      "gtin": "09310885115517",
+      "reason": "nutrition_divergence",
+      "a": {
+        "source": "openfoodfacts",
+        "id": "9310885115517",
+        "kcal": 565.65
+      },
+      "b": {
+        "source": "openfoodfacts",
+        "id": "9310885115517",
+        "kcal": 714.63
       }
     },
     {
@@ -1717,114 +1885,6 @@
       "gtins": [
         "00000059032823",
         "00789742895050"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "purely elizabeth|vanilla chocolate chip ancient grain granola|30g",
-      "gtins": [
-        "00810589031216",
-        "00810589031247"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "califia farms|oat barista blend|240ml",
-      "gtins": [
-        "00813636021611",
-        "00813636022953"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "chobani|coffee creamer|15ml",
-      "gtins": [
-        "00818290010896",
-        "00818290012357"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "chobani|coffee creamer|15ml",
-      "gtins": [
-        "00818290010896",
-        "00818290016928"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "zespri|sungold kiwi|162g",
-      "gtins": [
-        "00000094001129",
-        "00818849020017"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "wild planet|albacore wild tuna|142g",
-      "gtins": [
-        "00829696000534",
-        "00829696001005"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "magic spoon|protein cereal|38g",
-      "gtins": [
-        "00810104460286",
-        "00850002887440"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "iq bar|peanut butter chip|45g",
-      "gtins": [
-        "00850004554005",
-        "00850004554623"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "vital proteins|collagen peptides|20g",
-      "gtins": [
-        "00850232005089",
-        "00850232005096"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "skinny pop|original popcorn|28g",
-      "gtins": [
-        "00816925022252",
-        "00850251004001"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "skinny pop|original popcorn|28g",
-      "gtins": [
-        "00816925022252",
-        "00850251004254"
-      ],
-      "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
-    },
-    {
-      "reason": "same_key_distinct_gtin",
-      "key": "siete|grain free tortilla chips|28g",
-      "gtins": [
-        "00851769007003",
-        "00851769007010"
       ],
       "note": "NOT merged — distinct valid GTINs are distinct trade items by definition."
     }
