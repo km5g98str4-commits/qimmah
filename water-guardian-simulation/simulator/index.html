@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Water Guardian — Digital Test Bench</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>💧 Water Guardian — Digital Test Bench</h1>
+  <span class="sub">Tank → Pipe → Clamp-on ultrasonic sensor (MODEL) → ESP32 → Rule engine → Dashboard / Alert. Sensor physics are <b>not</b> simulated; the sensor block is a configurable behaviour model.</span>
+  <span style="margin-inline-start:auto" class="row">
+    <button id="btnRun" class="primary">▶ Run</button>
+    <button id="btnPause">⏸ Pause</button>
+    <button id="btnReset">⟲ Reset</button>
+    <select id="speed" title="Simulation speed"><option value="1">1×</option><option value="10" selected>10×</option><option value="60">60×</option><option value="600">600×</option></select>
+  </span>
+</header>
+
+<main>
+  <!-- ================= LEFT: controls ================= -->
+  <section class="panel">
+    <h2>Plant & installation</h2>
+
+    <label>True flow rate <span class="val" id="vFlow">0.00 L/min</span></label>
+    <input type="range" id="flow" min="0" max="20" step="0.05" value="0">
+    <div class="row">
+      <button data-flow="0">0</button><button data-flow="0.25">0.25</button><button data-flow="0.5">0.5</button>
+      <button data-flow="1">1</button><button data-flow="2">2</button><button data-flow="5">5</button>
+    </div>
+
+    <label>Pipe preset</label>
+    <select id="pipePreset"></select>
+    <div class="row">
+      <div><label>Material</label><select id="material">
+        <option>PPR</option><option>PVC</option><option>CPVC</option><option>Copper</option><option>Steel</option><option>Galvanized Steel</option><option>Custom/Unknown</option>
+      </select></div>
+      <div><label>Internal Ø (mm)</label><input type="number" id="idMm" min="5" max="200" step="0.1" value="16.6"></div>
+      <div><label>Wall (mm)</label><input type="number" id="wallMm" min="0.5" max="20" step="0.1" value="4.2"></div>
+    </div>
+    <div class="note">Velocity in pipe: <b id="vVel">0.000 m/s</b> · area <span id="vArea"></span></div>
+
+    <h3>Sensor conditions</h3>
+    <label>Sensor quality (installation/pipe) <span class="val" id="vSq">100%</span></label>
+    <input type="range" id="sq" min="0" max="100" step="1" value="100">
+    <label>Air / bubbles <span class="val" id="vAir">0%</span></label>
+    <input type="range" id="air" min="0" max="100" step="1" value="0">
+    <div class="row">
+      <div><label>Attachment</label><select id="attach"><option>Good</option><option>Poor</option><option>Detached</option></select></div>
+      <div><label>Coupling</label><select id="coupling"><option>Good</option><option>Poor</option><option>Missing</option></select></div>
+      <div><label>Straight pipe</label><select id="straight"><option>Good</option><option>Marginal</option><option>Poor</option></select></div>
+    </div>
+
+    <h3>Sensor profile (model)</h3>
+    <select id="profile"></select>
+    <div class="note" id="profileSource"></div>
+    <div class="row">
+      <div><label>Min velocity (m/s)</label><input type="number" id="p_minVelocityMs" step="0.001"></div>
+      <div><label>Low-flow cutoff (m/s)</label><input type="number" id="p_lowFlowCutoffMs" step="0.001"></div>
+    </div>
+    <div class="row">
+      <div><label>Accuracy (%)</label><input type="number" id="p_accuracyPct" step="0.1"></div>
+      <div><label>Noise (m/s, 1σ)</label><input type="number" id="p_noiseAbsMs" step="0.001"></div>
+      <div><label>Zero offset (m/s)</label><input type="number" id="p_zeroOffsetMs" step="0.001"></div>
+    </div>
+    <div class="row">
+      <div><label>Update interval (s)</label><input type="number" id="p_updateIntervalS" step="0.1"></div>
+      <div><label>Comm fail prob.</label><input type="number" id="p_commFailProb" step="0.001" min="0" max="1"></div>
+    </div>
+
+    <h3>Facility & links</h3>
+    <div class="row">
+      <div><label>Facility mode</label><select id="mode">
+        <option value="QUIET">Quiet</option><option value="PRAYER">Prayer / Occupied</option><option value="CLEANING">Cleaning</option><option value="SPECIAL_EVENT">Special event</option>
+      </select></div>
+      <div><label>Clock / schedule</label><select id="clock"><option value="1">Valid</option><option value="0">Invalid</option></select></div>
+    </div>
+    <div class="row">
+      <div><label>Sensor link (RS485)</label><select id="sensorConn"><option value="1">Connected</option><option value="0">Disconnected</option></select></div>
+      <div><label>Wi-Fi</label><select id="wifi"><option value="1">Online</option><option value="0">Offline</option></select></div>
+      <div><label>Backend</label><select id="backend"><option value="1">Up</option><option value="0">Down</option></select></div>
+    </div>
+
+    <h3>Rules (editable)</h3>
+    <div class="row">
+      <div><label>Flow threshold (L/min)</label><input type="number" id="r_flowThresholdLpm" step="0.05"></div>
+      <div><label>Hysteresis (%)</label><input type="number" id="r_hysteresisPct" step="1"></div>
+    </div>
+    <div class="row">
+      <div><label>Quiet persistence (min)</label><input type="number" id="r_persistenceMinQuiet" step="1"></div>
+      <div><label>Occupied persistence (min)</label><input type="number" id="r_persistenceMinOccupied" step="1"></div>
+    </div>
+    <div class="row">
+      <div><label>Cleaning override (min)</label><input type="number" id="r_cleaningOverrideMin" step="1"></div>
+      <div><label>Resolve after (min)</label><input type="number" id="r_resolveMin" step="1"></div>
+    </div>
+    <div class="row">
+      <div><label>Quality threshold</label><input type="number" id="r_qualityThreshold" step="1"></div>
+      <div><label>Unknown grace (s)</label><input type="number" id="r_sensorUnknownGraceS" step="1"></div>
+    </div>
+
+    <h3>Break it</h3>
+    <div class="row">
+      <button data-fail="disconnect">Sensor disconnect</button>
+      <button data-fail="wifi">Kill Wi-Fi</button>
+      <button data-fail="backend">Kill backend</button>
+    </div>
+    <div class="row">
+      <button data-fail="poor">Poor signal</button>
+      <button data-fail="air">Air 60%</button>
+      <button data-fail="mount">Mount → Poor</button>
+    </div>
+    <div class="row">
+      <button data-fail="reboot">ESP32 reboot</button>
+      <button data-fail="clock">Invalid clock</button>
+      <button data-fail="burst">Flow burst 8 L/min 30 s</button>
+    </div>
+    <div class="row"><button data-fail="restore" class="primary">Restore all</button></div>
+  </section>
+
+  <!-- ================= CENTER: scene + engine ================= -->
+  <section class="panel">
+    <h2>System</h2>
+    <canvas id="scene" width="900" height="330"></canvas>
+    <div class="states" id="states"></div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">Sim clock</div><div class="v" id="kClock">00:00:00</div></div>
+      <div class="kpi"><div class="k">Meter reading</div><div class="v" id="kMeter">—</div></div>
+      <div class="kpi"><div class="k">Signal / Q / step</div><div class="v" id="kSig">—</div></div>
+      <div class="kpi"><div class="k">Above threshold for</div><div class="v" id="kAbove">0 min</div></div>
+    </div>
+    <div id="incident"></div>
+
+    <div class="tabs" style="margin-top:12px">
+      <button class="active" data-tab="log">Event log (ESP32 NVS buffer)</button>
+      <button data-tab="hyd">Hydraulic comparison</button>
+      <button data-tab="scen">Scenario runner</button>
+    </div>
+    <div id="tab-log" class="log"></div>
+    <div id="tab-hyd" class="hidden">
+      <div class="note">Q = v·A, A = πD²/4. Cells colour = true velocity vs the selected profile's <b>min velocity</b> (green ≥ 2× min · yellow ≥ min · red &lt; min). This is geometry, not a measurement.</div>
+      <div style="overflow-x:auto"><table id="hydTable"></table></div>
+    </div>
+    <div id="tab-scen" class="hidden">
+      <div class="row"><button id="runAll" class="primary">Run all 15 scenarios (headless, fast)</button><span class="note" id="scenStatus"></span></div>
+      <div id="scenarioOut"></div>
+    </div>
+  </section>
+
+  <!-- ================= RIGHT: phone + dashboard ================= -->
+  <section class="panel">
+    <h2>Caretaker phone (notification emulator)</h2>
+    <div class="phone" id="phone"></div>
+    <div class="note">Messages are queued locally while Wi-Fi/backend are down and delivered on reconnection. Real Telegram delivery is optional in the firmware (see firmware/README.md); this page never sends anything.</div>
+    <h3>Dashboard</h3>
+    <div class="kpis" style="grid-template-columns:repeat(2,1fr)">
+      <div class="kpi"><div class="k">Link</div><div class="v" id="dLink">—</div></div>
+      <div class="kpi"><div class="k">Unsynced events</div><div class="v" id="dUnsynced">0</div></div>
+      <div class="kpi"><div class="k">Suspect litres (open)</div><div class="v" id="dLitres">0</div></div>
+      <div class="kpi"><div class="k">True total (hidden ref)</div><div class="v" id="dTrue">0 L</div></div>
+    </div>
+    <div class="note" style="margin-top:10px">Legend: <span class="badge">MODEL</span> configurable assumption · <span class="badge">CALC</span> pure geometry · <span class="badge">LOGIC</span> deterministic firmware logic. Nothing here proves the real ultrasonic measurement on a real pipe.</div>
+  </section>
+</main>
+
+<script src="engine/hydraulics.js"></script>
+<script src="engine/sensorModel.js"></script>
+<script src="engine/ruleEngine.js"></script>
+<script src="engine/scenarios.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "water-guardian-simulation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Water Guardian — pre-purchase feasibility workspace: digital test bench, ESP32 firmware prototype, virtual test campaign, reports.",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node tests/run.js",
+    "sim": "node tests/serve.js",
+    "hydraulics": "node tests/hydraulics_table.js"
+  },
+  "license": "MIT"
+}

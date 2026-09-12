@@ -1,0 +1,4 @@
+firmware/esp32_prototype/include/config.h
+firmware/esp32_prototype/.pio/
+node_modules/
+.env
