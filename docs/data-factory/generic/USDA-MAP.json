@@ -86,7 +86,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Beef, steak, sirloin, lean only eaten"
   },
   {
    "id": "QF0015",
@@ -94,11 +95,9 @@
   },
   {
    "id": "QF0016",
-   "q": "beef rib eye steak boneless lean only",
+   "q": "beef rib eye steak boneless lip off lean only all grades cooked grilled",
    "not": [
-    "choice",
-    "select",
-    "prime"
+    "1/8\""
    ],
    "prefer": [
     "sr",
@@ -108,10 +107,7 @@
   },
   {
    "id": "QF0017",
-   "q": "beef top sirloin steak lean only all grades",
-   "not": [
-    "0\""
-   ],
+   "q": "top sirloin steak lean only 1/8 all grades cooked broiled",
    "prefer": [
     "sr",
     "foundation",
@@ -120,19 +116,17 @@
   },
   {
    "id": "QF0018",
-   "q": "beef stewed lean only eaten",
-   "not": [
-    "fat eaten"
-   ],
+   "q": "beef chuck arm pot roast lean only 1/8 all grades braised",
    "prefer": [
-    "fndds",
     "sr",
-    "foundation"
-   ]
+    "foundation",
+    "fndds"
+   ],
+   "note": "USDA: braised (رطب) — الأقرب للمسلوق"
   },
   {
    "id": "QF0019",
-   "q": "lamb domestic composite lean only raw",
+   "q": "lamb domestic composite trimmed retail cuts lean only raw",
    "not": [
     "1/8\""
    ],
@@ -144,7 +138,7 @@
   },
   {
    "id": "QF0020",
-   "q": "lamb domestic composite lean only cooked",
+   "q": "lamb domestic composite trimmed retail cuts lean only cooked",
    "not": [
     "1/8\""
    ],
@@ -156,30 +150,26 @@
   },
   {
    "id": "QF0021",
-   "q": "lamb chop lean only eaten",
+   "q": "lamb domestic loin lean only choice cooked broiled",
    "not": [
-    "fat eaten",
-    "fried",
-    "breaded"
+    "1/8\""
    ],
    "prefer": [
-    "fndds",
     "sr",
-    "foundation"
+    "foundation",
+    "fndds"
    ]
   },
   {
    "id": "QF0022",
-   "q": "lamb chop lean only eaten",
+   "q": "lamb domestic loin lean only choice cooked broiled",
    "not": [
-    "fat eaten",
-    "fried",
-    "breaded"
+    "1/8\""
    ],
    "prefer": [
-    "fndds",
     "sr",
-    "foundation"
+    "foundation",
+    "fndds"
    ]
   },
   {
@@ -230,7 +220,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Fish, salmon, baked or broiled"
   },
   {
    "id": "QF0031",
@@ -351,7 +342,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Egg omelet or scrambled egg, with vegetables other than dark-green, fat added"
   },
   {
    "id": "QF0050",
@@ -367,7 +359,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Egg omelet or scrambled egg, with cheese, made with oil"
   },
   {
    "id": "QF0051",
@@ -380,7 +373,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "Turkey, retail parts, breast, meat only, cooked, roasted"
   },
   {
    "id": "QF0052",
@@ -393,7 +387,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "Turkey, retail parts, breast, meat only, cooked, roasted"
   },
   {
    "id": "QF0053",
@@ -622,7 +617,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "English muffins, plain, enriched, without calcium propionate"
   },
   {
    "id": "QF0094",
@@ -665,9 +661,12 @@
   },
   {
    "id": "QF0102",
-   "q": "rice white long grain regular cooked unenriched",
+   "q": "rice white long grain regular enriched cooked",
    "not": [
-    "salt"
+    "salt",
+    "parboiled",
+    "fat",
+    "unenriched"
    ],
    "prefer": [
     "sr",
@@ -677,21 +676,33 @@
   },
   {
    "id": "QF0103",
-   "q": "rice basmati raw",
+   "q": "rice white long grain regular raw enriched",
+   "not": [
+    "parboiled",
+    "unenriched"
+   ],
    "prefer": [
-    "fndds",
     "sr",
-    "foundation"
-   ]
+    "foundation",
+    "fndds"
+   ],
+   "note": "البسمتي صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة"
   },
   {
    "id": "QF0104",
-   "q": "rice basmati cooked",
+   "q": "rice white long grain regular enriched cooked",
+   "not": [
+    "salt",
+    "parboiled",
+    "fat",
+    "unenriched"
+   ],
    "prefer": [
-    "fndds",
     "sr",
-    "foundation"
-   ]
+    "foundation",
+    "fndds"
+   ],
+   "note": "البسمتي صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة"
   },
   {
    "id": "QF0105",
@@ -713,12 +724,19 @@
   },
   {
    "id": "QF0107",
-   "q": "rice jasmine cooked",
+   "q": "rice white long grain regular enriched cooked",
+   "not": [
+    "salt",
+    "parboiled",
+    "fat",
+    "unenriched"
+   ],
    "prefer": [
-    "fndds",
     "sr",
-    "foundation"
-   ]
+    "foundation",
+    "fndds"
+   ],
+   "note": "الياسمين صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة"
   },
   {
    "id": "QF0108",
@@ -727,7 +745,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "Rice, white, short-grain, cooked, unenriched"
   },
   {
    "id": "QF0109",
@@ -776,11 +795,12 @@
   },
   {
    "id": "QF0119",
-   "q": "oats regular quick cooked water",
+   "q": "cereals oats regular quick cooked water",
    "not": [
     "fortified",
     "salt",
-    "instant"
+    "instant",
+    "sodium"
    ],
    "prefer": [
     "sr",
@@ -790,14 +810,13 @@
   },
   {
    "id": "QF0120",
-   "q": "oatmeal cooked milk",
+   "q": "oatmeal regular made milk",
    "not": [
-    "low fat",
-    "fat free",
-    "nonfat",
     "instant",
     "flavored",
-    "fruit"
+    "fruit",
+    "fat free",
+    "nonfat"
    ],
    "prefer": [
     "fndds",
@@ -815,12 +834,8 @@
   },
   {
    "id": "QF0123",
-   "q": "freekeh",
-   "prefer": [
-    "fndds",
-    "sr",
-    "foundation"
-   ]
+   "resolve": "recipe",
+   "why": "فريكة — لا سجلّ USDA"
   },
   {
    "id": "QF0124",
@@ -845,7 +860,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "Pasta, whole-wheat, cooked (Includes foods for USDA's Food Distribution Program)"
   },
   {
    "id": "QF0129",
@@ -863,20 +879,13 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "Noodles, egg, enriched, cooked"
   },
   {
    "id": "QF0131",
-   "q": "noodles instant",
-   "not": [
-    "dry",
-    "unprepared"
-   ],
-   "prefer": [
-    "fndds",
-    "sr",
-    "foundation"
-   ]
+   "resolve": "recipe",
+   "why": "نودلز سريعة — منتج معبّأ؛ الباركود"
   },
   {
    "id": "QF0132",
@@ -884,12 +893,8 @@
   },
   {
    "id": "QF0133",
-   "q": "polenta",
-   "prefer": [
-    "fndds",
-    "sr",
-    "foundation"
-   ]
+   "resolve": "recipe",
+   "why": "بولنتا مطبوخة — لا سجلّ"
   },
   {
    "id": "QF0134",
@@ -930,9 +935,12 @@
   },
   {
    "id": "QF0139",
-   "q": "corn grits white regular quick dry",
+   "q": "corn grits white regular quick",
    "not": [
-    "enriched"
+    "enriched",
+    "cooked",
+    "instant",
+    "yellow"
    ],
    "prefer": [
     "sr",
@@ -985,14 +993,12 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Cereals ready-to-eat, rice, puffed, fortified"
   },
   {
    "id": "QF0143",
-   "q": "muesli",
-   "not": [
-    "bar"
-   ],
+   "q": "muesli dried fruit nuts",
    "prefer": [
     "sr",
     "foundation",
@@ -1399,12 +1405,8 @@
   },
   {
    "id": "QF0235",
-   "q": "pickles mixed vegetables",
-   "prefer": [
-    "fndds",
-    "sr",
-    "foundation"
-   ]
+   "resolve": "recipe",
+   "why": "مخلل مشكّل — يختلف بالمحتوى؛ مخلل الخيار مغطًّى"
   },
   {
    "id": "QF0236",
@@ -2077,38 +2079,30 @@
   },
   {
    "id": "QF0380",
-   "q": "coffee latte whole milk",
-   "not": [
-    "decaf",
-    "flavored",
-    "sugar",
-    "iced"
-   ],
-   "prefer": [
-    "fndds",
-    "sr",
-    "foundation"
-   ]
-  },
-  {
-   "id": "QF0381",
    "q": "coffee latte",
    "not": [
-    "whole",
-    "non-dairy",
     "decaf",
     "flavored",
     "sugar",
     "iced",
+    "non-dairy",
     "nonfat",
     "fat free",
-    "skim"
+    "skim",
+    "whole"
    ],
    "prefer": [
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Coffee, Latte",
+   "note": "FNDDS لاتيه (حليب غير محدّد)"
+  },
+  {
+   "id": "QF0381",
+   "resolve": "recipe",
+   "why": "لاتيه قليل الدسم — لا سجلّ منفصل"
   },
   {
    "id": "QF0382",
@@ -2141,7 +2135,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Coffee, Cafe Mocha"
   },
   {
    "id": "QF0384",
@@ -2153,17 +2148,8 @@
   },
   {
    "id": "QF0386",
-   "q": "tea mint",
-   "not": [
-    "iced",
-    "bottled",
-    "sweetened"
-   ],
-   "prefer": [
-    "fndds",
-    "sr",
-    "foundation"
-   ]
+   "resolve": "recipe",
+   "why": "شاي بالنعناع — طاقة ≈ صفر؛ يغطّيه الشاي الأسود"
   },
   {
    "id": "QF0387",
@@ -2276,25 +2262,25 @@
   },
   {
    "id": "QF0406",
-   "q": "milkshake",
+   "q": "shake vanilla",
    "not": [
-    "chocolate",
-    "strawberry",
+    "protein",
     "fast food",
-    "vanilla"
+    "frozen"
    ],
    "prefer": [
     "fndds",
     "sr",
     "foundation"
-   ],
-   "pick": "Milkshake, vanilla"
+   ]
   },
   {
    "id": "QF0407",
-   "q": "milkshake chocolate",
+   "q": "shake chocolate",
    "not": [
-    "fast food"
+    "protein",
+    "fast food",
+    "frozen"
    ],
    "prefer": [
     "fndds",
@@ -2466,12 +2452,8 @@
   },
   {
    "id": "QF0439",
-   "q": "samosa vegetable",
-   "prefer": [
-    "fndds",
-    "sr",
-    "foundation"
-   ]
+   "resolve": "recipe",
+   "why": "سمبوسة خضار — وصفة"
   },
   {
    "id": "QF0440",
@@ -2730,7 +2712,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Chicken, nuggets, white meat, precooked, frozen, not reheated"
   },
   {
    "id": "QF0485",
@@ -2746,7 +2729,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Chicken tenders or strips, NFS"
   },
   {
    "id": "QF0486",
@@ -2827,7 +2811,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "Cake, chocolate, commercially prepared with chocolate frosting"
   },
   {
    "id": "QF0497",
@@ -2843,7 +2828,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "Cheesecake, plain"
   },
   {
    "id": "QF0498",
@@ -2925,16 +2911,21 @@
    "id": "QF0513",
    "q": "coleslaw",
    "not": [
-    "fast food",
-    "restaurant",
-    "dry mix"
+    "dressing",
+    "applebee's",
+    "denny's",
+    "cracker barrel",
+    "fast foods",
+    "kfc",
+    "bojangles",
+    "church's",
+    "popeyes"
    ],
    "prefer": [
-    "fndds",
     "sr",
-    "foundation"
-   ],
-   "pick": "Coleslaw, home-prepared"
+    "foundation",
+    "fndds"
+   ]
   },
   {
    "id": "QF0514",
@@ -3166,7 +3157,7 @@
   },
   {
    "id": "QF0558",
-   "q": "peanut butter chunky without salt",
+   "q": "peanut butter chunk style without salt",
    "prefer": [
     "sr",
     "foundation",
@@ -3228,7 +3219,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "pick": "Corn, sweet, yellow, frozen, kernels cut off cob, unprepared"
   },
   {
    "id": "QF0568",
