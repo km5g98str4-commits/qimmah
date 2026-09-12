@@ -144,8 +144,9 @@ function legacyCanon(text) {
 }
 
 /** القاعدة كما كانت: بلا أصناف الموجة وبلا كلماتها المفتاحية. */
+// [FOOD-GENERIC-001] الأصناف العامّة المولَّدة (gen-*) لاحقة على هذه الموجة أيضًا — تُستبعد من «القديم».
 const LEGACY_ITEMS = foodItems
-  .filter((f) => !WAVE_ITEM_IDS.has(f.id))
+  .filter((f) => !WAVE_ITEM_IDS.has(f.id) && !f.id.startsWith('gen-'))
   .map((f) => {
     const added = new Set((WAVE_KEYWORDS[f.id] ?? []).map(norm))
     return { item: f, keywords: (f.keywords ?? []).filter((k) => !added.has(norm(k))) }
