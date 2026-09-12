@@ -20,6 +20,7 @@ const argOf = (flag, d) => { const i = args.indexOf(flag); return i >= 0 ? args[
 const INPUTS = (argsOf('--in').length ? argsOf('--in') : [
   '.food-cache/curated-accepted.jsonl',
   '.food-cache/off-accepted.jsonl',
+  '.food-cache/off-market-accepted.jsonl',
 ]).map((p) => resolve(ROOT, p)).filter((p) => existsSync(p))
 
 const OUT_DIR = resolve(ROOT, argOf('--out-dir', 'data/food-production/accepted'))

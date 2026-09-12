@@ -1,0 +1,26 @@
+{
+  "input": 4936,
+  "pulled_on": "2026-07-14",
+  "gtin_rejected": {
+    "restricted-circulation": 65,
+    "checksum": 28,
+    "placeholder": 1
+  },
+  "quality_rejected": {
+    "missing_energy": 108,
+    "missing_macros": 23,
+    "no_searchable_token": 3
+  },
+  "accepted": 4713,
+  "arabic_names": 573,
+  "flags": {
+    "no_arabic_name": 4140,
+    "no_brand": 1314,
+    "no_english_name": 361,
+    "fiber_exceeds_carbs": 49,
+    "macro_energy_mismatch": 20,
+    "saturated_exceeds_fat": 11,
+    "sugar_exceeds_carbs": 13,
+    "serving_size_implausible": 1
+  }
+}

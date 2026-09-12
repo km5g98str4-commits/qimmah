@@ -1,6 +1,6 @@
 {
   "_note": "مرشّحون ضبابيون لمراجعة بشرية — لا يُدمجون آليًا أبدًا.",
-  "_total": 5093,
+  "_total": 5313,
   "_sample_size": 200,
   "sample": [
     {
@@ -125,7 +125,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "snickers",
-      "count": 8,
+      "count": 11,
       "gtins": [
         "05000159461122",
         "00040000424314",
@@ -133,8 +133,11 @@
         "05900951310973",
         "05900951311123",
         "05900951311505",
+        "07896423423822",
+        "07896423487657",
         "05000159384209",
-        "05900951311710"
+        "05900951311710",
+        "06294001813316"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -195,7 +198,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "baked beans",
-      "count": 20,
+      "count": 21,
       "gtins": [
         "06084000085827",
         "00000000272513",
@@ -277,24 +280,23 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "light meat tuna",
-      "count": 3,
+      "count": 5,
       "gtins": [
         "06281014300018",
         "06281055704516",
-        "08004030592247"
+        "08004030592247",
+        "04902931110581",
+        "06287022200142"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "nada fresh milk full cream",
-      "count": 5,
+      "count": 2,
       "gtins": [
         "06281018110323",
-        "06281018110064",
-        "06281018110187",
-        "06281018110347",
-        "06281018302919"
+        "06281018110187"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -315,6 +317,16 @@
       "gtins": [
         "06281018262947",
         "06281018143741"
+      ],
+      "note": "Queued for human review. NEVER auto-merged."
+    },
+    {
+      "reason": "fuzzy_same_name_distinct_gtin",
+      "normalized_name": "doritos flamin hot",
+      "count": 2,
+      "gtins": [
+        "06281036008350",
+        "06281036008343"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -450,8 +462,18 @@
     },
     {
       "reason": "fuzzy_same_name_distinct_gtin",
+      "normalized_name": "light meat tuna in water",
+      "count": 2,
+      "gtins": [
+        "06281174009028",
+        "06281174022867"
+      ],
+      "note": "Queued for human review. NEVER auto-merged."
+    },
+    {
+      "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "corn flakes",
-      "count": 50,
+      "count": 51,
       "gtins": [
         "06290050414412",
         "00000000358149",
@@ -550,7 +572,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "macaroni",
-      "count": 7,
+      "count": 8,
       "gtins": [
         "00000000084260",
         "03038350023100",
@@ -558,7 +580,8 @@
         "03560070329151",
         "03564700009833",
         "04056489818410",
-        "06271003052400"
+        "06271003052400",
+        "00000029582624"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -586,7 +609,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "olive oil",
-      "count": 10,
+      "count": 11,
       "gtins": [
         "00000000115292",
         "00000000415668",
@@ -597,7 +620,8 @@
         "05000119511027",
         "05000442007594",
         "06291023139905",
-        "08002210501201"
+        "08002210501201",
+        "06281062526309"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -765,13 +789,14 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "baking powder",
-      "count": 5,
+      "count": 6,
       "gtins": [
         "00000000185370",
         "00617950200628",
         "04056489198529",
         "05056036508893",
-        "05059697402029"
+        "05059697402029",
+        "06285046000144"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -848,11 +873,12 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "chicken tenders",
-      "count": 3,
+      "count": 4,
       "gtins": [
         "00000000254243",
         "00072745804892",
-        "05283013319962"
+        "05283013319962",
+        "06281102685201"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -1117,13 +1143,14 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "organic extra virgin olive oil",
-      "count": 6,
+      "count": 7,
       "gtins": [
         "00000000358262",
         "00096619927319",
         "05051008878592",
         "06191509900855",
         "08002210115422",
+        "06281057100477",
         "06191509900862"
       ],
       "note": "Queued for human review. NEVER auto-merged."
@@ -1199,7 +1226,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "mozzarella",
-      "count": 45,
+      "count": 47,
       "gtins": [
         "00000000373272",
         "00000001304893",
@@ -1332,7 +1359,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "salted peanuts",
-      "count": 8,
+      "count": 12,
       "gtins": [
         "00000000429849",
         "04088600277967",
@@ -1341,7 +1368,11 @@
         "06291014129366",
         "06291105824019",
         "08904004404647",
-        "08904004404661"
+        "08904004404661",
+        "00628176840581",
+        "06287002811108",
+        "06271100040027",
+        "06291014101270"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -1360,7 +1391,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "tahini",
-      "count": 7,
+      "count": 8,
       "gtins": [
         "00000000436151",
         "00000020840006",
@@ -1368,7 +1399,8 @@
         "04056489541813",
         "05000169251201",
         "05000362110206",
-        "08402001035265"
+        "08402001035265",
+        "06287001540849"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -1452,7 +1484,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "crunchy peanut butter",
-      "count": 33,
+      "count": 35,
       "gtins": [
         "00000000461481",
         "00000001179095",
@@ -1645,7 +1677,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "dark chocolate",
-      "count": 25,
+      "count": 27,
       "gtins": [
         "00000000557825",
         "00000020013189",
@@ -1665,10 +1697,12 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "classic hummus",
-      "count": 2,
+      "count": 4,
       "gtins": [
         "00000000592482",
-        "00040822011143"
+        "00040822011143",
+        "06281039711011",
+        "06287043723699"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -1744,14 +1778,15 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "mango chutney",
-      "count": 6,
+      "count": 7,
       "gtins": [
         "00000000693769",
         "04056489712459",
         "04088600109602",
         "05000197153959",
         "05000197520386",
-        "05051898384029"
+        "05051898384029",
+        "00000029574025"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -1889,7 +1924,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "tomato ketchup",
-      "count": 75,
+      "count": 77,
       "gtins": [
         "00000000819589",
         "00000001774207",
@@ -1944,7 +1979,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "greek yogurt",
-      "count": 13,
+      "count": 14,
       "gtins": [
         "00000000843423",
         "00056800634211",
@@ -1993,6 +2028,16 @@
     },
     {
       "reason": "fuzzy_same_name_distinct_gtin",
+      "normalized_name": "chocolate bar",
+      "count": 2,
+      "gtins": [
+        "00000000931847",
+        "00628451966159"
+      ],
+      "note": "Queued for human review. NEVER auto-merged."
+    },
+    {
+      "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "dark chocolate peanut butter cups",
       "count": 3,
       "gtins": [
@@ -2005,24 +2050,30 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "chicken tikka masala",
-      "count": 3,
+      "count": 4,
       "gtins": [
         "00000000953023",
         "04056489869092",
-        "07613269259930"
+        "07613269259930",
+        "06287035220243"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "potato chips",
-      "count": 5,
+      "count": 10,
       "gtins": [
         "00000000954174",
         "00084114902009",
         "05017764003159",
         "07610095014009",
-        "08886467122408"
+        "08886467122408",
+        "00072600064089",
+        "00628678211223",
+        "00731628553691",
+        "06281071271214",
+        "06281071114115"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -2043,6 +2094,16 @@
       "gtins": [
         "00000000964371",
         "05000169261170"
+      ],
+      "note": "Queued for human review. NEVER auto-merged."
+    },
+    {
+      "reason": "fuzzy_same_name_distinct_gtin",
+      "normalized_name": "plantain chips",
+      "count": 2,
+      "gtins": [
+        "00000000972086",
+        "00628235192897"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -2076,10 +2137,11 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "minestrone",
-      "count": 2,
+      "count": 3,
       "gtins": [
         "00000001016369",
-        "00041196010121"
+        "00041196010121",
+        "00628144243369"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -2235,7 +2297,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "mayonnaise",
-      "count": 53,
+      "count": 58,
       "gtins": [
         "00000001219098",
         "00000020051389",
@@ -2265,12 +2327,13 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "rice cakes",
-      "count": 4,
+      "count": 5,
       "gtins": [
         "00000001255027",
         "03800233091199",
         "04056489725459",
-        "05411788002509"
+        "05411788002509",
+        "05902609001882"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -2427,7 +2490,7 @@
     {
       "reason": "fuzzy_same_name_distinct_gtin",
       "normalized_name": "red kidney beans",
-      "count": 7,
+      "count": 8,
       "gtins": [
         "00000001642582",
         "00000020166090",
@@ -2435,7 +2498,8 @@
         "04088600040004",
         "04088600140841",
         "06291079225089",
-        "06291108226230"
+        "06291108226230",
+        "06281174013797"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     },
@@ -2459,59 +2523,6 @@
         "04335619011625",
         "05053526799779",
         "08711571008013"
-      ],
-      "note": "Queued for human review. NEVER auto-merged."
-    },
-    {
-      "reason": "fuzzy_same_name_distinct_gtin",
-      "normalized_name": "rough oatcakes",
-      "count": 3,
-      "gtins": [
-        "00000001705461",
-        "00061232203072",
-        "05000169261163"
-      ],
-      "note": "Queued for human review. NEVER auto-merged."
-    },
-    {
-      "reason": "fuzzy_same_name_distinct_gtin",
-      "normalized_name": "harissa paste",
-      "count": 4,
-      "gtins": [
-        "00000001710083",
-        "04056489895701",
-        "05052320703883",
-        "06194049100013"
-      ],
-      "note": "Queued for human review. NEVER auto-merged."
-    },
-    {
-      "reason": "fuzzy_same_name_distinct_gtin",
-      "normalized_name": "cypriot halloumi",
-      "count": 2,
-      "gtins": [
-        "00000001729313",
-        "05000362000002"
-      ],
-      "note": "Queued for human review. NEVER auto-merged."
-    },
-    {
-      "reason": "fuzzy_same_name_distinct_gtin",
-      "normalized_name": "guacamole",
-      "count": 28,
-      "gtins": [
-        "00000001731323",
-        "00000020878986",
-        "00000029570430",
-        "00046000815213",
-        "03250390751670",
-        "03256228666130",
-        "03263858772414",
-        "03270160407972",
-        "03280220109142",
-        "03292070001781",
-        "03350030167509",
-        "03353820070874"
       ],
       "note": "Queued for human review. NEVER auto-merged."
     }

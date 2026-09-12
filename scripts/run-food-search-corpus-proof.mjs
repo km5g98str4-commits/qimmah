@@ -265,7 +265,11 @@ for (const item of LONG_TAIL) {
 // ضابط الاختلاق: سجل الحزمة **مشتقّ** من حمولة الشريحة، لا مصنوع.
 const kinderHit = (await catalog.searchRanked('kinder chocolate', { deep: true, limit: 24 }))
   .find((h) => h.product.gtin === '08000500141601')
-const kinderShard = JSON.parse(readFileSync(resolve(FOOD, 'shards/shard-00.json'), 'utf8')).records['08000500141601']
+// الشريحة تُحسب بالتوجيه نفسه لا تُكتب باسمها: عدد الشرائح يتغيّر مع كل إعادة بناء
+// (٤١ ⇒ ٤٤ مع كتالوج OFF السعودي)، واسمٌ مثبَّت يجعل الإثبات يقيس شريحة خاطئة.
+const routing = await loadTsModule('src/lib/food/shardRouting.ts')
+const kinderShardName = routing.shardName(routing.assignShard('08000500141601', shardManifest.shard_count), shardManifest.shard_count)
+const kinderShard = JSON.parse(readFileSync(resolve(FOOD, `shards/${kinderShardName}.json`), 'utf8')).records['08000500141601']
 const sameFields = kinderHit && kinderShard && ['name_en', 'brand_en', 'energy_kcal', 'protein_g', 'carbs_g', 'fat_g', 'market']
   .every((f) => kinderHit.product[f] === kinderShard[f])
 counter('سجل الحزمة يطابق حمولة الشريحة حقلًا بحقل — لا صفوف مخترَعة',

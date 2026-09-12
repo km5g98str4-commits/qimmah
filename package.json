@@ -251,7 +251,7 @@
     "test:food-pkg-batches": "node scripts/run-food-pkg-batches-proof.mjs",
     "test:food-production": "node scripts/run-food-production-proof.mjs",
     "food:probe": "node scripts/food-production/probe-sources.mjs",
-    "food:ingest": "node scripts/food-production/ingest-curated.mjs && node scripts/food-production/ingest-off.mjs",
+    "food:ingest": "node scripts/food-production/ingest-curated.mjs && node scripts/food-production/ingest-off.mjs && node scripts/food-production/ingest-off-market.mjs",
     "food:build": "node scripts/food-production/build-pipeline.mjs",
     "food:verify": "node scripts/food-production/verify-artifacts.mjs",
     "food:report": "node scripts/food-production/write-report.mjs",
