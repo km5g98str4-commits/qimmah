@@ -1,0 +1,3103 @@
+{
+ "version": 1,
+ "note": "USDA-MAP — لكل صفّ من الـ٦٠٠: وصف USDA حرفي (exact) أو رموز (q/not/pick) أو قرار (mapped/recipe/quarantine).",
+ "rows": [
+  {
+   "id": "QF0001",
+   "exact": "Chicken, broilers or fryers, breast, meat only, raw"
+  },
+  {
+   "id": "QF0002",
+   "exact": "Chicken breast, grilled without sauce, skin not eaten",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0003",
+   "exact": "Chicken breast, stewed, skin not eaten",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0004",
+   "exact": "Chicken, broilers or fryers, breast, meat only, cooked, roasted"
+  },
+  {
+   "id": "QF0005",
+   "exact": "Chicken, broilers or fryers, thigh, meat only, raw"
+  },
+  {
+   "id": "QF0006",
+   "exact": "Chicken thigh, grilled without sauce, skin not eaten",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0007",
+   "exact": "Chicken thigh, grilled without sauce, skin eaten",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0008",
+   "exact": "Chicken, broilers or fryers, meat and skin, cooked, roasted"
+  },
+  {
+   "id": "QF0009",
+   "exact": "Chicken, broilers or fryers, meat only, cooked, stewed"
+  },
+  {
+   "id": "QF0010",
+   "exact": "Chicken, ground, raw"
+  },
+  {
+   "id": "QF0011",
+   "exact": "Beef, ground, 93% lean meat / 7% fat, raw"
+  },
+  {
+   "id": "QF0012",
+   "exact": "Beef, ground, 93% lean meat / 7% fat, patty, cooked, broiled"
+  },
+  {
+   "id": "QF0013",
+   "exact": "Beef, ground, 85% lean meat / 15% fat, patty, cooked, broiled"
+  },
+  {
+   "id": "QF0014",
+   "exact": "Beef steak, grilled or broiled, lean only eaten",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0015",
+   "exact": "Beef, tenderloin, steak, separable lean only, trimmed to 1/8\" fat, all grades, cooked, broiled"
+  },
+  {
+   "id": "QF0016",
+   "q": "beef rib eye steak lean only broiled",
+   "not": [
+    "choice",
+    "select",
+    "prime",
+    "0"
+   ],
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ],
+   "pick": "Beef, rib eye steak, boneless, lip off, separable lean only, trimmed to 0\" fat, all grades, cooked, grilled"
+  },
+  {
+   "id": "QF0017",
+   "q": "beef top sirloin steak lean only all grades cooked broiled",
+   "not": [
+    "0\"",
+    "1/8\""
+   ],
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ]
+  },
+  {
+   "id": "QF0018",
+   "exact": "Beef, stewed, lean only eaten",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0019",
+   "exact": "Lamb, domestic, composite of trimmed retail cuts, separable lean only, trimmed to 1/4\" fat, choice, raw"
+  },
+  {
+   "id": "QF0020",
+   "exact": "Lamb, domestic, composite of trimmed retail cuts, separable lean only, trimmed to 1/4\" fat, choice, cooked"
+  },
+  {
+   "id": "QF0021",
+   "exact": "Lamb chop, grilled or broiled, lean only eaten",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0022",
+   "exact": "Lamb chop, grilled or broiled, lean only eaten",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0023",
+   "exact": "Chicken, broilers or fryers, giblets, cooked, simmered"
+  },
+  {
+   "id": "QF0024",
+   "exact": "Beef, variety meats and by-products, liver, cooked, braised"
+  },
+  {
+   "id": "QF0025",
+   "exact": "Lamb, variety meats and by-products, liver, cooked, braised"
+  },
+  {
+   "id": "QF0026",
+   "exact": "Fish, tuna, light, canned in water, drained solids"
+  },
+  {
+   "id": "QF0027",
+   "exact": "Fish, tuna, light, canned in oil, drained solids"
+  },
+  {
+   "id": "QF0028",
+   "exact": "Fish, salmon, Atlantic, farmed, raw"
+  },
+  {
+   "id": "QF0029",
+   "exact": "Salmon, grilled",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0030",
+   "exact": "Salmon, baked or broiled, no added fat",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0031",
+   "q": "fish grouper mixed species raw",
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ]
+  },
+  {
+   "id": "QF0032",
+   "q": "fish grouper mixed species cooked dry heat",
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ]
+  },
+  {
+   "id": "QF0033",
+   "exact": "Fish, tilapia, raw"
+  },
+  {
+   "id": "QF0034",
+   "exact": "Fish, tilapia, cooked, dry heat"
+  },
+  {
+   "id": "QF0035",
+   "exact": "Crustaceans, shrimp, mixed species, raw"
+  },
+  {
+   "id": "QF0036",
+   "exact": "Crustaceans, shrimp, mixed species, cooked, moist heat"
+  },
+  {
+   "id": "QF0037",
+   "exact": "Shrimp, grilled",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0038",
+   "exact": "Fish, sardine, Atlantic, canned in oil, drained solids with bone"
+  },
+  {
+   "id": "QF0039",
+   "exact": "Fish, mackerel, Atlantic, cooked, dry heat"
+  },
+  {
+   "id": "QF0040",
+   "exact": "Fish, cod, Atlantic, raw"
+  },
+  {
+   "id": "QF0041",
+   "exact": "Fish, cod, Atlantic, cooked, dry heat"
+  },
+  {
+   "id": "QF0042",
+   "exact": "Fish, tuna, fresh, yellowfin, cooked, dry heat"
+  },
+  {
+   "id": "QF0043",
+   "exact": "Egg, whole, raw, fresh"
+  },
+  {
+   "id": "QF0044",
+   "exact": "Egg, whole, cooked, hard-boiled"
+  },
+  {
+   "id": "QF0045",
+   "exact": "Egg, whole, cooked, fried"
+  },
+  {
+   "id": "QF0046",
+   "exact": "Egg, whole, cooked, scrambled"
+  },
+  {
+   "id": "QF0047",
+   "exact": "Egg, white, raw, fresh"
+  },
+  {
+   "id": "QF0048",
+   "exact": "Egg, whole, cooked, omelet"
+  },
+  {
+   "id": "QF0049",
+   "exact": "Egg omelet or scrambled egg, with vegetables, fat added",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0050",
+   "exact": "Egg omelet or scrambled egg, with cheese, fat added",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0051",
+   "exact": "Turkey, breast, from whole bird, meat only, roasted"
+  },
+  {
+   "id": "QF0052",
+   "exact": "Turkey, breast, from whole bird, meat only, roasted"
+  },
+  {
+   "id": "QF0053",
+   "exact": "Veal, composite of trimmed retail cuts, separable lean only, cooked"
+  },
+  {
+   "id": "QF0054",
+   "resolve": "recipe",
+   "why": "لا سجلّ USDA للحم الجمل؛ مصدر خليجي موثّق مطلوب"
+  },
+  {
+   "id": "QF0055",
+   "resolve": "recipe",
+   "why": "وصفة منزلية — تختلف بنسبة الدهن؛ يُغطّيها Ground beef patty (0013)"
+  },
+  {
+   "id": "QF0056",
+   "resolve": "recipe",
+   "why": "وصفة منزلية — يُغطّيها Chicken, ground"
+  },
+  {
+   "id": "QF0057",
+   "q": "kofta beef",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0058",
+   "q": "kofta chicken",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0059",
+   "q": "chicken kebab",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0060",
+   "q": "beef kebab",
+   "not": [
+    "chicken"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0061",
+   "exact": "Bread, white, commercially prepared"
+  },
+  {
+   "id": "QF0062",
+   "exact": "Bread, whole-wheat, commercially prepared"
+  },
+  {
+   "id": "QF0063",
+   "exact": "Bread, multi-grain (includes whole-grain)"
+  },
+  {
+   "id": "QF0064",
+   "exact": "Bread, pita, white, enriched"
+  },
+  {
+   "id": "QF0065",
+   "exact": "Bread, pita, whole-wheat"
+  },
+  {
+   "id": "QF0066",
+   "exact": "Rolls, dinner, plain, commercially prepared (includes brown-and-serve)"
+  },
+  {
+   "id": "QF0067",
+   "exact": "Rolls, dinner, wheat"
+  },
+  {
+   "id": "QF0068",
+   "exact": "Bread, chapati or roti, whole wheat, commercially prepared"
+  },
+  {
+   "id": "QF0069",
+   "resolve": "recipe",
+   "why": "خبز تميس — لا سجلّ USDA؛ يبقى الصنف المنسَّق القائم «تميس»"
+  },
+  {
+   "id": "QF0070",
+   "exact": "Bread, naan, plain, commercially prepared, refrigerated"
+  },
+  {
+   "id": "QF0071",
+   "exact": "Bread, chapati or roti, whole wheat, commercially prepared"
+  },
+  {
+   "id": "QF0072",
+   "exact": "Tortillas, ready-to-bake or -fry, flour, refrigerated"
+  },
+  {
+   "id": "QF0073",
+   "exact": "Tortillas, ready-to-bake or -fry, whole wheat"
+  },
+  {
+   "id": "QF0074",
+   "exact": "Rolls, hamburger or hotdog, plain"
+  },
+  {
+   "id": "QF0075",
+   "exact": "Rolls, hamburger or hotdog, plain"
+  },
+  {
+   "id": "QF0076",
+   "exact": "Bread, french or vienna (includes sourdough)"
+  },
+  {
+   "id": "QF0077",
+   "exact": "Bread, french or vienna (includes sourdough)"
+  },
+  {
+   "id": "QF0078",
+   "exact": "Bread, french or vienna (includes sourdough)"
+  },
+  {
+   "id": "QF0079",
+   "exact": "Bread, rye"
+  },
+  {
+   "id": "QF0080",
+   "exact": "Bread, multi-grain (includes whole-grain)"
+  },
+  {
+   "id": "QF0081",
+   "exact": "Bread, oatmeal"
+  },
+  {
+   "id": "QF0082",
+   "resolve": "recipe",
+   "why": "خبز بروتين — منتج مصنّع؛ يُبحث بالباركود"
+  },
+  {
+   "id": "QF0083",
+   "exact": "Bread, gluten-free, white, made with rice flour, corn starch, and/or tapioca"
+  },
+  {
+   "id": "QF0084",
+   "exact": "Rice cakes, brown rice, plain"
+  },
+  {
+   "id": "QF0085",
+   "exact": "Snacks, corn cakes"
+  },
+  {
+   "id": "QF0086",
+   "q": "rusk",
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ]
+  },
+  {
+   "id": "QF0087",
+   "exact": "Croissants, butter"
+  },
+  {
+   "id": "QF0088",
+   "exact": "Croissants, cheese"
+  },
+  {
+   "id": "QF0089",
+   "q": "croissant chocolate",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0090",
+   "q": "brioche",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0091",
+   "exact": "Bagels, plain, enriched, with calcium propionate (includes onion, poppy, sesame)"
+  },
+  {
+   "id": "QF0092",
+   "exact": "Bagels, wheat"
+  },
+  {
+   "id": "QF0093",
+   "exact": "English muffins, plain, enriched, with ca prop (includes sourdough)"
+  },
+  {
+   "id": "QF0094",
+   "resolve": "recipe",
+   "why": "مناقيش — وصفة؛ مطعم/مخبز"
+  },
+  {
+   "id": "QF0095",
+   "resolve": "recipe",
+   "why": "مناقيش — وصفة"
+  },
+  {
+   "id": "QF0096",
+   "resolve": "recipe",
+   "why": "مناقيش — وصفة"
+  },
+  {
+   "id": "QF0097",
+   "resolve": "recipe",
+   "why": "فطيرة سبانخ — وصفة"
+  },
+  {
+   "id": "QF0098",
+   "resolve": "recipe",
+   "why": "فطيرة جبن — وصفة"
+  },
+  {
+   "id": "QF0099",
+   "resolve": "recipe",
+   "why": "رقاق — لا سجلّ USDA"
+  },
+  {
+   "id": "QF0100",
+   "resolve": "recipe",
+   "why": "مرقوق (خبز) — لا سجلّ USDA"
+  },
+  {
+   "id": "QF0101",
+   "exact": "Rice, white, long-grain, regular, raw, unenriched"
+  },
+  {
+   "id": "QF0102",
+   "exact": "Rice, white, long-grain, regular, cooked, unenriched, without salt"
+  },
+  {
+   "id": "QF0103",
+   "q": "rice basmati raw",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0104",
+   "q": "rice basmati cooked",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0105",
+   "exact": "Rice, brown, long-grain, raw"
+  },
+  {
+   "id": "QF0106",
+   "exact": "Rice, brown, long-grain, cooked"
+  },
+  {
+   "id": "QF0107",
+   "q": "rice jasmine cooked",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0108",
+   "exact": "Rice, white, short-grain, cooked"
+  },
+  {
+   "id": "QF0109",
+   "resolve": "recipe",
+   "why": "رز بالشعيرية — وصفة"
+  },
+  {
+   "id": "QF0110",
+   "resolve": "recipe",
+   "why": "رز بخاري — وصفة"
+  },
+  {
+   "id": "QF0111",
+   "resolve": "mapped",
+   "curated": "رز كبسة"
+  },
+  {
+   "id": "QF0112",
+   "resolve": "mapped",
+   "curated": "أرز مندي مطعم فقط"
+  },
+  {
+   "id": "QF0113",
+   "resolve": "recipe",
+   "why": "رز برياني — وصفة"
+  },
+  {
+   "id": "QF0114",
+   "exact": "Bulgur, dry"
+  },
+  {
+   "id": "QF0115",
+   "exact": "Bulgur, cooked"
+  },
+  {
+   "id": "QF0116",
+   "exact": "Quinoa, uncooked"
+  },
+  {
+   "id": "QF0117",
+   "exact": "Quinoa, cooked"
+  },
+  {
+   "id": "QF0118",
+   "exact": "Cereals, oats, regular and quick, not fortified, dry"
+  },
+  {
+   "id": "QF0119",
+   "exact": "Cereals, oats, regular and quick, not fortified, cooked with water (includes boiling and microwaving), without salt"
+  },
+  {
+   "id": "QF0120",
+   "q": "oatmeal cooked with milk",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0121",
+   "exact": "Cereals ready-to-eat, granola, homemade"
+  },
+  {
+   "id": "QF0122",
+   "exact": "Barley, pearled, cooked"
+  },
+  {
+   "id": "QF0123",
+   "q": "freekeh cooked",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0124",
+   "exact": "Couscous, cooked"
+  },
+  {
+   "id": "QF0125",
+   "exact": "Pasta, dry, enriched"
+  },
+  {
+   "id": "QF0126",
+   "exact": "Pasta, cooked, enriched, without added salt"
+  },
+  {
+   "id": "QF0127",
+   "exact": "Pasta, cooked, enriched, without added salt"
+  },
+  {
+   "id": "QF0128",
+   "exact": "Pasta, whole-wheat, cooked"
+  },
+  {
+   "id": "QF0129",
+   "exact": "Rice noodles, cooked"
+  },
+  {
+   "id": "QF0130",
+   "exact": "Noodles, egg, cooked, enriched"
+  },
+  {
+   "id": "QF0131",
+   "q": "noodles instant prepared",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0132",
+   "exact": "Pasta, cooked, enriched, without added salt"
+  },
+  {
+   "id": "QF0133",
+   "q": "polenta cooked",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0134",
+   "q": "semolina",
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ]
+  },
+  {
+   "id": "QF0135",
+   "exact": "Wheat flour, white, all-purpose, enriched, bleached"
+  },
+  {
+   "id": "QF0136",
+   "exact": "Wheat flour, whole-grain"
+  },
+  {
+   "id": "QF0137",
+   "exact": "Oat flour, partially debranned"
+  },
+  {
+   "id": "QF0138",
+   "exact": "Rice flour, white, unenriched"
+  },
+  {
+   "id": "QF0139",
+   "exact": "Cereals, corn grits, white, regular and quick, unenriched, dry"
+  },
+  {
+   "id": "QF0140",
+   "q": "corn flakes",
+   "not": [
+    "frosted",
+    "honey",
+    "sugar",
+    "kellogg",
+    "general",
+    "post",
+    "crunch",
+    "malt"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0141",
+   "q": "bran flakes",
+   "not": [
+    "raisin",
+    "kellogg",
+    "post"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0142",
+   "q": "puffed rice cereal",
+   "not": [
+    "chocolate",
+    "sugar"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0143",
+   "q": "muesli",
+   "not": [
+    "kellogg",
+    "familia",
+    "bar"
+   ],
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ]
+  },
+  {
+   "id": "QF0144",
+   "exact": "Potatoes, mashed, dehydrated, prepared from flakes without milk, whole milk and butter added"
+  },
+  {
+   "id": "QF0145",
+   "exact": "Milk, whole, 3.25% milkfat, with added vitamin D"
+  },
+  {
+   "id": "QF0146",
+   "exact": "Milk, reduced fat, fluid, 2% milkfat, with added vitamin A and vitamin D"
+  },
+  {
+   "id": "QF0147",
+   "exact": "Milk, nonfat, fluid, with added vitamin A and vitamin D (fat free or skim)"
+  },
+  {
+   "id": "QF0148",
+   "exact": "Milk, whole, 3.25% milkfat, with added vitamin D"
+  },
+  {
+   "id": "QF0149",
+   "exact": "Milk, canned, evaporated, with added vitamin D and without added vitamin A"
+  },
+  {
+   "id": "QF0150",
+   "exact": "Milk, dry, whole, with added vitamin D"
+  },
+  {
+   "id": "QF0151",
+   "exact": "Milk, buttermilk, fluid, whole"
+  },
+  {
+   "id": "QF0152",
+   "exact": "Milk, buttermilk, fluid, cultured, lowfat"
+  },
+  {
+   "id": "QF0153",
+   "exact": "Yogurt, plain, whole milk"
+  },
+  {
+   "id": "QF0154",
+   "exact": "Yogurt, plain, low fat"
+  },
+  {
+   "id": "QF0155",
+   "exact": "Yogurt, plain, skim milk"
+  },
+  {
+   "id": "QF0156",
+   "exact": "Yogurt, Greek, plain, whole milk"
+  },
+  {
+   "id": "QF0157",
+   "exact": "Yogurt, Greek, plain, lowfat"
+  },
+  {
+   "id": "QF0158",
+   "exact": "Yogurt, Greek, plain, nonfat"
+  },
+  {
+   "id": "QF0159",
+   "q": "labneh",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0160",
+   "resolve": "recipe",
+   "why": "لبنة قليلة الدسم — لا سجلّ؛ الباركود"
+  },
+  {
+   "id": "QF0161",
+   "exact": "Cheese, feta"
+  },
+  {
+   "id": "QF0162",
+   "q": "halloumi",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0163",
+   "exact": "Cheese, cheddar"
+  },
+  {
+   "id": "QF0164",
+   "exact": "Cheese, mozzarella, whole milk"
+  },
+  {
+   "id": "QF0165",
+   "exact": "Cheese, parmesan, hard"
+  },
+  {
+   "id": "QF0166",
+   "exact": "Cheese, cottage, creamed, large or small curd"
+  },
+  {
+   "id": "QF0167",
+   "exact": "Cheese, cream"
+  },
+  {
+   "id": "QF0168",
+   "exact": "Cheese, pasteurized process, American, fortified with vitamin D"
+  },
+  {
+   "id": "QF0169",
+   "q": "cheese white mexican queso fresco",
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ]
+  },
+  {
+   "id": "QF0170",
+   "resolve": "recipe",
+   "why": "جبنة عكاوي — لا سجلّ USDA"
+  },
+  {
+   "id": "QF0171",
+   "exact": "Cheese, edam"
+  },
+  {
+   "id": "QF0172",
+   "exact": "Cheese, gouda"
+  },
+  {
+   "id": "QF0173",
+   "exact": "Cream, fluid, half and half"
+  },
+  {
+   "id": "QF0174",
+   "exact": "Cream, fluid, heavy whipping"
+  },
+  {
+   "id": "QF0175",
+   "exact": "Cream, fluid, light (coffee cream or table cream)"
+  },
+  {
+   "id": "QF0176",
+   "exact": "Ice creams, vanilla"
+  },
+  {
+   "id": "QF0177",
+   "exact": "Ice creams, chocolate"
+  },
+  {
+   "id": "QF0178",
+   "exact": "Yogurt, fruit, low fat, 10 grams protein per 8 ounce"
+  },
+  {
+   "id": "QF0179",
+   "exact": "Milk, chocolate, fluid, commercial, whole, with added vitamin A and vitamin D"
+  },
+  {
+   "id": "QF0180",
+   "resolve": "recipe",
+   "why": "حليب بروتين — منتج مصنّع؛ الباركود"
+  },
+  {
+   "id": "QF0181",
+   "q": "yogurt drink",
+   "not": [
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0182",
+   "exact": "Milk, buttermilk, fluid, cultured, lowfat"
+  },
+  {
+   "id": "QF0183",
+   "exact": "Cucumber, with peel, raw"
+  },
+  {
+   "id": "QF0184",
+   "exact": "Tomatoes, red, ripe, raw, year round average"
+  },
+  {
+   "id": "QF0185",
+   "exact": "Lettuce, cos or romaine, raw"
+  },
+  {
+   "id": "QF0186",
+   "exact": "Lettuce, iceberg (includes crisphead types), raw"
+  },
+  {
+   "id": "QF0187",
+   "exact": "Arugula, raw"
+  },
+  {
+   "id": "QF0188",
+   "exact": "Spinach, raw"
+  },
+  {
+   "id": "QF0189",
+   "exact": "Spinach, cooked, boiled, drained, without salt"
+  },
+  {
+   "id": "QF0190",
+   "exact": "Broccoli, raw"
+  },
+  {
+   "id": "QF0191",
+   "exact": "Broccoli, cooked, boiled, drained, without salt"
+  },
+  {
+   "id": "QF0192",
+   "exact": "Cauliflower, raw"
+  },
+  {
+   "id": "QF0193",
+   "exact": "Cauliflower, cooked, boiled, drained, without salt"
+  },
+  {
+   "id": "QF0194",
+   "exact": "Carrots, raw"
+  },
+  {
+   "id": "QF0195",
+   "exact": "Carrots, cooked, boiled, drained, without salt"
+  },
+  {
+   "id": "QF0196",
+   "exact": "Squash, summer, zucchini, includes skin, raw"
+  },
+  {
+   "id": "QF0197",
+   "exact": "Eggplant, raw"
+  },
+  {
+   "id": "QF0198",
+   "exact": "Peppers, sweet, green, raw"
+  },
+  {
+   "id": "QF0199",
+   "exact": "Peppers, sweet, red, raw"
+  },
+  {
+   "id": "QF0200",
+   "exact": "Peppers, sweet, yellow, raw"
+  },
+  {
+   "id": "QF0201",
+   "exact": "Peppers, hot chili, green, raw"
+  },
+  {
+   "id": "QF0202",
+   "exact": "Onions, raw"
+  },
+  {
+   "id": "QF0203",
+   "exact": "Onions, raw"
+  },
+  {
+   "id": "QF0204",
+   "exact": "Onions, spring or scallions (includes tops and bulb), raw"
+  },
+  {
+   "id": "QF0205",
+   "exact": "Garlic, raw"
+  },
+  {
+   "id": "QF0206",
+   "exact": "Leeks, (bulb and lower leaf-portion), raw"
+  },
+  {
+   "id": "QF0207",
+   "exact": "Cabbage, raw"
+  },
+  {
+   "id": "QF0208",
+   "exact": "Cabbage, red, raw"
+  },
+  {
+   "id": "QF0209",
+   "exact": "Mushrooms, white, raw"
+  },
+  {
+   "id": "QF0210",
+   "exact": "Mushrooms, white, cooked, boiled, drained, without salt"
+  },
+  {
+   "id": "QF0211",
+   "exact": "Beans, snap, green, raw"
+  },
+  {
+   "id": "QF0212",
+   "exact": "Peas, green, raw"
+  },
+  {
+   "id": "QF0213",
+   "exact": "Corn, sweet, yellow, raw"
+  },
+  {
+   "id": "QF0214",
+   "exact": "Beets, raw"
+  },
+  {
+   "id": "QF0215",
+   "exact": "Turnips, raw"
+  },
+  {
+   "id": "QF0216",
+   "exact": "Radishes, raw"
+  },
+  {
+   "id": "QF0217",
+   "exact": "Celery, raw"
+  },
+  {
+   "id": "QF0218",
+   "exact": "Asparagus, raw"
+  },
+  {
+   "id": "QF0219",
+   "exact": "Artichokes, (globe or french), raw"
+  },
+  {
+   "id": "QF0220",
+   "exact": "Okra, raw"
+  },
+  {
+   "id": "QF0221",
+   "q": "molokhia cooked",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0222",
+   "exact": "Grape leaves, canned"
+  },
+  {
+   "id": "QF0223",
+   "exact": "Pumpkin, raw"
+  },
+  {
+   "id": "QF0224",
+   "exact": "Squash, winter, butternut, raw"
+  },
+  {
+   "id": "QF0225",
+   "exact": "Potatoes, flesh and skin, raw"
+  },
+  {
+   "id": "QF0226",
+   "exact": "Potatoes, boiled, cooked without skin, flesh, without salt"
+  },
+  {
+   "id": "QF0227",
+   "exact": "Potatoes, baked, flesh and skin, without salt"
+  },
+  {
+   "id": "QF0228",
+   "exact": "Fast foods, potato, french fried in vegetable oil"
+  },
+  {
+   "id": "QF0229",
+   "exact": "Sweet potato, raw, unprepared"
+  },
+  {
+   "id": "QF0230",
+   "exact": "Sweet potato, cooked, baked in skin, flesh, without salt"
+  },
+  {
+   "id": "QF0231",
+   "exact": "Avocados, raw, all commercial varieties"
+  },
+  {
+   "id": "QF0232",
+   "q": "olives green",
+   "not": [
+    "stuffed",
+    "ripe"
+   ],
+   "prefer": [
+    "sr",
+    "foundation",
+    "fndds"
+   ]
+  },
+  {
+   "id": "QF0233",
+   "exact": "Olives, ripe, canned (small-extra large)"
+  },
+  {
+   "id": "QF0234",
+   "exact": "Pickles, cucumber, dill or kosher dill"
+  },
+  {
+   "id": "QF0235",
+   "q": "pickles mixed",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0236",
+   "exact": "Parsley, fresh"
+  },
+  {
+   "id": "QF0237",
+   "exact": "Coriander (cilantro) leaves, raw"
+  },
+  {
+   "id": "QF0238",
+   "exact": "Dill weed, fresh"
+  },
+  {
+   "id": "QF0239",
+   "exact": "Peppermint, fresh"
+  },
+  {
+   "id": "QF0240",
+   "exact": "Basil, fresh"
+  },
+  {
+   "id": "QF0241",
+   "exact": "Tomatoes, red, ripe, raw, year round average"
+  },
+  {
+   "id": "QF0242",
+   "exact": "Tomatoes, sun-dried"
+  },
+  {
+   "id": "QF0243",
+   "exact": "Apples, raw, with skin"
+  },
+  {
+   "id": "QF0244",
+   "exact": "Apples, raw, with skin"
+  },
+  {
+   "id": "QF0245",
+   "exact": "Bananas, raw"
+  },
+  {
+   "id": "QF0246",
+   "exact": "Oranges, raw, all commercial varieties"
+  },
+  {
+   "id": "QF0247",
+   "exact": "Tangerines, (mandarin oranges), raw"
+  },
+  {
+   "id": "QF0248",
+   "exact": "Lemons, raw, without peel"
+  },
+  {
+   "id": "QF0249",
+   "exact": "Limes, raw"
+  },
+  {
+   "id": "QF0250",
+   "exact": "Grapefruit, raw, pink and red and white, all areas"
+  },
+  {
+   "id": "QF0251",
+   "exact": "Strawberries, raw"
+  },
+  {
+   "id": "QF0252",
+   "exact": "Blueberries, raw"
+  },
+  {
+   "id": "QF0253",
+   "exact": "Blackberries, raw"
+  },
+  {
+   "id": "QF0254",
+   "exact": "Raspberries, raw"
+  },
+  {
+   "id": "QF0255",
+   "exact": "Grapes, red or green (European type, such as Thompson seedless), raw"
+  },
+  {
+   "id": "QF0256",
+   "exact": "Grapes, red or green (European type, such as Thompson seedless), raw"
+  },
+  {
+   "id": "QF0257",
+   "exact": "Watermelon, raw"
+  },
+  {
+   "id": "QF0258",
+   "exact": "Melons, cantaloupe, raw"
+  },
+  {
+   "id": "QF0259",
+   "exact": "Mangos, raw"
+  },
+  {
+   "id": "QF0260",
+   "exact": "Pineapple, raw, all varieties"
+  },
+  {
+   "id": "QF0261",
+   "exact": "Kiwifruit, green, raw"
+  },
+  {
+   "id": "QF0262",
+   "exact": "Peaches, yellow, raw"
+  },
+  {
+   "id": "QF0263",
+   "exact": "Nectarines, raw"
+  },
+  {
+   "id": "QF0264",
+   "exact": "Plums, raw"
+  },
+  {
+   "id": "QF0265",
+   "exact": "Apricots, raw"
+  },
+  {
+   "id": "QF0266",
+   "exact": "Pears, raw"
+  },
+  {
+   "id": "QF0267",
+   "exact": "Pomegranates, raw"
+  },
+  {
+   "id": "QF0268",
+   "exact": "Figs, raw"
+  },
+  {
+   "id": "QF0269",
+   "exact": "Dates, deglet noor"
+  },
+  {
+   "id": "QF0270",
+   "exact": "Dates, deglet noor"
+  },
+  {
+   "id": "QF0271",
+   "exact": "Dates, medjool"
+  },
+  {
+   "id": "QF0272",
+   "exact": "Dates, medjool"
+  },
+  {
+   "id": "QF0273",
+   "exact": "Raisins, seedless"
+  },
+  {
+   "id": "QF0274",
+   "exact": "Figs, dried, uncooked"
+  },
+  {
+   "id": "QF0275",
+   "exact": "Apricots, dried, sulfured, uncooked"
+  },
+  {
+   "id": "QF0276",
+   "exact": "Plums, dried (prunes), uncooked"
+  },
+  {
+   "id": "QF0277",
+   "exact": "Cranberries, dried, sweetened"
+  },
+  {
+   "id": "QF0278",
+   "exact": "Nuts, coconut meat, raw"
+  },
+  {
+   "id": "QF0279",
+   "exact": "Papayas, raw"
+  },
+  {
+   "id": "QF0280",
+   "exact": "Passion-fruit, (granadilla), purple, raw"
+  },
+  {
+   "id": "QF0281",
+   "exact": "Guavas, common, raw"
+  },
+  {
+   "id": "QF0282",
+   "exact": "Litchis, raw"
+  },
+  {
+   "id": "QF0283",
+   "exact": "Persimmons, japanese, raw"
+  },
+  {
+   "id": "QF0284",
+   "exact": "Cherries, sweet, raw"
+  },
+  {
+   "id": "QF0285",
+   "resolve": "recipe",
+   "why": "رطب — لا سجلّ USDA للرطب الطازج"
+  },
+  {
+   "id": "QF0286",
+   "resolve": "recipe",
+   "why": "سلطة فواكه — وصفة"
+  },
+  {
+   "id": "QF0287",
+   "exact": "Lentils, pink or red, raw"
+  },
+  {
+   "id": "QF0288",
+   "exact": "Lentils, mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0289",
+   "exact": "Lentils, raw"
+  },
+  {
+   "id": "QF0290",
+   "exact": "Lentils, mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0291",
+   "exact": "Chickpeas (garbanzo beans, bengal gram), mature seeds, raw"
+  },
+  {
+   "id": "QF0292",
+   "exact": "Chickpeas (garbanzo beans, bengal gram), mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0293",
+   "exact": "Beans, kidney, all types, mature seeds, raw"
+  },
+  {
+   "id": "QF0294",
+   "exact": "Beans, kidney, all types, mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0295",
+   "exact": "Beans, white, mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0296",
+   "exact": "Beans, black, mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0297",
+   "exact": "Broadbeans (fava beans), mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0298",
+   "exact": "Broadbeans, immature seeds, raw"
+  },
+  {
+   "id": "QF0299",
+   "exact": "Cowpeas, common (blackeyes, crowder, southern), mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0300",
+   "exact": "Edamame, frozen, prepared"
+  },
+  {
+   "id": "QF0301",
+   "exact": "Peas, split, mature seeds, cooked, boiled, without salt"
+  },
+  {
+   "id": "QF0302",
+   "exact": "Hummus, commercial"
+  },
+  {
+   "id": "QF0303",
+   "q": "baba ghanoush",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0304",
+   "exact": "Falafel, home-prepared"
+  },
+  {
+   "id": "QF0305",
+   "resolve": "recipe",
+   "why": "فلافل مخبوزة — وصفة"
+  },
+  {
+   "id": "QF0306",
+   "resolve": "recipe",
+   "why": "برجر فاصوليا — وصفة"
+  },
+  {
+   "id": "QF0307",
+   "resolve": "recipe",
+   "why": "برجر عدس — وصفة"
+  },
+  {
+   "id": "QF0308",
+   "q": "soup lentil",
+   "not": [
+    "canned",
+    "condensed"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0309",
+   "resolve": "recipe",
+   "why": "شوربة فول — وصفة"
+  },
+  {
+   "id": "QF0310",
+   "exact": "Beans, baked, canned, plain or vegetarian"
+  },
+  {
+   "id": "QF0311",
+   "exact": "Nuts, almonds"
+  },
+  {
+   "id": "QF0312",
+   "exact": "Nuts, almonds, dry roasted, without salt added"
+  },
+  {
+   "id": "QF0313",
+   "exact": "Nuts, walnuts, english"
+  },
+  {
+   "id": "QF0314",
+   "exact": "Nuts, cashew nuts, raw"
+  },
+  {
+   "id": "QF0315",
+   "exact": "Nuts, cashew nuts, dry roasted, without salt added"
+  },
+  {
+   "id": "QF0316",
+   "exact": "Nuts, pistachio nuts, raw"
+  },
+  {
+   "id": "QF0317",
+   "exact": "Peanuts, all types, raw"
+  },
+  {
+   "id": "QF0318",
+   "exact": "Nuts, hazelnuts or filberts"
+  },
+  {
+   "id": "QF0319",
+   "exact": "Nuts, brazilnuts, dried, unblanched"
+  },
+  {
+   "id": "QF0320",
+   "exact": "Nuts, macadamia nuts, raw"
+  },
+  {
+   "id": "QF0321",
+   "exact": "Nuts, pecans"
+  },
+  {
+   "id": "QF0322",
+   "exact": "Nuts, pine nuts, dried"
+  },
+  {
+   "id": "QF0323",
+   "exact": "Seeds, chia seeds, dried"
+  },
+  {
+   "id": "QF0324",
+   "exact": "Seeds, flaxseed"
+  },
+  {
+   "id": "QF0325",
+   "exact": "Seeds, sunflower seed kernels, dried"
+  },
+  {
+   "id": "QF0326",
+   "exact": "Seeds, pumpkin and squash seed kernels, dried"
+  },
+  {
+   "id": "QF0327",
+   "exact": "Seeds, sesame seeds, whole, dried"
+  },
+  {
+   "id": "QF0328",
+   "exact": "Seeds, sesame butter, tahini, from roasted and toasted kernels (most common type)"
+  },
+  {
+   "id": "QF0329",
+   "exact": "Peanut butter, smooth style, without salt"
+  },
+  {
+   "id": "QF0330",
+   "exact": "Nuts, almond butter, plain, without salt added"
+  },
+  {
+   "id": "QF0331",
+   "exact": "Nuts, cashew butter, plain, without salt added"
+  },
+  {
+   "id": "QF0332",
+   "resolve": "recipe",
+   "why": "زبدة فستق — لا سجلّ USDA"
+  },
+  {
+   "id": "QF0333",
+   "exact": "Nuts, coconut meat, dried (desiccated), not sweetened"
+  },
+  {
+   "id": "QF0334",
+   "exact": "Nuts, mixed nuts, dry roasted, with peanuts, without salt added"
+  },
+  {
+   "id": "QF0335",
+   "exact": "Oil, olive, salad or cooking"
+  },
+  {
+   "id": "QF0336",
+   "exact": "Oil, avocado"
+  },
+  {
+   "id": "QF0337",
+   "exact": "Oil, sunflower, linoleic, (approx. 65%)"
+  },
+  {
+   "id": "QF0338",
+   "exact": "Oil, canola"
+  },
+  {
+   "id": "QF0339",
+   "exact": "Oil, corn, industrial and retail, all purpose salad or cooking"
+  },
+  {
+   "id": "QF0340",
+   "exact": "Oil, coconut"
+  },
+  {
+   "id": "QF0341",
+   "exact": "Butter, salted"
+  },
+  {
+   "id": "QF0342",
+   "exact": "Butter oil, anhydrous"
+  },
+  {
+   "id": "QF0343",
+   "exact": "Salad dressing, mayonnaise, regular"
+  },
+  {
+   "id": "QF0344",
+   "exact": "Salad dressing, mayonnaise, light"
+  },
+  {
+   "id": "QF0345",
+   "exact": "Catsup"
+  },
+  {
+   "id": "QF0346",
+   "exact": "Mustard, prepared, yellow"
+  },
+  {
+   "id": "QF0347",
+   "exact": "Sauce, barbecue"
+  },
+  {
+   "id": "QF0348",
+   "exact": "Sauce, ready-to-serve, pepper or hot"
+  },
+  {
+   "id": "QF0349",
+   "exact": "Soy sauce made from soy and wheat (shoyu)"
+  },
+  {
+   "id": "QF0350",
+   "exact": "Soy sauce made from soy and wheat (shoyu), low sodium"
+  },
+  {
+   "id": "QF0351",
+   "exact": "Sauce, teriyaki, ready-to-serve"
+  },
+  {
+   "id": "QF0352",
+   "exact": "Salad dressing, ranch dressing, regular"
+  },
+  {
+   "id": "QF0353",
+   "exact": "Salad dressing, caesar dressing, regular"
+  },
+  {
+   "id": "QF0354",
+   "exact": "Salad dressing, italian dressing, commercial, regular"
+  },
+  {
+   "id": "QF0355",
+   "exact": "Vinegar, balsamic"
+  },
+  {
+   "id": "QF0356",
+   "exact": "Vinegar, distilled"
+  },
+  {
+   "id": "QF0357",
+   "exact": "Vinegar, cider"
+  },
+  {
+   "id": "QF0358",
+   "q": "pomegranate molasses",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0359",
+   "resolve": "recipe",
+   "why": "دبس تمر — لا سجلّ USDA"
+  },
+  {
+   "id": "QF0360",
+   "exact": "Honey"
+  },
+  {
+   "id": "QF0361",
+   "exact": "Sugars, granulated"
+  },
+  {
+   "id": "QF0362",
+   "exact": "Sugars, brown"
+  },
+  {
+   "id": "QF0363",
+   "resolve": "recipe",
+   "why": "ستيفيا — قيمة طاقة صفر عمليًّا؛ يُبحث بالباركود"
+  },
+  {
+   "id": "QF0364",
+   "exact": "Syrups, maple"
+  },
+  {
+   "id": "QF0365",
+   "exact": "Jams and preserves"
+  },
+  {
+   "id": "QF0366",
+   "exact": "Jams and preserves"
+  },
+  {
+   "id": "QF0367",
+   "exact": "Chocolate-flavored hazelnut spread"
+  },
+  {
+   "id": "QF0368",
+   "exact": "Sauce, pasta, spaghetti/marinara, ready-to-serve"
+  },
+  {
+   "id": "QF0369",
+   "exact": "Tomato products, canned, paste, without salt added"
+  },
+  {
+   "id": "QF0370",
+   "exact": "Sauce, pesto, ready-to-serve, refrigerated"
+  },
+  {
+   "id": "QF0371",
+   "q": "garlic sauce",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0372",
+   "q": "tahini sauce",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0373",
+   "q": "yogurt sauce",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0374",
+   "exact": "Water, tap, drinking"
+  },
+  {
+   "id": "QF0375",
+   "exact": "Carbonated beverage, club soda"
+  },
+  {
+   "id": "QF0376",
+   "resolve": "recipe",
+   "why": "قهوة عربية — لا سجلّ؛ طاقة ≈ صفر (قهوة سادة)"
+  },
+  {
+   "id": "QF0377",
+   "exact": "Beverages, coffee, brewed, prepared with tap water"
+  },
+  {
+   "id": "QF0378",
+   "exact": "Beverages, coffee, brewed, espresso, restaurant-prepared"
+  },
+  {
+   "id": "QF0379",
+   "exact": "Beverages, coffee, brewed, prepared with tap water"
+  },
+  {
+   "id": "QF0380",
+   "exact": "Coffee, Latte, with whole milk",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0381",
+   "q": "coffee latte 2% milk",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0382",
+   "q": "coffee cappuccino",
+   "not": [
+    "decaf",
+    "nonfat",
+    "fat free",
+    "skim",
+    "sugar",
+    "flavored"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0383",
+   "q": "coffee mocha",
+   "not": [
+    "decaf",
+    "nonfat",
+    "skim",
+    "sugar",
+    "whipped"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0384",
+   "exact": "Beverages, tea, black, brewed, prepared with tap water"
+  },
+  {
+   "id": "QF0385",
+   "exact": "Beverages, tea, green, brewed, regular"
+  },
+  {
+   "id": "QF0386",
+   "q": "tea herbal mint",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0387",
+   "q": "tea with milk",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0388",
+   "resolve": "recipe",
+   "why": "شاي كرك — وصفة"
+  },
+  {
+   "id": "QF0389",
+   "exact": "Orange juice, raw"
+  },
+  {
+   "id": "QF0390",
+   "exact": "Apple juice, canned or bottled, unsweetened, with added ascorbic acid"
+  },
+  {
+   "id": "QF0391",
+   "exact": "Mango nectar, canned"
+  },
+  {
+   "id": "QF0392",
+   "exact": "Pomegranate juice, bottled"
+  },
+  {
+   "id": "QF0393",
+   "resolve": "recipe",
+   "why": "ليمون بالنعناع — وصفة"
+  },
+  {
+   "id": "QF0394",
+   "exact": "Beverages, almond milk, unsweetened, shelf stable"
+  },
+  {
+   "id": "QF0395",
+   "q": "oat milk",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0396",
+   "exact": "Soymilk (all flavors), unsweetened, with added calcium, vitamins A and D"
+  },
+  {
+   "id": "QF0397",
+   "exact": "Beverages, coconut water, ready-to-drink, unsweetened"
+  },
+  {
+   "id": "QF0398",
+   "q": "sports drink",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0399",
+   "q": "energy drink",
+   "not": [
+    "sugar-free",
+    "sugar free",
+    "diet",
+    "zero"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0400",
+   "exact": "Beverages, carbonated, cola, regular"
+  },
+  {
+   "id": "QF0401",
+   "exact": "Beverages, carbonated, low calorie, cola or pepper-type, with aspartame, contains caffeine"
+  },
+  {
+   "id": "QF0402",
+   "q": "hot chocolate",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0403",
+   "resolve": "recipe",
+   "why": "سموذي فراولة — وصفة"
+  },
+  {
+   "id": "QF0404",
+   "resolve": "recipe",
+   "why": "سموذي موز — وصفة"
+  },
+  {
+   "id": "QF0405",
+   "resolve": "recipe",
+   "why": "سموذي توت — وصفة"
+  },
+  {
+   "id": "QF0406",
+   "q": "milkshake vanilla",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0407",
+   "q": "milkshake chocolate",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0408",
+   "exact": "Beverages, tea, black, brewed, prepared with tap water"
+  },
+  {
+   "id": "QF0409",
+   "resolve": "mapped",
+   "curated": "كبسة دجاج"
+  },
+  {
+   "id": "QF0410",
+   "resolve": "mapped",
+   "curated": "كبسة لحم"
+  },
+  {
+   "id": "QF0411",
+   "resolve": "mapped",
+   "curated": "مندي دجاج"
+  },
+  {
+   "id": "QF0412",
+   "resolve": "mapped",
+   "curated": "مندي لحم"
+  },
+  {
+   "id": "QF0413",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0414",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0415",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0416",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0417",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0418",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0419",
+   "resolve": "mapped",
+   "curated": "جريش"
+  },
+  {
+   "id": "QF0420",
+   "resolve": "mapped",
+   "curated": "قرصان"
+  },
+  {
+   "id": "QF0421",
+   "resolve": "mapped",
+   "curated": "مرقوق"
+  },
+  {
+   "id": "QF0422",
+   "resolve": "mapped",
+   "curated": "مطازيز"
+  },
+  {
+   "id": "QF0423",
+   "resolve": "mapped",
+   "curated": "سليق"
+  },
+  {
+   "id": "QF0424",
+   "resolve": "mapped",
+   "curated": "هريس"
+  },
+  {
+   "id": "QF0425",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0426",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0427",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0428",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0429",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0430",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0431",
+   "q": "shakshuka",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0432",
+   "resolve": "mapped",
+   "curated": "معصوب"
+  },
+  {
+   "id": "QF0433",
+   "resolve": "mapped",
+   "curated": "عريكة"
+  },
+  {
+   "id": "QF0434",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0435",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0436",
+   "q": "samosa meat",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0437",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0438",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0439",
+   "q": "samosa vegetable",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0440",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0441",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0442",
+   "q": "soup chicken",
+   "not": [
+    "canned",
+    "condensed",
+    "noodle",
+    "rice",
+    "cream",
+    "vegetable",
+    "dumpling",
+    "corn",
+    "tortilla",
+    "gumbo",
+    "mushroom",
+    "broth"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0443",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0444",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0445",
+   "q": "grape leaves stuffed",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0446",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0447",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0448",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0449",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0450",
+   "resolve": "mapped",
+   "curated": "كبسة روبيان"
+  },
+  {
+   "id": "QF0451",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0452",
+   "q": "luqaimat",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0453",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0454",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0455",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0456",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0457",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0458",
+   "resolve": "recipe",
+   "why": "طبق مركّب — وصفة؛ يبقى المنسَّق القائم إن وُجد"
+  },
+  {
+   "id": "QF0459",
+   "exact": "Pancakes, plain, prepared from recipe"
+  },
+  {
+   "id": "QF0460",
+   "resolve": "recipe",
+   "why": "بان كيك شوفان — وصفة"
+  },
+  {
+   "id": "QF0461",
+   "exact": "Waffles, plain, prepared from recipe"
+  },
+  {
+   "id": "QF0462",
+   "exact": "French toast, prepared from recipe, made with low fat (2%) milk"
+  },
+  {
+   "id": "QF0463",
+   "resolve": "recipe",
+   "why": "توست أفوكادو — وصفة (توست + أفوكادو)"
+  },
+  {
+   "id": "QF0464",
+   "resolve": "mapped",
+   "curated": "توست بالبيض"
+  },
+  {
+   "id": "QF0465",
+   "resolve": "recipe",
+   "why": "توست زبدة فول سوداني — وصفة"
+  },
+  {
+   "id": "QF0466",
+   "resolve": "recipe",
+   "why": "توست بالجبن — وصفة"
+  },
+  {
+   "id": "QF0467",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0468",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0469",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0470",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0471",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0472",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0473",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0474",
+   "resolve": "mapped",
+   "curated": "شاورما دجاج"
+  },
+  {
+   "id": "QF0475",
+   "resolve": "mapped",
+   "curated": "شاورما لحم"
+  },
+  {
+   "id": "QF0476",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0477",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0478",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0479",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0480",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0481",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0482",
+   "resolve": "recipe",
+   "why": "ساندويتش/بيتزا/برجر — وصفة أو مطعم؛ المنسَّق يغطّي الأشهر"
+  },
+  {
+   "id": "QF0483",
+   "q": "potato wedges",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0484",
+   "q": "chicken nuggets",
+   "not": [
+    "fast food",
+    "kids",
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0485",
+   "q": "chicken strips",
+   "not": [
+    "fast food"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0486",
+   "exact": "Snacks, popcorn, air-popped"
+  },
+  {
+   "id": "QF0487",
+   "q": "popcorn butter",
+   "not": [
+    "light",
+    "low fat",
+    "microwave"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0488",
+   "exact": "Snacks, potato chips, plain, salted"
+  },
+  {
+   "id": "QF0489",
+   "exact": "Snacks, tortilla chips, plain, white corn, salted"
+  },
+  {
+   "id": "QF0490",
+   "q": "cookie oatmeal",
+   "not": [
+    "raisin",
+    "chocolate",
+    "iced",
+    "frosting",
+    "fat free",
+    "soft",
+    "commercial"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0491",
+   "q": "digestive",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0492",
+   "q": "cookie plain",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0493",
+   "exact": "Cookies, chocolate chip, commercially prepared, regular, higher fat, enriched"
+  },
+  {
+   "id": "QF0494",
+   "exact": "Cookies, brownies, commercially prepared"
+  },
+  {
+   "id": "QF0495",
+   "exact": "Cake, yellow, commercially prepared, with vanilla frosting"
+  },
+  {
+   "id": "QF0496",
+   "exact": "Cake, chocolate, commercially prepared with chocolate frosting"
+  },
+  {
+   "id": "QF0497",
+   "exact": "Cheesecake commercially prepared"
+  },
+  {
+   "id": "QF0498",
+   "exact": "Doughnuts, cake-type, plain (includes unsugared, old-fashioned)"
+  },
+  {
+   "id": "QF0499",
+   "exact": "Doughnuts, cake-type, chocolate, sugared or glazed"
+  },
+  {
+   "id": "QF0500",
+   "resolve": "recipe",
+   "why": "بروتين بار — منتج مصنّع؛ الباركود"
+  },
+  {
+   "id": "QF0501",
+   "exact": "Snacks, granola bars, hard, plain"
+  },
+  {
+   "id": "QF0502",
+   "resolve": "recipe",
+   "why": "تمر محشي مكسرات — وصفة (تمر + مكسرات)"
+  },
+  {
+   "id": "QF0503",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0504",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0505",
+   "q": "fattoush",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0506",
+   "q": "tabbouleh",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0507",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0508",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0509",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0510",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0511",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0512",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0513",
+   "q": "coleslaw",
+   "not": [
+    "fast food",
+    "restaurant",
+    "dry mix"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0514",
+   "q": "potato salad",
+   "not": [
+    "german",
+    "fast food"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0515",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0516",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0517",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0518",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0519",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0520",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0521",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0522",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0523",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0524",
+   "resolve": "recipe",
+   "why": "سلطة/شوربة — وصفة"
+  },
+  {
+   "id": "QF0525",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0526",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0527",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0528",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0529",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0530",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0531",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0532",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0533",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0534",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0535",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0536",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0537",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0538",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0539",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0540",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0541",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0542",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0543",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0544",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0545",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0546",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0547",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0548",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0549",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0550",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0551",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0552",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0553",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0554",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0555",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0556",
+   "resolve": "recipe",
+   "why": "طبق مطعم/عالمي — وصفة"
+  },
+  {
+   "id": "QF0557",
+   "exact": "Peanut butter, smooth style, without salt"
+  },
+  {
+   "id": "QF0558",
+   "exact": "Peanut butter, chunky style, without salt"
+  },
+  {
+   "id": "QF0559",
+   "resolve": "recipe",
+   "why": "لبن بروتين — منتج مصنّع"
+  },
+  {
+   "id": "QF0560",
+   "resolve": "recipe",
+   "why": "زبادي بروتين — منتج مصنّع"
+  },
+  {
+   "id": "QF0561",
+   "exact": "Cheese, cheddar, reduced fat"
+  },
+  {
+   "id": "QF0562",
+   "exact": "Bananas, raw"
+  },
+  {
+   "id": "QF0563",
+   "q": "berries mixed frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0564",
+   "q": "mango frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "QF0565",
+   "exact": "Vegetables, mixed, frozen, unprepared"
+  },
+  {
+   "id": "QF0566",
+   "exact": "Broccoli, frozen, chopped, unprepared"
+  },
+  {
+   "id": "QF0567",
+   "exact": "Corn, sweet, yellow, frozen, kernels cut off cob, unprepared"
+  },
+  {
+   "id": "QF0568",
+   "exact": "Peas and carrots, frozen, unprepared"
+  },
+  {
+   "id": "QF0569",
+   "resolve": "recipe",
+   "why": "مقلاة هوائية — لا سجلّ USDA؛ الأقرب صدر دجاج مشوي (0002)"
+  },
+  {
+   "id": "QF0570",
+   "resolve": "recipe",
+   "why": "مقلاة هوائية — بلا سجلّ"
+  },
+  {
+   "id": "QF0571",
+   "resolve": "recipe",
+   "why": "مقلاة هوائية — بلا سجلّ"
+  },
+  {
+   "id": "QF0572",
+   "resolve": "recipe",
+   "why": "مقلاة هوائية — بلا سجلّ"
+  },
+  {
+   "id": "QF0573",
+   "resolve": "recipe",
+   "why": "مقلاة هوائية — بلا سجلّ"
+  },
+  {
+   "id": "QF0574",
+   "resolve": "recipe",
+   "why": "مقلاة هوائية — بلا سجلّ"
+  },
+  {
+   "id": "QF0575",
+   "exact": "Bread, white, commercially prepared, toasted"
+  },
+  {
+   "id": "QF0576",
+   "exact": "Bread, whole-wheat, commercially prepared, toasted"
+  },
+  {
+   "id": "QF0577",
+   "resolve": "recipe",
+   "why": "خبز بروتين محمّص — منتج مصنّع"
+  },
+  {
+   "id": "QF0578",
+   "resolve": "recipe",
+   "why": "رز مبرّد — لا سجلّ منفصل؛ نفس قيم المطبوخ (0102)"
+  },
+  {
+   "id": "QF0579",
+   "resolve": "recipe",
+   "why": "رز بسمتي مبرّد — نفس قيم المطبوخ (0104)"
+  },
+  {
+   "id": "QF0580",
+   "resolve": "recipe",
+   "why": "مكرونة مبرّدة — نفس قيم المطبوخ (0126)"
+  },
+  {
+   "id": "QF0581",
+   "exact": "Potatoes, mashed, home-prepared, whole milk added"
+  },
+  {
+   "id": "QF0582",
+   "exact": "Potatoes, mashed, home-prepared, whole milk added"
+  },
+  {
+   "id": "QF0583",
+   "resolve": "recipe",
+   "why": "سلطة — وصفة"
+  },
+  {
+   "id": "QF0584",
+   "resolve": "recipe",
+   "why": "سلطة — وصفة"
+  },
+  {
+   "id": "QF0585",
+   "resolve": "recipe",
+   "why": "سلطة — وصفة"
+  },
+  {
+   "id": "QF0586",
+   "resolve": "recipe",
+   "why": "سلطة — وصفة"
+  },
+  {
+   "id": "QF0587",
+   "resolve": "recipe",
+   "why": "فول بالبيض — وصفة"
+  },
+  {
+   "id": "QF0588",
+   "resolve": "recipe",
+   "why": "شكشوكة بالجبن — وصفة"
+  },
+  {
+   "id": "QF0589",
+   "resolve": "recipe",
+   "why": "وصفة فطور — مركّب من أصناف أساسية"
+  },
+  {
+   "id": "QF0590",
+   "resolve": "recipe",
+   "why": "وصفة فطور — مركّب من أصناف أساسية"
+  },
+  {
+   "id": "QF0591",
+   "resolve": "recipe",
+   "why": "وصفة فطور — مركّب من أصناف أساسية"
+  },
+  {
+   "id": "QF0592",
+   "resolve": "recipe",
+   "why": "وصفة فطور — مركّب من أصناف أساسية"
+  },
+  {
+   "id": "QF0593",
+   "resolve": "recipe",
+   "why": "وصفة فطور — مركّب من أصناف أساسية"
+  },
+  {
+   "id": "QF0594",
+   "resolve": "recipe",
+   "why": "وصفة فطور — مركّب من أصناف أساسية"
+  },
+  {
+   "id": "QF0595",
+   "resolve": "recipe",
+   "why": "ساندويتش/راب — وصفة"
+  },
+  {
+   "id": "QF0596",
+   "resolve": "recipe",
+   "why": "ساندويتش/راب — وصفة"
+  },
+  {
+   "id": "QF0597",
+   "resolve": "recipe",
+   "why": "ساندويتش/راب — وصفة"
+  },
+  {
+   "id": "QF0598",
+   "resolve": "recipe",
+   "why": "ساندويتش/راب — وصفة"
+  },
+  {
+   "id": "QF0599",
+   "resolve": "recipe",
+   "why": "ساندويتش/راب — وصفة"
+  },
+  {
+   "id": "QF0600",
+   "resolve": "recipe",
+   "why": "ساندويتش/راب — وصفة"
+  }
+ ]
+}
