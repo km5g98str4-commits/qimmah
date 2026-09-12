@@ -1,0 +1,1 @@
+date,session,mounting_no,pipe_material,pipe_od_mm,pipe_wall_mm,pipe_id_mm,transducer,method,m25_spacing_mm,m91_ratio_pct,couplant,rung_target_lpm,collection_no,collected_g,collection_s,reference_lpm,meter_mean_lpm,meter_min_lpm,meter_max_lpm,error_pct,q_min,q_mean,strength_up,strength_down,working_step,valid_samples_pct,detected_yes_no,water_temp_c,ambient_c,observations

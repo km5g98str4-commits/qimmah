@@ -9,7 +9,19 @@ const path = require('path');
 const SC = require('../simulator/engine/scenarios.js');
 const S = require('../simulator/engine/sensorModel.js');
 
-const PROFILES = ['TUF2000M_PUBLISHED', 'CONSERVATIVE', 'IDEAL'];
+/* Run matrix. `stress: true` runs are FINDINGS-ONLY: their failures are the information we
+ * want (what a noisy meter does to the rules), never counted as logic failures. */
+const RUNS = [
+  { key: 'TUF2000M_PUBLISHED', profile: 'TUF2000M_PUBLISHED' },
+  { key: 'CONSERVATIVE', profile: 'CONSERVATIVE' },
+  { key: 'IDEAL', profile: 'IDEAL' },
+  { key: 'FIELD_REPORTS_RAW', profile: 'TUF2000M_FIELD_REPORTS', stress: true,
+    label: 'Field-report noise, NO zero calibration, default 0.5 L/min threshold' },
+  { key: 'FIELD_REPORTS_ZEROCAL', profile: 'TUF2000M_FIELD_REPORTS', stress: true, profileOverrides: { zeroOffsetMs: 0 },
+    label: 'Field-report noise, AFTER M42 zero calibration (offset 0), default 0.5 L/min threshold' },
+  { key: 'FIELD_REPORTS_THR1', profile: 'TUF2000M_FIELD_REPORTS', stress: true, rulesOverrides: { flowThresholdLpm: 1.0 },
+    label: 'Field-report noise, NO zero calibration, threshold raised to 1.0 L/min' },
+];
 const LADDER = new Set(['3', '4', '5', '6', '7', '3z', '4z', '5z', '13']);
 const outDir = path.join(__dirname, 'results');
 fs.mkdirSync(outDir, { recursive: true });
@@ -20,21 +32,26 @@ let md = `# Virtual Test Campaign — Results\n\nGenerated ${new Date().toISOStr
 
 let logicFailures = 0;
 const summary = {};
-for (const prof of PROFILES) {
-  const results = SC.SCENARIOS.map((sc) => SC.run(Object.assign({}, sc, { profile: prof }), { stepS: 1, seed: 42 }));
-  fs.writeFileSync(path.join(outDir, `campaign-${prof}.json`), JSON.stringify(results.map((r) => ({ id: r.id, name: r.name, expected: r.expected, pass: r.pass, detail: r.detail, note: r.verdictNote, states: r.trace.states, events: r.trace.events.map((e) => ({ t: e.tSec, type: e.type, p: e.payload })) })), null, 1));
+for (const run of RUNS) {
+  const prof = run.profile;
+  const results = SC.SCENARIOS.map((sc) => SC.run(Object.assign({}, sc, {
+    profile: prof,
+    profileOverrides: Object.assign({}, sc.profileOverrides || {}, run.profileOverrides || {}),
+    rules: Object.assign({}, run.rulesOverrides || {}, sc.rules || {}),  // scenario-specific thresholds (ladder) win
+  }), { stepS: 1, seed: 42 }));
+  fs.writeFileSync(path.join(outDir, `campaign-${run.key}.json`), JSON.stringify(results.map((r) => ({ id: r.id, name: r.name, expected: r.expected, pass: r.pass, detail: r.detail, note: r.verdictNote, states: r.trace.states, events: r.trace.events.map((e) => ({ t: e.tSec, type: e.type, p: e.payload })) })), null, 1));
   const pass = results.filter((r) => r.pass).length;
-  summary[prof] = { pass, total: results.length };
-  md += `## Profile: ${S.PROFILES[prof].name}\n\n_${S.PROFILES[prof].source}_\n\n**${pass}/${results.length} PASS**\n\n| # | Scenario | Expected | Result | Detail |\n|---|---|---|---|---|\n`;
+  summary[run.key] = { pass, total: results.length, stress: !!run.stress };
+  md += `## Run: ${run.key} — ${S.PROFILES[prof].name}${run.label ? ' — ' + run.label : ''}\n\n_${S.PROFILES[prof].source}_\n\n${run.stress ? '**STRESS RUN (findings only — failures here are the information we want, not logic defects).**\n\n' : ''}**${pass}/${results.length} PASS**\n\n| # | Scenario | Expected | Result | Detail |\n|---|---|---|---|---|\n`;
   for (const r of results) {
     const isLadder = LADDER.has(String(r.id));
-    if (!r.pass && !isLadder) logicFailures++;
-    md += `| ${r.id} | ${r.name} | ${r.expected} | ${r.pass ? '✅ PASS' : isLadder ? '⚠️ FAIL (finding)' : '❌ FAIL'}${r.verdictNote ? ' `' + r.verdictNote + '`' : ''} | ${r.detail.replace(/\|/g, '\\|')} |\n`;
-    console.log(`${prof.padEnd(20)} ${(r.pass ? 'PASS' : 'FAIL').padEnd(5)} ${String(r.id).padEnd(3)} ${r.name.slice(0, 70)}`);
+    if (!r.pass && !isLadder && !run.stress) logicFailures++;
+    md += `| ${r.id} | ${r.name} | ${r.expected} | ${r.pass ? '✅ PASS' : isLadder || run.stress ? '⚠️ FAIL (finding)' : '❌ FAIL'}${r.verdictNote ? ' `' + r.verdictNote + '`' : ''} | ${r.detail.replace(/\|/g, '\\|')} |\n`;
+    console.log(`${run.key.padEnd(24)} ${(r.pass ? 'PASS' : 'FAIL').padEnd(5)} ${String(r.id).padEnd(3)} ${r.name.slice(0, 70)}`);
   }
   md += '\n';
 }
-md += `## Summary\n\n| Profile | PASS | Total |\n|---|---|---|\n` + Object.entries(summary).map(([k, v]) => `| ${k} | ${v.pass} | ${v.total} |`).join('\n') + '\n';
+md += `## Summary\n\n| Run | PASS | Total | Kind |\n|---|---|---|---|\n` + Object.entries(summary).map(([k, v]) => `| ${k} | ${v.pass} | ${v.total} | ${v.stress ? 'stress (findings)' : 'logic + profile'} |`).join('\n') + '\n';
 fs.writeFileSync(path.join(outDir, 'CAMPAIGN_RESULTS.md'), md);
 console.log('\nSummary:', JSON.stringify(summary), '\nLogic failures:', logicFailures, '\nWritten to tests/results/');
 process.exit(logicFailures ? 1 : 0);

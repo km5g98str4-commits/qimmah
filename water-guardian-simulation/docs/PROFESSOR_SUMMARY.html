@@ -1,0 +1,83 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Water Guardian — Professor Summary</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:1000px;margin:32px auto;padding:0 20px;color:#1f2937;line-height:1.5}
+h1{border-bottom:3px solid #0ea5e9;padding-bottom:6px}h2{margin-top:2em;border-bottom:1px solid #e5e7eb;padding-bottom:4px;color:#0c4a6e}h3{color:#075985}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:12px 0}th,td{border:1px solid #d1d5db;padding:5px 8px;vertical-align:top;text-align:left}th{background:#f1f5f9}
+code{background:#f3f4f6;padding:1px 4px;border-radius:3px;font-size:90%}pre{background:#0b1219;color:#e6edf3;padding:12px;border-radius:8px;overflow-x:auto;font-size:12px}
+blockquote{border-left:4px solid #0ea5e9;margin:0;padding:4px 12px;color:#374151;background:#f0f9ff}
+img{max-width:100%;border:1px solid #d1d5db;border-radius:6px;margin:8px 0}
+.tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:11px;font-weight:700}
+@media print{body{max-width:none;margin:0;font-size:12px}pre{white-space:pre-wrap}}</style></head><body><h1>Water Guardian — Summary for the Supervising Professor</h1>
+<p><em>A retrofit monitor that tells a mosque caretaker when water keeps running during quiet hours.</em> · 2026-09-12 · 3 pages</p>
+<hr>
+<h2>PROBLEM</h2>
+<p>Mosques (and schools, offices) lose water through taps left open, failed float valves and small leaks that run for hours when nobody is there. Existing pipes cannot be cut to insert a meter, and a simple &quot;leak detector&quot; claim is not honest: one meter on a pipe cannot say <em>which</em> tap is the cause.</p>
+<h2>↓ SOLUTION</h2>
+<p><strong>Water Guardian</strong> clamps an ultrasonic flow meter on the <em>outside</em> of an existing pipe, reads it with a small ESP32 computer, and applies simple, transparent rules: if water keeps flowing above a threshold for, say, 10 minutes during a quiet period, it sends the caretaker a phone message describing <strong>persistent unexpected water use</strong> — never &quot;leak&quot;. After the caretaker checks, the system confirms the flow stopped.</p>
+<h2>↓ HOW THE DEVICE WORKS</h2>
+<pre><code>Existing pipe ──► clamp-on ultrasonic transducers ──► flow meter box (Modbus RS485)
+      │                                                       │
+      │                                            ESP32 reads flow + signal quality every second
+      │                                                       │
+      │              &quot;Is the reading trustworthy?&quot;  ── no ──► SENSOR UNKNOWN (never assumed zero)
+      │                                                       │ yes
+      │              Quiet / prayer / cleaning schedule ──► rule: above threshold for N minutes?
+      │                                                       │
+      └──── caretaker inspects ◄── Telegram message ◄── incident (stored locally, sent when online)
+</code></pre>
+<p>Three design rules: (1) a bad sensor reading is <em>unknown</em>, not zero; (2) no internet does not stop detection — messages queue and send later; (3) every threshold is a setting we will measure, not a fact we assume. See <code>diagrams/architecture.svg</code>.</p>
+<h2>↓ SIMULATION</h2>
+<p>Because no ordinary electronics simulator can model ultrasound through a pipe wall, we built our own <strong>Digital Test Bench</strong> (a web page, no installation): a tank, a pipe with visibly moving water, a <em>model</em> of the sensor with adjustable noise and cut-offs, the ESP32 rules, and a fake caretaker phone. It runs <strong>25 automated scenarios</strong> — no flow, short bursts, 0.25 → 5 L/min persistent flows, prayer-time use, cleaning, sensor unplugged, Wi-Fi lost, reboot, air bubbles, wrong clock. <strong>Every logic scenario passes</strong>; the firmware&#39;s own logic passes 37 host tests. The simulation also shows <em>where the idea could fail</em>: a noisy, uncalibrated meter would raise false alarms, and a 0.25 L/min drip on a 25 mm pipe moves at only 0.019 m/s — below the meter&#39;s 0.03 m/s cut-off.</p>
+<p><code>simulator/index.html</code> · screenshots in <code>docs/screenshots/</code> · results in <code>tests/results/CAMPAIGN_RESULTS.md</code></p>
+<h2>↓ EXPECTED HARDWARE</h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>Role</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TUF-2000M clamp-on ultrasonic meter + TS-2 transducers</td>
+<td>measures flow without cutting the pipe</td>
+<td>to buy or borrow</td>
+</tr>
+<tr>
+<td>ESP32 development board</td>
+<td>reads the meter, runs the rules, sends alerts</td>
+<td><strong>owned</strong></td>
+</tr>
+<tr>
+<td>RS485 adapter (3.3 V, ideally isolated)</td>
+<td>connects meter to ESP32</td>
+<td>≈ SAR 25–200</td>
+</tr>
+<tr>
+<td>12/24 V supply, small enclosure, couplant gel, clamps</td>
+<td>installation</td>
+<td>≈ SAR 150–300</td>
+</tr>
+<tr>
+<td>Test rig: PPR pipe, valves, 20 L tank, 1 g scale, jug</td>
+<td>to <em>prove</em> the meter with weighed water</td>
+<td>≈ SAR 200–300</td>
+</tr>
+</tbody></table>
+<h2>↓ ESTIMATED COST</h2>
+<p><strong>≈ SAR 900–1,300</strong> for the complete prototype and test rig if the meter is bought (AliExpress kit ≈ SAR 450–600 landed), <strong>≈ SAR 450–700</strong> if a lab or distributor lends a meter. Planning ceiling SAR 2,300 is not approached.</p>
+<h2>↓ WHAT WE HAVE VERIFIED (without spending money)</h2>
+<ul>
+<li>The meter&#39;s manual (read in full): it runs on 8–36 V, speaks Modbus over RS485, and publishes flow, signal quality and error codes in known registers — so the ESP32 <em>can</em> read it, and can tell when it is not trustworthy. Three open-source projects already do this.</li>
+<li>The electrical connection (voltage levels, isolation, wiring diagram) and a complete ESP32 firmware prototype with unit tests.</li>
+<li>The arithmetic linking litres per minute to velocity in each pipe size — which tells us to install on the small branch pipe, not the big riser.</li>
+<li>The competition landscape (MEWA University Innovation Challenge is the best fit; team = 1 faculty + 4–5 students; no AI requirement found; dates still to confirm on the official page).</li>
+</ul>
+<h2>↓ WHAT REQUIRES PHYSICAL TESTING</h2>
+<ul>
+<li>Whether the transducers get a good signal through <strong>PPR</strong> plastic pipe (not in the manufacturer&#39;s material list).</li>
+<li>How steady the meter&#39;s reading is at <strong>zero flow</strong> on a 25 mm pipe (users on small copper pipes report noise and drift).</li>
+<li>The <strong>smallest flow it reliably detects</strong> — we expect about 1 L/min to be the honest threshold; drips are probably out of reach.</li>
+</ul>
+<h2>↓ NEXT EXPERIMENT</h2>
+<p>A bench &quot;flow ladder&quot;: water from a raised 20 L tank through a 25 mm PPR pipe with the meter clamped on; set 0, 0.25, 0.5, 1, 2 and 5 L/min with a valve; weigh the water collected in 60 s as the independent reference; repeat for five separate mountings; then 20 detection trials and 40 no-flow/disturbance trials. Pass targets we set for ourselves: <strong>≥ 19/20 detections at the declared threshold, ≤ 1 false incident in 40 trials.</strong> If the meter cannot reach those at 2 L/min, we change the sensing approach before building further. Procedure: <code>docs/PHYSICAL_TEST_PLAN.md</code>.</p>
+<p><strong>Request:</strong> an introduction to a fluids/instrumentation lab that could lend a clamp-on meter or host a one-day calibration session (KFUPM&#39;s GUNT HM 500 bench includes an ultrasonic module), and confirmation of the MEWA challenge cycle and deadline.</p>
+</body></html>

@@ -80,14 +80,33 @@
     TUF2000M_PUBLISHED: {
       name: 'TUF-2000M (published spec + assumptions)',
       source:
-        'PUBLISHED: velocity range 0.01–12 m/s (some manuals say 0.03), accuracy ±1 %, repeatability 0.2 %, ' +
-        'measurement period 500 ms, default M41 low-flow cutoff 0.03 m/s (varies). ' +
-        'ASSUMED: noiseAbsMs, zeroOffsetMs, commFailProb.',
+        'PUBLISHED (manual v13.44, research/notes/tuf2000m.md): accuracy "better than 1 %", repeatability "better than 0.2 %", ' +
+        'measurement period 500 ms, M41 low-flow cutoff default 0.03 m/s, M40 damping default 10 s. Velocity range ±0.01–12 m/s is a VENDOR claim (not in the manual). ' +
+        'ASSUMED: noiseAbsMs 0.005, zeroOffsetMs 0.005, commFailProb 0.5 %.',
       minVelocityMs: 0.03,
       lowFlowCutoffMs: 0.03,
       accuracyPct: 1.0,
       noiseAbsMs: 0.005,
       zeroOffsetMs: 0.005,
+      qualityThreshold: 60,
+      updateIntervalS: 0.5,
+      commFailProb: 0.005,
+    },
+    /* Pessimistic profile built from SECONDARY field reports of the TUF-2000M on small
+     * (22–28 mm copper) pipes: "huge oscillations around zero when there is no flow",
+     * "steadily drifting", "too noisy to detect really low flows". No numbers were
+     * published, so the magnitudes below are our ASSUMED reading of "huge" — they are the
+     * case the physical test must confirm or refute. */
+    TUF2000M_FIELD_REPORTS: {
+      name: 'TUF-2000M small-pipe FIELD REPORTS (pessimistic, assumed magnitudes)',
+      source:
+        'SECONDARY reports (partofthething.com ESP8266 on ~28 mm copper; HA community 22 mm): zero-flow oscillation and drift. ' +
+        'ASSUMED magnitudes: noise 0.05 m/s (1σ), zero offset +0.03 m/s, cutoff left at 0.03 m/s, 3 % accuracy.',
+      minVelocityMs: 0.03,
+      lowFlowCutoffMs: 0.03,
+      accuracyPct: 3.0,
+      noiseAbsMs: 0.05,
+      zeroOffsetMs: 0.03,
       qualityThreshold: 60,
       updateIntervalS: 0.5,
       commFailProb: 0.005,

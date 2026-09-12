@@ -1,0 +1,5992 @@
+[
+ {
+  "id": 1,
+  "name": "No flow during quiet period",
+  "expected": "No alert",
+  "pass": false,
+  "detail": "states=PERSISTENT_FLOW,NORMAL",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 823,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 825,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1850,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1852,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1854,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1855,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3237,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3239,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3246,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3250,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 2,
+  "name": "Short legitimate 5 L/min burst (90 s) in quiet",
+  "expected": "No persistent-flow alert",
+  "pass": true,
+  "detail": "states=PERSISTENT_FLOW,NORMAL, maxAbove=2.4 min",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 64,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 177,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 823,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 825,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 3,
+  "name": "0.25 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.15 L/min)",
+  "expected": "UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE.",
+  "pass": true,
+  "detail": "v_true=0.019 m/s; meter mean=0.206 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 17,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 18,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 19,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 24,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 32,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 33,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 35,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 45,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 69,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 70,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 75,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 110,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 139,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 187,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 198,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 199,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 200,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 289,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 294,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 349,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 350,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 353,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 354,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 441,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 449,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 532,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 541,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 542,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 593,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 594,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 595,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 596,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 598,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 613,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 615,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 626,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 628,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 631,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 633,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 635,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 638,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 640,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 642,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 647,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 648,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 761,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 783,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 784,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 795,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 853,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 856,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 857,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 858,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 862,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 866,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 871,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 878,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 879,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 880,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 886,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 887,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 889,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 894,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 896,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 899,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 900,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 905,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 909,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 915,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 916,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 917,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 971,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 992,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 994,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1001,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1039,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1040,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1043,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1045,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1049,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1051,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1052,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1056,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1057,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1068,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1131,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1145,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1148,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1170,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1173,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1184,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1185,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1186,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1187,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1189,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1192,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1197,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 1197,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 0.17445161290322583,
+     "durationMin": 10.1,
+     "mode": "QUIET",
+     "quality": 67,
+     "reason": "Flow remained above 0.15 L/min for 10 minutes during a QUIET period."
+    }
+   }
+  ]
+ },
+ {
+  "id": "3z",
+  "name": "Zero-flow control at threshold 0.15 L/min (2 h, ID 16.6 mm)",
+  "expected": "No incident from noise/zero drift alone",
+  "pass": true,
+  "detail": "meter mean at true 0 = -0.018 L/min; falseIncident=false; states=PERSISTENT_FLOW,NORMAL",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 81,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 83,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 149,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 150,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 152,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 153,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 156,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 172,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 206,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 258,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 259,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 260,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 261,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 264,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 311,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 312,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 323,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 324,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 376,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 377,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 380,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 381,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 400,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 422,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 423,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 428,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 463,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 464,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 474,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 480,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 481,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 482,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 503,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 505,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 507,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 511,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 513,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 520,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 523,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 524,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 657,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 659,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 660,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 673,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 683,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 689,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 690,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 691,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 704,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 705,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 708,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 713,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 737,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 740,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 802,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 838,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 840,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 841,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 935,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 961,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 965,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 966,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1009,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1010,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1011,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1017,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1018,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1020,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1027,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1032,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1088,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1089,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1090,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1099,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1100,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1102,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1103,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1104,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1109,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1111,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1305,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1306,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1313,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1314,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1320,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1321,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1341,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1343,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1353,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1360,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1397,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1399,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1402,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1406,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1407,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1411,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1412,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1415,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1420,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1421,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1452,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1453,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1458,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1459,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1463,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1466,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1467,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1470,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1477,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1483,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1485,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1487,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1488,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1489,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1490,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1521,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1556,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1581,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1635,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1636,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1638,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1662,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1664,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1665,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1717,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1719,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1838,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1868,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2052,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2053,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2056,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2058,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2059,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2063,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2141,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2142,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2230,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2239,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2251,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2252,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2253,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2257,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2269,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2276,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2277,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2278,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2281,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2282,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2295,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2300,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2313,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2325,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2382,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2386,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2394,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2395,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2399,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2407,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2472,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2475,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2484,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2485,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2511,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2512,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2570,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2571,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2580,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2617,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2736,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2739,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2740,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2742,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2752,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2759,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2760,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2768,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2774,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2777,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2880,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2881,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2890,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2896,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2989,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2990,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3122,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3135,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3227,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3265,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3271,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3276,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3285,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3315,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3322,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3328,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3329,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3337,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3338,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3342,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3348,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3349,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3390,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3395,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3488,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3489,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3490,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3492,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3496,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3497,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3498,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3521,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3534,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3536,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3699,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3721,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3724,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3725,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3806,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3809,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3811,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3876,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3883,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3884,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3890,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3891,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3903,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3912,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3913,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3915,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3922,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3925,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3926,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3927,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3943,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3944,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3983,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3986,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3988,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3989,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4044,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4053,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4054,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4059,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4104,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4142,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4169,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4176,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4245,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4246,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4265,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4266,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4267,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4268,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4280,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4307,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4310,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4317,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4321,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4325,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4336,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4337,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4338,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4341,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4416,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4417,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4418,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4447,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4448,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4452,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4458,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4459,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4472,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4479,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4491,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4503,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4536,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4555,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4557,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4558,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4565,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4566,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4604,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4607,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4648,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4649,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4685,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4708,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4775,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4792,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4805,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4806,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4941,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4949,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5014,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5015,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5019,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5022,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5064,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5090,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5166,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5172,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5174,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5175,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5176,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5196,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5229,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5242,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5243,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5245,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5258,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5259,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5326,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5351,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5355,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5356,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5372,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5378,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5399,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5400,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5501,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5503,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5606,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5607,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5609,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5610,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5725,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5730,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5736,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5738,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5739,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5740,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5826,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5834,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5851,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5852,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5897,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5927,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5976,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5979,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5981,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5982,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6031,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6052,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6097,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6105,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6146,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6156,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6164,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6166,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6183,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6185,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6186,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6193,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6205,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6206,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6225,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6226,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6227,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6228,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6229,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6233,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6307,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6310,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6311,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6312,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6313,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6315,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6326,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6357,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6392,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6410,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6411,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6427,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6428,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6435,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6436,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6461,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6462,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6464,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6510,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6511,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6514,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6517,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6520,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6573,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6688,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6692,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6694,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6704,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6744,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6755,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6766,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6768,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6809,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6899,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6946,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6947,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6950,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6956,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6957,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6987,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6996,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6997,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6998,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6999,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7023,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7024,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7072,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7105,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7106,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7108,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7109,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7110,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 4,
+  "name": "0.5 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.30 L/min)",
+  "expected": "UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE.",
+  "pass": true,
+  "detail": "v_true=0.039 m/s; meter mean=0.437 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 15,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 30,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 31,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 48,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 56,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 60,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 61,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 62,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 63,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 117,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 119,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 121,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 138,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 193,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 196,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 197,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 198,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 442,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 449,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 539,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 541,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 544,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 548,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 554,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 585,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 764,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 776,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 786,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 788,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 853,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 855,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 863,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 865,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 873,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 878,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 972,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 990,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 996,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1000,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1044,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1045,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1050,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1051,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1057,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1068,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1139,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1144,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1149,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1162,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1166,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1167,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1176,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1182,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1185,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 1185,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 0.37551612903225806,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 76,
+     "reason": "Flow remained above 0.3 L/min for 10 minutes during a QUIET period."
+    }
+   }
+  ]
+ },
+ {
+  "id": "4z",
+  "name": "Zero-flow control at threshold 0.30 L/min (2 h, ID 16.6 mm)",
+  "expected": "No incident from noise/zero drift alone",
+  "pass": true,
+  "detail": "meter mean at true 0 = -0.018 L/min; falseIncident=false; states=PERSISTENT_FLOW,NORMAL",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 160,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 161,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 166,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 168,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 224,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 231,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 236,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 237,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 411,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 415,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 416,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 418,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 662,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 664,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 815,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 816,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 817,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 833,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 940,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 943,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 949,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 950,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 951,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 952,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 953,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 954,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1501,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1508,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1510,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1513,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1514,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1515,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1560,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1562,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1572,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1579,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1642,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1645,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1842,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1862,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2232,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2238,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2586,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2587,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2592,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2597,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2598,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2602,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2603,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2604,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3230,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3258,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3289,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3292,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3295,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3303,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3304,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3305,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3508,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3510,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3515,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3519,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3702,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3707,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3816,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3817,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3820,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3824,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3826,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3832,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3835,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3838,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3839,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3845,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3854,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3870,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3871,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3872,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3908,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3911,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4108,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4130,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4134,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4135,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4301,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4304,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4429,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4436,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4540,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4541,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4544,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4550,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4778,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4782,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4787,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4790,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5070,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5086,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5177,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5178,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5191,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5192,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5234,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5236,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5328,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5329,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5337,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5340,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5900,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5901,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5902,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5905,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5920,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 5921,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6034,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6040,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6041,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6045,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6149,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6150,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6190,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6191,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6348,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6353,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6446,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6447,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6448,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6451,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6455,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6459,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6524,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6528,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6534,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6536,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6542,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6545,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6546,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6553,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6561,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6562,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6745,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6746,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6749,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6750,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6811,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6828,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6832,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6866,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6870,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6887,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6888,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6890,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6959,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6981,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7077,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7101,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 5,
+  "name": "1 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.60 L/min)",
+  "expected": "UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE.",
+  "pass": true,
+  "detail": "v_true=0.077 m/s; meter mean=0.952 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 11,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 568,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 576,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 1.0613548387096772,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 71,
+     "reason": "Flow remained above 0.6 L/min for 10 minutes during a QUIET period."
+    }
+   }
+  ]
+ },
+ {
+  "id": "5z",
+  "name": "Zero-flow control at threshold 0.60 L/min (2 h, ID 16.6 mm)",
+  "expected": "No incident from noise/zero drift alone",
+  "pass": true,
+  "detail": "meter mean at true 0 = -0.018 L/min; falseIncident=false; states=PERSISTENT_FLOW,NORMAL",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3247,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3248,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6860,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6862,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7088,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7090,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 6,
+  "name": "2 L/min persistent flow, quiet, ID 16.6 mm (threshold 1.20 L/min)",
+  "expected": "UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE.",
+  "pass": true,
+  "detail": "v_true=0.154 m/s; meter mean=1.943 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 2.0364193548387095,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 71,
+     "reason": "Flow remained above 1.2 L/min for 10 minutes during a QUIET period."
+    }
+   }
+  ]
+ },
+ {
+  "id": 7,
+  "name": "5 L/min persistent flow, quiet, ID 16.6 mm (threshold 3.00 L/min)",
+  "expected": "UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE.",
+  "pass": true,
+  "detail": "v_true=0.385 m/s; meter mean=4.956 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=false",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 5.059,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 71,
+     "reason": "Flow remained above 3 L/min for 10 minutes during a QUIET period."
+    }
+   }
+  ]
+ },
+ {
+  "id": 8,
+  "name": "Long legitimate flow (2 L/min, 40 min) during PRAYER",
+  "expected": "No high-priority quiet alert (REVIEW allowed only after occupied persistence)",
+  "pass": true,
+  "detail": "states=EXPECTED_FLOW,NORMAL",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2421,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 9,
+  "name": "Cleaning override during quiet hours (3 L/min for 30 min, override 60 min)",
+  "expected": "EXPECTED_FLOW, no high-priority alert; override expiry logged",
+  "pass": true,
+  "detail": "states=EXPECTED_FLOW,NORMAL,PERSISTENT_FLOW, overrideExpired=true",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1819,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1820,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1821,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1850,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1852,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1854,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1855,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3237,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3239,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3246,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3250,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4120,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4123,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 0,
+    "type": "CLEANING_START",
+    "p": {}
+   },
+   {
+    "t": 3600,
+    "type": "CLEANING_OVERRIDE_EXPIRED",
+    "p": {}
+   }
+  ]
+ },
+ {
+  "id": "9b",
+  "name": "Cleaning override EXPIRES while 3 L/min continues in quiet hours",
+  "expected": "After expiry the underlying QUIET rule applies → UNEXPECTED_FLOW",
+  "pass": true,
+  "detail": "states=EXPECTED_FLOW,UNEXPECTED_FLOW",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 0,
+    "type": "CLEANING_START",
+    "p": {}
+   },
+   {
+    "t": 3600,
+    "type": "CLEANING_OVERRIDE_EXPIRED",
+    "p": {}
+   },
+   {
+    "t": 3600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 3,
+     "flowLpm": 2.8122903225806457,
+     "durationMin": 60,
+     "mode": "QUIET",
+     "quality": 73,
+     "reason": "Flow remained above 0.5 L/min for 60 minutes during a QUIET period."
+    }
+   }
+  ]
+ },
+ {
+  "id": 10,
+  "name": "Sensor disconnected while 3 L/min flows (incident already open)",
+  "expected": "SENSOR_UNKNOWN, never zero; incident NOT resolved by the outage",
+  "pass": false,
+  "detail": "unknown=true, resolvedDuringOutage=false, incidentOpenAfterRecovery=true, zeroWhileFlowing=true",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1215,
+    "state": "SENSOR_UNKNOWN",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1800,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 3.0563870967741935,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 71,
+     "reason": "Flow remained above 0.5 L/min for 10 minutes during a QUIET period."
+    }
+   },
+   {
+    "t": 1215,
+    "type": "SENSOR_UNKNOWN",
+    "p": {
+     "reason": "NO_RESPONSE (timeout)",
+     "incidentOpen": true
+    }
+   },
+   {
+    "t": 1800,
+    "type": "SENSOR_RECOVERED",
+    "p": {}
+   }
+  ]
+ },
+ {
+  "id": 11,
+  "name": "Internet disconnected during 3 L/min quiet flow",
+  "expected": "Local detection continues; event buffered; synced on reconnection",
+  "pass": true,
+  "detail": "detectedAt=600s (offline until 1800 s), unsyncedAtEnd=0",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "OFFLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "OFFLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 0,
+    "type": "LINK",
+    "p": {
+     "link": "OFFLINE"
+    }
+   },
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 2,
+     "flowLpm": 3.0563870967741935,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 71,
+     "reason": "Flow remained above 0.5 L/min for 10 minutes during a QUIET period."
+    }
+   },
+   {
+    "t": 1800,
+    "type": "LINK",
+    "p": {
+     "link": "ONLINE"
+    }
+   }
+  ]
+ },
+ {
+  "id": 12,
+  "name": "Poor signal quality (sensor quality 35%) with 3 L/min",
+  "expected": "SENSOR_UNKNOWN rather than a confident number; no alert built on invalid data",
+  "pass": true,
+  "detail": "states=NORMAL,SENSOR_UNKNOWN, valid=0, invalid=1801",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 15,
+    "state": "SENSOR_UNKNOWN",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 15,
+    "type": "SENSOR_UNKNOWN",
+    "p": {
+     "reason": "WORKING_STEP_H",
+     "incidentOpen": false
+    }
+   }
+  ]
+ },
+ {
+  "id": 13,
+  "name": "Large pipe (DN50 steel, ID 52.5 mm) with 0.5 L/min",
+  "expected": "Velocity 0.004 m/s is far below any published min velocity → campaign must FLAG as undetectable (pass = honest flag, not a false detection)",
+  "pass": true,
+  "detail": "v=0.0038 m/s (< published 0.03 m/s min); detected=false → correctly NOT claimed. Meter reported 0 while flowing=false — THIS is the blind spot a large pipe creates.",
+  "note": "UNDETECTABLE_BY_GEOMETRY",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 39,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 42,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 76,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 78,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 79,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 84,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 85,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 89,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 90,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 100,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 102,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 108,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 141,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 177,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 184,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 185,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 203,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 266,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 269,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 275,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 276,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 279,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 282,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 287,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 302,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 303,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 307,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 313,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 318,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 336,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 337,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 338,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 355,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 356,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 358,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 359,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 360,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 361,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 366,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 393,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 394,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 440,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 452,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 455,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 458,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 484,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 485,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 487,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 488,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 489,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 498,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 529,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 603,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 604,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 607,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 609,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 610,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 623,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 624,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 634,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 635,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 644,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 646,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 649,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 653,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 654,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 693,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 695,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 716,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 717,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 725,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 727,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 744,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 746,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 750,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 751,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 752,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 753,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 754,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 755,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 758,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 796,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 797,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 798,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 848,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 849,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 850,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 883,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 886,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 905,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 906,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 921,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 922,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 923,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 926,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 928,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 969,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1002,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1033,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1034,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1035,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1073,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1076,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1079,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1116,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1117,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1122,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1214,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1215,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1249,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1251,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1252,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1253,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1254,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1255,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1260,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1261,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1263,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1278,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1279,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1281,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1284,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1285,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1286,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1287,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1299,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1309,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1312,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1324,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1325,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1336,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1337,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1362,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1369,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1371,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1380,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1381,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1393,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1426,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1429,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1434,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1442,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1447,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1448,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1522,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1524,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1526,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1552,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1585,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1590,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1591,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1629,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1630,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1631,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1668,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1697,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1699,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1704,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1707,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1709,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1710,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1712,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1725,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1755,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1756,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1760,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1761,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1763,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1764,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1765,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1775,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1776,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1777,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1836,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1871,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1942,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1953,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1957,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1970,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2002,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2003,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2017,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2020,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2027,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2028,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2036,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2037,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2038,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2065,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2070,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2072,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2078,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2081,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2084,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2085,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2089,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2090,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2094,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2099,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2100,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2101,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2137,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2150,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2161,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2169,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2212,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2216,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2220,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2243,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2244,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2266,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2267,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2285,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2286,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2287,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2288,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2302,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2305,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2306,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2307,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2327,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2329,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2330,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2332,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2343,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2356,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2359,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2378,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 14,
+  "name": "ESP32 reboot during open incident (3 L/min quiet)",
+  "expected": "Incident restored from NVS; no duplicate alert; resolves later normally",
+  "pass": true,
+  "detail": "alerts=1, bootRestored=true, resolved=true",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2605,
+    "state": "RESOLVED",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 2905,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 3.0563870967741935,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 71,
+     "reason": "Flow remained above 0.5 L/min for 10 minutes during a QUIET period."
+    }
+   },
+   {
+    "t": 0,
+    "type": "BOOT",
+    "p": {
+     "restoredIncident": true,
+     "unsyncedEvents": 0
+    }
+   },
+   {
+    "t": 2605,
+    "type": "INCIDENT_RESOLVED",
+    "p": {
+     "id": 1,
+     "litres": 143.3,
+     "durationMin": 40.4,
+     "ackType": null
+    }
+   }
+  ]
+ },
+ {
+  "id": 15,
+  "name": "Flow stops after caretaker action (3 L/min → ACK → 0)",
+  "expected": "INCIDENT_RESOLVED after resolve window",
+  "pass": true,
+  "detail": "resolvedAt=1404s, litres=61",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1404,
+    "state": "RESOLVED",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1704,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1850,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1852,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1854,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1855,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 3.0563870967741935,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 71,
+     "reason": "Flow remained above 0.5 L/min for 10 minutes during a QUIET period."
+    }
+   },
+   {
+    "t": 899,
+    "type": "ACTION_ACKNOWLEDGE",
+    "p": {
+     "id": 1
+    }
+   },
+   {
+    "t": 1404,
+    "type": "INCIDENT_RESOLVED",
+    "p": {
+     "id": 1,
+     "litres": 61,
+     "durationMin": 20.4,
+     "ackType": "ACKNOWLEDGE"
+    }
+   }
+  ]
+ },
+ {
+  "id": 16,
+  "name": "Invalid clock with 3 L/min for 30 min",
+  "expected": "Conservative policy: treated as OCCUPIED → no high-priority alert within quiet window",
+  "pass": true,
+  "detail": "states=EXPECTED_FLOW",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "EXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 17,
+  "name": "Sudden 8 L/min burst 30 s then 0, quiet",
+  "expected": "No alert",
+  "pass": true,
+  "detail": "states=PERSISTENT_FLOW,NORMAL",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 122,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 179,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 823,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 825,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ },
+ {
+  "id": 18,
+  "name": "Air/bubbles 80% with 3 L/min",
+  "expected": "Meter step K/H → SENSOR_UNKNOWN; must not report a confident zero",
+  "pass": true,
+  "detail": "states=NORMAL,SENSOR_UNKNOWN, zeroWhileFlowing=false",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 15,
+    "state": "SENSOR_UNKNOWN",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 15,
+    "type": "SENSOR_UNKNOWN",
+    "p": {
+     "reason": "WORKING_STEP_H",
+     "incidentOpen": false
+    }
+   }
+  ]
+ },
+ {
+  "id": 19,
+  "name": "Mount becomes Poor mid-incident (3 L/min)",
+  "expected": "Degrades to SENSOR_UNKNOWN (or stays valid if Q still ≥ threshold); incident not silently resolved",
+  "pass": true,
+  "detail": "states=PERSISTENT_FLOW,UNEXPECTED_FLOW,SENSOR_UNKNOWN, resolved=false",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1215,
+    "state": "SENSOR_UNKNOWN",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 3.0563870967741935,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 71,
+     "reason": "Flow remained above 0.5 L/min for 10 minutes during a QUIET period."
+    }
+   },
+   {
+    "t": 1215,
+    "type": "SENSOR_UNKNOWN",
+    "p": {
+     "reason": "WORKING_STEP_H",
+     "incidentOpen": true
+    }
+   }
+  ]
+ },
+ {
+  "id": 20,
+  "name": "Transient Modbus CRC/timeout errors (5 %) with 3 L/min",
+  "expected": "Grace period absorbs transient errors; detection still occurs",
+  "pass": true,
+  "detail": "states=PERSISTENT_FLOW,UNEXPECTED_FLOW, invalid=111",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 600,
+    "state": "UNEXPECTED_FLOW",
+    "link": "ONLINE"
+   }
+  ],
+  "events": [
+   {
+    "t": 600,
+    "type": "UNEXPECTED_FLOW",
+    "p": {
+     "id": 1,
+     "flowLpm": 2.6342903225806444,
+     "durationMin": 10,
+     "mode": "QUIET",
+     "quality": 75,
+     "reason": "Flow remained above 0.5 L/min for 10 minutes during a QUIET period."
+    }
+   }
+  ]
+ },
+ {
+  "id": 21,
+  "name": "ZERO-FLOW FALSE-ALARM STRESS: 0 L/min for 3 h with CONSERVATIVE profile (zero drift +0.01 m/s)",
+  "expected": "No incident — tests whether zero drift alone can cross the 0.5 L/min threshold on DN25",
+  "pass": true,
+  "detail": "0.01 m/s zero drift on ID 16.6 mm = 0.130 L/min vs threshold 0.5; states=PERSISTENT_FLOW,NORMAL",
+  "note": "",
+  "states": [
+   {
+    "tSec": 0,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 823,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 825,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1850,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1852,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1854,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 1855,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3237,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3239,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3246,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 3250,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4120,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 4123,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6817,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6820,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6823,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6824,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6836,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6838,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6839,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6841,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6858,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6864,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6883,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6884,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6966,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6967,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6968,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 6974,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7084,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7092,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7093,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 7094,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 8667,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 8675,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 8922,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 8926,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 8933,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 8934,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 9660,
+    "state": "PERSISTENT_FLOW",
+    "link": "ONLINE"
+   },
+   {
+    "tSec": 9661,
+    "state": "NORMAL",
+    "link": "ONLINE"
+   }
+  ],
+  "events": []
+ }
+]

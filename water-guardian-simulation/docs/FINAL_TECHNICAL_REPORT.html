@@ -1,0 +1,744 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Water Guardian — Pre-Purchase Technical Feasibility & Simulation Report</title><style>body{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;max-width:1000px;margin:32px auto;padding:0 20px;color:#1f2937;line-height:1.5}
+h1{border-bottom:3px solid #0ea5e9;padding-bottom:6px}h2{margin-top:2em;border-bottom:1px solid #e5e7eb;padding-bottom:4px;color:#0c4a6e}h3{color:#075985}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:12px 0}th,td{border:1px solid #d1d5db;padding:5px 8px;vertical-align:top;text-align:left}th{background:#f1f5f9}
+code{background:#f3f4f6;padding:1px 4px;border-radius:3px;font-size:90%}pre{background:#0b1219;color:#e6edf3;padding:12px;border-radius:8px;overflow-x:auto;font-size:12px}
+blockquote{border-left:4px solid #0ea5e9;margin:0;padding:4px 12px;color:#374151;background:#f0f9ff}
+img{max-width:100%;border:1px solid #d1d5db;border-radius:6px;margin:8px 0}
+.tag{display:inline-block;padding:0 6px;border-radius:4px;font-size:11px;font-weight:700}
+@media print{body{max-width:none;margin:0;font-size:12px}pre{white-space:pre-wrap}}</style></head><body><h1>WATER GUARDIAN</h1>
+<h2>Pre-Purchase Technical Feasibility &amp; Simulation Report</h2>
+<p>Version 1.0 · 2026-09-12 · Workspace <code>water-guardian-simulation/</code></p>
+<p>Tags used throughout: <strong>VERIFIED</strong> (primary document read, or listing seen) · <strong>CALCULATED</strong> (pure arithmetic/geometry) · <strong>SIMULATED</strong> (proven in the digital test bench or host tests) · <strong>ASSUMED</strong> (our engineering assumption) · <strong>NOT YET PHYSICALLY VERIFIED</strong> (only a bench test with a real meter can settle it). Research-access caveat: manufacturer, marketplace and government pages were mostly blocked from the research sandbox; facts from those pages are quoted via search snippets and flagged <em>(snippet)</em>. The TUF-2000M manual itself was read in full from a GitHub mirror.</p>
+<hr>
+<h2>1. Executive Summary</h2>
+<p><strong>Can this system actually work?</strong> The electronics, protocol, firmware and detection logic: <strong>yes, with evidence.</strong> The one thing that decides the project — whether a ~SAR 600 clamp-on transit-time meter reads a small PPR pipe at 0.5–1 L/min with a stable zero — <strong>is not yet verified, and the available field evidence is unfavourable.</strong></p>
+<ul>
+<li><strong>VERIFIED:</strong> the TUF-2000M has an isolated RS485 Modbus RTU port, runs on 8–36 VDC at 50 mA, publishes a complete register map with flow (REAL4), signal quality, strengths, transit ratio and error bits, and a working-step letter that tells us when it has no signal. Three open-source projects read it from ESP32/Python. Default protocol is Modbus <strong>ASCII</strong> (must set M63 = RTU). PPR is <strong>not</strong> in its material list.</li>
+<li><strong>CALCULATED:</strong> on a DN25 PPR PN20 pipe (ID ≈ 16.6 mm) the meter&#39;s default 0.03 m/s low-flow cutoff equals <strong>≈ 0.39 L/min</strong>; on a 2&quot; riser it equals <strong>≈ 3.9 L/min</strong>. Sensor placement on a small branch is therefore mandatory; the main riser is blind to small flows.</li>
+<li><strong>SIMULATED:</strong> a 25-scenario campaign passes every logic scenario (sensor failure → SENSOR_UNKNOWN never zero; offline detection with later sync; reboot restore; cleaning override; occupied-period REVIEW; resolution) under three profiles; firmware host tests pass 37/37. The 0.25 L/min rung is <strong>undetectable</strong> under the published-spec profile, by geometry. Under a <strong>pessimistic profile derived from user reports</strong> (zero offset +0.03 m/s, noise 0.05 m/s), an <em>uncalibrated</em> meter produces <strong>false incidents and incidents that never resolve</strong>; a zero calibration (M42+M26) plus 30 s averaging removes them at a 0.5 L/min threshold, and a 1.0 L/min threshold removes them even without calibration.</li>
+<li><strong>NOT YET PHYSICALLY VERIFIED:</strong> TS-2 signal quality on PPR wall (soft, attenuating, not in the material list); real zero-flow noise on DN25; minimum detectable flow; long-term couplant stability.</li>
+</ul>
+<p><strong>Decision: GO WITH CONDITIONS</strong> (§24) — and for the purchase itself: <strong>NO — BORROW FIRST; if a loan is impossible within two weeks, YES — BUT ONLY AFTER</strong> the pipe facts in §23 are in hand and the order is placed as the AliExpress SAR ≈ 450–600 kit, budgeted as a <em>test article</em> whose failure is an acceptable outcome (§25).</p>
+<h2>2. Project Objective</h2>
+<p>Retrofit monitoring of an existing facility pipe (mosque ablution supply first) to detect <strong>persistent unexpected water flow</strong> — not &quot;leak&quot; — without cutting or drilling, on the smallest, cheapest, fastest credible prototype, using the ESP32 already owned. Reduce technical uncertainty before spending ~SAR 600+ on a clamp-on ultrasonic meter.</p>
+<h2>3. Final MVP Architecture</h2>
+<p><img src="../diagrams/architecture.svg" alt="architecture"></p>
+<pre><code>Qualified existing pipe (DN20–32 branch, full, ≥10D/5D straight)
+  ↓ acoustic, no cutting
+TS-2 clamp-on transducers, V-method, couplant, side of pipe
+  ↓ coax
+TUF-2000M module (8–36 VDC · M63=RTU · M46=1 · 9600 8N1)
+  ↓ RS485 A/B (isolated port)
+RS485↔TTL 3.3 V (MAX3485 with DE/RE, or DFR0845 isolated auto-direction)
+  ↓ UART2 GPIO16/17
+ESP32 (owned): Modbus poll 1 s → validity policy (step, Q, strength, ratio, error bits)
+  ↓ valid samples only          ↓ invalid → SENSOR_UNKNOWN (never zero)
+30 s moving average → rule engine (QUIET / OCCUPIED / CLEANING, threshold + persistence)
+  ↓
+NVS: incident + unsynced events (survive reboot, work offline)
+  ↓ Wi-Fi when available
+Telegram bot → caretaker phone (+ optional HTTP backend/dashboard)
+  ↓
+Human inspection → flow stops → system confirms flow &lt; threshold for resolveMin → INCIDENT RESOLVED
+</code></pre>
+<p>Changes vs. the initial proposal, and why: (1) an explicit <strong>validity layer</strong> before the rule engine, because the meter reports 0 when it has no signal and, by default, <em>holds the last good value</em> on poor signal (M28) — both would be silently misread as facts; (2) a <strong>30 s moving average and gap tolerance</strong>, because the first simulation run showed noise spikes being counted as &quot;persistence&quot;; (3) <strong>placement on a branch, not the riser</strong>, from the hydraulic table. Diagrams: <code>diagrams/architecture.svg</code>, <code>diagrams/wiring.svg</code>, <code>diagrams/architecture.md</code> (Mermaid state machine).</p>
+<h2>4. Competition Requirements</h2>
+<p><em>(All snippet-level; official pages must be opened to confirm — see <code>research/notes/competition.md</code>.)</em></p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>MEWA University Innovation Challenge (تحدي الابتكار الجامعي)</th>
+<th>Future Makers: AI Challenge for Critical Sustainability</th>
+<th>SWA Global Prize for Innovation in Water</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Organizer</td>
+<td>MEWA Agency for Research &amp; Innovation — VERIFIED (snippet)</td>
+<td>DCO + MEWA + RDIA + KACST via NexaBridge — REPORTED (press)</td>
+<td>Saudi Water Authority — VERIFIED (snippet)</td>
+</tr>
+<tr>
+<td>Fit</td>
+<td><strong>Best match</strong>: water element explicitly &quot;water loss and grey water management&quot;</td>
+<td>Only if a genuine AI component exists (<strong>AI is mandatory</strong>)</td>
+<td>Conservation / digital water management categories; global, professional</td>
+</tr>
+<tr>
+<td>Team</td>
+<td>&quot;1 faculty member and 4–5 students&quot; — VERIFIED (snippet)</td>
+<td>innovators/startups/researchers in DCO states; no team rule</td>
+<td>universities eligible; no team rule</td>
+</tr>
+<tr>
+<td>Edition / deadline</td>
+<td>2nd edition reported (Sabq); page updated 2025-07-20; <strong>2026 cycle status and deadline NOT FOUND</strong></td>
+<td>closes <strong>4 Oct 2026</strong> (press)</td>
+<td>8 Jun–30 Sep 2026; TRL 1–3 / 4–7 tracks</td>
+</tr>
+<tr>
+<td>AI required</td>
+<td><strong>NOT FOUND</strong> → treat as not required</td>
+<td>Yes</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Prototype required</td>
+<td>NOT YET VERIFIED (&quot;early-stage ideas&quot; → &quot;pilot projects&quot;)</td>
+<td>implied (demonstration/testing in KSA)</td>
+<td>by track</td>
+</tr>
+<tr>
+<td>Evaluation criteria</td>
+<td>NOT FOUND</td>
+<td>NOT FOUND</td>
+<td>NOT FOUND</td>
+</tr>
+<tr>
+<td>Restrictions relevant to us</td>
+<td>none found; utility-vs-end-user scope of &quot;water loss&quot; unverified</td>
+<td>pure threshold logic likely insufficient</td>
+<td>none found</td>
+</tr>
+</tbody></table>
+<p>Three programmes share the words &quot;تحدي الابتكار&quot; (MEWA UIC, MEWA &quot;للاستدامة&quot; with Babson, MoE &quot;للتنمية المستدامة&quot;); rules must not be mixed. <strong>Action:</strong> open the MEWA UIC page (EN/AR) and the SEU notice from an unblocked browser and record platform URL, dates and criteria before the next milestone.</p>
+<h2>5. Existing Technology / Market Reality</h2>
+<p>Clamp-on transit-time meters are a mature industrial product (Flexim, Siemens, KROHNE, E+H) priced SAR 20k–60k, and a Chinese OEM family (TUF-2000 / TDS-100, Dalian Taijia and clones) priced SAR 400–2,000 that shares one firmware lineage, menu map and Modbus table. Small-pipe (≤ DN32) clamp-on is the hard corner of the market: industrial vendors quote ≥ 0.3 m/s for full accuracy; Keyence sells purpose-built dry-clamp sensors for ø13–44 mm at SAR 2–4k; hobbyist reports of the cheap family on 22–28 mm pipe describe zero-flow oscillation and drift. There is no evidence anyone sells a sub-SAR-1,000 clamp-on meter <em>specified</em> for PPR. Detailed candidates: <code>SENSOR_COMPARISON.md</code>, <code>research/notes/alternatives_and_procurement.md</code>.</p>
+<h2>6. Sensor Research</h2>
+<p>The 33-item questionnaire for the TUF-2000M family, answered from the manual (v13.44) and cross-checked code, is in <code>research/notes/tuf2000m.md</code>. Headlines:</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Finding</th>
+<th>Tag</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Transducer for DN20–32</td>
+<td>TS-2 &quot;small&quot; — DN15–100 (most listings) <strong>vs</strong> DN25–100 (older listings); manual lists TS-1/TM-1/TL-1 codes, not TS-2</td>
+<td>CONFLICT (snippet)</td>
+</tr>
+<tr>
+<td>Materials (M14)</td>
+<td>carbon steel, stainless, cast/ductile iron, copper, PVC, aluminium, asbestos, fiberglass, <strong>other (enter sound speed)</strong>. <strong>PPR, CPVC, galvanized not listed</strong> (galvanized → carbon steel; PPR → &quot;other&quot; + sound speed, value not in any TUF document)</td>
+<td>VERIFIED (manual)</td>
+</tr>
+<tr>
+<td>Accuracy / repeatability</td>
+<td>&quot;better than 1 %&quot; / &quot;better than 0.2 %&quot;; linearity 0.5 % (datasheets)</td>
+<td>VERIFIED / snippet</td>
+</tr>
+<tr>
+<td>Velocity range</td>
+<td>±0.01–12 m/s (vendor); <strong>M41 low-flow cutoff default 0.03 m/s</strong> (manual); &quot;0.001 m/s with PI transducers&quot; (manual, not clamp-on)</td>
+<td>CONFLICT</td>
+</tr>
+<tr>
+<td>Straight pipe</td>
+<td>upstream 10D (up to 20–30D after fittings/pump), downstream 5D; pipe must be <strong>full</strong></td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>TS-2 −30…90 °C (HT −30…160 °C)</td>
+<td>snippet</td>
+</tr>
+<tr>
+<td>Power</td>
+<td><strong>8–36 VDC @ 50 mA</strong> (or 10–30 VAC); mains must never be applied to the module</td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Interfaces</td>
+<td>isolated RS485 (Modbus RTU/ASCII, FC03/06), 4–20 mA loop, 2× OCT (pulse/frequency/relay-like), PT100 inputs</td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Pulse</td>
+<td>OCT totalizer pulse, unit × multiplier, ≤ 1 pulse per 500 ms period, 6–1000 ms width</td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Diagnostics</td>
+<td>reg 92 = step (hi byte) + <strong>Q 0–99</strong> (lo byte); reg 93/94 strength 0–2047; reg 97–98 transit ratio (normal 100 ± 3 %); reg 72 error bits (bit0 no signal … bit3 empty pipe); step letters R/I/H/J/G/K/E/Q/F</td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Update rate</td>
+<td>measurement period <strong>500 ms</strong>; M40 damping default 10 s; first 60 s after power-on is settling</td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Low-flow cutoff / hold</td>
+<td>M41 (velocity, default 0.03 m/s); <strong>M28 &quot;hold last good value&quot; default YES</strong>; M.5 Q-threshold zeroes flow on airy pipes</td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Zero</td>
+<td>M42 with still water; <strong>lost at power-cycle unless M26 saves it</strong></td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Couplant / mounting</td>
+<td>&quot;adequate coupler… no gap&quot;, sand the pipe, transducers on the <strong>side</strong> to avoid bubbles, V-method 15–200 mm, W 15–50 mm</td>
+<td>VERIFIED</td>
+</tr>
+<tr>
+<td>Air sensitivity</td>
+<td>empty-pipe code K, &quot;poor signal&quot; H; bubbles degrade Q</td>
+<td>VERIFIED (qualitative)</td>
+</tr>
+<tr>
+<td>Price / availability (KSA)</td>
+<td>AliExpress TS-2 kit $100.70–208.50; landed SAR ≈ 430–1,090 incl. 15 % VAT; amazon.sa has only handheld TUF-2000H (SAR 502.50); noon: none</td>
+<td>snippet / ESTIMATE</td>
+</tr>
+<tr>
+<td>Returns</td>
+<td>amazon.sa 15 days; AliExpress buyer protection (non-delivery); return-to-China impractical</td>
+<td>snippet</td>
+</tr>
+<tr>
+<td>Small-pipe field reports</td>
+<td>28 mm copper: &quot;huge oscillations around zero when there is no flow&quot;, drift, &quot;not suitable for relatively small copper pipes&quot;; 22 mm: hard to get good Q; libe.net: needs Q &gt; 85, read 1.3× low until M45 corrected; 1&quot; PVC: worked. <strong>No PPR report found.</strong></td>
+<td>snippet (SECONDARY)</td>
+</tr>
+</tbody></table>
+<h2>7. Selected Sensor Candidates</h2>
+<p>Scored table in <code>SENSOR_COMPARISON.md</code>. Picks: <strong>Best overall / best budget:</strong> TUF-2000M + TS-2. <strong>Best if borrowed:</strong> Flexim FLUXUS F401 or Siemens FS230 portable (distributor demo), or the KFUPM GUNT HM 500 bench as a calibration reference. <strong>Best documented:</strong> Keyence FD-Q (2× budget, no Modbus RTU). <strong>Avoid:</strong> inline sensors as the primary (YF-S201), tubing-only clamp-ons (Sonotec CO.55), &gt; SAR 25k instruments.</p>
+<h2>8. Ultrasonic Measurement Limitations</h2>
+<p><em>(VERIFIED from the manual and physics of transit-time meters; magnitudes on our pipe are NOT YET PHYSICALLY VERIFIED.)</em></p>
+<ol>
+<li><strong>Transit-time difference is tiny at low velocity.</strong> The meter measures Δt between up- and downstream pulses; at 0.03 m/s across a 16 mm bore Δt is in the tens of picoseconds range, so zero stability and electronics noise, not accuracy %, dominate at our flows.</li>
+<li><strong>Wall entry is the weak point on plastics.</strong> PPR has low acoustic impedance and high attenuation relative to metal; a PN20 wall is 3.4–4.2 mm — thick for its diameter. The manual has no PPR entry. Expect lower strength/Q than PVC. Vendor listings&#39; &quot;PVC/plastic&quot; is not a PPR test.</li>
+<li><strong>Small diameters give short acoustic paths</strong> (V-method on 16–21 mm bore), which is why users needed unusual transducer spacings on ¾&quot; copper.</li>
+<li><strong>Zero offset is installation-specific and drifts</strong> with temperature and coupling; the manual requires zeroing on still water and saving with M26.</li>
+<li><strong>The meter is opaque about confidence unless you read Q, strength, ratio and error bits</strong> — which the firmware does; and it can <em>freeze the last value</em> (M28) — which the firmware detects only via those diagnostics.</li>
+<li><strong>Air, partial fill and vibration</strong> corrupt readings; the pipe must be full and transducers on the side.</li>
+<li><strong>A single aggregate sensor cannot identify the fixture</strong>; the product claim must stay &quot;persistent unexpected flow&quot;.</li>
+</ol>
+<h2>9. Pipe Compatibility</h2>
+<table>
+<thead>
+<tr>
+<th>Material</th>
+<th>Meter list (M14)</th>
+<th>Our confidence</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>PVC / uPVC</td>
+<td>listed</td>
+<td>medium-high</td>
+<td>1&quot; Sch40 PVC field report worked</td>
+</tr>
+<tr>
+<td>CPVC</td>
+<td>not listed (use PVC or &quot;other&quot;)</td>
+<td>medium</td>
+<td>thin CTS wall helps</td>
+</tr>
+<tr>
+<td>Copper</td>
+<td>listed</td>
+<td>medium</td>
+<td>but this is where the small-pipe noise reports come from</td>
+</tr>
+<tr>
+<td>Steel</td>
+<td>listed</td>
+<td>medium-high</td>
+<td>best acoustic match</td>
+</tr>
+<tr>
+<td>Galvanized steel</td>
+<td>not listed (use carbon steel)</td>
+<td>medium</td>
+<td>zinc layer/scale, thick wall; older mosque risers</td>
+</tr>
+<tr>
+<td><strong>PPR</strong></td>
+<td><strong>not listed</strong> — M14 = &quot;other&quot; + sound speed in M15 (value NOT FOUND in TUF docs)</td>
+<td><strong>low until tested</strong></td>
+<td>the pilot&#39;s most likely pipe</td>
+</tr>
+<tr>
+<td>Unknown</td>
+<td>—</td>
+<td>low</td>
+<td>measure and identify first</td>
+</tr>
+</tbody></table>
+<p>Required before purchase (§23): pipe <strong>material, OD, wall/PN class, ID, location of a full, straight, accessible run, and whether it is the riser or the ablution branch</strong>.</p>
+<h2>10. Hydraulic Calculations</h2>
+<p><strong>CALCULATED</strong> (Q = v·A, A = πD²/4; <code>tests/results/HYDRAULICS_TABLE.md</code>, <code>tests/hydraulics_table.js</code>):</p>
+<table>
+<thead>
+<tr>
+<th>Flow (L/min)</th>
+<th>ID 13.2 (PPR 20)</th>
+<th>ID 16.6 (PPR 25)</th>
+<th>ID 21.2 (PPR 32)</th>
+<th>ID 26.6 (GI 1&quot;)</th>
+<th>ID 52.5 (GI 2&quot;)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0.25</td>
+<td>0.030 m/s</td>
+<td>0.019</td>
+<td>0.012</td>
+<td>0.007</td>
+<td>0.002</td>
+</tr>
+<tr>
+<td>0.5</td>
+<td>0.061</td>
+<td>0.039</td>
+<td>0.024</td>
+<td>0.015</td>
+<td>0.004</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0.122</td>
+<td>0.077</td>
+<td>0.047</td>
+<td>0.030</td>
+<td>0.008</td>
+</tr>
+<tr>
+<td>2</td>
+<td>0.244</td>
+<td>0.154</td>
+<td>0.094</td>
+<td>0.060</td>
+<td>0.015</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.609</td>
+<td>0.385</td>
+<td>0.236</td>
+<td>0.150</td>
+<td>0.038</td>
+</tr>
+</tbody></table>
+<p>Minimum flow at the default <strong>0.03 m/s</strong> cutoff: PPR 20 → 0.25 L/min · PPR 25 → <strong>0.39</strong> · PPR 32 → 0.64 · GI 1&quot; → 1.0 · GI 2&quot; → <strong>3.9 L/min</strong>. Same volumetric flow, 10× lower velocity on the riser — the riser cannot see a dripping tap; a DN20–25 branch can, <em>if</em> the meter is quiet at zero.</p>
+<h2>11. Electrical Architecture</h2>
+<p><img src="../diagrams/wiring.svg" alt="wiring"></p>
+<p><em>(VERIFIED interface facts; module choice ASSUMED best practice.)</em></p>
+<ul>
+<li>The meter&#39;s RS485 is a <strong>differential bus</strong> (A/B, ±1.5–5 V), galvanically isolated inside the meter; it is <strong>not</strong> a 12/24 V logic signal and must not be wired to the ESP32 directly.</li>
+<li>The meter is powered at <strong>12 or 24 VDC</strong> (8–36 V); the ESP32 gets 5 V from an LM2596 buck on the same rail. Never mains to the module.</li>
+<li>Interface options compared (<code>research/notes/alternatives_and_procurement.md</code> Task C): plain 5 V <strong>MAX485</strong> boards drive a 5 V RO output into the ESP32 RX — out of spec, avoid; <strong>MAX3485</strong> is native 3.3 V (DE/RE tied to one GPIO, ≈ SAR 25–45, on amazon.sa); <strong>isolated auto-direction DFR0845</strong> (ADM2483-class, 3 kV, ≈ SAR 150–200 landed) is the recommended primary for a mains-fed installation. 120 Ω termination at the far end only; short runs may omit it.</li>
+<li>Wiring diagram: <code>diagrams/wiring.svg</code> (power, grounds, A/B, RX/TX, DE/RE, isolation note).</li>
+</ul>
+<h2>12. ESP32 Integration</h2>
+<p>Firmware prototype in <code>firmware/esp32_prototype/</code> (PlatformIO, Arduino core), status <strong>compiles; logic host-tested; not yet run on a real meter</strong>:</p>
+<ul>
+<li>Modbus RTU master in-tree (FC03/06, CRC16, timeouts, exception/CRC/bad-frame results) with an injected transport so it runs on hardware and in host tests.</li>
+<li><code>tuf2000m.*</code>: register map from the manual (1-based → PDU −1), REAL4 low-word-first decode with a runtime toggle and a <strong>self-check on register 221 (inner diameter)</strong>, validity policy (step = R, error bits 0–3 clear, Q ≥ 60, strength ≥ ~60 %, ratio 97–103 %, finite flow).</li>
+<li><code>rule_engine.*</code>: C++ port of the simulator engine — same parameters, moving average, gap tolerance, NVS-persistable incident + 32-event unsynced buffer.</li>
+<li><code>main.cpp</code>: 1 s polling, NTP-based schedule with a <strong>conservative policy when the clock is invalid</strong>, serial-console mode override for the demo, non-blocking Wi-Fi reconnection, Telegram + optional HTTP sync with ordered retry, periodic NVS checkpoint.</li>
+<li>Host tests <code>test/test_native</code>: <strong>37/37 pass</strong> (CRC vector, word order, Modbus OK/timeout/CRC/exception, &quot;no-signal zero is not valid&quot;, quiet persistence, unknown-keeps-incident, burst, occupied REVIEW, cleaning expiry, invalid clock, persist/restore without duplicate alert, gap tolerance).</li>
+<li><code>tools/virtual_tuf2000m.py</code>: a Modbus RTU <strong>slave</strong> answering with the meter&#39;s register layout and fault injection (no signal, poor Q, dropped/corrupted frames, word order) for end-to-end tests over a socat pty pair or a USB-RS485 adapter.</li>
+</ul>
+<h2>13. Modbus Protocol</h2>
+<p>VERIFIED from the manual (p.39–47) and three code bases:</p>
+<table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Function codes</td>
+<td>0x03 read holding, 0x06 write single — only these</td>
+</tr>
+<tr>
+<td>Serial</td>
+<td>9600 8N1 default (M62); address via keypad only (M46), default 1</td>
+</tr>
+<tr>
+<td>Protocol default</td>
+<td><strong>MODBUS-ASCII</strong> — set <strong>M63 = 1</strong> for RTU</td>
+</tr>
+<tr>
+<td>Addressing</td>
+<td>manual register N → PDU address N−1</td>
+</tr>
+<tr>
+<td>Flow rate</td>
+<td>reg 1–2, REAL4, <strong>m³/h</strong> (unit reg 1437)</td>
+</tr>
+<tr>
+<td>Velocity</td>
+<td>reg 5–6, REAL4 m/s</td>
+</tr>
+<tr>
+<td>Totalizers</td>
+<td>reg 9–10 LONG + 11–12 REAL4 fraction (× unit reg 1438 × 10^(reg 1439−3)); simplest: <strong>reg 113–118 REAL4 in m³</strong></td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>reg 33–34 / 35–36 REAL4 °C (PT100 fitted only)</td>
+</tr>
+<tr>
+<td>Signal quality</td>
+<td>reg 92 low byte 0–99; working step letter in high byte</td>
+</tr>
+<tr>
+<td>Strength</td>
+<td>reg 93 / 94, 0–2047 (display scale 0–99.9; mapping not published)</td>
+</tr>
+<tr>
+<td>Transit ratio</td>
+<td>reg 97–98 REAL4 %, normal 100 ± 3</td>
+</tr>
+<tr>
+<td>Error bits</td>
+<td>reg 72 (bit0 no signal, bit1 low, bit2 poor, bit3 empty pipe, bit4 hardware … bit15 AI over-range)</td>
+</tr>
+<tr>
+<td>Inner diameter</td>
+<td>reg 221–222 REAL4 mm (used as word-order self-check)</td>
+</tr>
+<tr>
+<td>Word order</td>
+<td><strong>low word first (CDAB)</strong> per AiltonFidelix, jkkorpi70, arivin29 (worked example 36.625 °C = 0x4212 8000 → regs [0x8000, 0x4212]); one blog says &quot;big-endian&quot; → CONFLICT, handled by toggle + self-check</td>
+</tr>
+<tr>
+<td>Variants</td>
+<td>M/B/H/F/S/P share the table; register set may differ on clones (C3 note) → validate on the actual unit</td>
+</tr>
+</tbody></table>
+<h2>14. Simulation Architecture</h2>
+<p>Tool survey (<code>research/notes/simulation_tools.md</code>): Wokwi can run the ESP32 firmware and a C custom chip can act as a Modbus slave; pymodbus/socat give a virtual meter on a serial port; PlatformIO native / ESP-IDF host target unit-test the logic; QEMU has UART but no Wi-Fi; Tinkercad/Proteus/SimulIDE cannot run ESP32 + Modbus; <strong>no general-purpose tool simulates transit-time acoustics through a pipe wall</strong> (COMSOL/k-Wave are research-grade and out of scope). We therefore split the system:</p>
+<table>
+<thead>
+<tr>
+<th>Layer</th>
+<th>Simulated by</th>
+<th>Fidelity</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A Hydraulic / flow</td>
+<td><code>engine/hydraulics.js</code></td>
+<td>CALCULATED (geometry only; no transients)</td>
+</tr>
+<tr>
+<td>B Sensor</td>
+<td><code>engine/sensorModel.js</code> — configurable behaviour model (cutoff, noise, error, zero drift, Q/strength, step letters, comm faults); profiles IDEAL / CONSERVATIVE / <strong>TUF-2000M published</strong> / <strong>TUF-2000M field-reports</strong> / CUSTOM</td>
+<td>MODEL — <strong>no physics</strong>; every number is an assumption except the published ones</td>
+</tr>
+<tr>
+<td>C Modbus / comms</td>
+<td><code>tools/virtual_tuf2000m.py</code> + firmware <code>modbus_rtu</code> host tests</td>
+<td>SIMULATED (protocol, framing, faults; not wire electrical)</td>
+</tr>
+<tr>
+<td>D ESP32 firmware</td>
+<td>logic host-tested; sketch compiles</td>
+<td>SIMULATED (host) — not run on silicon yet</td>
+</tr>
+<tr>
+<td>E Detection logic</td>
+<td><code>engine/ruleEngine.js</code> ≡ <code>rule_engine.cpp</code></td>
+<td>SIMULATED, deterministic</td>
+</tr>
+<tr>
+<td>F Dashboard / notification</td>
+<td>simulator phone emulator; firmware Telegram optional</td>
+<td>EMULATED</td>
+</tr>
+</tbody></table>
+<p>Interactive bench: <code>simulator/index.html</code> (open directly). Water moves at the true velocity; every control from the brief is present; rules are editable; the &quot;Break it&quot; panel injects the 15 failure modes.</p>
+<h2>15. Simulator Screenshots</h2>
+<p><code>docs/screenshots/01_idle.png</code> (bench idle) · <code>02_incident.png</code> (3 L/min quiet → UNEXPECTED_FLOW, incident card, phone alert) · <code>03_sensor_unknown.png</code> (RS485 disconnected during the incident → SENSOR_UNKNOWN, incident preserved) · <code>04_offline.png</code> (Wi-Fi lost → OFFLINE overlay, events queued) · <code>05_hydraulics.png</code> (velocity table coloured against the profile&#39;s minimum) · <code>06_scenarios.png</code> (campaign run in-browser).</p>
+<p><img src="screenshots/01_idle.png" alt="01_idle"></p>
+<p><img src="screenshots/02_incident.png" alt="02_incident"></p>
+<p><img src="screenshots/03_sensor_unknown.png" alt="03_sensor_unknown"></p>
+<p><img src="screenshots/04_offline.png" alt="04_offline"></p>
+<p><img src="screenshots/05_hydraulics.png" alt="05_hydraulics"></p>
+<p><img src="screenshots/06_scenarios.png" alt="06_scenarios"></p>
+<h2>16. Virtual Test Results</h2>
+<p><code>tests/run.js</code> → <code>tests/results/CAMPAIGN_RESULTS.md</code> (deterministic seed, 1 s step). <strong>SIMULATED.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Run</th>
+<th>Profile</th>
+<th>Result</th>
+<th>Reading</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TUF2000M_PUBLISHED</td>
+<td>published spec + assumed noise</td>
+<td><strong>24/25</strong></td>
+<td>only rung 3 (0.25 L/min on ID 16.6 = 0.019 m/s) fails — <strong>below the 0.03 m/s cutoff by geometry</strong></td>
+</tr>
+<tr>
+<td>CONSERVATIVE</td>
+<td>0.05 m/s cutoff, 3 %</td>
+<td>24/25</td>
+<td>same</td>
+</tr>
+<tr>
+<td>IDEAL</td>
+<td>no cutoff</td>
+<td>24/25</td>
+<td>&quot;fails&quot; 13 only because an ideal sensor <em>does</em> see 0.5 L/min on DN50 — a finding, not a defect</td>
+</tr>
+<tr>
+<td>FIELD_REPORTS_RAW (stress)</td>
+<td>+0.03 m/s zero offset, 0.05 m/s noise, <strong>no zero-cal</strong></td>
+<td>18/25</td>
+<td>meter reads <strong>0.33 L/min at true zero</strong>; false incidents at 0.15/0.30 L/min thresholds; incidents at 0.5 L/min <strong>never resolve</strong> (§17)</td>
+</tr>
+<tr>
+<td>FIELD_REPORTS_ZEROCAL (stress)</td>
+<td>same noise, <strong>zero-cal applied</strong></td>
+<td>23/25</td>
+<td>no false incidents; resolves normally; transient PERSISTENT_FLOW blips at zero; single samples can read 0 while flowing (averaging covers it)</td>
+</tr>
+<tr>
+<td>FIELD_REPORTS_THR1 (stress)</td>
+<td>no zero-cal, <strong>threshold 1.0 L/min</strong></td>
+<td>20/25</td>
+<td>incidents resolve; no false incident at 1.0 (the two &quot;failures&quot; are ladder rungs that force their own low thresholds)</td>
+</tr>
+</tbody></table>
+<p>Logic failures across all runs: <strong>0</strong>. Firmware host tests: 37/37.</p>
+<p>Scenario coverage vs the brief (1–15 all present, plus 9b cleaning expiry, 16 invalid clock, 17 burst, 18 air, 19 mount degrades, 20 Modbus CRC errors, 21 zero-drift stress, and zero-flow controls 3z/4z/5z paired with the ladder rungs).</p>
+<h2>17. Failure-Mode Tests</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Failure</th>
+<th>Behaviour proven (SIMULATED)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Sensor disconnected</td>
+<td>NO_RESPONSE → SENSOR_UNKNOWN after 15 s grace; open incident frozen, <strong>not</strong> resolved; recovers with incident intact</td>
+</tr>
+<tr>
+<td>2</td>
+<td>RS485 CRC/timeouts (5 %)</td>
+<td>absorbed by grace + averaging; detection unaffected</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Wi-Fi lost</td>
+<td>detection at 600 s while offline; events queued; synced on reconnect (0 unsynced at end)</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Backend down</td>
+<td>same as Wi-Fi (link overlay OFFLINE)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Poor signal (Q &lt; 60)</td>
+<td>SENSOR_UNKNOWN, no numeric claim</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Air 80 %</td>
+<td>step K/H → SENSOR_UNKNOWN; never a valid zero while flowing</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Mount → Poor mid-incident</td>
+<td>degrades to SENSOR_UNKNOWN; incident not silently closed</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Flow below detection</td>
+<td>0.25 L/min on DN25 undetected — reported as BELOW_PROFILE_USABLE_RANGE</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Large pipe + small flow</td>
+<td>DN50 at 0.5 L/min = 0.004 m/s → correctly no claim; blind spot documented</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Cleaning in quiet hours</td>
+<td>EXPECTED_FLOW; override expiry logged; after expiry the QUIET rule applies</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Long legitimate occupied flow</td>
+<td>EXPECTED_FLOW → REVIEW (low priority) only after 45 min; never a quiet alert</td>
+</tr>
+<tr>
+<td>12</td>
+<td>ESP32 reboot</td>
+<td>incident restored from NVS; <strong>one</strong> alert total; resolves later</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Invalid clock</td>
+<td>conservative: treated as occupied → no quiet alert</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Sudden burst</td>
+<td>PERSISTENT_FLOW blip, no incident</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Persistent moderate flow</td>
+<td>UNEXPECTED_FLOW after 10 min; RESOLVED 3 min after flow stops; litres estimated</td>
+</tr>
+</tbody></table>
+<p>Stress finding (the important one): <strong>an uncalibrated noisy meter makes incidents that cannot resolve</strong> because the &quot;zero&quot; sits at 0.33 L/min against a 0.40 L/min resolve level. Mitigations shown to work in the model: M42 zero calibration saved with M26, 30 s averaging, and/or threshold ≥ 1.0 L/min on DN25. These become Phase 7 acceptance criteria.</p>
+<h2>18. Physical Validation Plan</h2>
+<p><img src="../diagrams/hydraulic_layout.svg" alt="rig"></p>
+<p><code>PHYSICAL_TEST_PLAN.md</code> — preconditions (M63 RTU, measured pipe parameters, V-method, full pipe, M42+M26 zero), flow ladder 0/0.25/0.5/1/2/5 L/min with three timed gravimetric collections per rung and <strong>five independent mountings</strong>, a 30 min zero-stability log, a 20-trial detection run at the declared threshold (target ≥ 19/20), a 40-trial mixed false-incident run (target ≤ 1/40), pre-declared abandon criteria, and a CSV data sheet (<code>tests/results/physical_test_template.csv</code>). Rig drawing: <code>diagrams/hydraulic_layout.svg</code>.</p>
+<h2>19. Complete BOM</h2>
+<p><code>BOM.md</code>. Essentials: meter + TS-2 (SAR ≈ 430–1,090 landed), RS485 module (25–200), 12/24 V PSU (19–120), LM2596 (27), couplant (40–98), clamps (45), wiring (20–30), enclosure (35–96); rig: PPR 25/32 mm + fittings (≈ 60–90), valves (50–90), 20 L can (85), jug (8–15), 1 g scale (19–44).</p>
+<h2>20. Saudi Price Estimates</h2>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>SAR</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Rig + electronics, meter borrowed</td>
+<td>≈ 450–700</td>
+</tr>
+<tr>
+<td>Rig + AliExpress TUF-2000M-TS-2 (standard shipping)</td>
+<td><strong>≈ 900–1,300</strong></td>
+</tr>
+<tr>
+<td>+ DHL + isolated DFR0845</td>
+<td>≈ 1,300–2,000</td>
+</tr>
+<tr>
+<td>Ceiling (2,300)</td>
+<td>not exceeded in any configuration</td>
+</tr>
+</tbody></table>
+<p>Prices are snippet-level (VERIFIED listings, ESTIMATE totals); 15 % VAT applies to imports; duty waived &lt; SAR 1,000.</p>
+<h2>21. Procurement Recommendations</h2>
+<ol>
+<li><strong>Ask for a loan/demo first, in parallel with obtaining the pipe facts</strong>: KFUPM ME lab (HM 500 bench for calibration), IAU fluid lab, KSU hydraulics; distributors E+H Arabia, KROHNE KSA, IICS–Abunayyan, Kanoo Energy, Flexim ME. Give them a one-page pilot framing.</li>
+<li>If no loan in ~2 weeks: order <strong>TUF-2000M + TS-2 with RS485</strong> from AliExpress (item 32518776067-class listing, confirm &quot;TS-2 DN15–100&quot; and &quot;RS485&quot; in the seller chat), standard shipping, ≈ SAR 450–600 landed. Order a <strong>KNACRO MAX3485</strong> locally now (cheap, arrives in days) and decide on DFR0845 after the bench test.</li>
+<li>Buy the rig items locally now (they are useful regardless of meter).</li>
+<li>Do <strong>not</strong> buy the handheld TUF-2000H as the product sensor (no Modbus); it is acceptable only as a survey instrument if it can be returned within 15 days.</li>
+<li>Budget the meter as a <strong>test article</strong>: a negative result is a legitimate, reportable outcome of the pre-purchase programme.</li>
+</ol>
+<h2>22. Risks</h2>
+<table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Likelihood</th>
+<th>Impact</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>TS-2 cannot achieve Q ≥ 60 on PPR PN20</td>
+<td>medium-high (no PPR evidence; soft, thick wall)</td>
+<td>fatal for PPR sites</td>
+<td>test on PPR <em>and</em> GI/PVC; W-method; sanding; alternative site pipe (metal riser branch)</td>
+</tr>
+<tr>
+<td>Zero noise ≥ threshold on DN25</td>
+<td>medium (reported on Cu 22–28 mm)</td>
+<td>false alarms / unresolvable incidents</td>
+<td>M42+M26, 30 s average, threshold ≥ 1 L/min, declare the threshold honestly</td>
+</tr>
+<tr>
+<td>Meter freezes last value (M28) or reports 0 on signal loss</td>
+<td>certain unless configured</td>
+<td>silent misreads</td>
+<td>validity policy on step/Q/bits; set M28 = NO</td>
+</tr>
+<tr>
+<td>Modbus ASCII default</td>
+<td>certain</td>
+<td>&quot;no comms&quot; on day 1</td>
+<td>set M63 = 1</td>
+</tr>
+<tr>
+<td>Word-order mismatch</td>
+<td>low</td>
+<td>garbage floats</td>
+<td>reg-221 self-check + toggle</td>
+</tr>
+<tr>
+<td>Wrong wall thickness entered</td>
+<td>high</td>
+<td>confident but wrong absolute flow</td>
+<td>measure with calliper/ultrasonic gauge; bucket test; M45</td>
+</tr>
+<tr>
+<td>Couplant dries</td>
+<td>high over weeks</td>
+<td>Q decay → SENSOR_UNKNOWN</td>
+<td>grease-type couplant; monitor Q trend</td>
+</tr>
+<tr>
+<td>Shipping delay / DOA / no return</td>
+<td>medium</td>
+<td>schedule</td>
+<td>order early; Alibaba Trade Assurance; local MAX3485</td>
+</tr>
+<tr>
+<td>Competition rules unverified</td>
+<td>medium</td>
+<td>wrong deliverable</td>
+<td>open official pages now</td>
+</tr>
+</tbody></table>
+<h2>23. Unknowns</h2>
+<p>Must obtain before buying: pipe <strong>material</strong> (PPR? PVC? GI?), <strong>OD and wall/PN class</strong>, ID, an accessible <strong>full</strong> horizontal straight run (≥ 10D + 5D) on the <strong>branch</strong> feeding the ablution area, the riser diameter, water temperature range, whether a caretaker can operate a Telegram bot, and the mosque&#39;s daily schedule (for the QUIET windows). Still unverified after this study: TS-2 minimum pipe (DN15 vs 25), PP-R sound speed for M15, strength scaling 0–2047 → 0–99.9, register set on clone firmware, competition deadline/criteria.</p>
+<h2>24. GO / PIVOT / NO-GO Decision</h2>
+<p><strong>GO WITH CONDITIONS.</strong></p>
+<ol>
+<li>Feasible? <strong>Yes for the system; unproven for the sensor at &lt; 1 L/min on PPR.</strong></li>
+<li>Proven: RS485/Modbus interface facts, register map, power, diagnostics; hydraulic implications; that the ESP32 chain and rules behave correctly under every failure mode we could model.</li>
+<li>Simulated: layers C–F and the sensor <em>behaviour</em> envelope.</li>
+<li>Physically unverified: acoustic coupling on PPR, zero stability, minimum detectable flow, couplant life.</li>
+<li>Biggest risk: <strong>zero-flow noise/drift on a small plastic pipe</strong> (false or unresolvable incidents), closely followed by PPR coupling.</li>
+<li>Minimum useful flow to test: <strong>1 L/min</strong> is the realistic declared threshold on DN25 PPR; test 0.5 and 0.25 to know the floor, but do not promise them.</li>
+<li>Best location: the <strong>DN20–32 branch to the ablution area</strong>, horizontal, full, ≥ 10D straight upstream, accessible, away from the pump.</li>
+<li>Pipe information: §23.</li>
+<li>Sensor sufficient? <strong>Probably for ≥ 1–2 L/min continuous flows</strong> (running tap, failed float valve) — which is the product&#39;s actual value; <strong>probably not for drips</strong>.</li>
+<li>Buy / borrow / other / pivot: <strong>borrow first; buy the AliExpress kit if no loan within two weeks; keep Keyence FD-Q as the funded upgrade path if PPR coupling fails and budget can grow.</strong></li>
+<li>What could make it fail completely: Q never ≥ 60 on the pilot&#39;s PPR pipe; zero noise &gt; 2 L/min after calibration; no accessible full straight run.</li>
+<li>Abandon this sensing approach if, after 5 mountings with correct setup: zero noise floor &gt; 2 L/min on DN25, &lt; 15/20 detections at 2 L/min, &gt; 4/40 false incidents with mitigations, or Q &lt; 60 unattainable on PPR (pre-declared in the test plan §5).</li>
+</ol>
+<h2>25. Exact Next Steps</h2>
+<ol>
+<li><strong>Today:</strong> open the MEWA UIC page and SEU notice (unblocked browser); record deadline, platform, criteria. Send loan requests (template: pilot framing) to KFUPM ME lab, IAU, E+H Arabia, KROHNE KSA, IICS, Kanoo Energy.</li>
+<li><strong>This week:</strong> visit the pilot mosque; photograph and measure the branch and riser (calliper OD, PN class printed on the pipe); note straight lengths and access; get the prayer/cleaning schedule.</li>
+<li><strong>This week:</strong> buy locally: MAX3485 module, LM2596, 12 V adapter, PPR 25 + 32 mm bars and fittings, 2 valves, jerry can, jug, 1 g scale, couplant/grease. Build the rig (<code>hydraulic_layout.svg</code>).</li>
+<li><strong>This week:</strong> flash the firmware on the owned ESP32; run it against <code>tools/virtual_tuf2000m.py</code> over a USB-RS485 adapter (or a second ESP32/USB-TTL) to prove the RS485 path end-to-end before the meter arrives.</li>
+<li><strong>Day 10–14:</strong> if no loan is confirmed, order the TUF-2000M-TS-2 RS485 kit (≈ SAR 450–600 landed).</li>
+<li><strong>On meter arrival:</strong> meter setup checklist (M63, M46, M11–16, M23–25, M41 default, M28 = NO, M42 → M26), then the Phase 7 ladder on PPR 25 → decide the declared threshold from data → 20/40 trials → write results into <code>tests/results/</code>.</li>
+<li><strong>Then:</strong> freeze the MVP claim (&quot;persistent unexpected flow ≥ X L/min, verified on pipe Y&quot;) and build the poster/demo around the simulator + the bench rig.</li>
+</ol>
+<h2>26. Sources and URLs</h2>
+<p><code>SOURCES.md</code> (44 entries, tagged by access level) and per-fact tags in <code>research/notes/*.md</code>.</p>
+<hr>
+<h3>Final question — &quot;if the SAR 600+ were your own money, would you buy this sensor today?&quot;</h3>
+<p><strong>NO — BORROW FIRST.</strong> And if borrowing fails within two weeks: <strong>YES — BUT ONLY AFTER</strong> (a) the pilot pipe&#39;s material/OD/wall and a full, straight, accessible branch run are confirmed, (b) the order is the cheapest RS485-equipped TS-2 kit (≈ SAR 450–600 landed, not SAR 1,000+), and (c) the team accepts in writing that a negative bench result is a valid deliverable.</p>
+<p>Evidence: the interface, protocol and firmware side is verified to the register and pin level, so the <em>only</em> purchase risk is acoustic performance on a small PPR pipe at low velocity. On that risk the manual is silent about PPR, the hydraulic arithmetic puts 0.5 L/min right at the meter&#39;s default cutoff on DN25, and the only independent small-pipe reports describe zero-flow oscillation and drift — which our stress simulation shows would produce false and unresolvable incidents unless the zero is calibrated and the threshold is ≥ ~1 L/min. A borrowed reference-class meter would answer that question for free; failing that, the cheap kit is worth buying <em>as an experiment</em> at the low landed price, provided nobody arrives at the competition claiming drip detection before the ladder test has been run.</p>
+</body></html>

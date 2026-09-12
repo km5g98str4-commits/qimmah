@@ -1,14 +1,14 @@
 # Virtual Test Campaign — Results
 
-Generated 2026-09-12T20:14:15.547Z by `tests/run.js` (deterministic seed 42, 1 s step).
+Generated 2026-09-12T20:17:50.494Z by `tests/run.js` (deterministic seed 42, 1 s step).
 
 **Tag: SIMULATED.** These results prove the *logic* (rule engine, state machine, buffering, recovery) and show what each *sensor model profile* implies for low-flow detection. They do **not** prove that a real TUF-2000M on a real PPR pipe behaves like any profile — that is Phase 7.
 
 Flow-ladder rungs (3–7, 13) and zero-controls are **findings**: a FAIL means "this profile cannot resolve that flow on that pipe", which is exactly the information we want before buying.
 
-## Profile: TUF-2000M (published spec + assumptions)
+## Run: TUF2000M_PUBLISHED — TUF-2000M (published spec + assumptions)
 
-_PUBLISHED: velocity range 0.01–12 m/s (some manuals say 0.03), accuracy ±1 %, repeatability 0.2 %, measurement period 500 ms, default M41 low-flow cutoff 0.03 m/s (varies). ASSUMED: noiseAbsMs, zeroOffsetMs, commFailProb._
+_PUBLISHED (manual v13.44, research/notes/tuf2000m.md): accuracy "better than 1 %", repeatability "better than 0.2 %", measurement period 500 ms, M41 low-flow cutoff default 0.03 m/s, M40 damping default 10 s. Velocity range ±0.01–12 m/s is a VENDOR claim (not in the manual). ASSUMED: noiseAbsMs 0.005, zeroOffsetMs 0.005, commFailProb 0.5 %._
 
 **24/25 PASS**
 
@@ -40,7 +40,7 @@ _PUBLISHED: velocity range 0.01–12 m/s (some manuals say 0.03), accuracy ±1 %
 | 20 | Transient Modbus CRC/timeout errors (5 %) with 3 L/min | Grace period absorbs transient errors; detection still occurs | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW, invalid=111 |
 | 21 | ZERO-FLOW FALSE-ALARM STRESS: 0 L/min for 3 h with CONSERVATIVE profile (zero drift +0.01 m/s) | No incident — tests whether zero drift alone can cross the 0.5 L/min threshold on DN25 | ✅ PASS | 0.01 m/s zero drift on ID 16.6 mm = 0.130 L/min vs threshold 0.5; states=NORMAL |
 
-## Profile: CONSERVATIVE (assumption)
+## Run: CONSERVATIVE — CONSERVATIVE (assumption)
 
 _ASSUMED — pessimistic: 0.05 m/s cutoff, 3% error, 0.01 m/s noise, ±0.01 m/s zero drift_
 
@@ -74,7 +74,7 @@ _ASSUMED — pessimistic: 0.05 m/s cutoff, 3% error, 0.01 m/s noise, ±0.01 m/s 
 | 20 | Transient Modbus CRC/timeout errors (5 %) with 3 L/min | Grace period absorbs transient errors; detection still occurs | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW, invalid=111 |
 | 21 | ZERO-FLOW FALSE-ALARM STRESS: 0 L/min for 3 h with CONSERVATIVE profile (zero drift +0.01 m/s) | No incident — tests whether zero drift alone can cross the 0.5 L/min threshold on DN25 | ✅ PASS | 0.01 m/s zero drift on ID 16.6 mm = 0.130 L/min vs threshold 0.5; states=NORMAL |
 
-## Profile: IDEAL (assumption)
+## Run: IDEAL — IDEAL (assumption)
 
 _ASSUMED — best case, used only to check the logic_
 
@@ -108,10 +108,121 @@ _ASSUMED — best case, used only to check the logic_
 | 20 | Transient Modbus CRC/timeout errors (5 %) with 3 L/min | Grace period absorbs transient errors; detection still occurs | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW, invalid=111 |
 | 21 | ZERO-FLOW FALSE-ALARM STRESS: 0 L/min for 3 h with CONSERVATIVE profile (zero drift +0.01 m/s) | No incident — tests whether zero drift alone can cross the 0.5 L/min threshold on DN25 | ✅ PASS | 0.01 m/s zero drift on ID 16.6 mm = 0.130 L/min vs threshold 0.5; states=NORMAL |
 
+## Run: FIELD_REPORTS_RAW — TUF-2000M small-pipe FIELD REPORTS (pessimistic, assumed magnitudes) — Field-report noise, NO zero calibration, default 0.5 L/min threshold
+
+_SECONDARY reports (partofthething.com ESP8266 on ~28 mm copper; HA community 22 mm): zero-flow oscillation and drift. ASSUMED magnitudes: noise 0.05 m/s (1σ), zero offset +0.03 m/s, cutoff left at 0.03 m/s, 3 % accuracy._
+
+**STRESS RUN (findings only — failures here are the information we want, not logic defects).**
+
+**18/25 PASS**
+
+| # | Scenario | Expected | Result | Detail |
+|---|---|---|---|---|
+| 1 | No flow during quiet period | No alert | ⚠️ FAIL (finding) | states=PERSISTENT_FLOW,NORMAL |
+| 2 | Short legitimate 5 L/min burst (90 s) in quiet | No persistent-flow alert | ✅ PASS | states=PERSISTENT_FLOW,NORMAL, maxAbove=4.3 min |
+| 3 | 0.25 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.15 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.019 m/s; meter mean=0.586 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 3z | Zero-flow control at threshold 0.15 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ⚠️ FAIL (finding) | meter mean at true 0 = 0.332 L/min; falseIncident=true; states=PERSISTENT_FLOW,NORMAL,UNEXPECTED_FLOW |
+| 4 | 0.5 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.30 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.039 m/s; meter mean=0.839 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 4z | Zero-flow control at threshold 0.30 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ⚠️ FAIL (finding) | meter mean at true 0 = 0.332 L/min; falseIncident=true; states=PERSISTENT_FLOW,NORMAL,UNEXPECTED_FLOW |
+| 5 | 1 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.60 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.077 m/s; meter mean=1.337 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 5z | Zero-flow control at threshold 0.60 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ✅ PASS | meter mean at true 0 = 0.332 L/min; falseIncident=false; states=PERSISTENT_FLOW,NORMAL |
+| 6 | 2 L/min persistent flow, quiet, ID 16.6 mm (threshold 1.20 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.154 m/s; meter mean=2.343 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 7 | 5 L/min persistent flow, quiet, ID 16.6 mm (threshold 3.00 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.385 m/s; meter mean=5.346 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=false |
+| 8 | Long legitimate flow (2 L/min, 40 min) during PRAYER | No high-priority quiet alert (REVIEW allowed only after occupied persistence) | ✅ PASS | states=EXPECTED_FLOW,NORMAL |
+| 9 | Cleaning override during quiet hours (3 L/min for 30 min, override 60 min) | EXPECTED_FLOW, no high-priority alert; override expiry logged | ✅ PASS | states=EXPECTED_FLOW,NORMAL,PERSISTENT_FLOW, overrideExpired=true |
+| 9b | Cleaning override EXPIRES while 3 L/min continues in quiet hours | After expiry the underlying QUIET rule applies → UNEXPECTED_FLOW | ✅ PASS | states=EXPECTED_FLOW,UNEXPECTED_FLOW |
+| 10 | Sensor disconnected while 3 L/min flows (incident already open) | SENSOR_UNKNOWN, never zero; incident NOT resolved by the outage | ⚠️ FAIL (finding) | unknown=true, resolvedDuringOutage=false, incidentOpenAfterRecovery=true, zeroWhileFlowing=true |
+| 11 | Internet disconnected during 3 L/min quiet flow | Local detection continues; event buffered; synced on reconnection | ✅ PASS | detectedAt=600s (offline until 1800 s), unsyncedAtEnd=0 |
+| 12 | Poor signal quality (sensor quality 35%) with 3 L/min | SENSOR_UNKNOWN rather than a confident number; no alert built on invalid data | ✅ PASS | states=NORMAL,SENSOR_UNKNOWN, valid=0, invalid=1801 |
+| 13 | Large pipe (DN50 steel, ID 52.5 mm) with 0.5 L/min | Velocity 0.004 m/s is far below any published min velocity → campaign must FLAG as undetectable (pass = honest flag, not a false detection) | ⚠️ FAIL (finding) `UNDETECTABLE_BY_GEOMETRY` | v=0.0038 m/s (< published 0.03 m/s min); detected=true → correctly NOT claimed. Meter reported 0 while flowing=false — THIS is the blind spot a large pipe creates. |
+| 14 | ESP32 reboot during open incident (3 L/min quiet) | Incident restored from NVS; no duplicate alert; resolves later normally | ⚠️ FAIL (finding) | alerts=1, bootRestored=true, resolved=false |
+| 15 | Flow stops after caretaker action (3 L/min → ACK → 0) | INCIDENT_RESOLVED after resolve window | ⚠️ FAIL (finding) | resolvedAt=nevers, litres=- |
+| 16 | Invalid clock with 3 L/min for 30 min | Conservative policy: treated as OCCUPIED → no high-priority alert within quiet window | ✅ PASS | states=EXPECTED_FLOW |
+| 17 | Sudden 8 L/min burst 30 s then 0, quiet | No alert | ✅ PASS | states=PERSISTENT_FLOW,NORMAL |
+| 18 | Air/bubbles 80% with 3 L/min | Meter step K/H → SENSOR_UNKNOWN; must not report a confident zero | ✅ PASS | states=NORMAL,SENSOR_UNKNOWN, zeroWhileFlowing=false |
+| 19 | Mount becomes Poor mid-incident (3 L/min) | Degrades to SENSOR_UNKNOWN (or stays valid if Q still ≥ threshold); incident not silently resolved | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW,SENSOR_UNKNOWN, resolved=false |
+| 20 | Transient Modbus CRC/timeout errors (5 %) with 3 L/min | Grace period absorbs transient errors; detection still occurs | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW, invalid=111 |
+| 21 | ZERO-FLOW FALSE-ALARM STRESS: 0 L/min for 3 h with CONSERVATIVE profile (zero drift +0.01 m/s) | No incident — tests whether zero drift alone can cross the 0.5 L/min threshold on DN25 | ✅ PASS | 0.01 m/s zero drift on ID 16.6 mm = 0.130 L/min vs threshold 0.5; states=PERSISTENT_FLOW,NORMAL |
+
+## Run: FIELD_REPORTS_ZEROCAL — TUF-2000M small-pipe FIELD REPORTS (pessimistic, assumed magnitudes) — Field-report noise, AFTER M42 zero calibration (offset 0), default 0.5 L/min threshold
+
+_SECONDARY reports (partofthething.com ESP8266 on ~28 mm copper; HA community 22 mm): zero-flow oscillation and drift. ASSUMED magnitudes: noise 0.05 m/s (1σ), zero offset +0.03 m/s, cutoff left at 0.03 m/s, 3 % accuracy._
+
+**STRESS RUN (findings only — failures here are the information we want, not logic defects).**
+
+**23/25 PASS**
+
+| # | Scenario | Expected | Result | Detail |
+|---|---|---|---|---|
+| 1 | No flow during quiet period | No alert | ⚠️ FAIL (finding) | states=PERSISTENT_FLOW,NORMAL |
+| 2 | Short legitimate 5 L/min burst (90 s) in quiet | No persistent-flow alert | ✅ PASS | states=PERSISTENT_FLOW,NORMAL, maxAbove=2.4 min |
+| 3 | 0.25 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.15 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.019 m/s; meter mean=0.206 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 3z | Zero-flow control at threshold 0.15 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ✅ PASS | meter mean at true 0 = -0.018 L/min; falseIncident=false; states=PERSISTENT_FLOW,NORMAL |
+| 4 | 0.5 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.30 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.039 m/s; meter mean=0.437 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 4z | Zero-flow control at threshold 0.30 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ✅ PASS | meter mean at true 0 = -0.018 L/min; falseIncident=false; states=PERSISTENT_FLOW,NORMAL |
+| 5 | 1 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.60 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.077 m/s; meter mean=0.952 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 5z | Zero-flow control at threshold 0.60 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ✅ PASS | meter mean at true 0 = -0.018 L/min; falseIncident=false; states=PERSISTENT_FLOW,NORMAL |
+| 6 | 2 L/min persistent flow, quiet, ID 16.6 mm (threshold 1.20 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.154 m/s; meter mean=1.943 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 7 | 5 L/min persistent flow, quiet, ID 16.6 mm (threshold 3.00 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.385 m/s; meter mean=4.956 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=false |
+| 8 | Long legitimate flow (2 L/min, 40 min) during PRAYER | No high-priority quiet alert (REVIEW allowed only after occupied persistence) | ✅ PASS | states=EXPECTED_FLOW,NORMAL |
+| 9 | Cleaning override during quiet hours (3 L/min for 30 min, override 60 min) | EXPECTED_FLOW, no high-priority alert; override expiry logged | ✅ PASS | states=EXPECTED_FLOW,NORMAL,PERSISTENT_FLOW, overrideExpired=true |
+| 9b | Cleaning override EXPIRES while 3 L/min continues in quiet hours | After expiry the underlying QUIET rule applies → UNEXPECTED_FLOW | ✅ PASS | states=EXPECTED_FLOW,UNEXPECTED_FLOW |
+| 10 | Sensor disconnected while 3 L/min flows (incident already open) | SENSOR_UNKNOWN, never zero; incident NOT resolved by the outage | ⚠️ FAIL (finding) | unknown=true, resolvedDuringOutage=false, incidentOpenAfterRecovery=true, zeroWhileFlowing=true |
+| 11 | Internet disconnected during 3 L/min quiet flow | Local detection continues; event buffered; synced on reconnection | ✅ PASS | detectedAt=600s (offline until 1800 s), unsyncedAtEnd=0 |
+| 12 | Poor signal quality (sensor quality 35%) with 3 L/min | SENSOR_UNKNOWN rather than a confident number; no alert built on invalid data | ✅ PASS | states=NORMAL,SENSOR_UNKNOWN, valid=0, invalid=1801 |
+| 13 | Large pipe (DN50 steel, ID 52.5 mm) with 0.5 L/min | Velocity 0.004 m/s is far below any published min velocity → campaign must FLAG as undetectable (pass = honest flag, not a false detection) | ✅ PASS `UNDETECTABLE_BY_GEOMETRY` | v=0.0038 m/s (< published 0.03 m/s min); detected=false → correctly NOT claimed. Meter reported 0 while flowing=false — THIS is the blind spot a large pipe creates. |
+| 14 | ESP32 reboot during open incident (3 L/min quiet) | Incident restored from NVS; no duplicate alert; resolves later normally | ✅ PASS | alerts=1, bootRestored=true, resolved=true |
+| 15 | Flow stops after caretaker action (3 L/min → ACK → 0) | INCIDENT_RESOLVED after resolve window | ✅ PASS | resolvedAt=1404s, litres=61 |
+| 16 | Invalid clock with 3 L/min for 30 min | Conservative policy: treated as OCCUPIED → no high-priority alert within quiet window | ✅ PASS | states=EXPECTED_FLOW |
+| 17 | Sudden 8 L/min burst 30 s then 0, quiet | No alert | ✅ PASS | states=PERSISTENT_FLOW,NORMAL |
+| 18 | Air/bubbles 80% with 3 L/min | Meter step K/H → SENSOR_UNKNOWN; must not report a confident zero | ✅ PASS | states=NORMAL,SENSOR_UNKNOWN, zeroWhileFlowing=false |
+| 19 | Mount becomes Poor mid-incident (3 L/min) | Degrades to SENSOR_UNKNOWN (or stays valid if Q still ≥ threshold); incident not silently resolved | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW,SENSOR_UNKNOWN, resolved=false |
+| 20 | Transient Modbus CRC/timeout errors (5 %) with 3 L/min | Grace period absorbs transient errors; detection still occurs | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW, invalid=111 |
+| 21 | ZERO-FLOW FALSE-ALARM STRESS: 0 L/min for 3 h with CONSERVATIVE profile (zero drift +0.01 m/s) | No incident — tests whether zero drift alone can cross the 0.5 L/min threshold on DN25 | ✅ PASS | 0.01 m/s zero drift on ID 16.6 mm = 0.130 L/min vs threshold 0.5; states=PERSISTENT_FLOW,NORMAL |
+
+## Run: FIELD_REPORTS_THR1 — TUF-2000M small-pipe FIELD REPORTS (pessimistic, assumed magnitudes) — Field-report noise, NO zero calibration, threshold raised to 1.0 L/min
+
+_SECONDARY reports (partofthething.com ESP8266 on ~28 mm copper; HA community 22 mm): zero-flow oscillation and drift. ASSUMED magnitudes: noise 0.05 m/s (1σ), zero offset +0.03 m/s, cutoff left at 0.03 m/s, 3 % accuracy._
+
+**STRESS RUN (findings only — failures here are the information we want, not logic defects).**
+
+**20/25 PASS**
+
+| # | Scenario | Expected | Result | Detail |
+|---|---|---|---|---|
+| 1 | No flow during quiet period | No alert | ⚠️ FAIL (finding) | states=PERSISTENT_FLOW,NORMAL |
+| 2 | Short legitimate 5 L/min burst (90 s) in quiet | No persistent-flow alert | ✅ PASS | states=PERSISTENT_FLOW,NORMAL, maxAbove=2.4 min |
+| 3 | 0.25 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.15 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.019 m/s; meter mean=0.586 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 3z | Zero-flow control at threshold 0.15 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ⚠️ FAIL (finding) | meter mean at true 0 = 0.332 L/min; falseIncident=true; states=PERSISTENT_FLOW,NORMAL,UNEXPECTED_FLOW |
+| 4 | 0.5 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.30 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.039 m/s; meter mean=0.839 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 4z | Zero-flow control at threshold 0.30 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ⚠️ FAIL (finding) | meter mean at true 0 = 0.332 L/min; falseIncident=true; states=PERSISTENT_FLOW,NORMAL,UNEXPECTED_FLOW |
+| 5 | 1 L/min persistent flow, quiet, ID 16.6 mm (threshold 0.60 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.077 m/s; meter mean=1.337 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 5z | Zero-flow control at threshold 0.60 L/min (2 h, ID 16.6 mm) | No incident from noise/zero drift alone | ✅ PASS | meter mean at true 0 = 0.332 L/min; falseIncident=false; states=PERSISTENT_FLOW,NORMAL |
+| 6 | 2 L/min persistent flow, quiet, ID 16.6 mm (threshold 1.20 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.154 m/s; meter mean=2.343 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=true |
+| 7 | 5 L/min persistent flow, quiet, ID 16.6 mm (threshold 3.00 L/min) | UNEXPECTED_FLOW within the persistence window if the sensor profile can resolve this flow; otherwise reported as BELOW_PROFILE_USABLE_RANGE. | ✅ PASS | v_true=0.385 m/s; meter mean=5.346 L/min; detected=true; valid=2384, invalid=17; zero-while-flowing=false |
+| 8 | Long legitimate flow (2 L/min, 40 min) during PRAYER | No high-priority quiet alert (REVIEW allowed only after occupied persistence) | ✅ PASS | states=EXPECTED_FLOW,NORMAL |
+| 9 | Cleaning override during quiet hours (3 L/min for 30 min, override 60 min) | EXPECTED_FLOW, no high-priority alert; override expiry logged | ✅ PASS | states=EXPECTED_FLOW,NORMAL, overrideExpired=true |
+| 9b | Cleaning override EXPIRES while 3 L/min continues in quiet hours | After expiry the underlying QUIET rule applies → UNEXPECTED_FLOW | ✅ PASS | states=EXPECTED_FLOW,UNEXPECTED_FLOW |
+| 10 | Sensor disconnected while 3 L/min flows (incident already open) | SENSOR_UNKNOWN, never zero; incident NOT resolved by the outage | ⚠️ FAIL (finding) | unknown=true, resolvedDuringOutage=false, incidentOpenAfterRecovery=true, zeroWhileFlowing=true |
+| 11 | Internet disconnected during 3 L/min quiet flow | Local detection continues; event buffered; synced on reconnection | ✅ PASS | detectedAt=600s (offline until 1800 s), unsyncedAtEnd=0 |
+| 12 | Poor signal quality (sensor quality 35%) with 3 L/min | SENSOR_UNKNOWN rather than a confident number; no alert built on invalid data | ✅ PASS | states=NORMAL,SENSOR_UNKNOWN, valid=0, invalid=1801 |
+| 13 | Large pipe (DN50 steel, ID 52.5 mm) with 0.5 L/min | Velocity 0.004 m/s is far below any published min velocity → campaign must FLAG as undetectable (pass = honest flag, not a false detection) | ⚠️ FAIL (finding) `UNDETECTABLE_BY_GEOMETRY` | v=0.0038 m/s (< published 0.03 m/s min); detected=true → correctly NOT claimed. Meter reported 0 while flowing=false — THIS is the blind spot a large pipe creates. |
+| 14 | ESP32 reboot during open incident (3 L/min quiet) | Incident restored from NVS; no duplicate alert; resolves later normally | ✅ PASS | alerts=1, bootRestored=true, resolved=true |
+| 15 | Flow stops after caretaker action (3 L/min → ACK → 0) | INCIDENT_RESOLVED after resolve window | ✅ PASS | resolvedAt=1404s, litres=68.9 |
+| 16 | Invalid clock with 3 L/min for 30 min | Conservative policy: treated as OCCUPIED → no high-priority alert within quiet window | ✅ PASS | states=EXPECTED_FLOW |
+| 17 | Sudden 8 L/min burst 30 s then 0, quiet | No alert | ✅ PASS | states=PERSISTENT_FLOW,NORMAL |
+| 18 | Air/bubbles 80% with 3 L/min | Meter step K/H → SENSOR_UNKNOWN; must not report a confident zero | ✅ PASS | states=NORMAL,SENSOR_UNKNOWN, zeroWhileFlowing=false |
+| 19 | Mount becomes Poor mid-incident (3 L/min) | Degrades to SENSOR_UNKNOWN (or stays valid if Q still ≥ threshold); incident not silently resolved | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW,SENSOR_UNKNOWN, resolved=false |
+| 20 | Transient Modbus CRC/timeout errors (5 %) with 3 L/min | Grace period absorbs transient errors; detection still occurs | ✅ PASS | states=PERSISTENT_FLOW,UNEXPECTED_FLOW, invalid=111 |
+| 21 | ZERO-FLOW FALSE-ALARM STRESS: 0 L/min for 3 h with CONSERVATIVE profile (zero drift +0.01 m/s) | No incident — tests whether zero drift alone can cross the 0.5 L/min threshold on DN25 | ✅ PASS | 0.01 m/s zero drift on ID 16.6 mm = 0.130 L/min vs threshold 0.5; states=PERSISTENT_FLOW,NORMAL |
+
 ## Summary
 
-| Profile | PASS | Total |
-|---|---|---|
-| TUF2000M_PUBLISHED | 24 | 25 |
-| CONSERVATIVE | 24 | 25 |
-| IDEAL | 24 | 25 |
+| Run | PASS | Total | Kind |
+|---|---|---|---|
+| TUF2000M_PUBLISHED | 24 | 25 | logic + profile |
+| CONSERVATIVE | 24 | 25 | logic + profile |
+| IDEAL | 24 | 25 | logic + profile |
+| FIELD_REPORTS_RAW | 18 | 25 | stress (findings) |
+| FIELD_REPORTS_ZEROCAL | 23 | 25 | stress (findings) |
+| FIELD_REPORTS_THR1 | 20 | 25 | stress (findings) |

@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" font-family="system-ui, sans-serif" font-size="13">
+  <rect width="1000" height="560" fill="#ffffff"/>
+  <text x="20" y="28" font-size="18" font-weight="bold">Water Guardian — wiring (TUF-2000M → RS485 → ESP32)</text>
+  <text x="20" y="48" fill="#555">Verified: meter power 8–36 VDC @ 50 mA, isolated RS485 port, Modbus RTU 9600 8N1 (manual v13.44). Module pin names vary — check your board.</text>
+
+  <!-- PSU -->
+  <rect x="30" y="90" width="150" height="90" rx="8" fill="#fef3c7" stroke="#d97706"/>
+  <text x="105" y="115" text-anchor="middle" font-weight="bold">24 VDC PSU ≥1 A</text>
+  <text x="105" y="135" text-anchor="middle">(12 V 2 A adapter OK)</text>
+  <text x="60" y="165">V+</text><text x="140" y="165">GND</text>
+  <circle cx="68" cy="172" r="4" fill="#d97706"/><circle cx="150" cy="172" r="4" fill="#333"/>
+
+  <!-- Buck -->
+  <rect x="30" y="230" width="150" height="80" rx="8" fill="#fef3c7" stroke="#d97706"/>
+  <text x="105" y="255" text-anchor="middle" font-weight="bold">LM2596 buck</text>
+  <text x="105" y="275" text-anchor="middle">IN 24 V → OUT 5.0 V</text>
+  <text x="45" y="300">IN+</text><text x="85" y="300">IN−</text><text x="120" y="300">OUT+</text><text x="155" y="300">OUT−</text>
+
+  <!-- Meter -->
+  <rect x="330" y="80" width="230" height="170" rx="8" fill="#dbeafe" stroke="#1d4ed8"/>
+  <text x="445" y="105" text-anchor="middle" font-weight="bold">TUF-2000M module</text>
+  <text x="445" y="123" text-anchor="middle" fill="#333">set M63=1 (RTU) · M46 addr=1 · M62 9600 8N1</text>
+  <text x="345" y="150">8~36V+</text><text x="345" y="170">8~36V−</text>
+  <text x="345" y="200">485+ (A)</text><text x="345" y="220">485− (B)</text>
+  <text x="470" y="150">TX1/TX2 → transducer UP</text><text x="470" y="170">RX1/RX2 → transducer DOWN</text>
+  <text x="470" y="200" fill="#555">OCT / AO unused</text>
+  <text x="470" y="235" fill="#b91c1c" font-size="11">NEVER connect mains to the module</text>
+
+  <!-- transducers -->
+  <rect x="620" y="90" width="60" height="30" fill="#1d4ed8"/><rect x="700" y="90" width="60" height="30" fill="#1d4ed8"/>
+  <rect x="600" y="125" width="180" height="26" fill="#94a3b8"/><rect x="600" y="131" width="180" height="14" fill="#7dd3fc"/>
+  <text x="690" y="172" text-anchor="middle" fill="#333">TS-2 pair, V-method, couplant, side of pipe</text>
+  <line x1="560" y1="145" x2="620" y2="105" stroke="#1d4ed8"/><line x1="560" y1="165" x2="700" y2="105" stroke="#1d4ed8"/>
+
+  <!-- RS485 module -->
+  <rect x="330" y="320" width="230" height="140" rx="8" fill="#dcfce7" stroke="#15803d"/>
+  <text x="445" y="345" text-anchor="middle" font-weight="bold">RS485 ↔ TTL module (3.3 V)</text>
+  <text x="445" y="362" text-anchor="middle" fill="#333">MAX3485 (DE/RE) or DFR0845 isolated auto-dir</text>
+  <text x="345" y="390">A (485+)</text><text x="345" y="410">B (485−)</text><text x="345" y="440">GND*</text>
+  <text x="470" y="390">VCC 3V3</text><text x="470" y="410">RO/RXD</text><text x="470" y="430">DI/TXD</text><text x="470" y="450">DE+RE</text>
+  <!-- termination -->
+  <rect x="290" y="392" width="30" height="12" fill="#fff" stroke="#333"/><text x="305" y="420" text-anchor="middle" font-size="11">120 Ω</text>
+  <text x="240" y="440" font-size="11" fill="#555">termination at far end</text>
+  <text x="240" y="452" font-size="11" fill="#555">only (short cable: optional)</text>
+
+  <!-- ESP32 -->
+  <rect x="680" y="300" width="230" height="180" rx="8" fill="#f3e8ff" stroke="#7e22ce"/>
+  <text x="795" y="325" text-anchor="middle" font-weight="bold">ESP32 DevKit (owned)</text>
+  <text x="695" y="355">3V3</text><text x="695" y="375">GPIO16 (RX2)</text><text x="695" y="395">GPIO17 (TX2)</text><text x="695" y="415">GPIO4 (DE/RE)</text><text x="695" y="445">VIN 5 V</text><text x="695" y="465">GND</text>
+  <text x="830" y="355" fill="#555" font-size="11">Wi-Fi → Telegram</text>
+  <text x="830" y="375" fill="#555" font-size="11">NVS event buffer</text>
+
+  <!-- wires power -->
+  <path d="M68 172 L68 60 L300 60 L300 145 L330 145" fill="none" stroke="#d97706" stroke-width="2"/>
+  <path d="M150 172 L150 70 L310 70 L310 165 L330 165" fill="none" stroke="#333" stroke-width="2"/>
+  <path d="M68 172 L68 200 L52 200 L52 300" fill="none" stroke="#d97706" stroke-width="2"/>
+  <path d="M150 172 L150 210 L92 210 L92 300" fill="none" stroke="#333" stroke-width="2"/>
+  <path d="M132 300 L132 520 L660 520 L660 445 L680 445" fill="none" stroke="#dc2626" stroke-width="2"/>
+  <path d="M162 300 L162 535 L670 535 L670 465 L680 465" fill="none" stroke="#333" stroke-width="2"/>
+  <text x="400" y="515" fill="#dc2626" font-size="11">5 V</text><text x="400" y="548" fill="#333" font-size="11">GND (ESP32 + RS485 module common)</text>
+
+  <!-- RS485 A/B -->
+  <path d="M330 195 L250 195 L250 385 L330 385" fill="none" stroke="#15803d" stroke-width="2"/>
+  <path d="M330 215 L262 215 L262 405 L330 405" fill="none" stroke="#15803d" stroke-width="2"/>
+  <text x="200" y="300" fill="#15803d" font-size="11">twisted pair A/B</text>
+  <!-- TTL side -->
+  <path d="M560 385 L640 385 L640 350 L680 350" fill="none" stroke="#dc2626" stroke-width="2"/>
+  <path d="M560 405 L650 405 L650 370 L680 370" fill="none" stroke="#7e22ce" stroke-width="2"/>
+  <path d="M560 425 L660 425 L660 390 L680 390" fill="none" stroke="#7e22ce" stroke-width="2"/>
+  <path d="M560 445 L665 445 L665 410 L680 410" fill="none" stroke="#7e22ce" stroke-width="2" stroke-dasharray="4 3"/>
+  <path d="M330 435 L300 435 L300 545 L670 545" fill="none" stroke="#333" stroke-width="2"/>
+
+  <!-- notes -->
+  <text x="20" y="490" font-size="11" fill="#333">* GND: with a NON-isolated MAX3485, tie module GND to ESP32 GND (already common via the buck). Do NOT tie the meter's RS485 GND if the port is isolated and the cable is short; a 100 Ω "GND-reference" wire is optional for long runs.</text>
+  <text x="20" y="505" font-size="11" fill="#333">Dashed DE/RE line: omit for auto-direction / DFR0845 modules (set WG_RS485_DE_PIN = -1). Never feed 12/24 V or a 5 V RO output into an ESP32 pin — use a 3.3 V module.</text>
+</svg>

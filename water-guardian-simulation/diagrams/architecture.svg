@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300" font-family="system-ui, sans-serif" font-size="12">
+  <rect width="1000" height="300" fill="#fff"/>
+  <text x="20" y="28" font-size="18" font-weight="bold">Water Guardian — MVP architecture</text>
+  <defs><marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 z" fill="#333"/></marker></defs>
+  <g>
+    <rect x="20" y="70" width="120" height="70" rx="8" fill="#e0f2fe" stroke="#0369a1"/><text x="80" y="98" text-anchor="middle" font-weight="bold">Existing pipe</text><text x="80" y="116" text-anchor="middle">DN20–32 branch</text><text x="80" y="130" text-anchor="middle" fill="#555">no cutting</text>
+    <rect x="165" y="70" width="120" height="70" rx="8" fill="#dbeafe" stroke="#1d4ed8"/><text x="225" y="98" text-anchor="middle" font-weight="bold">Clamp-on</text><text x="225" y="116" text-anchor="middle">TS-2 + TUF-2000M</text><text x="225" y="130" text-anchor="middle" fill="#b91c1c">NOT YET PHYSICALLY VERIFIED</text>
+    <rect x="310" y="70" width="110" height="70" rx="8" fill="#dcfce7" stroke="#15803d"/><text x="365" y="98" text-anchor="middle" font-weight="bold">RS485 Modbus</text><text x="365" y="116" text-anchor="middle">9600 8N1 FC03</text><text x="365" y="130" text-anchor="middle" fill="#555">VERIFIED (manual)</text>
+    <rect x="445" y="70" width="110" height="70" rx="8" fill="#f3e8ff" stroke="#7e22ce"/><text x="500" y="98" text-anchor="middle" font-weight="bold">ESP32</text><text x="500" y="116" text-anchor="middle">validity + rules</text><text x="500" y="130" text-anchor="middle" fill="#555">SIMULATED + host tests</text>
+    <rect x="580" y="70" width="110" height="70" rx="8" fill="#fef3c7" stroke="#d97706"/><text x="635" y="98" text-anchor="middle" font-weight="bold">NVS buffer</text><text x="635" y="116" text-anchor="middle">works offline</text><text x="635" y="130" text-anchor="middle" fill="#555">SIMULATED</text>
+    <rect x="715" y="70" width="110" height="70" rx="8" fill="#fee2e2" stroke="#dc2626"/><text x="770" y="98" text-anchor="middle" font-weight="bold">Telegram</text><text x="770" y="116" text-anchor="middle">caretaker phone</text><text x="770" y="130" text-anchor="middle" fill="#555">emulated / optional real</text>
+    <rect x="850" y="70" width="130" height="70" rx="8" fill="#f1f5f9" stroke="#475569"/><text x="915" y="98" text-anchor="middle" font-weight="bold">Human check</text><text x="915" y="116" text-anchor="middle">inspect → fix</text><text x="915" y="130" text-anchor="middle" fill="#555">closes the loop</text>
+    <line x1="140" y1="105" x2="163" y2="105" stroke="#333" stroke-width="2" marker-end="url(#a)"/>
+    <line x1="285" y1="105" x2="308" y2="105" stroke="#333" stroke-width="2" marker-end="url(#a)"/>
+    <line x1="420" y1="105" x2="443" y2="105" stroke="#333" stroke-width="2" marker-end="url(#a)"/>
+    <line x1="555" y1="105" x2="578" y2="105" stroke="#333" stroke-width="2" marker-end="url(#a)"/>
+    <line x1="690" y1="105" x2="713" y2="105" stroke="#333" stroke-width="2" marker-end="url(#a)"/>
+    <line x1="825" y1="105" x2="848" y2="105" stroke="#333" stroke-width="2" marker-end="url(#a)"/>
+    <path d="M915 140 L915 200 L80 200 L80 142" fill="none" stroke="#15803d" stroke-width="2" stroke-dasharray="6 4" marker-end="url(#a)"/>
+    <text x="500" y="195" text-anchor="middle" fill="#15803d">resolution: system confirms flow returned below the detection threshold</text>
+  </g>
+  <text x="20" y="240" font-size="12">Claim made: <tspan font-weight="bold">persistent unexpected flow</tspan> (not "leak"). One aggregate meter cannot name the fixture.</text>
+  <text x="20" y="260" font-size="12">Invalid sensor data → <tspan font-weight="bold">SENSOR_UNKNOWN</tspan>, never zero flow. No internet → local detection continues, events sync later.</text>
+  <text x="20" y="285" font-size="11" fill="#555">Tags: VERIFIED = primary document read · SIMULATED = behaviour proven in the digital test bench · NOT YET PHYSICALLY VERIFIED = needs the Phase 7 bench test.</text>
+</svg>
