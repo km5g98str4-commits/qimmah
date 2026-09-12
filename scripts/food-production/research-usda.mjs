@@ -58,7 +58,8 @@ function portions(f) {
     grams: typeof p.gramWeight === 'number' ? p.gramWeight : null,
     amount: p.amount ?? null,
     unit: p.measureUnit?.name ?? p.measureUnit?.abbreviation ?? null,
-    modifier: p.modifier ?? p.portionDescription ?? null,
+    // FNDDS يضع الوصف المقروء في portionDescription والرمز في modifier — الوصف أولًا.
+    modifier: p.portionDescription ?? p.modifier ?? null,
   })).filter((p) => p.grams && p.grams > 0)
 }
 
