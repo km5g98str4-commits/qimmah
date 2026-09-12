@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-12T22:41:15.337Z",
+  "generated_at": "2026-09-12T22:46:31.104Z",
   "source": "USDA FoodData Central (SR Legacy 2018-04 · Foundation Foods · FNDDS 2021-2023) — public domain (CC0)",
   "datasets": [
     {
@@ -16,17 +16,54 @@
     }
   ],
   "stats": {
-    "matched": 323,
+    "matched": 365,
     "exact": 308,
-    "single": 15,
-    "ambiguous": 15,
-    "unmatched": 80,
-    "skipped": 182
+    "single": 57,
+    "ambiguous": 21,
+    "unmatched": 23,
+    "skipped": 191
   },
   "results": [
     {
       "id": "QF0001",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 171509,
+      "dataType": "SR Legacy",
+      "description": "Chicken, broilers or fryers, breast, skinless, boneless, meat only, with added solution, raw",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 5314,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 108,
+        "protein": 20.3,
+        "carbs": 0,
+        "fat": 3,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 173,
+        "satFat": 0.545
+      },
+      "portions": [
+        {
+          "grams": 118,
+          "amount": 0.5,
+          "unit": "undetermined",
+          "modifier": "breast"
+        },
+        {
+          "grams": 113,
+          "amount": 4,
+          "unit": "undetermined",
+          "modifier": "oz"
+        },
+        {
+          "grams": 263,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "piece"
+        }
+      ]
     },
     {
       "id": "QF0002",
@@ -237,7 +274,38 @@
     },
     {
       "id": "QF0005",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173627,
+      "dataType": "SR Legacy",
+      "description": "Chicken, broilers or fryers, dark meat, thigh, meat only, raw",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 5096,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 121,
+        "protein": 19.7,
+        "carbs": 0,
+        "fat": 4.12,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 95,
+        "satFat": 1.1
+      },
+      "portions": [
+        {
+          "grams": 113,
+          "amount": 4,
+          "unit": "undetermined",
+          "modifier": "oz"
+        },
+        {
+          "grams": 149,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "thigh without skin"
+        }
+      ]
     },
     {
       "id": "QF0006",
@@ -581,7 +649,29 @@
     },
     {
       "id": "QF0014",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2705830,
+          "dataType": "FNDDS",
+          "description": "Beef, steak, ribeye, lean only eaten"
+        },
+        {
+          "fdcId": 2705834,
+          "dataType": "FNDDS",
+          "description": "Beef, steak, sirloin, lean only eaten"
+        },
+        {
+          "fdcId": 2705837,
+          "dataType": "FNDDS",
+          "description": "Beef, steak, strip, lean only eaten"
+        },
+        {
+          "fdcId": 2705840,
+          "dataType": "FNDDS",
+          "description": "Beef, steak, T-bone, lean only eaten"
+        }
+      ]
     },
     {
       "id": "QF0015",
@@ -620,11 +710,55 @@
     },
     {
       "id": "QF0016",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170839,
+          "dataType": "SR Legacy",
+          "description": "Beef, rib eye steak/roast, boneless, lip-on, separable lean only, trimmed to 1/8\" fat, all grades, raw"
+        },
+        {
+          "fdcId": 171209,
+          "dataType": "SR Legacy",
+          "description": "Beef, rib eye steak, boneless, lip-on, separable lean only, trimmed to 1/8\" fat, all grades, cooked, grilled"
+        },
+        {
+          "fdcId": 172142,
+          "dataType": "SR Legacy",
+          "description": "Beef, rib eye steak, boneless, lip off, separable lean only, trimmed to 0\" fat, all grades, cooked, grilled"
+        },
+        {
+          "fdcId": 172143,
+          "dataType": "SR Legacy",
+          "description": "Beef, rib eye steak, boneless, lip off, separable lean only, trimmed to 0\" fat, all grades, raw"
+        }
+      ]
     },
     {
       "id": "QF0017",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 172170,
+          "dataType": "SR Legacy",
+          "description": "Beef, loin, top sirloin cap steak, boneless, separable lean only, trimmed to 1/8\" fat, all grades, cooked, grilled"
+        },
+        {
+          "fdcId": 172173,
+          "dataType": "SR Legacy",
+          "description": "Beef, loin, top sirloin cap steak, boneless, separable lean only, trimmed to 1/8\" fat, all grades, raw"
+        },
+        {
+          "fdcId": 174054,
+          "dataType": "SR Legacy",
+          "description": "Beef, top sirloin, steak, separable lean only, trimmed to 1/8\" fat, all grades, cooked, broiled"
+        },
+        {
+          "fdcId": 174055,
+          "dataType": "SR Legacy",
+          "description": "Beef, top sirloin, steak, separable lean only, trimmed to 1/8\" fat, all grades, raw"
+        }
+      ]
     },
     {
       "id": "QF0018",
@@ -863,11 +997,84 @@
     },
     {
       "id": "QF0029",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2706287,
+      "dataType": "FNDDS",
+      "description": "Fish, salmon, grilled",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "26137123",
+      "per100g": {
+        "kcal": 259,
+        "protein": 25.9,
+        "carbs": 0,
+        "fat": 16.5,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 288,
+        "satFat": 3.76
+      },
+      "portions": [
+        {
+          "grams": 140,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64761"
+        },
+        {
+          "grams": 210,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64009"
+        },
+        {
+          "grams": 140,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        },
+        {
+          "grams": 135,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10205"
+        },
+        {
+          "grams": 17,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "51000"
+        },
+        {
+          "grams": 210,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "62898"
+        },
+        {
+          "grams": 20,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "40016"
+        }
+      ]
     },
     {
       "id": "QF0030",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2706286,
+          "dataType": "FNDDS",
+          "description": "Fish, salmon, baked or broiled"
+        },
+        {
+          "fdcId": 2706288,
+          "dataType": "FNDDS",
+          "description": "Fish, salmon, baked or broiled, coated"
+        }
+      ]
     },
     {
       "id": "QF0031",
@@ -999,11 +1206,85 @@
     },
     {
       "id": "QF0035",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 174210,
+      "dataType": "SR Legacy",
+      "description": "Crustaceans, shrimp, mixed species, raw (may contain additives to retain moisture)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 15149,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 71,
+        "protein": 13.6,
+        "carbs": 0.91,
+        "fat": 1.01,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 566,
+        "satFat": 0.261
+      },
+      "portions": [
+        {
+          "grams": 28,
+          "amount": 4,
+          "unit": "undetermined",
+          "modifier": "large"
+        },
+        {
+          "grams": 6,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium"
+        },
+        {
+          "grams": 5,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small"
+        },
+        {
+          "grams": 85,
+          "amount": 3,
+          "unit": "undetermined",
+          "modifier": "oz"
+        }
+      ]
     },
     {
       "id": "QF0036",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 171971,
+      "dataType": "SR Legacy",
+      "description": "Crustaceans, shrimp, mixed species, cooked, moist heat (may contain additives to retain moisture)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 15151,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 119,
+        "protein": 22.8,
+        "carbs": 1.52,
+        "fat": 1.7,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 947,
+        "satFat": 0.521
+      },
+      "portions": [
+        {
+          "grams": 85,
+          "amount": 3,
+          "unit": "undetermined",
+          "modifier": "oz"
+        },
+        {
+          "grams": 22,
+          "amount": 4,
+          "unit": "undetermined",
+          "modifier": "large"
+        }
+      ]
     },
     {
       "id": "QF0037",
@@ -1230,7 +1511,32 @@
     },
     {
       "id": "QF0042",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172006,
+      "dataType": "SR Legacy",
+      "description": "Fish, tuna, yellowfin, fresh, cooked, dry heat",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 15221,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 130,
+        "protein": 29.2,
+        "carbs": 0,
+        "fat": 0.59,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 54,
+        "satFat": 0.205
+      },
+      "portions": [
+        {
+          "grams": 85,
+          "amount": 3,
+          "unit": "undetermined",
+          "modifier": "oz"
+        }
+      ]
     },
     {
       "id": "QF0043",
@@ -1474,19 +1780,147 @@
     },
     {
       "id": "QF0049",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2707232,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with dark-green vegetables, fat added"
+        },
+        {
+          "fdcId": 2707233,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with dark-green vegetables, no added fat"
+        },
+        {
+          "fdcId": 2707234,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with dark-green vegetables, NS as to fat"
+        },
+        {
+          "fdcId": 2707235,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with tomatoes and dark-green vegetables, fat added"
+        },
+        {
+          "fdcId": 2707237,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with tomatoes and dark-green vegetables, NS as to fat"
+        },
+        {
+          "fdcId": 2707238,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with vegetables other than dark green and/or tomatoes, fat added"
+        },
+        {
+          "fdcId": 2707239,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with vegetables other than dark green and/or tomatoes, no added fat"
+        },
+        {
+          "fdcId": 2707240,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with vegetables other than dark green and/or tomatoes, NS as to fat"
+        }
+      ]
     },
     {
       "id": "QF0050",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2707207,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with cheese, made with margarine"
+        },
+        {
+          "fdcId": 2707208,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with cheese, made with oil"
+        },
+        {
+          "fdcId": 2707209,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with cheese, made with butter"
+        },
+        {
+          "fdcId": 2707211,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with cheese, made with cooking spray"
+        },
+        {
+          "fdcId": 2707212,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with cheese, no added fat"
+        },
+        {
+          "fdcId": 2707241,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with cheese and tomatoes, fat added"
+        },
+        {
+          "fdcId": 2707242,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with cheese and tomatoes, no added fat"
+        },
+        {
+          "fdcId": 2707243,
+          "dataType": "FNDDS",
+          "description": "Egg omelet or scrambled egg, with cheese and tomatoes, NS as to fat"
+        }
+      ]
     },
     {
       "id": "QF0051",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 171496,
+          "dataType": "SR Legacy",
+          "description": "Turkey, whole, breast, meat only, cooked, roasted"
+        },
+        {
+          "fdcId": 174514,
+          "dataType": "SR Legacy",
+          "description": "Turkey, retail parts, breast, meat only, with added solution, cooked, roasted"
+        },
+        {
+          "fdcId": 174516,
+          "dataType": "SR Legacy",
+          "description": "Turkey, retail parts, breast, meat only, cooked, roasted"
+        },
+        {
+          "fdcId": 174519,
+          "dataType": "SR Legacy",
+          "description": "Turkey, breast, from whole bird, meat only, with added solution, roasted"
+        }
+      ]
     },
     {
       "id": "QF0052",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 171496,
+          "dataType": "SR Legacy",
+          "description": "Turkey, whole, breast, meat only, cooked, roasted"
+        },
+        {
+          "fdcId": 174514,
+          "dataType": "SR Legacy",
+          "description": "Turkey, retail parts, breast, meat only, with added solution, cooked, roasted"
+        },
+        {
+          "fdcId": 174516,
+          "dataType": "SR Legacy",
+          "description": "Turkey, retail parts, breast, meat only, cooked, roasted"
+        },
+        {
+          "fdcId": 174519,
+          "dataType": "SR Legacy",
+          "description": "Turkey, breast, from whole bird, meat only, with added solution, roasted"
+        }
+      ]
     },
     {
       "id": "QF0053",
@@ -1540,19 +1974,167 @@
     },
     {
       "id": "QF0057",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2706730,
+      "dataType": "FNDDS",
+      "description": "Beef shish kabob with vegetables, excluding potatoes",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "27410250",
+      "per100g": {
+        "kcal": 122,
+        "protein": 14.8,
+        "carbs": 5.06,
+        "fat": 4.88,
+        "fiber": 0.8,
+        "sugar": 2.37,
+        "sodium": 208,
+        "satFat": 1.66
+      },
+      "portions": [
+        {
+          "grams": 154,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10205"
+        },
+        {
+          "grams": 202,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "61911"
+        },
+        {
+          "grams": 115,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        }
+      ]
     },
     {
       "id": "QF0058",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2706783,
+      "dataType": "FNDDS",
+      "description": "Chicken or turkey shish kabob with vegetables, excluding potatoes",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "27440130",
+      "per100g": {
+        "kcal": 104,
+        "protein": 13,
+        "carbs": 5.06,
+        "fat": 3.69,
+        "fiber": 0.8,
+        "sugar": 2.37,
+        "sodium": 346,
+        "satFat": 0.83
+      },
+      "portions": [
+        {
+          "grams": 154,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10205"
+        },
+        {
+          "grams": 202,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "61911"
+        },
+        {
+          "grams": 154,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        }
+      ]
     },
     {
       "id": "QF0059",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2706783,
+      "dataType": "FNDDS",
+      "description": "Chicken or turkey shish kabob with vegetables, excluding potatoes",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "27440130",
+      "per100g": {
+        "kcal": 104,
+        "protein": 13,
+        "carbs": 5.06,
+        "fat": 3.69,
+        "fiber": 0.8,
+        "sugar": 2.37,
+        "sodium": 346,
+        "satFat": 0.83
+      },
+      "portions": [
+        {
+          "grams": 154,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10205"
+        },
+        {
+          "grams": 202,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "61911"
+        },
+        {
+          "grams": 154,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        }
+      ]
     },
     {
       "id": "QF0060",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2706730,
+      "dataType": "FNDDS",
+      "description": "Beef shish kabob with vegetables, excluding potatoes",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "27410250",
+      "per100g": {
+        "kcal": 122,
+        "protein": 14.8,
+        "carbs": 5.06,
+        "fat": 4.88,
+        "fiber": 0.8,
+        "sugar": 2.37,
+        "sodium": 208,
+        "satFat": 1.66
+      },
+      "portions": [
+        {
+          "grams": 154,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10205"
+        },
+        {
+          "grams": 202,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "61911"
+        },
+        {
+          "grams": 115,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        }
+      ]
     },
     {
       "id": "QF0061",
@@ -1807,7 +2389,32 @@
     },
     {
       "id": "QF0068",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 174075,
+      "dataType": "SR Legacy",
+      "description": "Bread, chapati or roti, whole wheat, commercially prepared, frozen",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 28285,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 299,
+        "protein": 7.85,
+        "carbs": 46.1,
+        "fat": 9.2,
+        "fiber": 9.7,
+        "sugar": 2.93,
+        "sodium": 298,
+        "satFat": 3.31
+      },
+      "portions": [
+        {
+          "grams": 43,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "piece"
+        }
+      ]
     },
     {
       "id": "QF0069",
@@ -1845,7 +2452,32 @@
     },
     {
       "id": "QF0071",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 174075,
+      "dataType": "SR Legacy",
+      "description": "Bread, chapati or roti, whole wheat, commercially prepared, frozen",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 28285,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 299,
+        "protein": 7.85,
+        "carbs": 46.1,
+        "fat": 9.2,
+        "fiber": 9.7,
+        "sugar": 2.93,
+        "sodium": 298,
+        "satFat": 3.31
+      },
+      "portions": [
+        {
+          "grams": 43,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "piece"
+        }
+      ]
     },
     {
       "id": "QF0072",
@@ -2275,7 +2907,38 @@
     },
     {
       "id": "QF0084",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170250,
+      "dataType": "SR Legacy",
+      "description": "Snacks, rice cakes, brown rice, plain, unsalted",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 19816,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 387,
+        "protein": 8.2,
+        "carbs": 81.5,
+        "fat": 2.8,
+        "fiber": 4.2,
+        "sugar": 0.88,
+        "sodium": 26,
+        "satFat": 0.57
+      },
+      "portions": [
+        {
+          "grams": 9,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cake"
+        },
+        {
+          "grams": 18,
+          "amount": 2,
+          "unit": "undetermined",
+          "modifier": "cakes"
+        }
+      ]
     },
     {
       "id": "QF0085",
@@ -2607,7 +3270,19 @@
     },
     {
       "id": "QF0093",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 174994,
+          "dataType": "SR Legacy",
+          "description": "Muffins, English, plain, enriched, with ca prop (includes sourdough)"
+        },
+        {
+          "fdcId": 175063,
+          "dataType": "SR Legacy",
+          "description": "English muffins, plain, enriched, without calcium propionate(includes sourdough)"
+        }
+      ]
     },
     {
       "id": "QF0094",
@@ -2687,11 +3362,61 @@
     },
     {
       "id": "QF0105",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 169703,
+      "dataType": "SR Legacy",
+      "description": "Rice, brown, long-grain, raw (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20036,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 367,
+        "protein": 7.54,
+        "carbs": 76.2,
+        "fat": 3.2,
+        "fiber": 3.6,
+        "sugar": 0.66,
+        "sodium": 5,
+        "satFat": 0.591
+      },
+      "portions": [
+        {
+          "grams": 185,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0106",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 169704,
+      "dataType": "SR Legacy",
+      "description": "Rice, brown, long-grain, cooked (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20037,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 123,
+        "protein": 2.74,
+        "carbs": 25.6,
+        "fat": 0.97,
+        "fiber": 1.6,
+        "sugar": 0.24,
+        "sodium": 4,
+        "satFat": 0.26
+      },
+      "portions": [
+        {
+          "grams": 202,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0107",
@@ -2699,7 +3424,19 @@
     },
     {
       "id": "QF0108",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 168882,
+          "dataType": "SR Legacy",
+          "description": "Rice, white, short-grain, enriched, cooked"
+        },
+        {
+          "fdcId": 168932,
+          "dataType": "SR Legacy",
+          "description": "Rice, white, short-grain, cooked, unenriched"
+        }
+      ]
     },
     {
       "id": "QF0109",
@@ -3227,7 +3964,24 @@
     },
     {
       "id": "QF0128",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 168910,
+          "dataType": "SR Legacy",
+          "description": "Pasta, whole-wheat, cooked (Includes foods for USDA's Food Distribution Program)"
+        },
+        {
+          "fdcId": 168916,
+          "dataType": "SR Legacy",
+          "description": "Pasta, whole grain, 51% whole wheat, remaining unenriched semolina, cooked"
+        },
+        {
+          "fdcId": 172024,
+          "dataType": "SR Legacy",
+          "description": "Pasta, whole grain, 51% whole wheat, remaining enriched semolina, cooked (Includes foods for USDA's Food Distribution Program)"
+        }
+      ]
     },
     {
       "id": "QF0129",
@@ -3260,7 +4014,19 @@
     },
     {
       "id": "QF0130",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 168919,
+          "dataType": "SR Legacy",
+          "description": "Noodles, egg, cooked, enriched, with added salt"
+        },
+        {
+          "fdcId": 169732,
+          "dataType": "SR Legacy",
+          "description": "Noodles, egg, enriched, cooked"
+        }
+      ]
     },
     {
       "id": "QF0131",
@@ -3349,19 +4115,25 @@
     },
     {
       "id": "QF0134",
-      "status": "ambiguous",
-      "candidates": [
-        {
-          "fdcId": 2003588,
-          "dataType": "Foundation",
-          "description": "Flour, semolina, coarse and semi-coarse"
-        },
-        {
-          "fdcId": 2003589,
-          "dataType": "Foundation",
-          "description": "Flour, semolina, fine"
-        }
-      ]
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2003588,
+      "dataType": "Foundation",
+      "description": "Flour, semolina, coarse and semi-coarse",
+      "publicationDate": "10/28/2021",
+      "ndbNumber": 100269,
+      "foodCode": null,
+      "per100g": {
+        "kcal": null,
+        "protein": 11.7,
+        "carbs": 73.8,
+        "fat": 1.6,
+        "fiber": 3.22,
+        "sugar": null,
+        "sodium": 0,
+        "satFat": null
+      },
+      "portions": []
     },
     {
       "id": "QF0135",
@@ -3394,7 +4166,32 @@
     },
     {
       "id": "QF0136",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 168893,
+      "dataType": "SR Legacy",
+      "description": "Wheat flour, whole-grain (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 20080,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 340,
+        "protein": 13.2,
+        "carbs": 72,
+        "fat": 2.5,
+        "fiber": 10.7,
+        "sugar": 0.41,
+        "sodium": 2,
+        "satFat": 0.43
+      },
+      "portions": [
+        {
+          "grams": 120,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0137",
@@ -3489,23 +4286,54 @@
     },
     {
       "id": "QF0141",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 173002,
+      "dataType": "SR Legacy",
+      "description": "Cereals ready-to-eat, RALSTON Enriched Wheat Bran flakes",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 8504,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 390,
+        "protein": 10.2,
+        "carbs": 79.8,
+        "fat": 3.36,
+        "fiber": 16.9,
+        "sugar": 17.2,
+        "sodium": 586,
+        "satFat": 0.433
+      },
+      "portions": [
         {
-          "fdcId": 167725,
-          "dataType": "SR Legacy",
-          "description": "Cereals ready-to-eat, OAT BRAN FLAKES, HEALTH VALLEY"
+          "grams": 29,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving (NLEA serving size = 0.75 cup)"
         },
         {
-          "fdcId": 173002,
-          "dataType": "SR Legacy",
-          "description": "Cereals ready-to-eat, RALSTON Enriched Wheat Bran flakes"
+          "grams": 42,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
         }
       ]
     },
     {
       "id": "QF0142",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 171651,
+          "dataType": "SR Legacy",
+          "description": "Cereals ready-to-eat, QUAKER, QUAKER Puffed Rice"
+        },
+        {
+          "fdcId": 173912,
+          "dataType": "SR Legacy",
+          "description": "Cereals ready-to-eat, rice, puffed, fortified"
+        }
+      ]
     },
     {
       "id": "QF0143",
@@ -4085,7 +4913,8 @@
     },
     {
       "id": "QF0159",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0160",
@@ -4141,7 +4970,8 @@
     },
     {
       "id": "QF0162",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0163",
@@ -4414,7 +5244,32 @@
     },
     {
       "id": "QF0169",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172223,
+      "dataType": "SR Legacy",
+      "description": "Cheese, fresh, queso fresco",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 1228,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 299,
+        "protein": 18.1,
+        "carbs": 2.98,
+        "fat": 23.8,
+        "fiber": 0,
+        "sugar": 2.32,
+        "sodium": 751,
+        "satFat": 12.9
+      },
+      "portions": [
+        {
+          "grams": 122,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup, crumbled"
+        }
+      ]
     },
     {
       "id": "QF0170",
@@ -4797,7 +5652,44 @@
     },
     {
       "id": "QF0181",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2705442,
+      "dataType": "FNDDS",
+      "description": "Yogurt, liquid",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "11436000",
+      "per100g": {
+        "kcal": 74,
+        "protein": 3.65,
+        "carbs": 12.6,
+        "fat": 1.07,
+        "fiber": 0.1,
+        "sugar": 10.3,
+        "sodium": 53,
+        "satFat": 0.689
+      },
+      "portions": [
+        {
+          "grams": 150,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64039"
+        },
+        {
+          "grams": 245,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10205"
+        },
+        {
+          "grams": 150,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        }
+      ]
     },
     {
       "id": "QF0182",
@@ -6844,7 +7736,38 @@
     },
     {
       "id": "QF0221",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2709641,
+      "dataType": "FNDDS",
+      "description": "Bitter melon, horseradish, jute, or radish leaves, cooked",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "72132201",
+      "per100g": {
+        "kcal": 56,
+        "protein": 3.49,
+        "carbs": 6.47,
+        "fat": 2.74,
+        "fiber": 1.8,
+        "sugar": 1.01,
+        "sodium": 134,
+        "satFat": 0.697
+      },
+      "portions": [
+        {
+          "grams": 64,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        },
+        {
+          "grams": 128,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10205"
+        }
+      ]
     },
     {
       "id": "QF0222",
@@ -7117,7 +8040,38 @@
     },
     {
       "id": "QF0229",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 168482,
+      "dataType": "SR Legacy",
+      "description": "Sweet potato, raw, unprepared (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 11507,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 86,
+        "protein": 1.57,
+        "carbs": 20.1,
+        "fat": 0.05,
+        "fiber": 3,
+        "sugar": 4.18,
+        "sodium": 55,
+        "satFat": 0.018
+      },
+      "portions": [
+        {
+          "grams": 133,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup, cubes"
+        },
+        {
+          "grams": 130,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "sweetpotato, 5\" long"
+        }
+      ]
     },
     {
       "id": "QF0230",
@@ -7671,11 +8625,133 @@
     },
     {
       "id": "QF0243",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 171688,
+      "dataType": "SR Legacy",
+      "description": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 9003,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 52,
+        "protein": 0.26,
+        "carbs": 13.8,
+        "fat": 0.17,
+        "fiber": 2.4,
+        "sugar": 10.4,
+        "sodium": 1,
+        "satFat": 0.028
+      },
+      "portions": [
+        {
+          "grams": 109,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup slices"
+        },
+        {
+          "grams": 182,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium (3\" dia)"
+        },
+        {
+          "grams": 149,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small (2-3/4\" dia)"
+        },
+        {
+          "grams": 242,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "NLEA serving"
+        },
+        {
+          "grams": 125,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup, quartered or chopped"
+        },
+        {
+          "grams": 101,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "extra small (2-1/2\" dia)"
+        },
+        {
+          "grams": 223,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large (3-1/4\" dia)"
+        }
+      ]
     },
     {
       "id": "QF0244",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 171688,
+      "dataType": "SR Legacy",
+      "description": "Apples, raw, with skin (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 9003,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 52,
+        "protein": 0.26,
+        "carbs": 13.8,
+        "fat": 0.17,
+        "fiber": 2.4,
+        "sugar": 10.4,
+        "sodium": 1,
+        "satFat": 0.028
+      },
+      "portions": [
+        {
+          "grams": 109,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup slices"
+        },
+        {
+          "grams": 182,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium (3\" dia)"
+        },
+        {
+          "grams": 149,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small (2-3/4\" dia)"
+        },
+        {
+          "grams": 242,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "NLEA serving"
+        },
+        {
+          "grams": 125,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup, quartered or chopped"
+        },
+        {
+          "grams": 101,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "extra small (2-1/2\" dia)"
+        },
+        {
+          "grams": 223,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large (3-1/4\" dia)"
+        }
+      ]
     },
     {
       "id": "QF0245",
@@ -8989,7 +10065,62 @@
     },
     {
       "id": "QF0273",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 168165,
+      "dataType": "SR Legacy",
+      "description": "Raisins, dark, seedless (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 9298,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 299,
+        "protein": 3.3,
+        "carbs": 79.3,
+        "fat": 0.25,
+        "fiber": 4.5,
+        "sugar": 65.2,
+        "sodium": 26,
+        "satFat": 0.094
+      },
+      "portions": [
+        {
+          "grams": 28.35,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "oz (60 raisins)"
+        },
+        {
+          "grams": 14,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "miniature box (.5 oz)"
+        },
+        {
+          "grams": 43,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small box (1.5 oz)"
+        },
+        {
+          "grams": 26,
+          "amount": 50,
+          "unit": "undetermined",
+          "modifier": "raisins"
+        },
+        {
+          "grams": 145,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup (not packed)"
+        },
+        {
+          "grams": 165,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup, packed"
+        }
+      ]
     },
     {
       "id": "QF0274",
@@ -9098,7 +10229,32 @@
     },
     {
       "id": "QF0277",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 171723,
+      "dataType": "SR Legacy",
+      "description": "Cranberries, dried, sweetened (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 9079,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 308,
+        "protein": 0.17,
+        "carbs": 82.8,
+        "fat": 1.09,
+        "fiber": 5.3,
+        "sugar": 72.6,
+        "sodium": 5,
+        "satFat": 0.088
+      },
+      "portions": [
+        {
+          "grams": 40,
+          "amount": 0.25,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0278",
@@ -9899,7 +11055,44 @@
     },
     {
       "id": "QF0303",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2710049,
+      "dataType": "FNDDS",
+      "description": "Eggplant dip",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "75412030",
+      "per100g": {
+        "kcal": 183,
+        "protein": 4.8,
+        "carbs": 8.15,
+        "fat": 15,
+        "fiber": 3.9,
+        "sugar": 2.81,
+        "sodium": 209,
+        "satFat": 2.19
+      },
+      "portions": [
+        {
+          "grams": 15,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "21000"
+        },
+        {
+          "grams": 60,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        },
+        {
+          "grams": 70,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "60868"
+        }
+      ]
     },
     {
       "id": "QF0304",
@@ -11829,7 +13022,8 @@
     },
     {
       "id": "QF0358",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0359",
@@ -12153,7 +13347,50 @@
     },
     {
       "id": "QF0369",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170459,
+      "dataType": "SR Legacy",
+      "description": "Tomato products, canned, paste, without salt added (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 11546,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 82,
+        "protein": 4.32,
+        "carbs": 18.9,
+        "fat": 0.47,
+        "fiber": 4.1,
+        "sugar": 12.2,
+        "sodium": 59,
+        "satFat": 0.1
+      },
+      "portions": [
+        {
+          "grams": 170,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "can (6 oz)"
+        },
+        {
+          "grams": 16,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "tbsp"
+        },
+        {
+          "grams": 66,
+          "amount": 0.25,
+          "unit": "undetermined",
+          "modifier": "cup"
+        },
+        {
+          "grams": 262,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0370",
@@ -12186,35 +13423,172 @@
     },
     {
       "id": "QF0371",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2710169,
+      "dataType": "FNDDS",
+      "description": "Garlic sauce",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "81301000",
+      "per100g": {
+        "kcal": 683,
+        "protein": 1.43,
+        "carbs": 2.87,
+        "fat": 74,
+        "fiber": 0.3,
+        "sugar": 0.62,
+        "sodium": 473,
+        "satFat": 41
+      },
+      "portions": [
         {
-          "fdcId": 2706465,
-          "dataType": "FNDDS",
-          "description": "Shrimp in garlic sauce, Puerto Rican style"
+          "grams": 28,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64353"
         },
         {
-          "fdcId": 2710169,
-          "dataType": "FNDDS",
-          "description": "Garlic sauce"
+          "grams": 16,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "21000"
+        },
+        {
+          "grams": 32,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
         }
       ]
     },
     {
       "id": "QF0372",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0373",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2705448,
+      "dataType": "FNDDS",
+      "description": "Tzatziki dip",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "11440060",
+      "per100g": {
+        "kcal": 91,
+        "protein": 5.22,
+        "carbs": 4.1,
+        "fat": 6,
+        "fiber": 0.2,
+        "sugar": 2.5,
+        "sodium": 307,
+        "satFat": 1.89
+      },
+      "portions": [
+        {
+          "grams": 70,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "60868"
+        },
+        {
+          "grams": 15,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "21000"
+        },
+        {
+          "grams": 60,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        }
+      ]
     },
     {
       "id": "QF0374",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173647,
+      "dataType": "SR Legacy",
+      "description": "Beverages, water, tap, drinking",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 14411,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 4,
+        "satFat": 0
+      },
+      "portions": [
+        {
+          "grams": 1000,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "liter"
+        },
+        {
+          "grams": 237,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving 8 fl oz"
+        },
+        {
+          "grams": 29.6,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "fl oz"
+        }
+      ]
     },
     {
       "id": "QF0375",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 174842,
+      "dataType": "SR Legacy",
+      "description": "Beverages, carbonated, club soda",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 14121,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 0,
+        "protein": 0,
+        "carbs": 0,
+        "fat": 0,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 21,
+        "satFat": 0
+      },
+      "portions": [
+        {
+          "grams": 355,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "can or bottle (12 fl oz)"
+        },
+        {
+          "grams": 29.6,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "fl oz"
+        },
+        {
+          "grams": 474,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "can or bottle (16 fl oz)"
+        }
+      ]
     },
     {
       "id": "QF0376",
@@ -12338,31 +13712,76 @@
     },
     {
       "id": "QF0381",
-      "status": "unmatched"
-    },
-    {
-      "id": "QF0382",
       "status": "ambiguous",
       "candidates": [
         {
-          "fdcId": 2710472,
+          "fdcId": 2710386,
           "dataType": "FNDDS",
-          "description": "Coffee, Cappuccino"
+          "description": "Coffee, Latte"
         },
         {
-          "fdcId": 2710474,
+          "fdcId": 2710392,
           "dataType": "FNDDS",
-          "description": "Coffee, Cappuccino, with non-dairy milk"
+          "description": "Coffee, Latte, decaffeinated"
+        }
+      ]
+    },
+    {
+      "id": "QF0382",
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2710472,
+      "dataType": "FNDDS",
+      "description": "Coffee, Cappuccino",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "92161000",
+      "per100g": {
+        "kcal": 27,
+        "protein": 1.71,
+        "carbs": 2.75,
+        "fat": 0.99,
+        "fiber": 0,
+        "sugar": 2.46,
+        "sodium": 23,
+        "satFat": 0.575
+      },
+      "portions": [
+        {
+          "grams": 30,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "30000"
         },
         {
-          "fdcId": 2710475,
-          "dataType": "FNDDS",
-          "description": "Coffee, Cappuccino, decaffeinated"
+          "grams": 240,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10215"
         },
         {
-          "fdcId": 2710477,
-          "dataType": "FNDDS",
-          "description": "Coffee, Cappuccino, decaffeinated, with non-dairy milk"
+          "grams": 360,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        },
+        {
+          "grams": 360,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "62015"
+        },
+        {
+          "grams": 480,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "61238"
+        },
+        {
+          "grams": 600,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "60919"
         }
       ]
     },
@@ -12371,14 +13790,44 @@
       "status": "ambiguous",
       "candidates": [
         {
-          "fdcId": 174119,
-          "dataType": "SR Legacy",
-          "description": "Beverages, coffee, ready to drink, iced, mocha, milk based"
+          "fdcId": 2710410,
+          "dataType": "FNDDS",
+          "description": "Coffee, Cafe Mocha"
         },
         {
-          "fdcId": 174135,
-          "dataType": "SR Legacy",
-          "description": "Beverages, coffee, instant, mocha, sweetened"
+          "fdcId": 2710411,
+          "dataType": "FNDDS",
+          "description": "Coffee, Cafe Mocha, nonfat"
+        },
+        {
+          "fdcId": 2710412,
+          "dataType": "FNDDS",
+          "description": "Coffee, Cafe Mocha, with non-dairy milk"
+        },
+        {
+          "fdcId": 2710413,
+          "dataType": "FNDDS",
+          "description": "Coffee, Cafe Mocha, decaffeinated"
+        },
+        {
+          "fdcId": 2710414,
+          "dataType": "FNDDS",
+          "description": "Coffee, Cafe Mocha, decaffeinated, nonfat"
+        },
+        {
+          "fdcId": 2710415,
+          "dataType": "FNDDS",
+          "description": "Coffee, Cafe Mocha, decaffeinated, with non-dairy milk"
+        },
+        {
+          "fdcId": 2710416,
+          "dataType": "FNDDS",
+          "description": "Frozen mocha coffee drink"
+        },
+        {
+          "fdcId": 2710417,
+          "dataType": "FNDDS",
+          "description": "Frozen mocha coffee drink, nonfat"
         }
       ]
     },
@@ -12528,7 +13977,44 @@
     },
     {
       "id": "QF0389",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 169098,
+      "dataType": "SR Legacy",
+      "description": "Orange juice, raw (Includes foods for USDA's Food Distribution Program)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 9206,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 45,
+        "protein": 0.7,
+        "carbs": 10.4,
+        "fat": 0.2,
+        "fiber": 0.2,
+        "sugar": 8.4,
+        "sodium": 1,
+        "satFat": 0.024
+      },
+      "portions": [
+        {
+          "grams": 31,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "fl oz"
+        },
+        {
+          "grams": 86,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "fruit yields"
+        },
+        {
+          "grams": 248,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        }
+      ]
     },
     {
       "id": "QF0390",
@@ -12776,90 +14262,73 @@
     },
     {
       "id": "QF0398",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2710771,
+      "dataType": "FNDDS",
+      "description": "Sports drink, NFS",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "95321000",
+      "per100g": {
+        "kcal": 26,
+        "protein": 0,
+        "carbs": 6.43,
+        "fat": 0,
+        "fiber": 0,
+        "sugar": 5.24,
+        "sodium": 39,
+        "satFat": 0
+      },
+      "portions": [
         {
-          "fdcId": 2710615,
-          "dataType": "FNDDS",
-          "description": "Sports drink, dry concentrate, not reconstituted"
+          "grams": 372,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "60422"
         },
         {
-          "fdcId": 2710769,
-          "dataType": "FNDDS",
-          "description": "Sports drink (Gatorade G)"
+          "grams": 31,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "30000"
         },
         {
-          "fdcId": 2710770,
-          "dataType": "FNDDS",
-          "description": "Sports drink (Powerade)"
+          "grams": 524,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64090"
         },
         {
-          "fdcId": 2710771,
-          "dataType": "FNDDS",
-          "description": "Sports drink, NFS"
+          "grams": 992,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64518"
         },
         {
-          "fdcId": 2710772,
-          "dataType": "FNDDS",
-          "description": "Sports drink, low calorie (Gatorade G2)"
+          "grams": 248,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10205"
         },
         {
-          "fdcId": 2710773,
-          "dataType": "FNDDS",
-          "description": "Sports drink, low calorie (Powerade Zero)"
+          "grams": 496,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
         },
         {
-          "fdcId": 2710774,
-          "dataType": "FNDDS",
-          "description": "Sports drink, low calorie"
+          "grams": 620,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "63999"
         }
       ]
     },
     {
       "id": "QF0399",
-      "status": "ambiguous",
-      "candidates": [
-        {
-          "fdcId": 171935,
-          "dataType": "SR Legacy",
-          "description": "Beverages, Energy Drink, Monster, fortified with vitamins C, B2, B3, B6, B12"
-        },
-        {
-          "fdcId": 171937,
-          "dataType": "SR Legacy",
-          "description": "Beverages, Energy drink, ROCKSTAR"
-        },
-        {
-          "fdcId": 171943,
-          "dataType": "SR Legacy",
-          "description": "Beverages, Energy drink, VAULT, citrus flavor"
-        },
-        {
-          "fdcId": 173162,
-          "dataType": "SR Legacy",
-          "description": "Beverages, MONSTER energy drink, low carb"
-        },
-        {
-          "fdcId": 173165,
-          "dataType": "SR Legacy",
-          "description": "Beverages, THE COCA-COLA COMPANY, NOS energy drink, Original, grape, loaded cherry, charged citrus, fortified with vitamins B6 and B12"
-        },
-        {
-          "fdcId": 173210,
-          "dataType": "SR Legacy",
-          "description": "Beverages, Energy drink, RED BULL"
-        },
-        {
-          "fdcId": 174108,
-          "dataType": "SR Legacy",
-          "description": "Beverages,  Energy drink, Citrus"
-        },
-        {
-          "fdcId": 174171,
-          "dataType": "SR Legacy",
-          "description": "Beverages, Energy drink, AMP"
-        }
-      ]
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0400",
@@ -12993,22 +14462,36 @@
     },
     {
       "id": "QF0402",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 171277,
+      "dataType": "SR Legacy",
+      "description": "Milk, chocolate beverage, hot cocoa, homemade",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 1105,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 77,
+        "protein": 3.52,
+        "carbs": 10.7,
+        "fat": 2.34,
+        "fiber": 1,
+        "sugar": 9.66,
+        "sodium": 44,
+        "satFat": 1.43
+      },
+      "portions": [
         {
-          "fdcId": 171277,
-          "dataType": "SR Legacy",
-          "description": "Milk, chocolate beverage, hot cocoa, homemade"
+          "grams": 31.2,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "fl oz"
         },
         {
-          "fdcId": 171887,
-          "dataType": "SR Legacy",
-          "description": "Cocoa mix, NESTLE, Rich Chocolate Hot Cocoa Mix"
-        },
-        {
-          "fdcId": 174124,
-          "dataType": "SR Legacy",
-          "description": "Beverages, Cocoa mix, NESTLE, Hot Cocoa Mix Rich Chocolate With Marshmallows"
+          "grams": 250,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
         }
       ]
     },
@@ -13188,7 +14671,8 @@
     },
     {
       "id": "QF0431",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0432",
@@ -13212,7 +14696,44 @@
     },
     {
       "id": "QF0436",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2708730,
+      "dataType": "FNDDS",
+      "description": "Samosa",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "58124500",
+      "per100g": {
+        "kcal": 310,
+        "protein": 5.14,
+        "carbs": 33.2,
+        "fat": 17.5,
+        "fiber": 1.8,
+        "sugar": 1.28,
+        "sodium": 388,
+        "satFat": 4.41
+      },
+      "portions": [
+        {
+          "grams": 25,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64770"
+        },
+        {
+          "grams": 100,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "61109"
+        },
+        {
+          "grams": 75,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
+        }
+      ]
     },
     {
       "id": "QF0437",
@@ -13285,22 +14806,36 @@
     },
     {
       "id": "QF0445",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2709064,
+      "dataType": "FNDDS",
+      "description": "Grape leaves stuffed with rice",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "58161510",
+      "per100g": {
+        "kcal": 168,
+        "protein": 2.28,
+        "carbs": 13.9,
+        "fat": 12,
+        "fiber": 3.1,
+        "sugar": 2.78,
+        "sodium": 166,
+        "satFat": 1.87
+      },
+      "portions": [
         {
-          "fdcId": 2706621,
-          "dataType": "FNDDS",
-          "description": "Stuffed grape leaves with beef and rice"
+          "grams": 56,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
         },
         {
-          "fdcId": 2706659,
-          "dataType": "FNDDS",
-          "description": "Stuffed grape leaves with lamb and rice"
-        },
-        {
-          "fdcId": 2709064,
-          "dataType": "FNDDS",
-          "description": "Grape leaves stuffed with rice"
+          "grams": 56,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "61823"
         }
       ]
     },
@@ -13336,7 +14871,8 @@
     },
     {
       "id": "QF0452",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0453",
@@ -13611,19 +15147,14 @@
       "status": "ambiguous",
       "candidates": [
         {
-          "fdcId": 168079,
+          "fdcId": 172111,
           "dataType": "SR Legacy",
-          "description": "DENNY'S, chicken nuggets, star shaped, from kid's menu"
+          "description": "Chicken, nuggets, dark and white meat, precooked, frozen, not reheated"
         },
         {
-          "fdcId": 170725,
+          "fdcId": 172112,
           "dataType": "SR Legacy",
-          "description": "WENDY'S, Chicken Nuggets"
-        },
-        {
-          "fdcId": 170795,
-          "dataType": "SR Legacy",
-          "description": "School Lunch, chicken nuggets, whole grain breaded"
+          "description": "Chicken, nuggets, white meat, precooked, frozen, not reheated"
         }
       ]
     },
@@ -13632,29 +15163,29 @@
       "status": "ambiguous",
       "candidates": [
         {
-          "fdcId": 169022,
-          "dataType": "SR Legacy",
-          "description": "DENNY'S, chicken strips"
+          "fdcId": 2706098,
+          "dataType": "FNDDS",
+          "description": "Chicken tenders or strips, NFS"
         },
         {
-          "fdcId": 170338,
-          "dataType": "SR Legacy",
-          "description": "POPEYES, Spicy Chicken Strips, analyzed 2006"
+          "fdcId": 2706100,
+          "dataType": "FNDDS",
+          "description": "Chicken tenders or strips, breaded, from restaurant"
         },
         {
-          "fdcId": 170341,
-          "dataType": "SR Legacy",
-          "description": "KFC, Crispy Chicken Strips"
+          "fdcId": 2706101,
+          "dataType": "FNDDS",
+          "description": "Chicken tenders or strips, breaded, from school lunch"
         },
         {
-          "fdcId": 170731,
-          "dataType": "SR Legacy",
-          "description": "BURGER KING, Chicken Strips"
+          "fdcId": 2706102,
+          "dataType": "FNDDS",
+          "description": "Chicken tenders or strips, breaded, from frozen"
         },
         {
-          "fdcId": 172088,
-          "dataType": "SR Legacy",
-          "description": "POPEYES, Mild Chicken Strips, analyzed 2006"
+          "fdcId": 2706103,
+          "dataType": "FNDDS",
+          "description": "Chicken tenders or strips, breaded, from other sources"
         }
       ]
     },
@@ -13695,42 +15226,54 @@
     },
     {
       "id": "QF0487",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2708222,
+      "dataType": "FNDDS",
+      "description": "Popcorn, popped in oil, with added butter",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "54403046",
+      "per100g": {
+        "kcal": 525,
+        "protein": 7.69,
+        "carbs": 49.1,
+        "fat": 35.2,
+        "fiber": 8.4,
+        "sugar": 0.51,
+        "sodium": 223,
+        "satFat": 9.21
+      },
+      "portions": [
         {
-          "fdcId": 2708217,
-          "dataType": "FNDDS",
-          "description": "Popcorn, movie theater, with added butter"
+          "grams": 14,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10134"
         },
         {
-          "fdcId": 2708218,
-          "dataType": "FNDDS",
-          "description": "Popcorn, movie theater, no butter added"
+          "grams": 193,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "10189"
         },
         {
-          "fdcId": 2708219,
-          "dataType": "FNDDS",
-          "description": "Popcorn, air-popped, no butter added"
+          "grams": 35,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
         },
         {
-          "fdcId": 2708220,
-          "dataType": "FNDDS",
-          "description": "Popcorn, air-popped, with added butter"
+          "grams": 25,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "40066"
         },
         {
-          "fdcId": 2708221,
-          "dataType": "FNDDS",
-          "description": "Popcorn, popped in oil, no butter added"
-        },
-        {
-          "fdcId": 2708222,
-          "dataType": "FNDDS",
-          "description": "Popcorn, popped in oil, with added butter"
-        },
-        {
-          "fdcId": 2708235,
-          "dataType": "FNDDS",
-          "description": "Popcorn, ready-to-eat, butter flavored"
+          "grams": 0.2,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64031"
         }
       ]
     },
@@ -13818,43 +15361,61 @@
     },
     {
       "id": "QF0490",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2707945,
+      "dataType": "FNDDS",
+      "description": "Cookie, oatmeal",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "53233000",
+      "per100g": {
+        "kcal": 450,
+        "protein": 6.2,
+        "carbs": 68.7,
+        "fat": 18.1,
+        "fiber": 2.8,
+        "sugar": 24.7,
+        "sodium": 520,
+        "satFat": 4.52
+      },
+      "portions": [
         {
-          "fdcId": 2707945,
-          "dataType": "FNDDS",
-          "description": "Cookie, oatmeal"
+          "grams": 5,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "64233"
         },
         {
-          "fdcId": 2707946,
-          "dataType": "FNDDS",
-          "description": "Cookie, oatmeal, with raisins"
+          "grams": 20,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "62015"
         },
         {
-          "fdcId": 2707947,
-          "dataType": "FNDDS",
-          "description": "Cookie, oatmeal, reduced fat, NS as to raisins"
+          "grams": 30,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "61238"
         },
         {
-          "fdcId": 2707948,
-          "dataType": "FNDDS",
-          "description": "Cookie, oatmeal sandwich, with creme filling"
+          "grams": 45,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "60919"
         },
         {
-          "fdcId": 2707950,
-          "dataType": "FNDDS",
-          "description": "Cookie, oatmeal sandwich, with peanut butter and jelly filling"
-        },
-        {
-          "fdcId": 2707986,
-          "dataType": "FNDDS",
-          "description": "Cookie, oatmeal, reduced sugar"
+          "grams": 60,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "90000"
         }
       ]
     },
     {
       "id": "QF0491",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0492",
@@ -14064,11 +15625,35 @@
     },
     {
       "id": "QF0496",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 174934,
+          "dataType": "SR Legacy",
+          "description": "Cake, chocolate, commercially prepared with chocolate frosting, in-store bakery"
+        },
+        {
+          "fdcId": 174944,
+          "dataType": "SR Legacy",
+          "description": "Cake, yellow, commercially prepared, with chocolate frosting, in-store bakery"
+        }
+      ]
     },
     {
       "id": "QF0497",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2707861,
+          "dataType": "FNDDS",
+          "description": "Cheesecake, plain"
+        },
+        {
+          "fdcId": 2707862,
+          "dataType": "FNDDS",
+          "description": "Cheesecake, fruit"
+        }
+      ]
     },
     {
       "id": "QF0498",
@@ -14239,7 +15824,8 @@
     },
     {
       "id": "QF0505",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "recipe"
     },
     {
       "id": "QF0506",
@@ -14354,17 +15940,30 @@
     },
     {
       "id": "QF0514",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 169269,
+      "dataType": "SR Legacy",
+      "description": "Potato salad, home-prepared",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 11414,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 143,
+        "protein": 2.68,
+        "carbs": 11.2,
+        "fat": 8.2,
+        "fiber": 1.3,
+        "sugar": null,
+        "sodium": 529,
+        "satFat": 1.43
+      },
+      "portions": [
         {
-          "fdcId": 169269,
-          "dataType": "SR Legacy",
-          "description": "Potato salad, home-prepared"
-        },
-        {
-          "fdcId": 173343,
-          "dataType": "SR Legacy",
-          "description": "Potato salad with egg"
+          "grams": 250,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
         }
       ]
     },
@@ -14783,7 +16382,32 @@
     },
     {
       "id": "QF0563",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170999,
+      "dataType": "SR Legacy",
+      "description": "Babyfood, banana with mixed berries, strained",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 3995,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 92,
+        "protein": 1.01,
+        "carbs": 21.3,
+        "fat": 0.36,
+        "fiber": 1,
+        "sugar": 15,
+        "sodium": 0,
+        "satFat": 0.081
+      },
+      "portions": [
+        {
+          "grams": 99,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "packet"
+        }
+      ]
     },
     {
       "id": "QF0564",
@@ -14904,7 +16528,19 @@
     },
     {
       "id": "QF0567",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 168398,
+          "dataType": "SR Legacy",
+          "description": "Corn, sweet, yellow, frozen, kernels cut off cob, unprepared (Includes foods for USDA's Food Distribution Program)"
+        },
+        {
+          "fdcId": 168400,
+          "dataType": "SR Legacy",
+          "description": "Corn, sweet, yellow, frozen, kernels on cob, unprepared"
+        }
+      ]
     },
     {
       "id": "QF0568",
