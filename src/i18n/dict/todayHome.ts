@@ -111,8 +111,8 @@ const ar: TodayHomeStrings = {
   firstDayTitle: 'يومك الأول في قِمّة',
   firstDayExpect: 'اليوم ما نبي منك إلا بداية صغيرة — خطوة وحدة تكفي، وباقي اليوم يجي وراها.',
   firstDayPickOne: 'اختر اللي يناسبك الحين:',
-  firstDayNumbers: 'أول ما تسجّل، تبدأ الأرقام تظهر: حلقة السعرات تبيّن اللي استهلكته والرقم داخلها الباقي. وكل هدف تقديري مبني على بياناتك — ما فيه رقم يجي من فراغ.',
-  firstDayNumbersMinor: 'لعمرك ما نحسب أهداف سعرات أو ماكروز أو ماء رقمية — نركّز على العادات والتسجيل والتمرين. أول ما تسجّل، يظهر سجلّك بدون أهداف رقمية.',
+  firstDayNumbers: 'أول ما تسجّل، تظهر أرقامك هنا. كل هدف تقديري من بياناتك.',
+  firstDayNumbersMinor: 'لعمرك ما نحسب أهداف سعرات أو ماء — نركّز على العادات والتسجيل. أول ما تسجّل يظهر سجلّك هنا.',
 
   nextStepEyebrow: 'خطوتك الجاية · الحين',
   restDayChip: 'يوم راحة',
@@ -181,8 +181,8 @@ const en: TodayHomeStrings = {
   firstDayTitle: 'Your first day on Qimmah',
   firstDayExpect: 'All we want today is a small start — one step is enough, the rest follows.',
   firstDayPickOne: 'Pick whatever suits you right now:',
-  firstDayNumbers: 'Once you log something, the numbers show up: the calorie ring shows what you have used, and the number inside is what is left. Every target is an estimate built from your data — no number comes out of nowhere.',
-  firstDayNumbersMinor: 'At your age we don’t set calorie, macro or water targets — we focus on habits, logging and training. Once you log something, your log shows up without numeric targets.',
+  firstDayNumbers: 'Log something and your numbers show up here. Every target is an estimate from your data.',
+  firstDayNumbersMinor: 'At your age we don’t set calorie or water targets — we focus on habits and logging. Log something and it shows up here.',
 
   nextStepEyebrow: 'Your next step · now',
   restDayChip: 'Rest day',

@@ -55,7 +55,10 @@ export function useKeyboardViewport(): { keyboardOpen: boolean } {
       }
       baselineHeight = Math.max(baselineHeight, vv.height)
       const shrink = baselineHeight - vv.height
-      const open = shrink > KEYBOARD_MIN_PX && isTextEntry(document.activeElement)
+      // تكبير القرص (وصولية) يقلّص المنطقة المرئية أيضًا — وليس لوحة مفاتيح. لو
+      // عاملناه كذلك لانكمشت القشرة مع كل تكبير وصارت الشاشة «غريبة» بعده.
+      const pinchZoomed = vv.scale > 1.01
+      const open = !pinchZoomed && shrink > KEYBOARD_MIN_PX && isTextEntry(document.activeElement)
       if (open) {
         root.style.setProperty(VAR, `${Math.round(vv.height)}px`)
         root.setAttribute('data-keyboard', 'open')

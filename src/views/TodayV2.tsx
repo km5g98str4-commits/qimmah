@@ -400,14 +400,6 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
           }}
         />
 
-        {/* [FINAL-CONVERGENCE] مدخل المرشد — كان يتيمًا.
-            المسار `#/coach` مسجَّل (`appRoutes.ts:43,64`) ومُركَّب (`App.tsx:564`)،
-            وهذه البطاقة مكتوبة لتكون مدخله من «اليوم» — **ولم يستوردها أحد**، ولا
-            وُجد في `src/` نداءُ تنقّل واحد إلى `coach`. فالشاشة كاملة ومُثبَتة
-            بـ٧١٣ فحصًا، ولا يبلغها مستخدم إلا بكتابة الهاش بيده.
-            وهي خفيفة عمدًا (أيقونة وثلاثة نصوص ونداء تنقّل) فلا تجرّ حزمة
-            المرشد إلى «اليوم» — الثقيل يبقى خلف `React.lazy` على المسار. */}
-        <CoachTodayEntry lang={lang} onOpen={() => onNavigate('coach')} />
 
         {/* ④ كيف ماشي معي؟ */}
         <WaterCard lang={lang} consumedMl={dayLog.waterMl} targetMl={waterTargetMl} onAdd={addWater} minor={minor} />
@@ -438,6 +430,11 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
             </button>
           )}
         </WeeklyPulseCard>
+
+        {/* [COACH-002] مدخل المرشد **بعد** أفعال اليوم لا قبلها: التسجيل والماء
+            والخطوات والنبض هي ما يفعله المستخدم كل يوم؛ المرشد أداة عند الحاجة،
+            فصفّ مدمج واحد يكفيه. (كان بطاقة كاملة وسط الشاشة قبل الماء والخطوات.) */}
+        <CoachTodayEntry lang={lang} onOpen={() => onNavigate('coach')} />
 
         {/* ⑤ «رؤى الأسبوع» (`InsightCardsView`) **لا تُعرض هنا بعد الآن.**
             كانت تجيب نفس سؤال بطاقة النبض بعبارة أقسى («التزامك ٠٪ — أقل من
