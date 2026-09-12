@@ -47,6 +47,7 @@ export interface CoachStrings extends CoachEntryStrings {
   disclosureLocal: string
   disclosureExternal: string
   askLabel: string
+  howItAnswers: string
   askPlaceholder: string
   askSubmit: string
   /**

@@ -165,15 +165,23 @@ export function CoachView({ lang, onBack, onNavigate }: CoachViewProps) {
           <span className="h-11 w-11 shrink-0" aria-hidden="true" />
         </div>
 
-        <header className="rounded-3xl border border-line bg-surface p-5 shadow-card">
+        {/* [COACH-002] رأس من سطرين لا ثلاث فقرات: العنوان يقول ما يفعله المرشد،
+            والإفصاح الكامل (لا نموذج لغوي · لا ذاكرة) خلف «كيف يجاوب؟» — ظاهر
+            بنقرة واحدة، لا مدفون. الشاشة كثيفة على الجوال، والمستخدم جاء ليسأل. */}
+        <header className="rounded-3xl border border-line bg-surface p-4 shadow-card">
           <span className="flex items-center gap-1.5 text-xs font-black" style={{ color: 'var(--v2-blue-text)' }}>
             <Icon name="MessageCircle" className="h-4 w-4" />
             {s.eyebrow}
           </span>
-          <h2 className="mt-2 text-2xl font-black leading-tight">{s.subtitle}</h2>
-          {/* الإفصاح **ليس** خلف «معلومات إضافية»: أول ما يُقرأ على الشاشة. */}
-          <p className="mt-2 text-sm leading-relaxed text-ink-500">{disclosure}</p>
-          <p className="mt-2 text-sm leading-relaxed text-ink-500">{s.noMemoryNote}</p>
+          <h2 className="mt-1.5 text-xl font-black leading-tight">{s.subtitle}</h2>
+          <details className="mt-2 text-sm text-ink-500">
+            <summary className="inline-flex min-h-[44px] cursor-pointer list-none items-center gap-1 font-bold [&::-webkit-details-marker]:hidden" style={{ color: 'var(--v2-blue-text)' }}>
+              <Icon name="Info" className="h-4 w-4" />
+              {s.howItAnswers}
+            </summary>
+            <p className="mt-1 leading-relaxed">{disclosure}</p>
+            <p className="mt-1 leading-relaxed">{s.noMemoryNote}</p>
+          </details>
         </header>
 
         <form onSubmit={onSubmit} className="space-y-2">
@@ -189,7 +197,9 @@ export function CoachView({ lang, onBack, onNavigate }: CoachViewProps) {
               onChange={(event) => setQuery(event.target.value)}
               placeholder={s.askPlaceholder}
               autoComplete="off"
-              className="min-h-[44px] flex-1 rounded-xl border border-line bg-beige px-3 py-2 text-base text-ink-900 focus:border-[color:var(--v2-blue-text)] focus:outline-none focus:ring-2"
+              // [COACH-002] `min-w-0`: بلا هذا يفرض حقل النصّ عرضه الذاتي (~٢٠ حرفًا) فيدفع
+              // زرّ «اسأل» خارج الشاشة عند ٣٩٠ بكسل RTL — مقيس: الزرّ مقصوص إلى «اسأ».
+              className="min-h-[44px] min-w-0 flex-1 rounded-xl border border-line bg-beige px-3 py-2 text-base text-ink-900 focus:border-[color:var(--v2-blue-text)] focus:outline-none focus:ring-2"
             />
             <button
               type="submit"

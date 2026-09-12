@@ -56,8 +56,10 @@ const MATCHERS: Readonly<Record<CoachQuestionId, QuestionMatcher>> = {
     hints: ['تمرين', 'exercise', 'اقدر', 'can i'],
   },
   whyCaloriesChanged: {
-    topics: ['سعرات', 'سعراتي', 'كالوري', 'calorie', 'calories'],
-    hints: ['ليش', 'why', 'رقم', 'number', 'هدفي', 'target'],
+    // [COACH-002] أسئلة الأهداف الغذائية كلّها هنا (بروتين · كارب · دهون · ماكروز):
+    // الجواب يشرح كيف حُسبت الأهداف من ملفّك — وهو ما يسأل عنه «كم بروتين آكل؟».
+    topics: ['سعرات', 'سعراتي', 'كالوري', 'calorie', 'calories', 'بروتين', 'كارب', 'دهون', 'ماكروز', 'protein', 'carbs', 'macros', 'اهدافي', 'targets'],
+    hints: ['ليش', 'why', 'رقم', 'number', 'هدفي', 'target', 'كم', 'how much', 'how many', 'اكل', 'eat'],
   },
   progressTrend: {
     topics: ['تقدمي', 'تقدم', 'progress', 'نتايجي', 'نتائجي', 'improving', 'how am i doing'],

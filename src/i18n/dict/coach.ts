@@ -31,14 +31,14 @@ import type { CoachEntryStrings, CoachStrings } from '@/lib/coach/strings'
 const arEntry: CoachEntryStrings = {
   eyebrow: 'المرشد',
   entryTitle: 'مرشد قِمّة',
-  entryBody: 'ستة أسئلة يجاوبها من بياناتك أنت — بلا نموذج لغوي وبلا اتصال.',
+  entryBody: 'ستة أسئلة عن يومك وخطتك — من بياناتك أنت.',
   entryCta: 'افتح المرشد',
 }
 
 const enEntry: CoachEntryStrings = {
   eyebrow: 'Coach',
   entryTitle: 'Qimmah coach',
-  entryBody: 'Six questions answered from your own data — no language model, no connection.',
+  entryBody: 'Six questions about your day and plan — from your own data.',
   entryCta: 'Open the coach',
 }
 
@@ -53,6 +53,7 @@ const ar: CoachStrings = {
     'كل جواب هنا محسوب من بياناتك على جهازك. ما فيه نموذج لغوي ولا اتصال بأي خدمة خارجية — وكل سطر مكتوب تحته مصدره.',
   disclosureExternal: 'هذا الجواب جا من مزوّد خارجي.',
   askLabel: 'اسأل المرشد',
+  howItAnswers: 'كيف يجاوب؟',
   askPlaceholder: 'مثال: ليش سعراتي هذا الرقم؟',
   askSubmit: 'اسأل',
   noMemoryNote:
@@ -226,6 +227,7 @@ const en: CoachStrings = {
     "Every answer here is worked out from your own data on this device. No language model, no outside service — and each line names where it came from.",
   disclosureExternal: 'This answer came from an outside provider.',
   askLabel: 'Ask the coach',
+  howItAnswers: 'How does it answer?',
   askPlaceholder: 'e.g. Why is my calorie number this?',
   askSubmit: 'Ask',
   noMemoryNote:
