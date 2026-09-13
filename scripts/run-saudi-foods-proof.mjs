@@ -39,7 +39,7 @@ await build({
   stdin: {
     contents: `
       export { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS, SCRIPT_TRANSLITERATIONS } from '@/data/foodItems'
-      export { servingSummary } from '@/lib/servingDisplay'
+      export { servingSummary, servingNoun } from '@/lib/servingDisplay'
     `,
     resolveDir: root,
     loader: 'ts',
@@ -58,7 +58,7 @@ try {
 } finally {
   try { rmSync(outfile) } catch { /* ignore */ }
 }
-const { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS, SCRIPT_TRANSLITERATIONS, servingSummary } = mod
+const { foodItems, searchFood, normalizeSearch, LOANWORD_SPELLINGS, SCRIPT_TRANSLITERATIONS, servingSummary, servingNoun } = mod
 
 const saudi = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('sfct-'))
 const ARABIC = /[؀-ۿ]/
@@ -179,8 +179,12 @@ const enLeaks = foodItems.filter((f) => {
   return en != null && ARABIC.test(en)
 })
 check('لا نصّ عربي في تسمية الحصة الإنجليزية لأي صنف', enLeaks.length === 0, `${enLeaks.length} من ${foodItems.length}`)
+// [RESTAURANT-MENUS-001] أصناف المنيو الرسمي السعودي (rst-*) قد تأتي بلا وزن — المنيو يعلن السعرات لا الغرامات،
+// ولا نخترع وزنًا. الاستثناء مسمّى ومحروس: كل صنف بلا غرامات هو rst-* وتسميته تُترجم بوحدة منزلية (لا سقوط عربي في EN).
 const noGrams = foodItems.filter((f) => servingSummary(f, 'en', 'g') == null)
-check('كل الأصناف لها غرامات حصة (لا سقوط للتسمية العربية)', noGrams.length === 0, `${noGrams.length} بلا servingGrams`)
+const noGramsOutside = noGrams.filter((f) => !f.id.startsWith('rst-'))
+check('كل الأصناف لها غرامات حصة (لا سقوط للتسمية العربية) — عدا rst-* المعلَن', noGramsOutside.length === 0, `${noGramsOutside.length} بلا servingGrams`)
+check('كل rst-* بلا غرامات تُترجم تسميته إلى وحدة إنجليزية لا «serving» العامّة', noGrams.every((f) => servingNoun(f.servingLabelAr, 'en') !== 'serving'), noGrams.filter((f) => servingNoun(f.servingLabelAr, 'en') === 'serving').map((f) => f.servingLabelAr).join('، '))
 
 console.log('\n═══ 8) [CTO-72] البند ٥ — البحث ثنائي الخطّ (نقل صوتي) ═══')
 
