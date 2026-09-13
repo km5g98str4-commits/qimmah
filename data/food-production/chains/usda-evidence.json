@@ -1,0 +1,1681 @@
+{
+  "generated_at": "2026-09-13T11:04:01.940Z",
+  "source": "USDA FoodData Central (SR Legacy 2018-04 · Foundation Foods · FNDDS 2021-2023) — public domain (CC0)",
+  "datasets": [
+    {
+      "name": "sr",
+      "foods": 7793
+    },
+    {
+      "name": "foundation",
+      "foods": 340
+    },
+    {
+      "name": "fndds",
+      "foods": 5432
+    }
+  ],
+  "stats": {
+    "matched": 39,
+    "exact": 0,
+    "single": 39,
+    "ambiguous": 12,
+    "unmatched": 36,
+    "skipped": 0
+  },
+  "results": [
+    {
+      "id": "CH001",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170720,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, BIG MAC"
+        },
+        {
+          "fdcId": 172067,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, BIG MAC (without Big Mac Sauce)"
+        }
+      ]
+    },
+    {
+      "id": "CH002",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170719,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, QUARTER POUNDER with Cheese",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21235,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 258,
+        "protein": 14.6,
+        "carbs": 20,
+        "fat": 14.2,
+        "fiber": 1.4,
+        "sugar": 4.91,
+        "sodium": 579,
+        "satFat": 5.64
+      },
+      "portions": [
+        {
+          "grams": 199,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item 7.1 oz"
+        }
+      ]
+    },
+    {
+      "id": "CH003",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172066,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, DOUBLE QUARTER POUNDER with Cheese",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21345,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 262,
+        "protein": 17,
+        "carbs": 14.4,
+        "fat": 16.2,
+        "fiber": 1,
+        "sugar": 3.49,
+        "sodium": 476,
+        "satFat": 6.47
+      },
+      "portions": [
+        {
+          "grams": 280,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item"
+        }
+      ]
+    },
+    {
+      "id": "CH004",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170320,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Cheeseburger",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21233,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 263,
+        "protein": 13,
+        "carbs": 27.8,
+        "fat": 11.8,
+        "fiber": 1.1,
+        "sugar": 6.22,
+        "sodium": 626,
+        "satFat": 4.44
+      },
+      "portions": [
+        {
+          "grams": 119,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item 4 oz"
+        }
+      ]
+    },
+    {
+      "id": "CH005",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172065,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Double Cheeseburger",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21344,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 282,
+        "protein": 15.5,
+        "carbs": 18.8,
+        "fat": 16.1,
+        "fiber": 0.8,
+        "sugar": 4.23,
+        "sodium": 668,
+        "satFat": 7
+      },
+      "portions": [
+        {
+          "grams": 155,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "sandwich"
+        }
+      ]
+    },
+    {
+      "id": "CH006",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170717,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Hamburger",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21228,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 264,
+        "protein": 12.9,
+        "carbs": 30.3,
+        "fat": 10.1,
+        "fiber": 1.3,
+        "sugar": 6.03,
+        "sodium": 494,
+        "satFat": 3.5
+      },
+      "portions": [
+        {
+          "grams": 95,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "sandwich"
+        }
+      ]
+    },
+    {
+      "id": "CH007",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 173305,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, McCHICKEN Sandwich"
+        },
+        {
+          "fdcId": 173306,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, McCHICKEN Sandwich (without mayonnaise)"
+        }
+      ]
+    },
+    {
+      "id": "CH008",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170319,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, FILET-O-FISH"
+        },
+        {
+          "fdcId": 173314,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, FILET-O-FISH (without tartar sauce)"
+        }
+      ]
+    },
+    {
+      "id": "CH009",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173297,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Chicken McNUGGETS",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21309,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 302,
+        "protein": 15.8,
+        "carbs": 15.1,
+        "fat": 19.8,
+        "fiber": null,
+        "sugar": 0.08,
+        "sodium": 566,
+        "satFat": 3.26
+      },
+      "portions": [
+        {
+          "grams": 95,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        },
+        {
+          "grams": 64,
+          "amount": 4,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        },
+        {
+          "grams": 159,
+          "amount": 10,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        }
+      ]
+    },
+    {
+      "id": "CH010",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170721,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, french fries",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21238,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 323,
+        "protein": 3.41,
+        "carbs": 42.6,
+        "fat": 15.5,
+        "fiber": 3.9,
+        "sugar": 0.21,
+        "sodium": 189,
+        "satFat": 2.27
+      },
+      "portions": [
+        {
+          "grams": 154,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large serving"
+        },
+        {
+          "grams": 71,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small serving"
+        },
+        {
+          "grams": 117,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium serving"
+        },
+        {
+          "grams": 31,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "kids serving"
+        }
+      ]
+    },
+    {
+      "id": "CH011",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170721,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, french fries",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21238,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 323,
+        "protein": 3.41,
+        "carbs": 42.6,
+        "fat": 15.5,
+        "fiber": 3.9,
+        "sugar": 0.21,
+        "sodium": 189,
+        "satFat": 2.27
+      },
+      "portions": [
+        {
+          "grams": 154,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large serving"
+        },
+        {
+          "grams": 71,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small serving"
+        },
+        {
+          "grams": 117,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium serving"
+        },
+        {
+          "grams": 31,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "kids serving"
+        }
+      ]
+    },
+    {
+      "id": "CH012",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173307,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Egg McMUFFIN",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21357,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 228,
+        "protein": 13.6,
+        "carbs": 21.7,
+        "fat": 9.66,
+        "fiber": 1.1,
+        "sugar": 2.13,
+        "sodium": 617,
+        "satFat": 3.59
+      },
+      "portions": [
+        {
+          "grams": 126,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "sandwich"
+        }
+      ]
+    },
+    {
+      "id": "CH013",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173298,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Hash Brown",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21319,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 271,
+        "protein": 2.48,
+        "carbs": 28.6,
+        "fat": 16.3,
+        "fiber": 2.8,
+        "sugar": 0.54,
+        "sodium": 580,
+        "satFat": 2.33
+      },
+      "portions": [
+        {
+          "grams": 53,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving 1 patty"
+        }
+      ]
+    },
+    {
+      "id": "CH014",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 173299,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Hotcakes (plain)"
+        },
+        {
+          "fdcId": 173311,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Hotcakes (with 2 pats margarine & syrup)"
+        }
+      ]
+    },
+    {
+      "id": "CH015",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173301,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Hot Caramel Sundae",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21335,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 188,
+        "protein": 3.58,
+        "carbs": 33.4,
+        "fat": 4.89,
+        "fiber": 0,
+        "sugar": 23.5,
+        "sodium": 80,
+        "satFat": 2.47
+      },
+      "portions": [
+        {
+          "grams": 182,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item (6.4 oz)"
+        }
+      ]
+    },
+    {
+      "id": "CH016",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH017",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170739,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat only, skin and breading removed"
+        },
+        {
+          "fdcId": 170744,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat and skin with breading"
+        }
+      ]
+    },
+    {
+      "id": "CH018",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170346,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat and skin with breading"
+        },
+        {
+          "fdcId": 170741,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat only, skin and breading removed"
+        }
+      ]
+    },
+    {
+      "id": "CH019",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170740,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat only, skin and breading removed"
+        },
+        {
+          "fdcId": 170745,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat and skin with breading"
+        }
+      ]
+    },
+    {
+      "id": "CH020",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170342,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat only, skin and breading removed"
+        },
+        {
+          "fdcId": 170347,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat and skin with breading"
+        }
+      ]
+    },
+    {
+      "id": "CH021",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170344,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat only, skin and breading removed"
+        },
+        {
+          "fdcId": 170348,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat and skin with breading"
+        }
+      ]
+    },
+    {
+      "id": "CH022",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 170742,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat only, skin and breading removed"
+        },
+        {
+          "fdcId": 170746,
+          "dataType": "SR Legacy",
+          "description": "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat and skin with breading"
+        }
+      ]
+    },
+    {
+      "id": "CH023",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170341,
+      "dataType": "SR Legacy",
+      "description": "KFC, Crispy Chicken Strips",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21421,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 274,
+        "protein": 20.2,
+        "carbs": 13.7,
+        "fat": 15.4,
+        "fiber": 1.4,
+        "sugar": 0,
+        "sodium": 948,
+        "satFat": 2.89
+      },
+      "portions": [
+        {
+          "grams": 47,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "strip"
+        }
+      ]
+    },
+    {
+      "id": "CH024",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170737,
+      "dataType": "SR Legacy",
+      "description": "KFC, Popcorn Chicken",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21422,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 351,
+        "protein": 17.7,
+        "carbs": 21.2,
+        "fat": 21.7,
+        "fiber": 1,
+        "sugar": 0,
+        "sodium": 1140,
+        "satFat": 3.95
+      },
+      "portions": [
+        {
+          "grams": 6.4,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "piece"
+        },
+        {
+          "grams": 56,
+          "amount": 10,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        }
+      ]
+    },
+    {
+      "id": "CH025",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170340,
+      "dataType": "SR Legacy",
+      "description": "KFC, Coleslaw",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21420,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 144,
+        "protein": 0.91,
+        "carbs": 15.6,
+        "fat": 8.64,
+        "fiber": 2,
+        "sugar": 13.5,
+        "sodium": 189,
+        "satFat": 1.3
+      },
+      "portions": [
+        {
+          "grams": 191,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "cup"
+        },
+        {
+          "grams": 112,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "package"
+        }
+      ]
+    },
+    {
+      "id": "CH026",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH027",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170339,
+      "dataType": "SR Legacy",
+      "description": "KFC, biscuit",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21419,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 358,
+        "protein": 7.5,
+        "carbs": 43.6,
+        "fat": 17,
+        "fiber": 2,
+        "sugar": 4.04,
+        "sodium": 1070,
+        "satFat": 11.9
+      },
+      "portions": [
+        {
+          "grams": 49,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "biscuit"
+        }
+      ]
+    },
+    {
+      "id": "CH028",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH029",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2706923,
+          "dataType": "FNDDS",
+          "description": "Whopper Jr (Burger King)"
+        },
+        {
+          "fdcId": 2706931,
+          "dataType": "FNDDS",
+          "description": "Whopper (Burger King)"
+        }
+      ]
+    },
+    {
+      "id": "CH030",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170728,
+      "dataType": "SR Legacy",
+      "description": "BURGER KING, WHOPPER, with cheese",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21253,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 250,
+        "protein": 11.2,
+        "carbs": 16.7,
+        "fat": 15.3,
+        "fiber": 1,
+        "sugar": 4.11,
+        "sodium": 453,
+        "satFat": 5.78
+      },
+      "portions": [
+        {
+          "grams": 316,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item"
+        }
+      ]
+    },
+    {
+      "id": "CH031",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH032",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2706923,
+      "dataType": "FNDDS",
+      "description": "Whopper Jr (Burger King)",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "27510552",
+      "per100g": {
+        "kcal": 216,
+        "protein": 10.7,
+        "carbs": 21.1,
+        "fat": 9.58,
+        "fiber": 1,
+        "sugar": 4.28,
+        "sodium": 315,
+        "satFat": 3.16
+      },
+      "portions": [
+        {
+          "grams": 135,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
+        },
+        {
+          "grams": 135,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 hamburger"
+        }
+      ]
+    },
+    {
+      "id": "CH033",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170329,
+      "dataType": "SR Legacy",
+      "description": "BURGER KING, Cheeseburger",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21251,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 286,
+        "protein": 14.6,
+        "carbs": 23.7,
+        "fat": 14.8,
+        "fiber": 1,
+        "sugar": 4.49,
+        "sodium": 602,
+        "satFat": 6.84
+      },
+      "portions": [
+        {
+          "grams": 133,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item"
+        }
+      ]
+    },
+    {
+      "id": "CH034",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170374,
+      "dataType": "SR Legacy",
+      "description": "BURGER KING, Double Cheeseburger",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21506,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 282,
+        "protein": 16.8,
+        "carbs": 17.4,
+        "fat": 16.1,
+        "fiber": null,
+        "sugar": 4.17,
+        "sodium": 562,
+        "satFat": 6.92
+      },
+      "portions": [
+        {
+          "grams": 162,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "sandwich"
+        }
+      ]
+    },
+    {
+      "id": "CH035",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170331,
+      "dataType": "SR Legacy",
+      "description": "BURGER KING, Original Chicken Sandwich",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21259,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 286,
+        "protein": 12.1,
+        "carbs": 26.2,
+        "fat": 14.7,
+        "fiber": 2.4,
+        "sugar": 3.02,
+        "sodium": 638,
+        "satFat": 2.72
+      },
+      "portions": [
+        {
+          "grams": 199,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "sandwich"
+        }
+      ]
+    },
+    {
+      "id": "CH036",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH037",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170327,
+      "dataType": "SR Legacy",
+      "description": "BURGER KING, french fries",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21249,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 280,
+        "protein": 3.23,
+        "carbs": 38.7,
+        "fat": 12.5,
+        "fiber": 2.9,
+        "sugar": 0.51,
+        "sodium": 279,
+        "satFat": 2.14
+      },
+      "portions": [
+        {
+          "grams": 117,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium serving"
+        },
+        {
+          "grams": 74,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small serving"
+        },
+        {
+          "grams": 160,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large serving"
+        }
+      ]
+    },
+    {
+      "id": "CH038",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170771,
+      "dataType": "SR Legacy",
+      "description": "BURGER KING, Onion Rings",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21509,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 417,
+        "protein": 3.86,
+        "carbs": 43.6,
+        "fat": 25.2,
+        "fiber": 2.7,
+        "sugar": 5.43,
+        "sodium": 776,
+        "satFat": 4.19
+      },
+      "portions": [
+        {
+          "grams": 117,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium"
+        },
+        {
+          "grams": 142,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large"
+        },
+        {
+          "grams": 91,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small"
+        }
+      ]
+    },
+    {
+      "id": "CH039",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172041,
+      "dataType": "SR Legacy",
+      "description": "PIZZA HUT 12\" Cheese Pizza, Pan Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21272,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 280,
+        "protein": 11.7,
+        "carbs": 29.9,
+        "fat": 12.6,
+        "fiber": 1.7,
+        "sugar": 3.21,
+        "sodium": 624,
+        "satFat": 5.18
+      },
+      "portions": [
+        {
+          "grams": 728,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pizza"
+        },
+        {
+          "grams": 100,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        }
+      ]
+    },
+    {
+      "id": "CH040",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173280,
+      "dataType": "SR Legacy",
+      "description": "PIZZA HUT 12\" Pepperoni Pizza, Pan Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21275,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 298,
+        "protein": 12,
+        "carbs": 30.5,
+        "fat": 14.2,
+        "fiber": 1.8,
+        "sugar": 3.2,
+        "sodium": 692,
+        "satFat": 5.27
+      },
+      "portions": [
+        {
+          "grams": 96,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        },
+        {
+          "grams": 778,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pizza"
+        }
+      ]
+    },
+    {
+      "id": "CH041",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH042",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172042,
+      "dataType": "SR Legacy",
+      "description": "PIZZA HUT 12\" Cheese Pizza, THIN 'N CRISPY Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21273,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 303,
+        "protein": 15.3,
+        "carbs": 28.6,
+        "fat": 14.1,
+        "fiber": 1.6,
+        "sugar": 2.67,
+        "sodium": 784,
+        "satFat": 6.9
+      },
+      "portions": [
+        {
+          "grams": 573,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pizza"
+        },
+        {
+          "grams": 69,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        }
+      ]
+    },
+    {
+      "id": "CH043",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH044",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173290,
+      "dataType": "SR Legacy",
+      "description": "PIZZA HUT 14\" Cheese Pizza, Hand-Tossed Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21293,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 275,
+        "protein": 12,
+        "carbs": 33.4,
+        "fat": 10.4,
+        "fiber": 2.4,
+        "sugar": 3.13,
+        "sodium": 674,
+        "satFat": 4.82
+      },
+      "portions": [
+        {
+          "grams": 841,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pizza"
+        },
+        {
+          "grams": 105,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        }
+      ]
+    },
+    {
+      "id": "CH045",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172052,
+      "dataType": "SR Legacy",
+      "description": "PIZZA HUT 14\" Pepperoni Pizza, Hand-Tossed Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21296,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 291,
+        "protein": 12.2,
+        "carbs": 32.1,
+        "fat": 12.6,
+        "fiber": 2.6,
+        "sugar": 2.82,
+        "sodium": 759,
+        "satFat": 5.4
+      },
+      "portions": [
+        {
+          "grams": 110,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        },
+        {
+          "grams": 883,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pizza"
+        }
+      ]
+    },
+    {
+      "id": "CH046",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH047",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173284,
+      "dataType": "SR Legacy",
+      "description": "PAPA JOHN'S 14\" Cheese Pizza, Original Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21283,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 260,
+        "protein": 11.5,
+        "carbs": 32.7,
+        "fat": 9.25,
+        "fiber": 1.9,
+        "sugar": 5.32,
+        "sodium": 578,
+        "satFat": 3.87
+      },
+      "portions": [
+        {
+          "grams": 117,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        },
+        {
+          "grams": 938,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pie"
+        }
+      ]
+    },
+    {
+      "id": "CH048",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173285,
+      "dataType": "SR Legacy",
+      "description": "PAPA JOHN'S 14\" Pepperoni Pizza, Original Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21284,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 275,
+        "protein": 12,
+        "carbs": 30,
+        "fat": 11.9,
+        "fiber": 1.2,
+        "sugar": 4.84,
+        "sodium": 671,
+        "satFat": 4.91
+      },
+      "portions": [
+        {
+          "grams": 123,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        },
+        {
+          "grams": 1021,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pie"
+        }
+      ]
+    },
+    {
+      "id": "CH049",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173286,
+      "dataType": "SR Legacy",
+      "description": "PAPA JOHN'S 14\" The Works Pizza, Original Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21285,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 240,
+        "protein": 10.3,
+        "carbs": 26.7,
+        "fat": 10.2,
+        "fiber": 2.5,
+        "sugar": 4.84,
+        "sodium": 570,
+        "satFat": 3.76
+      },
+      "portions": [
+        {
+          "grams": 153,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        },
+        {
+          "grams": 1093,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pie"
+        }
+      ]
+    },
+    {
+      "id": "CH050",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173287,
+      "dataType": "SR Legacy",
+      "description": "PAPA JOHN'S 14\" Cheese Pizza, Thin Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21286,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 295,
+        "protein": 12.3,
+        "carbs": 26.3,
+        "fat": 15.7,
+        "fiber": 2.3,
+        "sugar": 3.85,
+        "sodium": 528,
+        "satFat": 6.2
+      },
+      "portions": [
+        {
+          "grams": 87,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        },
+        {
+          "grams": 678,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pie"
+        }
+      ]
+    },
+    {
+      "id": "CH051",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170711,
+      "dataType": "SR Legacy",
+      "description": "SUBWAY, turkey breast sub on white bread with lettuce and tomato",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21207,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 147,
+        "protein": 9.12,
+        "carbs": 22.4,
+        "fat": 2.31,
+        "fiber": 1.3,
+        "sugar": 3.09,
+        "sodium": 317,
+        "satFat": 0.476
+      },
+      "portions": [
+        {
+          "grams": 367,
+          "amount": 12,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        },
+        {
+          "grams": 184,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        }
+      ]
+    },
+    {
+      "id": "CH052",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170316,
+      "dataType": "SR Legacy",
+      "description": "SUBWAY, tuna sub on white bread with lettuce and tomato",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21214,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 221,
+        "protein": 12.3,
+        "carbs": 16,
+        "fat": 12,
+        "fiber": 0.7,
+        "sugar": 1.93,
+        "sodium": 329,
+        "satFat": 2.19
+      },
+      "portions": [
+        {
+          "grams": 237,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        },
+        {
+          "grams": 474,
+          "amount": 12,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        }
+      ]
+    },
+    {
+      "id": "CH053",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170705,
+      "dataType": "SR Legacy",
+      "description": "SUBWAY, sweet onion chicken teriyaki sub on white bread with lettuce, tomato and sweet onion sauce",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21150,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 155,
+        "protein": 10.9,
+        "carbs": 22.5,
+        "fat": 2.37,
+        "fiber": 1.2,
+        "sugar": 6.06,
+        "sodium": 305,
+        "satFat": 0.505
+      },
+      "portions": [
+        {
+          "grams": 228,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        },
+        {
+          "grams": 457,
+          "amount": 12,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        }
+      ]
+    },
+    {
+      "id": "CH054",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170708,
+      "dataType": "SR Legacy",
+      "description": "SUBWAY, meatball marinara sub on white bread (no toppings)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21157,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 219,
+        "protein": 9.77,
+        "carbs": 26,
+        "fat": 8.45,
+        "fiber": 2.1,
+        "sugar": 4.98,
+        "sodium": 437,
+        "satFat": 3.12
+      },
+      "portions": [
+        {
+          "grams": 209,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        },
+        {
+          "grams": 418,
+          "amount": 12,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        }
+      ]
+    },
+    {
+      "id": "CH055",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH056",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170310,
+      "dataType": "SR Legacy",
+      "description": "SUBWAY, steak & cheese sub on white bread with American cheese, lettuce and tomato",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21159,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 183,
+        "protein": 12.3,
+        "carbs": 21.5,
+        "fat": 5.34,
+        "fiber": 1.2,
+        "sugar": 3.41,
+        "sodium": 444,
+        "satFat": 2.03
+      },
+      "portions": [
+        {
+          "grams": 401,
+          "amount": 12,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        },
+        {
+          "grams": 201,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        }
+      ]
+    },
+    {
+      "id": "CH057",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170314,
+      "dataType": "SR Legacy",
+      "description": "SUBWAY, oven roasted chicken sub on white bread with lettuce and tomato",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21211,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 157,
+        "protein": 10.8,
+        "carbs": 21.4,
+        "fat": 3.15,
+        "fiber": 1.2,
+        "sugar": 2.99,
+        "sodium": 268,
+        "satFat": 0.724
+      },
+      "portions": [
+        {
+          "grams": 198,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        },
+        {
+          "grams": 396,
+          "amount": 12,
+          "unit": "undetermined",
+          "modifier": "inch sub"
+        }
+      ]
+    },
+    {
+      "id": "CH058",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH059",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH060",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH061",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 169831,
+      "dataType": "SR Legacy",
+      "description": "APPLEBEE'S, 9 oz house sirloin steak",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 36000,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 189,
+        "protein": 26.8,
+        "carbs": 0,
+        "fat": 9.08,
+        "fiber": null,
+        "sugar": 0,
+        "sodium": 604,
+        "satFat": 3.48
+      },
+      "portions": [
+        {
+          "grams": 157,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving"
+        }
+      ]
+    },
+    {
+      "id": "CH062",
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 169012,
+          "dataType": "SR Legacy",
+          "description": "APPLEBEE'S, chicken tenders, from kids' menu"
+        },
+        {
+          "fdcId": 169841,
+          "dataType": "SR Legacy",
+          "description": "APPLEBEE'S, chicken tenders platter"
+        }
+      ]
+    },
+    {
+      "id": "CH063",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH064",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH065",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 169011,
+      "dataType": "SR Legacy",
+      "description": "APPLEBEE'S, mozzarella sticks",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 36004,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 316,
+        "protein": 14.9,
+        "carbs": 22.9,
+        "fat": 18.4,
+        "fiber": 2.1,
+        "sugar": 2.8,
+        "sodium": 838,
+        "satFat": 6.73
+      },
+      "portions": [
+        {
+          "grams": 289,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving"
+        },
+        {
+          "grams": 32,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "piece"
+        }
+      ]
+    },
+    {
+      "id": "CH066",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH067",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH068",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH069",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH070",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH071",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH072",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH073",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH074",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH075",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH076",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH077",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH078",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH079",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH080",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH081",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH082",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH083",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH084",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH085",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH086",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH087",
+      "status": "unmatched"
+    }
+  ]
+}
