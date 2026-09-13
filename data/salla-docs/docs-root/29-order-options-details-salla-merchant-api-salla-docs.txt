@@ -1,0 +1,295 @@
+# Order Options Details - Salla Merchant API | Salla Docs
+# https://docs.salla.dev/order-options/details
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Order Status
+Order Histories
+Order Options
+Create Order Option
+POST
+Update Order Option
+PUT
+List Order Options
+GET
+Delete Order Options
+DELETE
+Order Option Details
+GET
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+Order Options
+MCP
+Copy Page
+Order Option Details
+Production
+GET
+https://api.salla.dev/admin/v2/orders/options/{id}
+Try it
+Last modified:
+6 days ago
+This endpoint allows you to list a specific order option details
+Scopes
+orders.read - Orders Read Only
+Request
+Authorization
+Add the parameter Authorization to Headers，whose value is to concatenate the Token after the Bearer.
+Example:
+Authorization: Bearer ********************
+Path Params
+Generate Code
+id
+integer 
+required
+Unique identification number associated with a specific order options
+Example:
+123456787
+Request Code Samples
+Shell
+JavaScript
+Java
+Swift
+Go
+PHP
+Python
+HTTP
+C
+C#
+Objective-C
+Ruby
+OCaml
+Dart
+R
+Responses
+🟢200
+Success
+application/json
+Generate Code
+status
+integer 
+optional
+success
+boolean 
+optional
+data
+object 
+(OrderOption)
+OrderOption
+optional
+Dynamic cart-level options that allow users to make selections during checkout
+id
+integer 
+optional
+Unique Identifier
+name
+string 
+required
+The label or textual identifier for the checkout field option
+reference_id
+integer 
+optional
+Unique identification number associated with the refrence of the order option
+description
+string  | 
+null 
+optional
+Additional details about this checkout field option
+status
+boolean 
+optional
+status of the order option either available or not
+is_required
+string 
+optional
+Whether this field is mandatory during checkout
+type
+enum<string> 
+required
+The type of input field to render
+Allowed values:
+text
+Text input field
+number
+Numeric input field
+checkbox
+Checkbox selection
+date
+Date picker field
+length
+integer 
+optional
+Maximum length for text/number input fields
+is_multi_choice
+boolean 
+optional
+Whether multiple selections are allowed
+selected_products
+boolean 
+optional
+Whether this option applies to specific products
+categories
+array [object] 
+optional
+Product Categories this option applies to
+price
+number 
+optional
+Price adjustment for this option
+currency
+string 
+optional
+Currencu of the order option price
+options
+object 
+optional
+Configuration for option choices
+booking_details
+object 
+optional
+Configuration for bookable options
+session_duration
+integer 
+optional
+The timing of the session
+session_gap
+integer 
+optional
+The time between each session
+Examples
+Text Option
+Number Option
+Checkbox Option
+Days Option
+Days & Times Option
+{
+    "status": 200,
+    "success": true,
+    "data": {
+        "id": 123456787,
+        "name": "text order option",
+        "reference_id": 123456786,
+        "description": "some description",
+        "status": true,
+        "is_required": false,
+        "type": "text",
+        "length": "80",
+        "is_multi_choice": false,
+        "selected_products": true,
+        "categories": [
+            {
+                "id": 123456788,
+                "name": "category"
+            },
+            {
+                "id": 123456789,
+                "name": "sub category"
+            }
+        ],
+        "price": 0,
+        "currency": "SAR"
+    }
+}
+🟠404
+error_notFound_404
+🟠401
+error_unauthorized_401
+Modified at 6 days ago
+Previous
+Delete Order Options
+Next
+Order Assignment
+LLMs.txt
+Export
