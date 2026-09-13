@@ -382,6 +382,10 @@ export interface ShellStrings {
     remainingProtein: string
     remainingWater: string
     addToLog: string
+    /** [PARTIAL-NUTRITION-001] مغذٍّ غير متوفّر في المصدر — يُعرض بدل رقم. */
+    nutrientUnknown: string
+    /** ملاحظة المجموع الناقص: n صنف بلا بيانات لهذا المغذّي. */
+    nutrientsIncomplete: (n: string) => string
     customQuickAdd: string
     foodName: string
     quickAddHint: string
@@ -843,6 +847,8 @@ const ar: ShellStrings = {
     remainingProtein: 'بروتين متبقّي',
     remainingWater: 'ماء متبقّي',
     addToLog: 'أضف للسجل',
+    nutrientUnknown: 'غير متوفّر',
+    nutrientsIncomplete: (n) => `${n} صنف بلا بيانات لهذا المغذّي`,
     customQuickAdd: 'إضافة سريعة مخصّصة',
     foodName: 'اسم الأكل/الوجبة',
     quickAddHint: 'اكتب سعرات أو بروتين على الأقل عشان تضيف.',
@@ -1304,6 +1310,8 @@ const en: ShellStrings = {
     remainingProtein: 'Protein left',
     remainingWater: 'Water left',
     addToLog: 'Add to log',
+    nutrientUnknown: 'n/a',
+    nutrientsIncomplete: (n) => `${n} item(s) lack data for this nutrient`,
     customQuickAdd: 'Custom quick add',
     foodName: 'Food/meal name',
     quickAddHint: 'Enter at least calories or protein to add.',

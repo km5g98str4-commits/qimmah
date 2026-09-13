@@ -35,7 +35,7 @@ const checks = [
   ['أصناف سلاسل «مطاعم» يدوية = 100 ومن مصادر رسمية = 150', r.restaurantsHand === 100 && r.restaurants === 250, `hand=${r.restaurantsHand} total=${r.restaurants}`],
   // نظير «كل Food R2 معلّم تقديري»: قيم السلاسل كلها تقديرية (رأس كتلتها يعلنها)،
   // والوسم صار على الصنف المعروض نفسه — فلا يهبط صنف سلسلة جديد بلا وسمه.
-  ['كل أصناف السلاسل اليدوية معلّمة «تقديري» وكل rst-* يسمّي مصدره الرسمي', r.restaurantsEstimated === 100 && r.restaurantsSourced === 150, `estimated=${r.restaurantsEstimated} sourced=${r.restaurantsSourced}`],
+  ['كل أصناف السلاسل اليدوية معلّمة «تقديري» وكل rst-* مصنَّف provenance رسمي/USDA', r.restaurantsEstimated === 100 && r.restaurantsSourced === 150, `estimated=${r.restaurantsEstimated} sourced=${r.restaurantsSourced}`],
   ['Food R2 = 60 صنف مطاعم', r.r2 === 60, `r2=${r.r2}`],
   ['كل Food R2 معلّم «تقديري»', r.r2Estimated === 60, `estimated=${r.r2Estimated}`],
   ['Food R2 يغطي مطاعم/أطباق/مشروبات/فطور/حلويات', Array.isArray(r.r2Categories) && r.r2Categories.length >= 5, `categories=${r.r2Categories?.length ?? 0}`],

@@ -128,6 +128,7 @@ for (const row of catalog) {
     fiber: typeof n.fiber === 'number' ? round1((n.fiber * g) / 100) : undefined,
     keywords: [...new Set([...String(row.search_aliases_ar ?? '').split(/[،,;|]/), ...String(row.search_aliases_en ?? '').split(/[،,;|]/), nameEn.toLowerCase()].map((s) => s.trim()).filter((s) => s && normalize(s) !== normalize(nameAr)))],
     generic: true,
+    provenance: { class: sourceMatch === 'proxy' ? 'GENERIC_PROXY' : 'USDA_MEASURED', ref: `fdcId:${e.fdcId}` },
   }
   promoted.push({ item, provenance: { fdcId: e.fdcId, dataType: e.dataType, description: e.description, publicationDate: e.publicationDate, per100g: n, portion: portion.usda, portionGrams: g, preparation: row.preparation ?? null, sourceMatch, proxyNote, retrieved: evidence.generated_at } })
   resolution.push({ ...base, status: 'VERIFIED_AND_LOGGABLE', itemId: item.id, fdcId: e.fdcId, description: e.description, sourceMatch, proxyNote })
@@ -147,7 +148,7 @@ const lines = [
 ]
 for (const { item } of promoted) {
   const kw = item.keywords.map((k) => `'${esc(k)}'`).join(', ')
-  lines.push(`  { id: '${item.id}', nameAr: '${esc(item.nameAr)}', nameEn: '${esc(item.nameEn)}', category: '${item.category}', servingLabelAr: '${esc(item.servingLabelAr)}', servingGrams: ${item.servingGrams}, calories: ${item.calories}, protein: ${item.protein}, carbs: ${item.carbs}, fat: ${item.fat}${item.fiber !== undefined ? `, fiber: ${item.fiber}` : ''}, keywords: [${kw}], generic: true },`)
+  lines.push(`  { id: '${item.id}', nameAr: '${esc(item.nameAr)}', nameEn: '${esc(item.nameEn)}', category: '${item.category}', servingLabelAr: '${esc(item.servingLabelAr)}', servingGrams: ${item.servingGrams}, calories: ${item.calories}, protein: ${item.protein}, carbs: ${item.carbs}, fat: ${item.fat}${item.fiber !== undefined ? `, fiber: ${item.fiber}` : ''}, keywords: [${kw}], generic: true, provenance: { class: '${item.provenance.class}', ref: '${item.provenance.ref}' } },`)
 }
 lines.push(']', '')
 lines.push('/** أصناف منسَّقة قائمة غطّت صفًّا من الـ٦٠٠ (نفس الاسم) — تُعامَل كأصناف عامّة في الترتيب بلا تكرار. */')

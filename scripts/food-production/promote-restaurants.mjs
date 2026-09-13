@@ -7,16 +7,13 @@
  * (رابط + تاريخ + نوع + سوق) وأصنافه كما وردت فيه. يكتبه قارئ الدليل (موجة مُراجَعة)
  * من data/food-production/chain-evidence/<slug>/text.txt — لا مستورد آلي من الشبكة.
  *
- * ═══ قاعدة الصدق (الميثاق §5) ═══
+ * ═══ قاعدة الصدق (الميثاق §5 · [PARTIAL-NUTRITION-001]) ═══
  *   • السعرات رسمية دائمًا. صنف بلا سعرات رسمية لا يُرقّى.
- *   • الماكروز: إن أعطاها المصدر كاملة ⇒ رسمية (نمط الأدلة العالمية). وإن أعطى المصدر
- *     السعرات (والبروتين) فقط — وهو ما تُلزم به لائحة SFDA السعودية — فالناقص **تقدير
- *     موسوم** بطريقة معلَنة أدناه، لا رقم يُنسب للمصدر:
- *       بروتين رسمي إن وُجد؛ الباقي R = kcal − 4·P يُقسم طاقةً بين الكارب والدهون
- *       بحصّة كارب لنوع الصنف (ساندويتش/راب ٠٫٥٥ · بطاطس ٠٫٥٠ · صحن ٠٫٥٠ · سلطة ٠٫٤٥ ·
- *       حلويات ٠٫٦٥ · مشروب ١٫٠٠ · دجاج مقلي ٠٫٣٥ · بيتزا ٠٫٥٥ · برجر ٠٫٤٥).
- *     الوسم يظهر للمستخدم في notesAr ويُسجَّل في RESTAURANT_PROVENANCE.
- *   • الأدلة العالمية (US/UK) تُوسم بسوق المصدر: الوصفة السعودية قد تختلف.
+ *   • الماكروز: إن أعطاها المصدر كاملة ⇒ تُنسخ كما هي. وإن أعطى السعرات (والبروتين) فقط —
+ *     كما تُلزم لائحة SFDA — فالكارب/الدهون **يبقيان غير معروفين** (الحقل غائب لا صفر ولا تقدير).
+ *     القاعدة القانونية لا تحمل أي ماكرو مُشتقّ؛ التقدير شأن ميزات مُعلَنة لاحقًا لا شأن الكتالوج.
+ *   • كل صنف يحمل provenance: OFFICIAL_LOCAL (SA) · OFFICIAL_FOREIGN_MARKET (دليل رسمي أجنبي)
+ *     · USDA_MEASURED (سجلّ USDA للمنتج في أمريكا) — والإفصاح للمستخدم سطر واحد.
  *
  * المخرج: src/data/restaurantFoods.generated.ts + data/food-production/restaurants/resolution.json
  */
@@ -27,10 +24,7 @@ import { fileURLToPath } from 'node:url'
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const IN = resolve(ROOT, 'docs/data-factory/restaurants')
 
-export const CARB_SHARE = { sandwich: 0.55, wrap: 0.55, fries: 0.5, plate: 0.5, box: 0.5, salad: 0.45, dessert: 0.65, drink: 1.0, fried_chicken: 0.35, pizza: 0.55, burger: 0.45, side: 0.5, sauce: 0.3, soup: 0.5, breakfast: 0.5 }
-const MARKET_AR = { SA: 'السعودية', US: 'أمريكا', UK: 'بريطانيا', UAE: 'الإمارات' }
-
-const round1 = (n) => Math.round(n * 10) / 10
+const KIND_CLASS = { 'official-menu-sfda': 'OFFICIAL_LOCAL', 'official-nutrition-guide': 'OFFICIAL_FOREIGN_MARKET', 'usda-branded-record': 'USDA_MEASURED' }
 const files = readdirSync(IN).filter((f) => f.endsWith('.json')).sort()
 const items = []
 const prov = {}
@@ -49,42 +43,30 @@ for (const file of files) {
     if (typeof row.kcal !== 'number' || row.kcal <= 0) { resolution.push({ ...base, status: 'QUARANTINED', why: 'لا سعرات رسمية' }); continue }
     if (!row.nameAr || !row.nameEn) { resolution.push({ ...base, status: 'QUARANTINED', why: 'اسم ناقص' }); continue }
     const full = [row.protein, row.carbs, row.fat].every((v) => typeof v === 'number' && v >= 0)
-    let protein, carbs, fat, macros
+    if (typeof row.protein !== 'number' || row.protein < 0) { resolution.push({ ...base, status: 'QUARANTINED', why: 'لا بروتين رسمي' }); continue }
     if (full) {
-      ;({ protein, carbs, fat } = row)
-      macros = 'official'
-      const atw = 4 * protein + 4 * carbs + 9 * fat
+      const atw = 4 * row.protein + 4 * row.carbs + 9 * row.fat
       if (row.kcal >= 40 && Math.abs(atw - row.kcal) > 0.3 * Math.max(atw, row.kcal)) { resolution.push({ ...base, status: 'QUARANTINED', why: `أتواتر خارج ±٣٠٪ (${Math.round(atw)} مقابل ${row.kcal})` }); continue }
-    } else {
-      const share = CARB_SHARE[row.type]
-      if (share === undefined) { resolution.push({ ...base, status: 'QUARANTINED', why: `نوع غير معروف للتقدير: ${row.type}` }); continue }
-      const pOfficial = typeof row.protein === 'number' && row.protein >= 0
-      protein = pOfficial ? row.protein : null
-      let R = row.kcal - (pOfficial ? 4 * row.protein : 0)
-      if (R < 0) { resolution.push({ ...base, status: 'QUARANTINED', why: 'البروتين الرسمي يتجاوز طاقة الصنف' }); continue }
-      if (!pOfficial) {
-        // بلا بروتين رسمي: حصّة بروتين لنوع الصنف (طاقةً) ثم الباقي كارب/دهون.
-        const pShare = row.type === 'fried_chicken' ? 0.3 : row.type === 'drink' || row.type === 'dessert' ? 0.05 : 0.2
-        protein = round1((row.kcal * pShare) / 4)
-        R = row.kcal - 4 * protein
-      }
-      carbs = round1((R * share) / 4)
-      fat = round1((R * (1 - share)) / 9)
-      macros = pOfficial ? 'partial-estimated' : 'estimated'
     }
-    const marketAr = MARKET_AR[source.market] ?? source.market
-    const notesAr = source.market === 'SA'
-      ? (macros === 'official' ? 'القيم من مصدر السلسلة الرسمي.' : macros === 'partial-estimated' ? 'السعرات والبروتين من منيو السلسلة الرسمي · الكارب والدهون تقدير.' : 'السعرات من منيو السلسلة الرسمي · الماكروز تقدير.')
-      : source.kind === 'usda-branded-record' ? `القيم من سجلّ USDA لمنتج السلسلة في ${marketAr} — الوصفة السعودية قد تختلف.` : `القيم من دليل التغذية الرسمي للسلسلة في ${marketAr} — الوصفة السعودية قد تختلف.`
+    const macros = full ? 'official' : 'partial'
+    const cls = KIND_CLASS[source.kind]
+    if (!cls) { resolution.push({ ...base, status: 'QUARANTINED', why: `نوع مصدر غير مصنَّف: ${source.kind}` }); continue }
+    if (cls === 'OFFICIAL_LOCAL' && source.market !== 'SA') { resolution.push({ ...base, status: 'QUARANTINED', why: 'مصدر محلّي بسوق غير سعودي' }); continue }
+    if (cls !== 'OFFICIAL_LOCAL' && source.market === 'SA') { resolution.push({ ...base, status: 'QUARANTINED', why: 'سجلّ أجنبي/USDA لا يُوسم سعوديًّا' }); continue }
+    // الإفصاح للمستخدم سطر واحد (لا فقرة): الأجنبي «بيانات مرجعية»، والمحلّي الناقص يصرّح بالنقص.
+    const notesAr = cls === 'OFFICIAL_LOCAL'
+      ? (macros === 'official' ? 'القيم من مصدر السلسلة الرسمي.' : 'السعرات والبروتين من المنيو الرسمي · الكارب والدهون غير متوفّرة.')
+      : cls === 'OFFICIAL_FOREIGN_MARKET' ? 'بيانات مرجعية للسوق الأمريكي.' : 'بيانات USDA مرجعية للسوق الأمريكي.'
+    const provenance = { class: cls, market: source.market, ref: row.fdcId ? `fdcId:${row.fdcId}` : source.url }
     const item = {
       id, nameAr: `${chain.ar} - ${row.nameAr}`, nameEn: `${chain.en} - ${row.nameEn}`, category: 'مطاعم',
       servingLabelAr: row.servingLabelAr ?? 'حصة', ...(typeof row.servingGrams === 'number' ? { servingGrams: row.servingGrams } : {}),
-      calories: Math.round(row.kcal), protein, carbs, fat, ...(typeof row.fiber === 'number' ? { fiber: row.fiber } : {}),
-      keywords: [...new Set([...(chain.keywords ?? []), ...(row.keywords ?? []), row.nameEn.toLowerCase()])], notesAr,
+      calories: Math.round(row.kcal), protein: row.protein, ...(full ? { carbs: row.carbs, fat: row.fat } : {}), ...(typeof row.fiber === 'number' ? { fiber: row.fiber } : {}),
+      keywords: [...new Set([...(chain.keywords ?? []), ...(row.keywords ?? []), row.nameEn.toLowerCase()])], notesAr, provenance,
     }
     items.push(item)
-    prov[id] = { chain: chain.slug, source: source.url, kind: source.kind, market: source.market, accessed: source.accessed, kcal: 'official', macros, type: row.type ?? null, sourceName: row.sourceName ?? row.nameEn }
-    resolution.push({ ...base, status: macros === 'official' ? 'OFFICIAL_FULL' : 'OFFICIAL_KCAL_ESTIMATED_MACROS', macros })
+    prov[id] = { chain: chain.slug, source: source.url, kind: source.kind, market: source.market, accessed: source.accessed, kcal: 'official', macros, class: cls, type: row.type ?? null, sourceName: row.sourceName ?? row.nameEn }
+    resolution.push({ ...base, status: macros === 'official' ? 'OFFICIAL_FULL' : 'OFFICIAL_PARTIAL', macros, class: cls })
   }
 }
 
@@ -95,15 +77,17 @@ const lines = [
   '// والمولِّد scripts/food-production/promote-restaurants.mjs. كل صنف يحمل مصدره في RESTAURANT_PROVENANCE.',
   "import type { FoodItem } from './foodItems'",
   '',
-  "export interface RestaurantProvenance { chain: string; source: string; kind: string; market: string; accessed: string; kcal: 'official'; macros: 'official' | 'partial-estimated' | 'estimated'; type: string | null; sourceName: string }",
+  "import type { ProvenanceClass } from './foodItems'",
+  '',
+  "export interface RestaurantProvenance { chain: string; source: string; kind: string; market: string; accessed: string; kcal: 'official'; macros: 'official' | 'partial'; class: ProvenanceClass; type: string | null; sourceName: string }",
   '',
   'export const restaurantFoods: FoodItem[] = [',
 ]
 for (const f of items) {
-  lines.push(`  { id: '${f.id}', nameAr: '${esc(f.nameAr)}', nameEn: '${esc(f.nameEn)}', category: 'مطاعم', servingLabelAr: '${esc(f.servingLabelAr)}', ${f.servingGrams ? `servingGrams: ${f.servingGrams}, ` : ''}calories: ${f.calories}, protein: ${f.protein}, carbs: ${f.carbs}, fat: ${f.fat}, ${f.fiber !== undefined ? `fiber: ${f.fiber}, ` : ''}keywords: [${f.keywords.map((k) => `'${esc(k)}'`).join(', ')}], notesAr: '${esc(f.notesAr)}' },`)
+  lines.push(`  { id: '${f.id}', nameAr: '${esc(f.nameAr)}', nameEn: '${esc(f.nameEn)}', category: 'مطاعم', servingLabelAr: '${esc(f.servingLabelAr)}', ${f.servingGrams ? `servingGrams: ${f.servingGrams}, ` : ''}calories: ${f.calories}, protein: ${f.protein}, ${typeof f.carbs === 'number' ? `carbs: ${f.carbs}, fat: ${f.fat}, ` : ''}${f.fiber !== undefined ? `fiber: ${f.fiber}, ` : ''}keywords: [${f.keywords.map((k) => `'${esc(k)}'`).join(', ')}], notesAr: '${esc(f.notesAr)}', provenance: { class: '${f.provenance.class}', market: '${esc(f.provenance.market)}', ref: '${esc(f.provenance.ref)}' } },`)
 }
 lines.push(']', '', 'export const RESTAURANT_PROVENANCE: Record<string, RestaurantProvenance> = {')
-for (const [id, p] of Object.entries(prov)) lines.push(`  '${id}': { chain: '${esc(p.chain)}', source: '${esc(p.source)}', kind: '${esc(p.kind)}', market: '${esc(p.market)}', accessed: '${esc(p.accessed)}', kcal: 'official', macros: '${p.macros}', type: ${p.type ? `'${esc(p.type)}'` : 'null'}, sourceName: '${esc(p.sourceName)}' },`)
+for (const [id, p] of Object.entries(prov)) lines.push(`  '${id}': { chain: '${esc(p.chain)}', source: '${esc(p.source)}', kind: '${esc(p.kind)}', market: '${esc(p.market)}', accessed: '${esc(p.accessed)}', kcal: 'official', macros: '${p.macros}', class: '${p.class}', type: ${p.type ? `'${esc(p.type)}'` : 'null'}, sourceName: '${esc(p.sourceName)}' },`)
 lines.push('}', '')
 writeFileSync(resolve(ROOT, 'src/data/restaurantFoods.generated.ts'), lines.join('\n'))
 mkdirSync(resolve(ROOT, 'data/food-production/restaurants'), { recursive: true })

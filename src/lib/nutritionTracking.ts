@@ -54,8 +54,9 @@ export interface LoggedFood {
   unit?: 'g' | 'serving'
   calories: number
   protein: number
-  carbs: number
-  fat: number
+  /** [PARTIAL-NUTRITION-001] غياب الكارب/الدهون حقيقة تُحفظ كما هي — لا يُملأ صفرًا. */
+  carbs?: number
+  fat?: number
   meal?: MealSlot
   note?: string
 }
@@ -77,8 +78,8 @@ function fromCanonical(f: CanonicalFood): LoggedFood {
     label: f.nameAr,
     calories: f.calories,
     protein: f.protein,
-    carbs: f.carbs ?? 0,
-    fat: f.fat ?? 0,
+    ...(typeof f.carbs === 'number' ? { carbs: f.carbs } : {}),
+    ...(typeof f.fat === 'number' ? { fat: f.fat } : {}),
     meal: f.meal,
     grams: f.grams,
     servings: f.servings,
@@ -103,8 +104,8 @@ function toCanonical(item: LoggedFood): CanonicalFood {
     nameAr: item.label,
     calories: item.calories,
     protein: item.protein,
-    carbs: item.carbs,
-    fat: item.fat,
+    ...(typeof item.carbs === 'number' ? { carbs: item.carbs } : {}),
+    ...(typeof item.fat === 'number' ? { fat: item.fat } : {}),
     meal: item.meal ?? 'snack',
     ...(item.foodId ? { foodId: item.foodId } : {}),
     ...(item.grams !== undefined ? { grams: item.grams } : {}),
@@ -126,16 +127,29 @@ export function loadNutritionToday(): NutritionTodayState {
   return assemble()
 }
 
-/** مجاميع السعرات والماكروز من سجل اليوم. */
-export function logTotals(log: LoggedFood[]) {
-  return log.reduce(
+/** عدد القيود التي لا تحمل مغذّيًا ما — «المجموع ناقص» يُعلَن لا يُخفى. */
+export interface UnknownNutrientCounts { protein: number; carbs: number; fat: number }
+export interface LogTotals { calories: number; protein: number; carbs: number; fat: number; unknown: UnknownNutrientCounts }
+
+/**
+ * مجاميع السعرات والماكروز من سجل اليوم.
+ * [PARTIAL-NUTRITION-001] القيد بلا كارب/دهون **لا يُجمع صفرًا بصمت**: المجموع يضمّ المعروف فقط،
+ * و`unknown` يعدّ القيود الناقصة لكل مغذٍّ كي تعلنها الواجهة (بلا بيانات كارب لـ n صنف).
+ */
+export function logTotals(log: LoggedFood[]): LogTotals {
+  return log.reduce<LogTotals>(
     (acc, e) => ({
       calories: acc.calories + e.calories,
       protein: acc.protein + e.protein,
-      carbs: acc.carbs + e.carbs,
-      fat: acc.fat + e.fat,
+      carbs: acc.carbs + (typeof e.carbs === 'number' ? e.carbs : 0),
+      fat: acc.fat + (typeof e.fat === 'number' ? e.fat : 0),
+      unknown: {
+        protein: acc.unknown.protein,
+        carbs: acc.unknown.carbs + (typeof e.carbs === 'number' ? 0 : 1),
+        fat: acc.unknown.fat + (typeof e.fat === 'number' ? 0 : 1),
+      },
     }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    { calories: 0, protein: 0, carbs: 0, fat: 0, unknown: { protein: 0, carbs: 0, fat: 0 } },
   )
 }
 
@@ -344,8 +358,8 @@ export function useNutritionToday() {
         servings: current.servings === undefined ? undefined : Math.round(current.servings * ratio * 100) / 100,
         calories: Math.round(current.calories * ratio),
         protein: Math.round(current.protein * ratio * 10) / 10,
-        carbs: Math.round(current.carbs * ratio * 10) / 10,
-        fat: Math.round(current.fat * ratio * 10) / 10,
+        ...(typeof current.carbs === 'number' ? { carbs: Math.round(current.carbs * ratio * 10) / 10 } : {}),
+        ...(typeof current.fat === 'number' ? { fat: Math.round(current.fat * ratio * 10) / 10 } : {}),
         unit,
       }
       if (demo) {
