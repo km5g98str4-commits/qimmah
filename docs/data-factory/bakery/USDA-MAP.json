@@ -48,7 +48,6 @@
    "nameAr": "منقوشة جبن وزعتر",
    "nameEn": "Cheese and zaatar manakish",
    "category": "أفران",
-   "q": "pizza cheese restaurant thin crust",
    "proxy": "جبن وزعتر ⇐ بيتزا جبن رقيقة",
    "not": [
     "PIZZA HUT",
@@ -69,7 +68,9 @@
     "manakish",
     "manaqish",
     "جبنة وزعتر"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "نفس سجلّ بيتزا الجبن الرقيقة (BK026) — لا تكرار للقيم باسم آخر"
   },
   {
    "id": "BK004",
@@ -309,7 +310,7 @@
    "nameAr": "مفن توت",
    "nameEn": "Blueberry muffin",
    "category": "أفران",
-   "q": "muffin blueberry",
+   "q": "blueberry muffin",
    "not": [
     "low fat",
     "fat free",
@@ -526,12 +527,12 @@
    "nameAr": "بيتزا دجاج (شريحة)",
    "nameEn": "Chicken pizza slice",
    "category": "أفران",
-   "q": "pizza chicken",
+   "q": "pizza with chicken",
    "not": [
     "frozen",
     "white",
     "bbq",
-    "pizza chain"
+    "chain"
    ],
    "prefer": [
     "fndds",
@@ -561,7 +562,8 @@
     "بيتزا",
     "بيبروني",
     "pepperoni"
-   ]
+   ],
+   "pick": "Pizza with pepperoni, from restaurant or fast food, thin crust"
   },
   {
    "id": "BK030",
@@ -645,7 +647,6 @@
    "nameAr": "فطيرة تفاح",
    "nameEn": "Apple turnover",
    "category": "أفران",
-   "q": "turnover",
    "prefer": [
     "fndds",
     "sr",
@@ -662,7 +663,9 @@
    "keywords": [
     "فطيرة تفاح",
     "apple pie"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "المطابق فطيرة جبن بصلصة طماطم مجمَّدة — لا يمثّل فطيرة التفاح"
   },
   {
    "id": "BK040",
@@ -687,21 +690,17 @@
    "nameAr": "مكرونة بالجبن (جاهزة)",
    "nameEn": "Macaroni and cheese (prepared)",
    "category": "وجبات جاهزة",
-   "q": "macaroni cheese",
+   "q": "macaroni noodles cheese microwave",
    "prefer": [
     "fndds",
     "sr",
     "foundation"
    ],
    "not": [
-    "salisbury",
-    "meat",
-    "frozen meal",
-    "dry",
-    "mix",
-    "soup",
-    "vegetables",
-    "tuna"
+    "CRACKER",
+    "DENNY",
+    "APPLEBEE",
+    "kid"
    ],
    "keywords": [
     "ماك اند تشيز",
@@ -885,7 +884,6 @@
    "nameAr": "سبرنغ رول مجمّد",
    "nameEn": "Frozen spring roll",
    "category": "وجبات جاهزة",
-   "q": "egg roll",
    "prefer": [
     "fndds",
     "sr",
@@ -900,7 +898,9 @@
     "سبرنق رول",
     "spring roll",
     "egg roll"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "المطابق رقائق العجين لا السبرنغ رول"
   },
   {
    "id": "BK052",
@@ -959,7 +959,7 @@
    "nameAr": "كباب دجاج مجمّد (مطهو)",
    "nameEn": "Frozen chicken kebab, cooked",
    "category": "وجبات جاهزة",
-   "q": "kabob chicken",
+   "q": "shish kabob chicken",
    "not": [
     "vegetables",
     "rice",
@@ -975,7 +975,8 @@
     "شيش طاووق",
     "shish tawook",
     "chicken kebab"
-   ]
+   ],
+   "proxy": "كباب دجاج ⇐ كباب دجاج بالخضار (السجلّ الوحيد)"
   },
   {
    "id": "BK056",
@@ -1139,7 +1140,8 @@
     "indomie",
     "ramen",
     "instant noodles"
-   ]
+   ],
+   "pick": "Soup, ramen noodles, water added"
   }
  ]
 }
