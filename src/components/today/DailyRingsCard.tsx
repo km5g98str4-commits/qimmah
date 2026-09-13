@@ -38,6 +38,8 @@ const TONE = {
 export interface MacroSlice {
   consumed: number
   target: number
+  /** [PARTIAL-NUTRITION-001] أصناف مسجّلة بلا بيانات لهذا المغذّي — المجموع ناقص لا صفر. */
+  unknown?: number
 }
 
 interface DailyRingsCardProps {
@@ -123,6 +125,9 @@ export function DailyRingsCard({ lang, calories, protein, carbs, fat, onOpen }: 
                   {has ? `${n(Math.round(m.slice.consumed))} / ${n(m.slice.target)} ${d.gramsShort}` : '—'}
                 </span>
               </span>
+              {m.slice.unknown ? (
+                <span className="text-[10px] font-bold text-amber-600" title={d.macroIncomplete(n(m.slice.unknown))}>{d.macroIncomplete(n(m.slice.unknown))}</span>
+              ) : null}
             </li>
           )
         })}

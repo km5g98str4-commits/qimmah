@@ -55,7 +55,7 @@ const restaurantCount = restaurantItems.length
 // التقدير عن الجميع والصنف المعروض للمستخدم صامت — الوسم الآن حيث يُقرأ.
 const restaurantsEstimated = restaurantItems.filter((f) => typeof f.notesAr === 'string' && f.notesAr.includes('تقديري')).length
 // [RESTAURANT-MENUS-001] أصناف المصادر الرسمية (rst-*): سعراتها رسمية، وملاحظتها تسمّي المصدر أو تسم التقدير الجزئي.
-const restaurantsSourced = restaurantItems.filter((f) => String(f.id).startsWith('rst-') && typeof f.notesAr === 'string' && /رسمي|USDA/.test(f.notesAr)).length
+const restaurantsSourced = restaurantItems.filter((f) => String(f.id).startsWith('rst-') && ['OFFICIAL_LOCAL', 'OFFICIAL_FOREIGN_MARKET', 'USDA_MEASURED'].includes(f.provenance?.class)).length
 const restaurantsHand = restaurantItems.filter((f) => !String(f.id).startsWith('rst-')).length
 const r2Items = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('r2-eat-'))
 const r2Estimated = r2Items.filter((f) => typeof f.notesAr === 'string' && f.notesAr.includes('تقديري')).length
@@ -182,7 +182,11 @@ function checkMacros(item, ctx) {
   const label = ctx ? `${item.id} · ${ctx}` : item.id
   const name = item.nameAr || item.labelAr || ''
   // 1) حقول رقمية صالحة
+  // [PARTIAL-NUTRITION-001] الكارب/الدهون قد يغيبان — **فقط** لسجلّ رسمي محلّي (OFFICIAL_LOCAL) بسعرات وبروتين رسميين؛
+  // أي غياب آخر خطأ. الغياب حقل غائب لا صفر — الواجهة تعرض «غير متوفّر» والمجاميع تعلن النقص.
+  const partialAllowed = item.provenance?.class === 'OFFICIAL_LOCAL'
   for (const f of REQUIRED_NUM) {
+    if ((f === 'carbs' || f === 'fat') && item[f] === undefined && partialAllowed) continue
     if (!isNum(item[f])) { add('ERROR', 'MISSING_NUM', label, name, `الحقل «${f}» مفقود أو غير رقمي`); return }
     if (item[f] < 0) add('ERROR', 'NEGATIVE', label, name, `«${f}» سالب (${item[f]})`)
   }
@@ -193,15 +197,17 @@ function checkMacros(item, ctx) {
   if (grams && grams > 0) {
     const per100 = (v) => (v / grams) * 100
     for (const f of ['protein', 'carbs', 'fat']) {
+      if (item[f] === undefined) continue
       if (per100(item[f]) > MACRO_MAX_PER_100 + 2) add('ERROR', 'RANGE_MACRO', label, name, `${f}=${item[f]}غ ⇒ ${per100(item[f]).toFixed(0)}غ/100غ (> 100)`)
     }
-    const sumG = (item.protein + item.carbs + item.fat)
+    const sumG = (item.protein + (item.carbs ?? 0) + (item.fat ?? 0))
     if (per100(sumG) > 105) add('ERROR', 'RANGE_SUM', label, name, `مجموع الماكروز ${per100(sumG).toFixed(0)}غ/100غ (> 105)`)
     if (item.calories / grams > ENERGY_DENSITY_MAX) add('ERROR', 'RANGE_KCAL', label, name, `كثافة ${(item.calories / grams).toFixed(1)} سعرة/غ (> 9.1)`)
   }
   // 3) قاعدة 4/4/9 ±15% — واعية بالألياف (Atwater): الألياف تسهم بـ ~2 سعرة/غ لا 4،
   //    فالسعرات المعقولة تقع بين «صافي الكربوهيدرات» و«الكربوهيدرات الكلّية». نُحذّر فقط
   //    إذا خرجت السعرات عن هذا النطاق ±15% (يُزيل الإيجابيات الكاذبة للخضار عالية الألياف).
+  if (item.carbs === undefined || item.fat === undefined) return // سجلّ جزئي معلَن: لا يُختبر 4/4/9 بلا ماكروز كاملة
   const strict = predKcal(item) // 4·P + 4·(كارب كلّي) + 9·F
   const fiber = isNum(item.fiber) ? Math.min(item.fiber, item.carbs || 0) : 0
   const net = strict - 2 * fiber // الألياف بـ 2 سعرة/غ بدل 4

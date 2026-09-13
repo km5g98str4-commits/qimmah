@@ -58,12 +58,14 @@ export class NutritionStorageError extends Error {
 }
 
 /** Day food totals in the canonical `loggedFood` shape Today's pillar reads. */
-export function nutritionDayTotals(foods: LoggedFood[]): { calories: number; protein: number; carbs: number; fat: number } {
+/** [PARTIAL-NUTRITION-001] `unknown` يعدّ الأصناف بلا كارب/دهون — المجموع يضمّ المعروف فقط ولا يخفي النقص. */
+export function nutritionDayTotals(foods: LoggedFood[]): { calories: number; protein: number; carbs: number; fat: number; unknown: { carbs: number; fat: number } } {
   return {
     calories: Math.round(foods.reduce((s, f) => s + (f.calories || 0), 0)),
     protein: Math.round(foods.reduce((s, f) => s + (f.protein || 0), 0)),
     carbs: Math.round(foods.reduce((s, f) => s + (f.carbs ?? 0), 0)),
     fat: Math.round(foods.reduce((s, f) => s + (f.fat ?? 0), 0)),
+    unknown: { carbs: foods.filter((f) => typeof f.carbs !== 'number').length, fat: foods.filter((f) => typeof f.fat !== 'number').length },
   }
 }
 

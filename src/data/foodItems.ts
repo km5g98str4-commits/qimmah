@@ -41,6 +41,26 @@ export interface FoodSize {
   fat: number
 }
 
+/**
+ * [PARTIAL-NUTRITION-001] تصنيف مصدر القيم — يفرّق القيمة الموثوقة عن التقدير عن الوكيل:
+ *   OFFICIAL_LOCAL          مصدر السلسلة الرسمي في السوق السعودي (منيو SFDA…)
+ *   OFFICIAL_FOREIGN_MARKET دليل تغذية رسمي للسلسلة في سوق أجنبي (US…) — بيانات مرجعية
+ *   USDA_MEASURED           سجلّ USDA FoodData Central مقيس (عامّ أو منتج سلسلة في أمريكا)
+ *   GENERIC_PROXY           سجلّ USDA أوسع من الصنف المسمّى (بسمتي ⇐ أرز أبيض) — مُعلَن
+ *   RECIPE_ESTIMATE          محسوب من وصفة/مكوّنات — تقدير
+ *   CURATED_ESTIMATE         تقدير يدوي منسَّق (الأصناف التاريخية الموسومة «تقديري»)
+ * لا يجوز لسجلّ أجنبي أو وكيل أن يظهر داخليًّا كمنتج سعودي دقيق.
+ */
+export type ProvenanceClass = 'OFFICIAL_LOCAL' | 'OFFICIAL_FOREIGN_MARKET' | 'USDA_MEASURED' | 'GENERIC_PROXY' | 'RECIPE_ESTIMATE' | 'CURATED_ESTIMATE'
+export interface FoodProvenance {
+  class: ProvenanceClass
+  /** سوق المصدر (SA · US…) — يُعرض للمستخدم بإفصاح موجز حين يكون أجنبيًّا. */
+  market?: string
+  /** مرجع مقروء: fdcId أو رابط أو اسم المصدر. */
+  ref?: string
+}
+export type NutrientKey = 'protein' | 'carbs' | 'fat'
+
 export interface FoodItem {
   id: string
   nameAr: string
@@ -50,9 +70,16 @@ export interface FoodItem {
   servingGrams?: number
   calories: number
   protein: number
-  carbs: number
-  fat: number
+  /**
+   * [PARTIAL-NUTRITION-001] الكارب والدهون اختياريان: سجلّ رسمي بسعرات (وبروتين) فقط
+   * يبقى بلا كارب/دهون — **غيابها ليس صفرًا** ولا يُقدَّر في القاعدة القانونية.
+   * الواجهة تعرض «—» والمجاميع تعلن النقص (unknown) بدل جمع أصفار صامتة.
+   */
+  carbs?: number
+  fat?: number
   fiber?: number
+  /** تصنيف مصدر القيم — مطلوب على كل صنف مولَّد؛ الأصناف اليدوية تحمله عبر خريطة الفئة. */
+  provenance?: FoodProvenance
   notesAr?: string
   /** كلمات بحث إضافية (أسماء سلاسل/مطاعم وكتابات بديلة) لتسهيل الإيجاد */
   keywords?: string[]
@@ -67,6 +94,27 @@ export interface FoodItem {
    * عامّ تسبق بادئة اسم طبق مركّب («توست» ⇒ خبز التوست قبل «توست بالبيض»).
    */
   generic?: boolean
+}
+
+/** المغذّيات غير المعروفة لصنف — غياب الحقل هو الحقيقة، لا صفر. */
+export function unknownNutrients(item: Pick<FoodItem, 'carbs' | 'fat'>): NutrientKey[] {
+  const out: NutrientKey[] = []
+  if (typeof item.carbs !== 'number') out.push('carbs')
+  if (typeof item.fat !== 'number') out.push('fat')
+  return out
+}
+/** إفصاح موجز يراه المستخدم عن مصدر القيم — سطر واحد لا فقرة. */
+export function provenanceDisclosure(p: FoodProvenance | undefined, lang: 'ar' | 'en'): string | null {
+  if (!p) return null
+  const foreign = p.market && p.market !== 'SA'
+  switch (p.class) {
+    case 'OFFICIAL_FOREIGN_MARKET': return lang === 'en' ? `Reference data (${p.market ?? 'foreign'} market)` : `بيانات مرجعية للسوق ${p.market === 'US' ? 'الأمريكي' : 'الأجنبي'}`
+    case 'USDA_MEASURED': return foreign ? (lang === 'en' ? 'USDA reference data (US market)' : 'بيانات USDA مرجعية للسوق الأمريكي') : (lang === 'en' ? 'USDA measured' : 'قيم USDA مقيسة')
+    case 'GENERIC_PROXY': return lang === 'en' ? 'Closest USDA record (proxy)' : 'أقرب سجلّ USDA (وكيل)'
+    case 'RECIPE_ESTIMATE': return lang === 'en' ? 'Recipe estimate' : 'تقدير من وصفة'
+    case 'CURATED_ESTIMATE': return lang === 'en' ? 'Estimate' : 'تقديري'
+    case 'OFFICIAL_LOCAL': return lang === 'en' ? 'Official source' : 'مصدر رسمي'
+  }
 }
 
 export const FOOD_ESTIMATE_NOTE =
@@ -5704,6 +5752,9 @@ const foodItemsSource: FoodItem[] = [
 ]
 
 export const foodItems: FoodItem[] = foodItemsSource.map((f) => {
+  // [PARTIAL-NUTRITION-001] الأصناف اليدوية التقديرية (سلاسل «مطاعم» بوسم «تقديري» · r2-eat-*) تحمل تصنيفها
+  // صراحةً: CURATED_ESTIMATE — لا تقدير بلا تصنيف في القاعدة القانونية.
+  if (!f.provenance && (f.id.startsWith('r2-eat-') || (f.category === 'مطاعم' && (f.notesAr ?? '').includes('تقديري')))) f = { ...f, provenance: { class: 'CURATED_ESTIMATE', market: 'SA' } }
   if (!GENERIC_COVERED_IDS.has(f.id) || f.generic) return f
   const extra = GENERIC_COVERED_KEYWORDS[f.id] ?? []
   return { ...f, generic: true, keywords: [...new Set([...(f.keywords ?? []), ...extra])] }

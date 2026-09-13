@@ -480,8 +480,8 @@ function AddMeal({ lang, slot, onAdd, onBack }: { lang: Lang; slot: MealSlot; on
       nameEn: f.nameEn,
       calories: Math.round(f.calories * servings),
       protein: Math.round(f.protein * servings),
-      carbs: Math.round(f.carbs * servings),
-      fat: Math.round(f.fat * servings),
+      ...(typeof f.carbs === 'number' ? { carbs: Math.round(f.carbs * servings) } : {}),
+      ...(typeof f.fat === 'number' ? { fat: Math.round(f.fat * servings) } : {}),
       meal: slot,
     })
     onAdd()

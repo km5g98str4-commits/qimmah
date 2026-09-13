@@ -176,8 +176,8 @@ export function NutritionView({ lang }: NutritionViewProps) {
         */}
         <div className="mt-4 grid grid-cols-2 gap-3">
           <MacroCard label={t.protein} eaten={round(totals.protein)} target={hasNumericTargets ? targetProtein : null} unit={d.gramsUnit} color="#22c55e" lang={lang} />
-          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={hasNumericTargets ? targetCarbs : null} unit={d.gramsUnit} color="#0ea5e9" lang={lang} />
-          <MacroCard label={t.fat} eaten={round(totals.fat)} target={hasNumericTargets ? targetFat : null} unit={d.gramsUnit} color="#e0941f" lang={lang} />
+          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={hasNumericTargets ? targetCarbs : null} unit={d.gramsUnit} color="#0ea5e9" lang={lang} incomplete={totals.unknown.carbs} incompleteLabel={t.nutrientsIncomplete} />
+          <MacroCard label={t.fat} eaten={round(totals.fat)} target={hasNumericTargets ? targetFat : null} unit={d.gramsUnit} color="#e0941f" lang={lang} incomplete={totals.unknown.fat} incompleteLabel={t.nutrientsIncomplete} />
           <MacroCard label={t.water} eaten={state.waterMl} target={hasNumericTargets ? targetWaterMl : null} unit={d.mlUnit} color="#F26A21" lang={lang} />
         </div>
 
@@ -262,7 +262,7 @@ function EqCell({ label, value, lang }: { label: string; value: number; lang: La
   )
 }
 
-function MacroCard({ label, eaten, target, unit, color, lang }: { label: string; eaten: number; target: number | null; unit: string; color: string; lang: Lang }) {
+function MacroCard({ label, eaten, target, unit, color, lang, incomplete = 0, incompleteLabel }: { label: string; eaten: number; target: number | null; unit: string; color: string; lang: Lang; incomplete?: number; incompleteLabel?: (n: string) => string }) {
   const pct = target !== null && target > 0 ? Math.min(1, eaten / target) : 0
   return (
     // [WP-4B] البطاقة كانت `flex` أفقيًا: الحلقة ٤٠بكسل + نصّ بجانبها داخل عمود
@@ -278,6 +278,10 @@ function MacroCard({ label, eaten, target, unit, color, lang }: { label: string;
         {/* الهدف لا يُقصّ: `whitespace-nowrap` يمنع كسر «/ ١٥٠غ» على سطرين. */}
         {target !== null && <span className="whitespace-nowrap text-[11px] font-bold text-ink-400"> / {formatNumber(target, lang)}{unit}</span>}
       </p>
+      {/* [PARTIAL-NUTRITION-001] المجموع ناقص حين تُسجَّل أصناف بلا هذا المغذّي — يُعلَن لا يُجمع صفرًا. */}
+      {incomplete > 0 && incompleteLabel && (
+        <p data-testid="macro-incomplete" className="text-[10px] font-bold text-amber-600">{incompleteLabel(formatNumber(incomplete, lang))}</p>
+      )}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 {
  "counts": {
   "OFFICIAL_FULL": 111,
-  "OFFICIAL_KCAL_ESTIMATED_MACROS": 39
+  "OFFICIAL_PARTIAL": 39
  },
  "byChain": {
   "dominos": 59,
@@ -21,7 +21,8 @@
    "nameAr": "بيتزا بافلو تشيكن (شريحة وسط 1/5)",
    "nameEn": "Buffalo Chicken (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-buffalo-chicken-l-1-8-pizza",
@@ -29,7 +30,8 @@
    "nameAr": "بيتزا بافلو تشيكن (شريحة كبيرة 1/8)",
    "nameEn": "Buffalo Chicken (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-deluxe-m-1-5-pizza",
@@ -37,7 +39,8 @@
    "nameAr": "بيتزا ديلوكس (شريحة وسط 1/5)",
    "nameEn": "Deluxe (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-deluxe-l-1-8-pizza",
@@ -45,7 +48,8 @@
    "nameAr": "بيتزا ديلوكس (شريحة كبيرة 1/8)",
    "nameEn": "Deluxe (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-extravaganzza-m-1-5-pizza",
@@ -53,7 +57,8 @@
    "nameAr": "بيتزا إكسترافاغانزا (شريحة وسط 1/5)",
    "nameEn": "ExtravaganZZa (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-extravaganzza-l-1-8-pizza",
@@ -61,7 +66,8 @@
    "nameAr": "بيتزا إكسترافاغانزا (شريحة كبيرة 1/8)",
    "nameEn": "ExtravaganZZa (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-meatzza-m-1-5-pizza",
@@ -69,7 +75,8 @@
    "nameAr": "بيتزا ميتزا (شريحة وسط 1/5)",
    "nameEn": "MeatZZa (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-meatzza-l-1-8-pizza",
@@ -77,7 +84,8 @@
    "nameAr": "بيتزا ميتزا (شريحة كبيرة 1/8)",
    "nameEn": "MeatZZa (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-memphis-bbq-chicken-m-1-5-pizza",
@@ -85,7 +93,8 @@
    "nameAr": "بيتزا دجاج باربكيو (شريحة وسط 1/5)",
    "nameEn": "Memphis BBQ Chicken (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-memphis-bbq-chicken-l-1-8-pizza",
@@ -93,7 +102,8 @@
    "nameAr": "بيتزا دجاج باربكيو (شريحة كبيرة 1/8)",
    "nameEn": "Memphis BBQ Chicken (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-pacific-veggie-m-1-5-pizza",
@@ -101,7 +111,8 @@
    "nameAr": "بيتزا خضار باسيفيك (شريحة وسط 1/5)",
    "nameEn": "Pacific Veggie (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-pacific-veggie-l-1-8-pizza",
@@ -109,7 +120,8 @@
    "nameAr": "بيتزا خضار باسيفيك (شريحة كبيرة 1/8)",
    "nameEn": "Pacific Veggie (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-philly-cheese-steak-m-1-5-pizza",
@@ -117,7 +129,8 @@
    "nameAr": "بيتزا فيلي تشيز ستيك (شريحة وسط 1/5)",
    "nameEn": "Philly Cheese Steak (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-philly-cheese-steak-l-1-8-pizza",
@@ -125,7 +138,8 @@
    "nameAr": "بيتزا فيلي تشيز ستيك (شريحة كبيرة 1/8)",
    "nameEn": "Philly Cheese Steak (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-spinach-feta-m-1-5-pizza",
@@ -133,7 +147,8 @@
    "nameAr": "بيتزا سبانخ وفيتا (شريحة وسط 1/5)",
    "nameEn": "Spinach & Feta (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-spinach-feta-l-1-8-pizza",
@@ -141,7 +156,8 @@
    "nameAr": "بيتزا سبانخ وفيتا (شريحة كبيرة 1/8)",
    "nameEn": "Spinach & Feta (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-ultimate-pepperoni-m-1-5-pizza",
@@ -149,7 +165,8 @@
    "nameAr": "بيتزا ألتيميت بيبروني (شريحة وسط 1/5)",
    "nameEn": "Ultimate Pepperoni (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-ultimate-pepperoni-l-1-8-pizza",
@@ -157,7 +174,8 @@
    "nameAr": "بيتزا ألتيميت بيبروني (شريحة كبيرة 1/8)",
    "nameEn": "Ultimate Pepperoni (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-wisconsin-6-cheese-m-1-5-pizza",
@@ -165,7 +183,8 @@
    "nameAr": "بيتزا ستّ أجبان (شريحة وسط 1/5)",
    "nameEn": "Wisconsin 6 Cheese (M, 1/5 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-wisconsin-6-cheese-l-1-8-pizza",
@@ -173,7 +192,8 @@
    "nameAr": "بيتزا ستّ أجبان (شريحة كبيرة 1/8)",
    "nameEn": "Wisconsin 6 Cheese (L, 1/8 pizza)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-garlic-bread-twists-2-pieces",
@@ -181,7 +201,8 @@
    "nameAr": "خبز بالثوم (قطعتان)",
    "nameEn": "Garlic Bread Twists (2 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-parmesan-bread-twists-2-pieces",
@@ -189,7 +210,8 @@
    "nameAr": "خبز بارميزان (قطعتان)",
    "nameEn": "Parmesan Bread Twists (2 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-stuffed-cheesy-bread-1-piece",
@@ -197,7 +219,8 @@
    "nameAr": "خبز محشو بالجبن (قطعة)",
    "nameEn": "Stuffed Cheesy Bread (1 piece)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-pepperoni-stuffed-cheesy-bread-1-piece",
@@ -205,7 +228,8 @@
    "nameAr": "خبز محشو بالجبن والبيبروني (قطعة)",
    "nameEn": "Pepperoni Stuffed Cheesy Bread (1 piece)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-spinach-feta-stuffed-cheesy-bread-1-piece",
@@ -213,7 +237,8 @@
    "nameAr": "خبز محشو بالسبانخ والفيتا (قطعة)",
    "nameEn": "Spinach & Feta Stuffed Cheesy Bread (1 piece)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-parmesan-bread-bites-4-pieces",
@@ -221,7 +246,8 @@
    "nameAr": "كرات خبز بارميزان (٤ قطع)",
    "nameEn": "Parmesan Bread Bites (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-boneless-chicken-3-pieces",
@@ -229,7 +255,8 @@
    "nameAr": "دجاج بلا عظم (٣ قطع)",
    "nameEn": "Boneless Chicken (3 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-plain-wings-no-sauce-4-pieces",
@@ -237,7 +264,8 @@
    "nameAr": "أجنحة دجاج سادة (٤ قطع)",
    "nameEn": "Plain Wings (No sauce) (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-honey-bbq-wings-4-pieces",
@@ -245,7 +273,8 @@
    "nameAr": "أجنحة باربكيو بالعسل (٤ قطع)",
    "nameEn": "Honey BBQ Wings (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-hot-buffalo-wings-4-pieces",
@@ -253,7 +282,8 @@
    "nameAr": "أجنحة بافلو حارّة (٤ قطع)",
    "nameEn": "Hot Buffalo Wings (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-mild-buffalo-wings-4-pieces",
@@ -261,7 +291,8 @@
    "nameAr": "أجنحة بافلو خفيفة (٤ قطع)",
    "nameEn": "Mild Buffalo Wings (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-garlic-parmesan-wings-4-pieces",
@@ -269,7 +300,8 @@
    "nameAr": "أجنحة ثوم وبارميزان (٤ قطع)",
    "nameEn": "Garlic Parmesan Wings (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-sweet-mango-habanero-wings-4-pieces",
@@ -277,7 +309,8 @@
    "nameAr": "أجنحة مانجو هابانيرو (٤ قطع)",
    "nameEn": "Sweet Mango Habanero Wings (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-classic-hot-buffalo-loaded-chicken-4-pieces",
@@ -285,7 +318,8 @@
    "nameAr": "دجاج محمَّل بافلو (٤ قطع)",
    "nameEn": "Classic Hot Buffalo Loaded Chicken (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-spicy-jalapeno-pineapple-loaded-chicken-4-pieces",
@@ -293,7 +327,8 @@
    "nameAr": "دجاج محمَّل هالبينو وأناناس (٤ قطع)",
    "nameEn": "Spicy Jalapeno & Pineapple Loaded Chicken (4 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-chocolate-lava-crunch-cake-1-cake",
@@ -301,7 +336,8 @@
    "nameAr": "كيك لافا شوكولاتة",
    "nameEn": "Chocolate Lava Crunch Cake (1 cake)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-marbled-cookie-brownie-1-brownie",
@@ -309,7 +345,8 @@
    "nameAr": "براوني كوكيز",
    "nameEn": "Marbled Cookie Brownie (1 brownie)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-cinnamon-bread-twists-2-pieces",
@@ -317,7 +354,8 @@
    "nameAr": "خبز قرفة (قطعتان)",
    "nameEn": "Cinnamon Bread Twists (2 pieces)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-honey-bbq-1-cup",
@@ -325,7 +363,8 @@
    "nameAr": "صوص باربكيو بالعسل (كوب)",
    "nameEn": "Honey BBQ (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-blue-cheese-1-cup",
@@ -333,7 +372,8 @@
    "nameAr": "صوص جبنة زرقاء (كوب)",
    "nameEn": "Blue Cheese (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-garlic-1-cup",
@@ -341,7 +381,8 @@
    "nameAr": "صوص ثوم (كوب)",
    "nameEn": "Garlic (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-hot-buffalo-1-cup",
@@ -349,7 +390,8 @@
    "nameAr": "صوص بافلو حار (كوب)",
    "nameEn": "Hot Buffalo (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-marinara-1-cup",
@@ -357,7 +399,8 @@
    "nameAr": "صوص مارينارا (كوب)",
    "nameEn": "Marinara (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-ranch-1-cup",
@@ -365,7 +408,8 @@
    "nameAr": "صوص رانش (كوب)",
    "nameEn": "Ranch (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-sweet-icing-1-cup",
@@ -373,7 +417,8 @@
    "nameAr": "صوص آيسنغ حلو (كوب)",
    "nameEn": "Sweet Icing (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-sweet-mango-habanero-1-cup",
@@ -381,7 +426,8 @@
    "nameAr": "صوص مانجو هابانيرو (كوب)",
    "nameEn": "Sweet Mango Habanero (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-nacho-cheese-dipping-cup-1-cup",
@@ -389,7 +435,8 @@
    "nameAr": "صوص جبنة ناتشو (كوب)",
    "nameEn": "Nacho Cheese Dipping Cup (1 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-melty-3-cheese-loaded-tots-1-4-of-loaded-tots",
@@ -397,7 +444,8 @@
    "nameAr": "بطاطس توتس بثلاث أجبان (ربع)",
    "nameEn": "Melty 3-Cheese Loaded Tots (1/4 of Loaded Tots)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-philly-cheese-steak-loaded-tots-1-4-of-loaded-tots",
@@ -405,7 +453,8 @@
    "nameAr": "بطاطس توتس فيلي (ربع)",
    "nameEn": "Philly Cheese Steak Loaded Tots (1/4 of Loaded Tots)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-cheesy-marinara-dip-2-tbsp",
@@ -413,7 +462,8 @@
    "nameAr": "غموس مارينارا بالجبن (ملعقتان)",
    "nameEn": "Cheesy Marinara Dip (2 tbsp)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-5-cheese-dip-2-tbsp",
@@ -421,7 +471,8 @@
    "nameAr": "غموس خمس أجبان (ملعقتان)",
    "nameEn": "5-Cheese Dip (2 tbsp)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-buffalo-chicken-1-2-sandwich",
@@ -429,7 +480,8 @@
    "nameAr": "ساندويتش بافلو تشيكن (نصف)",
    "nameEn": "Buffalo Chicken (1/2 Sandwich)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-chicken-parm-1-2-sandwich",
@@ -437,7 +489,8 @@
    "nameAr": "ساندويتش دجاج بارميزان (نصف)",
    "nameEn": "Chicken Parm (1/2 Sandwich)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-philly-cheese-steak-1-2-sandwich",
@@ -445,7 +498,8 @@
    "nameAr": "ساندويتش فيلي تشيز ستيك (نصف)",
    "nameEn": "Philly Cheese Steak (1/2 Sandwich)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-sweet-spicy-chicken-habanero-1-2-sandwich",
@@ -453,7 +507,8 @@
    "nameAr": "ساندويتش دجاج هابانيرو (نصف)",
    "nameEn": "Sweet & Spicy Chicken Habanero (1/2 Sandwich)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-chicken-alfredo-1-dish",
@@ -461,7 +516,8 @@
    "nameAr": "باستا دجاج ألفريدو (طبق)",
    "nameEn": "Chicken Alfredo (1 dish)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-5-cheese-mac-cheese-1-dish",
@@ -469,7 +525,8 @@
    "nameAr": "ماك آند تشيز خمس أجبان (طبق)",
    "nameEn": "5-Cheese Mac & Cheese (1 Dish)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-spicy-buffalo-5-cheese-mac-cheese-1-dish",
@@ -477,7 +534,8 @@
    "nameAr": "ماك آند تشيز بافلو حار (طبق)",
    "nameEn": "Spicy Buffalo 5-Cheese Mac & Cheese (1 Dish)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-dominos-classic-garden-salad-1-5-cup",
@@ -485,319 +543,359 @@
    "nameAr": "سلطة الحديقة (١٫٥ كوب)",
    "nameEn": "Classic Garden Salad (1.5 cup)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "OFFICIAL_FOREIGN_MARKET"
   },
   {
    "id": "rst-shawarmer-bites-sarokh",
    "chain": "shawarmer",
    "nameAr": "صاروخ بايتس",
    "nameEn": "Bites Sarokh",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-enjoooy-batranah",
    "chain": "shawarmer",
    "nameAr": "انبسطووووا بطرانة",
    "nameEn": "Enjoooy Batranah",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-enjoooy-abo-alsawarikh",
    "chain": "shawarmer",
    "nameAr": "انبسطووووا أبو الصواريخ",
    "nameEn": "Enjoooy Abo Alsawarikh",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-enjoooy-nahyfat",
    "chain": "shawarmer",
    "nameAr": "انبسطووووا نحيفات",
    "nameEn": "Enjoooy Nahyfat",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-two-arabi",
    "chain": "shawarmer",
    "nameAr": "اثنين عربي",
    "nameEn": "Two Arabi",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-abo-alsawarikh",
    "chain": "shawarmer",
    "nameAr": "أبو الصواريخ",
    "nameEn": "Abo Alsawarikh",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-two-saji",
    "chain": "shawarmer",
    "nameAr": "اثنين صاجي",
    "nameEn": "Two Saji",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-two-garsa-meal",
    "chain": "shawarmer",
    "nameAr": "اثنين قرصة وجبة",
    "nameEn": "Two Garsa Meal",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-two-garsa",
    "chain": "shawarmer",
    "nameAr": "اثنين قرصة",
    "nameEn": "Two Garsa",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-two-mafloqah",
    "chain": "shawarmer",
    "nameAr": "اثنين مفلوقة",
    "nameEn": "Two Mafloqah",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-hamad-gonzalos",
    "chain": "shawarmer",
    "nameAr": "حمد قونزالوس",
    "nameEn": "Hamad Gonzalos",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-alrahiyah",
    "chain": "shawarmer",
    "nameAr": "الراهية النسخة المدخنة",
    "nameEn": "Alrahiyah",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-al-batranah",
    "chain": "shawarmer",
    "nameAr": "البطرانة",
    "nameEn": "Al Batranah",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-nahyfat",
    "chain": "shawarmer",
    "nameAr": "نحيفات",
    "nameEn": "Nahyfat",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-sabbah",
    "chain": "shawarmer",
    "nameAr": "صبة",
    "nameEn": "Sabbah",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-shatshaweesh",
    "chain": "shawarmer",
    "nameAr": "شطشويش",
    "nameEn": "Shatshaweesh",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-tannouri",
    "chain": "shawarmer",
    "nameAr": "تنوري",
    "nameEn": "Tannouri",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-abo-khalta",
    "chain": "shawarmer",
    "nameAr": "أبو خلطة",
    "nameEn": "Abo Khalta",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-keto-shawarma",
    "chain": "shawarmer",
    "nameAr": "شاورما كيتو",
    "nameEn": "Keto Shawarma",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-althaybah",
    "chain": "shawarmer",
    "nameAr": "الذايبة",
    "nameEn": "Althaybah",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-arabo-chicken-double-box",
    "chain": "shawarmer",
    "nameAr": "دبل عربو دجاج بوكس",
    "nameEn": "Arabo Chicken Double Box",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-arabo-chicken-box",
    "chain": "shawarmer",
    "nameAr": "عربو دجاج بوكس",
    "nameEn": "Arabo Chicken Box",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-alsandouk",
    "chain": "shawarmer",
    "nameAr": "الصندوق",
    "nameEn": "Alsandouk",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-sahen",
    "chain": "shawarmer",
    "nameAr": "صحن",
    "nameEn": "Sahen",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-falafel-box",
    "chain": "shawarmer",
    "nameAr": "فلافل بوكس",
    "nameEn": "Falafel Box",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-raj-raj",
    "chain": "shawarmer",
    "nameAr": "رجرج",
    "nameEn": "Raj Raj",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-spicy-raj-raj",
    "chain": "shawarmer",
    "nameAr": "رجرج حار",
    "nameEn": "Spicy Raj Raj",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-protein-51",
    "chain": "shawarmer",
    "nameAr": "بروتين 51",
    "nameEn": "Protein 51",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-salad-al-salad",
    "chain": "shawarmer",
    "nameAr": "سلطة السلطة",
    "nameEn": "Salad Al Salad",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-world-cup-gathering",
    "chain": "shawarmer",
    "nameAr": "جمعات كاس العالم",
    "nameEn": "World Cup Gathering",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-al-azeima",
    "chain": "shawarmer",
    "nameAr": "العزيمة",
    "nameEn": "Al Azeima",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-tagamees",
    "chain": "shawarmer",
    "nameAr": "تغاميس",
    "nameEn": "Tagamees",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-shawarma-nachos",
    "chain": "shawarmer",
    "nameAr": "ناتشو شاورما",
    "nameEn": "Shawarma Nachos",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-mozzarella-sticks",
    "chain": "shawarmer",
    "nameAr": "أصابع موزاريلا",
    "nameEn": "Mozzarella Sticks",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-chicken-bites",
    "chain": "shawarmer",
    "nameAr": "تشيكن بايتس",
    "nameEn": "Chicken Bites",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-family-fries",
    "chain": "shawarmer",
    "nameAr": "بطاطس جمعات",
    "nameEn": "Family Fries",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-family-spicy-fries",
    "chain": "shawarmer",
    "nameAr": "بطاطس جمعات حار",
    "nameEn": "Family Spicy Fries",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-fries-medium",
    "chain": "shawarmer",
    "nameAr": "بطاطس مقلية وسط",
    "nameEn": "Fries Medium",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-shawarmer-spicy-fries-medium",
    "chain": "shawarmer",
    "nameAr": "بطاطس مقلية حارة وسط",
    "nameEn": "Spicy Fries Medium",
-   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
-   "macros": "partial-estimated"
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
   },
   {
    "id": "rst-applebees-7-oz-sirloin-steak",
@@ -805,7 +903,8 @@
    "nameAr": "ستيك ٧ أونصات",
    "nameEn": "7 oz Sirloin Steak",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-applebees-chicken-tenders",
@@ -813,7 +912,8 @@
    "nameAr": "شرائح دجاج مقرمشة",
    "nameEn": "Chicken Tenders",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-applebees-mozzarella-sticks",
@@ -821,7 +921,8 @@
    "nameAr": "موزاريلا ستيكس",
    "nameEn": "Mozzarella Sticks",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-burgerking-whopper",
@@ -829,7 +930,8 @@
    "nameAr": "وابر",
    "nameEn": "Whopper",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-burgerking-whopper-with-cheese",
@@ -837,7 +939,8 @@
    "nameAr": "وابر بالجبن",
    "nameEn": "Whopper with Cheese",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-burgerking-whopper-jr",
@@ -845,7 +948,8 @@
    "nameAr": "وابر جونيور",
    "nameEn": "Whopper Jr.",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-burgerking-cheeseburger",
@@ -853,7 +957,8 @@
    "nameAr": "تشيز برجر",
    "nameEn": "Cheeseburger",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-burgerking-double-cheeseburger",
@@ -861,7 +966,8 @@
    "nameAr": "دبل تشيز برجر",
    "nameEn": "Double Cheeseburger",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-burgerking-original-chicken-sandwich",
@@ -869,7 +975,8 @@
    "nameAr": "أوريجنال تشيكن ساندويتش",
    "nameEn": "Original Chicken Sandwich",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-burgerking-french-fries-medium",
@@ -877,7 +984,8 @@
    "nameAr": "بطاطس مقلية (وسط)",
    "nameEn": "French Fries (medium)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-burgerking-onion-rings-medium",
@@ -885,7 +993,8 @@
    "nameAr": "حلقات بصل (وسط)",
    "nameEn": "Onion Rings (medium)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-original-recipe-chicken-breast",
@@ -893,7 +1002,8 @@
    "nameAr": "صدر أوريجنال",
    "nameEn": "Original Recipe Chicken Breast",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-original-recipe-chicken-thigh",
@@ -901,7 +1011,8 @@
    "nameAr": "فخذ أوريجنال",
    "nameEn": "Original Recipe Chicken Thigh",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-original-recipe-chicken-drumstick",
@@ -909,7 +1020,8 @@
    "nameAr": "دبوس أوريجنال",
    "nameEn": "Original Recipe Chicken Drumstick",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-original-recipe-chicken-wing",
@@ -917,7 +1029,8 @@
    "nameAr": "جناح أوريجنال",
    "nameEn": "Original Recipe Chicken Wing",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-extra-crispy-chicken-breast",
@@ -925,7 +1038,8 @@
    "nameAr": "صدر كرسبي",
    "nameEn": "Extra Crispy Chicken Breast",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-extra-crispy-chicken-thigh",
@@ -933,7 +1047,8 @@
    "nameAr": "فخذ كرسبي",
    "nameEn": "Extra Crispy Chicken Thigh",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-crispy-chicken-strips",
@@ -941,7 +1056,8 @@
    "nameAr": "كرسبي ستربس (٣ قطع)",
    "nameEn": "Crispy Chicken Strips",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-popcorn-chicken",
@@ -949,7 +1065,8 @@
    "nameAr": "بوبكورن تشيكن",
    "nameEn": "Popcorn Chicken",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-coleslaw",
@@ -957,7 +1074,8 @@
    "nameAr": "كول سلو",
    "nameEn": "Coleslaw",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-kfc-biscuit",
@@ -965,7 +1083,8 @@
    "nameAr": "بسكويت",
    "nameEn": "Biscuit",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-big-mac",
@@ -973,7 +1092,8 @@
    "nameAr": "بيج ماك",
    "nameEn": "Big Mac",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-quarter-pounder-with-cheese",
@@ -981,7 +1101,8 @@
    "nameAr": "كوارتر باوندر بالجبن",
    "nameEn": "Quarter Pounder with Cheese",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-double-quarter-pounder-with-cheese",
@@ -989,7 +1110,8 @@
    "nameAr": "دبل كوارتر باوندر بالجبن",
    "nameEn": "Double Quarter Pounder with Cheese",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-cheeseburger",
@@ -997,7 +1119,8 @@
    "nameAr": "تشيز برجر",
    "nameEn": "Cheeseburger",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-double-cheeseburger",
@@ -1005,7 +1128,8 @@
    "nameAr": "دبل تشيز برجر",
    "nameEn": "Double Cheeseburger",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-hamburger",
@@ -1013,7 +1137,8 @@
    "nameAr": "همبرجر",
    "nameEn": "Hamburger",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-mcchicken",
@@ -1021,7 +1146,8 @@
    "nameAr": "ماك تشيكن",
    "nameEn": "McChicken",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-filet-o-fish",
@@ -1029,7 +1155,8 @@
    "nameAr": "فيليه أو فيش",
    "nameEn": "Filet-O-Fish",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-chicken-mcnuggets-6-pcs",
@@ -1037,7 +1164,8 @@
    "nameAr": "تشيكن ماك ناجتس (٦ قطع)",
    "nameEn": "Chicken McNuggets (6 pcs)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-french-fries-medium",
@@ -1045,7 +1173,8 @@
    "nameAr": "بطاطس مقلية (وسط)",
    "nameEn": "French Fries (medium)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-french-fries-large",
@@ -1053,7 +1182,8 @@
    "nameAr": "بطاطس مقلية (كبير)",
    "nameEn": "French Fries (large)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-egg-mcmuffin",
@@ -1061,7 +1191,8 @@
    "nameAr": "إيغ ماك مافن",
    "nameEn": "Egg McMuffin",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-hash-brown",
@@ -1069,7 +1200,8 @@
    "nameAr": "هاش براون",
    "nameEn": "Hash Brown",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-hotcakes",
@@ -1077,7 +1209,8 @@
    "nameAr": "هوت كيك (٣ قطع)",
    "nameEn": "Hotcakes",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-mcdonalds-caramel-sundae",
@@ -1085,7 +1218,8 @@
    "nameAr": "آيس كريم ساندي كراميل",
    "nameEn": "Caramel Sundae",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-papajohns-14-cheese-pizza-original-crust-slice",
@@ -1093,7 +1227,8 @@
    "nameAr": "بيتزا جبن (شريحة ١٤\")",
    "nameEn": "14\" Cheese Pizza, Original Crust (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-papajohns-14-pepperoni-pizza-original-crust-slice",
@@ -1101,7 +1236,8 @@
    "nameAr": "بيتزا بيبروني (شريحة ١٤\")",
    "nameEn": "14\" Pepperoni Pizza, Original Crust (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-papajohns-14-the-works-pizza-slice",
@@ -1109,7 +1245,8 @@
    "nameAr": "بيتزا الأعمال (شريحة ١٤\")",
    "nameEn": "14\" The Works Pizza (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-papajohns-14-cheese-pizza-thin-crust-slice",
@@ -1117,7 +1254,8 @@
    "nameAr": "بيتزا جبن رقيقة (شريحة ١٤\")",
    "nameEn": "14\" Cheese Pizza, Thin Crust (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-pizzahut-12-cheese-pizza-pan-slice",
@@ -1125,7 +1263,8 @@
    "nameAr": "بيتزا جبن بان (شريحة ١٢\")",
    "nameEn": "12\" Cheese Pizza, Pan (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-pizzahut-12-pepperoni-pizza-pan-slice",
@@ -1133,7 +1272,8 @@
    "nameAr": "بيتزا بيبروني بان (شريحة ١٢\")",
    "nameEn": "12\" Pepperoni Pizza, Pan (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-pizzahut-12-super-supreme-pizza-hand-tossed-slice",
@@ -1141,7 +1281,8 @@
    "nameAr": "بيتزا سوبر سوبريم هاند توسد (شريحة ١٢\")",
    "nameEn": "12\" Super Supreme Pizza, Hand-Tossed (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-pizzahut-12-cheese-pizza-thin-n-crispy-slice",
@@ -1149,7 +1290,8 @@
    "nameAr": "بيتزا جبن رقيقة (شريحة ١٢\")",
    "nameEn": "12\" Cheese Pizza, Thin N Crispy (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-pizzahut-14-cheese-pizza-hand-tossed-slice",
@@ -1157,7 +1299,8 @@
    "nameAr": "بيتزا جبن هاند توسد (شريحة ١٤\")",
    "nameEn": "14\" Cheese Pizza, Hand-Tossed (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-pizzahut-14-pepperoni-pizza-hand-tossed-slice",
@@ -1165,7 +1308,8 @@
    "nameAr": "بيتزا بيبروني هاند توسد (شريحة ١٤\")",
    "nameEn": "14\" Pepperoni Pizza, Hand-Tossed (slice)",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-subway-6-turkey-breast",
@@ -1173,7 +1317,8 @@
    "nameAr": "ساندويتش تركي ٦ إنش",
    "nameEn": "6\" Turkey Breast",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-subway-6-tuna",
@@ -1181,7 +1326,8 @@
    "nameAr": "ساندويتش تونة ٦ إنش",
    "nameEn": "6\" Tuna",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-subway-6-sweet-onion-chicken-teriyaki",
@@ -1189,7 +1335,8 @@
    "nameAr": "ساندويتش دجاج ترياكي ٦ إنش",
    "nameEn": "6\" Sweet Onion Chicken Teriyaki",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-subway-6-meatball-marinara",
@@ -1197,7 +1344,8 @@
    "nameAr": "ساندويتش ميت بول ٦ إنش",
    "nameEn": "6\" Meatball Marinara",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-subway-6-steak-cheese",
@@ -1205,7 +1353,8 @@
    "nameAr": "ساندويتش ستيك وجبن ٦ إنش",
    "nameEn": "6\" Steak & Cheese",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   },
   {
    "id": "rst-subway-6-oven-roasted-chicken",
@@ -1213,7 +1362,8 @@
    "nameAr": "ساندويتش دجاج مشوي ٦ إنش",
    "nameEn": "6\" Oven Roasted Chicken",
    "status": "OFFICIAL_FULL",
-   "macros": "official"
+   "macros": "official",
+   "class": "USDA_MEASURED"
   }
  ]
 }

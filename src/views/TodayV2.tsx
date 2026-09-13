@@ -92,8 +92,8 @@ export function TodayV2({ lang, onNavigate, onQuickLog }: TodayV2Props) {
   const minor = isMinorAge(customization.profile.age)
   const calories = { consumed: totals.calories, target: plan?.targetCalories ?? 0 }
   const protein = { consumed: totals.protein, target: plan?.targetProtein ?? 0 }
-  const carbs = { consumed: totals.carbs, target: plan?.targetCarbs ?? 0 }
-  const fat = { consumed: totals.fat, target: plan?.targetFat ?? 0 }
+  const carbs = { consumed: totals.carbs, target: plan?.targetCarbs ?? 0, unknown: totals.unknown.carbs }
+  const fat = { consumed: totals.fat, target: plan?.targetFat ?? 0, unknown: totals.unknown.fat }
   const waterTargetMl = Math.round((plan?.targetWaterLiters ?? 0) * 1000)
   const hasMeal = dayLog.log.length > 0
 

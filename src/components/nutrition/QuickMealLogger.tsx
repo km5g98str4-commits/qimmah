@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
-import { type FoodItem, type FoodSize } from '@/data/foodItems'
+import { type FoodItem, type FoodSize, provenanceDisclosure } from '@/data/foodItems'
 import { getAppCatalog, isOffDerived } from '@/lib/food/catalog/appCatalog'
 import type { RankedHit } from '@/lib/food/catalog/rank'
 import { mergeUnified, rankCurated, rankPackaged } from '@/lib/food/unifiedSearch'
@@ -170,8 +170,9 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
   const activeSize = selected?.sizes?.find((s) => s.id === sizeId) ?? null
   const baseCal = activeSize?.calories ?? selected?.calories ?? 0
   const baseProt = activeSize?.protein ?? selected?.protein ?? 0
-  const baseCarb = activeSize?.carbs ?? selected?.carbs ?? 0
-  const baseFat = activeSize?.fat ?? selected?.fat ?? 0
+  // [PARTIAL-NUTRITION-001] الكارب/الدهون قد تكون غير متوفّرة في المصدر — تبقى undefined (تُعرض «غير متوفّر» ولا تُسجَّل صفرًا).
+  const baseCarb: number | undefined = activeSize?.carbs ?? selected?.carbs
+  const baseFat: number | undefined = activeSize?.fat ?? selected?.fat
   const baseServingLabel = activeSize?.servingLabelAr ?? selected?.servingLabelAr ?? ''
   // غرامات الحصة المرجعية للقيم الفعّالة (أساس التحويل لكل غرام).
   const baseGrams = activeSize
@@ -213,8 +214,8 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
       unit: unit === 'serv' ? 'serving' : 'g',
       calories: round(baseCal * factor),
       protein: round(baseProt * factor),
-      carbs: round(baseCarb * factor),
-      fat: round(baseFat * factor),
+      ...(typeof baseCarb === 'number' ? { carbs: round(baseCarb * factor) } : {}),
+      ...(typeof baseFat === 'number' ? { fat: round(baseFat * factor) } : {}),
       meal: defaultMeal,
     })
     if (!saved) {
@@ -244,8 +245,9 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
       unit: 'serving',
       calories: round(cal),
       protein: round(prot),
-      carbs: round(parseSafeNumber(cCarb, { min: 0, max: NUM_LIMITS.quickMacro.max })),
-      fat: round(parseSafeNumber(cFat, { min: 0, max: NUM_LIMITS.quickMacro.max })),
+      // الحقلان اختياريان: الفارغ يبقى غير معروف لا صفرًا.
+      ...(cCarb.trim() ? { carbs: round(parseSafeNumber(cCarb, { min: 0, max: NUM_LIMITS.quickMacro.max })) } : {}),
+      ...(cFat.trim() ? { fat: round(parseSafeNumber(cFat, { min: 0, max: NUM_LIMITS.quickMacro.max })) } : {}),
       meal: defaultMeal,
       note: cName.trim() || undefined,
     })
@@ -515,9 +517,13 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-ink-500">
                     <Stat label={t.calories} value={round(baseCal * factor)} />
                     <Stat label={t.protein} value={`${round(baseProt * factor)}${t.gramsUnit}`} />
-                    <Stat label={t.carbs} value={`${round(baseCarb * factor)}${t.gramsUnit}`} />
-                    <Stat label={t.fat} value={`${round(baseFat * factor)}${t.gramsUnit}`} />
+                    <Stat label={t.carbs} value={typeof baseCarb === 'number' ? `${round(baseCarb * factor)}${t.gramsUnit}` : t.nutrientUnknown} />
+                    <Stat label={t.fat} value={typeof baseFat === 'number' ? `${round(baseFat * factor)}${t.gramsUnit}` : t.nutrientUnknown} />
                   </div>
+                  {/* [PARTIAL-NUTRITION-001] إفصاح المصدر سطرًا واحدًا — الأجنبي «بيانات مرجعية»، الوكيل «أقرب سجلّ». */}
+                  {selected && provenanceDisclosure(selected.provenance, lang) && (
+                    <p data-testid="food-provenance" className="mt-2 text-[11px] text-ink-400">{provenanceDisclosure(selected.provenance, lang)}</p>
+                  )}
                   <button type="button" onClick={addSelected} className="btn-primary mt-3 min-h-[44px] w-full justify-center py-2 text-xs">
                     <Icon name="Plus" className="h-4 w-4" />
                     {t.addToLog}

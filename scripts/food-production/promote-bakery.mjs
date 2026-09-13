@@ -63,6 +63,7 @@ for (const row of map.rows) {
     calories: per(n.kcal, g), protein: per1(n.protein, g), carbs: per1(n.carbs, g), fat: per1(n.fat, g),
     fiber: typeof n.fiber === 'number' ? Math.round((n.fiber * g) / 10) / 10 : undefined,
     keywords: [...new Set([...(row.keywords ?? []), row.nameEn.toLowerCase()])],
+    provenance: { class: sourceMatch === 'proxy' ? 'GENERIC_PROXY' : 'USDA_MEASURED', ref: `fdcId:${e.fdcId}` },
   })
   prov[id] = { fdcId: e.fdcId, dataType: e.dataType, description: e.description, per100g: n, portion: portion.usda, portionGrams: g, sourceMatch, proxyNote: row.proxy ?? null }
   resolution.push({ ...base, status: 'VERIFIED_AND_LOGGABLE', itemId: id, fdcId: e.fdcId, description: e.description, sourceMatch, proxyNote: row.proxy ?? null })
@@ -77,7 +78,7 @@ const lines = [
   '',
   'export const bakeryFoods: FoodItem[] = [',
 ]
-for (const f of items) lines.push(`  { id: '${f.id}', nameAr: '${esc(f.nameAr)}', nameEn: '${esc(f.nameEn)}', category: '${f.category}', servingLabelAr: '${esc(f.servingLabelAr)}', servingGrams: ${f.servingGrams}, calories: ${f.calories}, protein: ${f.protein}, carbs: ${f.carbs}, fat: ${f.fat}${f.fiber !== undefined ? `, fiber: ${f.fiber}` : ''}, keywords: [${f.keywords.map((k) => `'${esc(k)}'`).join(', ')}] },`)
+for (const f of items) lines.push(`  { id: '${f.id}', nameAr: '${esc(f.nameAr)}', nameEn: '${esc(f.nameEn)}', category: '${f.category}', servingLabelAr: '${esc(f.servingLabelAr)}', servingGrams: ${f.servingGrams}, calories: ${f.calories}, protein: ${f.protein}, carbs: ${f.carbs}, fat: ${f.fat}${f.fiber !== undefined ? `, fiber: ${f.fiber}` : ''}, keywords: [${f.keywords.map((k) => `'${esc(k)}'`).join(', ')}], provenance: { class: '${f.provenance.class}', ref: '${f.provenance.ref}' } },`)
 lines.push(']', '', 'export const BAKERY_PROVENANCE: Record<string, GenericProvenance> = {')
 for (const [id, p] of Object.entries(prov)) lines.push(`  '${id}': { fdcId: ${p.fdcId}, dataType: '${esc(p.dataType)}', description: '${esc(p.description)}', per100g: { kcal: ${p.per100g.kcal}, protein: ${p.per100g.protein}, carbs: ${p.per100g.carbs}, fat: ${p.per100g.fat}, fiber: ${typeof p.per100g.fiber === 'number' ? p.per100g.fiber : 'null'} }, portion: ${p.portion ? `'${esc(p.portion)}'` : 'null'}, portionGrams: ${p.portionGrams}, preparation: null, sourceMatch: '${p.sourceMatch}', proxyNote: ${p.proxyNote ? `'${esc(p.proxyNote)}'` : 'null'} },`)
 lines.push('}', '')

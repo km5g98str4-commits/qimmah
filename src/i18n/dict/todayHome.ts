@@ -22,6 +22,8 @@ export interface TodayHomeStrings {
   ofTarget: (consumed: string, target: string) => string
   macroProtein: string
   macroCarbs: string
+  /** [PARTIAL-NUTRITION-001] علامة نقص المجموع لمغذٍّ (أصناف بلا بيانات). */
+  macroIncomplete: (n: string) => string
   macroFat: string
   gramsShort: string
   /** وصف صوتي كامل لحلقة واحدة — لقارئ الشاشة، لا يعتمد على اللون. */
@@ -100,6 +102,7 @@ const ar: TodayHomeStrings = {
   ofTarget: (consumed, target) => `${consumed} / ${target}`,
   macroProtein: 'بروتين',
   macroCarbs: 'كارب',
+  macroIncomplete: (n) => `بلا بيانات لـ${n} صنف`,
   macroFat: 'دهون',
   gramsShort: 'غ',
   ringAria: (label, remaining, consumed, target) => `${label} · باقي ${remaining} · استهلكت ${consumed} من ${target}`,
@@ -170,6 +173,7 @@ const en: TodayHomeStrings = {
   ofTarget: (consumed, target) => `${consumed} / ${target}`,
   macroProtein: 'Protein',
   macroCarbs: 'Carbs',
+  macroIncomplete: (n) => `${n} item(s) without data`,
   macroFat: 'Fat',
   gramsShort: 'g',
   ringAria: (label, remaining, consumed, target) => `${label} · ${remaining} left · ${consumed} of ${target} used`,
