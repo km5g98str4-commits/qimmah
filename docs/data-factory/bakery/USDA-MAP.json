@@ -1,0 +1,800 @@
+{
+ "version": 1,
+ "note": "USDA-MAP للأفران والوجبات الجاهزة — [BAKERY-READY-001]. نفس محرّك research-usda (--map/--out). proxy = سجلّ أوسع مُعلَن؛ الغائب يُحجر لا يُخترع.",
+ "rows": [
+  {
+   "id": "BK001",
+   "nameAr": "منقوشة زعتر بالزيت",
+   "nameEn": "Zaatar manakish",
+   "category": "أفران",
+   "q": "zaatar",
+   "note": "إن غاب سجلّ مسمّى تُحجر — لا وكيل بيتزا للزعتر",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK002",
+   "nameAr": "منقوشة لحم بعجين",
+   "nameEn": "Meat manakish (lahm bi ajeen)",
+   "category": "أفران",
+   "q": "pizza meat thin crust",
+   "proxy": "لحم بعجين ⇐ بيتزا رقيقة باللحم (أقرب تركيب متاح)",
+   "not": [
+    "frozen",
+    "pepperoni",
+    "sausage"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK003",
+   "nameAr": "منقوشة جبن وزعتر",
+   "nameEn": "Cheese and zaatar manakish",
+   "category": "أفران",
+   "q": "pizza cheese thin crust",
+   "proxy": "جبن وزعتر ⇐ بيتزا جبن رقيقة",
+   "not": [
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK004",
+   "nameAr": "فطيرة لحم (سفيحة)",
+   "nameEn": "Meat pie (sfiha)",
+   "category": "أفران",
+   "q": "turnover meat filled",
+   "not": [
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK005",
+   "nameAr": "فطيرة دجاج",
+   "nameEn": "Chicken pie",
+   "category": "أفران",
+   "q": "turnover chicken filled",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK006",
+   "nameAr": "فطيرة زعتر",
+   "nameEn": "Zaatar pie",
+   "category": "أفران",
+   "q": "zaatar pie",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK007",
+   "nameAr": "فطيرة جبن حلوم",
+   "nameEn": "Halloumi pie",
+   "category": "أفران",
+   "q": "cheese pie",
+   "not": [
+    "spinach",
+    "cake",
+    "cheesecake"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK008",
+   "nameAr": "سبانخ فطيرة (فطاير سبانخ ٣ حبات)",
+   "nameEn": "Spinach fatayer (3 pcs)",
+   "category": "أفران",
+   "q": "spanakopita",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK009",
+   "nameAr": "سمبوسة خضار",
+   "nameEn": "Vegetable samosa",
+   "category": "أفران",
+   "q": "samosa vegetable",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK010",
+   "nameAr": "سمبوسة دجاج",
+   "nameEn": "Chicken samosa",
+   "category": "أفران",
+   "q": "samosa chicken",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK011",
+   "nameAr": "كرواسون زعتر",
+   "nameEn": "Zaatar croissant",
+   "category": "أفران",
+   "q": "croissant",
+   "proxy": "كرواسون زعتر ⇐ كرواسون زبدة (الزعتر غرامات قليلة)",
+   "not": [
+    "cheese",
+    "chocolate",
+    "ham",
+    "egg"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK012",
+   "nameAr": "كرواسون جبن",
+   "nameEn": "Cheese croissant (bakery)",
+   "category": "أفران",
+   "q": "croissant cheese",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK013",
+   "nameAr": "كرواسون شوكولاتة",
+   "nameEn": "Chocolate croissant (bakery)",
+   "category": "أفران",
+   "q": "croissant chocolate",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK014",
+   "nameAr": "دانش جبن",
+   "nameEn": "Cheese danish",
+   "category": "أفران",
+   "q": "danish pastry cheese",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK015",
+   "nameAr": "دانش فواكه",
+   "nameEn": "Fruit danish",
+   "category": "أفران",
+   "q": "danish pastry fruit",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK016",
+   "nameAr": "سينامون رول",
+   "nameEn": "Cinnamon roll",
+   "category": "أفران",
+   "q": "sweet roll cinnamon",
+   "not": [
+    "frosting free"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK017",
+   "nameAr": "مفن توت",
+   "nameEn": "Blueberry muffin",
+   "category": "أفران",
+   "q": "muffin blueberry",
+   "not": [
+    "fat free",
+    "mix"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK018",
+   "nameAr": "مفن شوكولاتة",
+   "nameEn": "Chocolate chip muffin",
+   "category": "أفران",
+   "q": "muffin chocolate chip",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK019",
+   "nameAr": "خبز نان",
+   "nameEn": "Naan bread",
+   "category": "أفران",
+   "q": "naan",
+   "not": [
+    "whole wheat"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK020",
+   "nameAr": "خبز تنور (قرص)",
+   "nameEn": "Tannour flatbread",
+   "category": "أفران",
+   "q": "flatbread",
+   "not": [
+    "frozen",
+    "gluten free"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK021",
+   "nameAr": "خبز بالثوم (شريحة)",
+   "nameEn": "Garlic bread",
+   "category": "أفران",
+   "q": "garlic bread",
+   "not": [
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK022",
+   "nameAr": "خبز بالجبن (شريحة)",
+   "nameEn": "Cheese bread",
+   "category": "أفران",
+   "q": "cheese bread",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK023",
+   "nameAr": "فوكاتشا",
+   "nameEn": "Focaccia",
+   "category": "أفران",
+   "q": "focaccia",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK024",
+   "nameAr": "أعواد خبز (بريد ستيك)",
+   "nameEn": "Breadsticks",
+   "category": "أفران",
+   "q": "breadsticks soft",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK025",
+   "nameAr": "كالزوني لحم وجبن",
+   "nameEn": "Meat and cheese calzone",
+   "category": "أفران",
+   "q": "calzone",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK026",
+   "nameAr": "بيتزا فرن حطب مارغريتا (شريحة)",
+   "nameEn": "Wood-oven margherita pizza slice",
+   "category": "أفران",
+   "q": "pizza cheese thin crust",
+   "proxy": "فرن حطب ⇐ بيتزا جبن رقيقة من مطعم",
+   "not": [
+    "frozen",
+    "fast food"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK027",
+   "nameAr": "بيتزا فرن حطب خضار (شريحة)",
+   "nameEn": "Wood-oven vegetable pizza slice",
+   "category": "أفران",
+   "q": "pizza cheese vegetables thin crust",
+   "not": [
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK028",
+   "nameAr": "بيتزا دجاج (شريحة)",
+   "nameEn": "Chicken pizza slice",
+   "category": "أفران",
+   "q": "pizza chicken",
+   "not": [
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK029",
+   "nameAr": "بيتزا بيبروني (شريحة)",
+   "nameEn": "Pepperoni pizza slice",
+   "category": "أفران",
+   "q": "pizza pepperoni thin crust",
+   "not": [
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK030",
+   "nameAr": "كيش جبن",
+   "nameEn": "Cheese quiche",
+   "category": "أفران",
+   "q": "quiche cheese",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK031",
+   "nameAr": "سبرنغ رول خضار",
+   "nameEn": "Vegetable spring roll",
+   "category": "أفران",
+   "q": "egg roll vegetable",
+   "not": [
+    "frozen"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK032",
+   "nameAr": "بف باستري لحم",
+   "nameEn": "Meat puff pastry",
+   "category": "أفران",
+   "q": "puff pastry meat",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK033",
+   "nameAr": "خبز صاج",
+   "nameEn": "Saj bread",
+   "category": "أفران",
+   "q": "lavash",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK034",
+   "nameAr": "فطيرة بطاطس",
+   "nameEn": "Potato pie",
+   "category": "أفران",
+   "q": "potato pie",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK035",
+   "nameAr": "فطيرة تفاح",
+   "nameEn": "Apple turnover",
+   "category": "أفران",
+   "q": "turnover apple",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK040",
+   "nameAr": "لازانيا لحم (وجبة مجمّدة)",
+   "nameEn": "Frozen meat lasagna",
+   "category": "وجبات جاهزة",
+   "q": "lasagna meat frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK041",
+   "nameAr": "مكرونة بالجبن (جاهزة)",
+   "nameEn": "Macaroni and cheese (prepared)",
+   "category": "وجبات جاهزة",
+   "q": "macaroni cheese frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK042",
+   "nameAr": "ناجتس دجاج مجمّد (مطهو)",
+   "nameEn": "Frozen chicken nuggets, cooked",
+   "category": "وجبات جاهزة",
+   "q": "chicken nuggets frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK043",
+   "nameAr": "برجر دجاج مجمّد (قرص)",
+   "nameEn": "Frozen breaded chicken patty",
+   "category": "وجبات جاهزة",
+   "q": "chicken patty breaded frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK044",
+   "nameAr": "أصابع سمك مجمّدة",
+   "nameEn": "Fish sticks",
+   "category": "وجبات جاهزة",
+   "q": "fish sticks frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK045",
+   "nameAr": "بيتزا مجمّدة جبن (شريحة)",
+   "nameEn": "Frozen cheese pizza slice",
+   "category": "وجبات جاهزة",
+   "q": "pizza cheese frozen thick crust",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK046",
+   "nameAr": "بيتزا مجمّدة بيبروني (شريحة)",
+   "nameEn": "Frozen pepperoni pizza slice",
+   "category": "وجبات جاهزة",
+   "q": "pizza pepperoni frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK047",
+   "nameAr": "بوريتو مجمّد لحم وفاصوليا",
+   "nameEn": "Frozen beef and bean burrito",
+   "category": "وجبات جاهزة",
+   "q": "burrito beef bean frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK048",
+   "nameAr": "فطيرة دجاج بالكريمة (بوت باي)",
+   "nameEn": "Chicken pot pie",
+   "category": "وجبات جاهزة",
+   "q": "pot pie chicken",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK049",
+   "nameAr": "كرات لحم مجمّدة (مطهوّة)",
+   "nameEn": "Frozen meatballs, cooked",
+   "category": "وجبات جاهزة",
+   "q": "meatballs frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK050",
+   "nameAr": "قرص برجر لحم مجمّد (مطهو)",
+   "nameEn": "Frozen beef patty, cooked",
+   "category": "وجبات جاهزة",
+   "q": "beef patty frozen cooked",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK051",
+   "nameAr": "سبرنغ رول مجمّد",
+   "nameEn": "Frozen spring roll",
+   "category": "وجبات جاهزة",
+   "q": "egg roll frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK052",
+   "nameAr": "وجبة دجاج مقلي مجمّدة (بطاطس وخضار)",
+   "nameEn": "Frozen fried chicken dinner",
+   "category": "وجبات جاهزة",
+   "q": "frozen meal chicken fried",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK053",
+   "nameAr": "وجبة ستيك سالزبري مجمّدة",
+   "nameEn": "Frozen salisbury steak meal",
+   "category": "وجبات جاهزة",
+   "q": "frozen meal salisbury",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK054",
+   "nameAr": "رز بالخضار مجمّد",
+   "nameEn": "Frozen rice with vegetables",
+   "category": "وجبات جاهزة",
+   "q": "rice vegetables frozen",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK055",
+   "nameAr": "كباب دجاج مجمّد (مطهو)",
+   "nameEn": "Frozen chicken kebab, cooked",
+   "category": "وجبات جاهزة",
+   "q": "chicken kabob",
+   "not": [
+    "vegetables"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK056",
+   "nameAr": "شوربة عدس جاهزة (كوب)",
+   "nameEn": "Ready lentil soup",
+   "category": "وجبات جاهزة",
+   "q": "soup lentil",
+   "not": [
+    "dry",
+    "mix"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK057",
+   "nameAr": "شوربة دجاج بالنودلز (معلّبة)",
+   "nameEn": "Canned chicken noodle soup",
+   "category": "وجبات جاهزة",
+   "q": "soup chicken noodle canned prepared",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK058",
+   "nameAr": "حمص جاهز",
+   "nameEn": "Ready-made hummus",
+   "category": "وجبات جاهزة",
+   "q": "hummus commercial",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK059",
+   "nameAr": "سلطة تبولة جاهزة",
+   "nameEn": "Prepared tabbouleh",
+   "category": "وجبات جاهزة",
+   "q": "tabbouleh",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK060",
+   "nameAr": "ورق عنب محشي جاهز",
+   "nameEn": "Stuffed grape leaves (ready)",
+   "category": "وجبات جاهزة",
+   "q": "grape leaves stuffed",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK061",
+   "nameAr": "كبة مقلية (جاهزة)",
+   "nameEn": "Kibbeh, fried",
+   "category": "وجبات جاهزة",
+   "q": "kibbeh",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK062",
+   "nameAr": "فلافل مجمّد (مطهو)",
+   "nameEn": "Frozen falafel, cooked",
+   "category": "وجبات جاهزة",
+   "q": "falafel",
+   "not": [
+    "home"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK063",
+   "nameAr": "شاورما دجاج جاهزة (كيس)",
+   "nameEn": "Ready chicken shawarma meat",
+   "category": "وجبات جاهزة",
+   "q": "gyro chicken",
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  },
+  {
+   "id": "BK064",
+   "nameAr": "نودلز سريعة التحضير (كوب)",
+   "nameEn": "Instant noodles cup",
+   "category": "وجبات جاهزة",
+   "q": "noodles instant ramen",
+   "not": [
+    "dry",
+    "uncooked"
+   ],
+   "prefer": [
+    "fndds",
+    "sr",
+    "foundation"
+   ]
+  }
+ ]
+}

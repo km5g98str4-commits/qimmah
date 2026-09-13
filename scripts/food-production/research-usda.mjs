@@ -26,8 +26,9 @@ import { fileURLToPath } from 'node:url'
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const args = process.argv.slice(2)
 const argOf = (f) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1] : null }
-const MAP = resolve(ROOT, 'docs/data-factory/generic/USDA-MAP.json')
-const OUT = resolve(ROOT, 'data/food-production/generic/usda-evidence.json')
+// --map/--out: الخريطة والمخرج قابلان للتبديل (خريطة الأفران والوجبات الجاهزة تشارك المحرّك نفسه).
+const MAP = resolve(ROOT, argOf('--map') ?? 'docs/data-factory/generic/USDA-MAP.json')
+const OUT = resolve(ROOT, argOf('--out') ?? 'data/food-production/generic/usda-evidence.json')
 
 const NUTRIENT = { kcal: [1008], protein: [1003], carbs: [1005], fat: [1004], fiber: [1079], sugar: [2000, 1063], sodium: [1093], satFat: [1258] }
 

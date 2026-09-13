@@ -20,6 +20,7 @@
  *         + index.json بحالة كل مصدر (نجاح/فشل مسمّى + الأحجام).
  */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -36,6 +37,17 @@ try {
   ;({ chromium } = await import('playwright'))
 } catch {
   console.log('⚠️  playwright غير متاح — سيُلتقط الخام فقط، وrendered يُعلَّم skipped.')
+}
+
+// نصّ مجرّد من الوسوم — يجعل قراءة الدليل رخيصة (المنيو بسعراته يظهر سطرًا سطرًا).
+const stripHtml = (html) => html
+  .replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>|<noscript[\s\S]*?<\/noscript>/gi, ' ')
+  .replace(/<[^>]+>/g, '\n')
+  .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+  .split('\n').map((l) => l.replace(/\s+/g, ' ').trim()).filter(Boolean).join('\n')
+// PDF ⇒ نصّ عبر pdftotext (poppler) إن وُجد؛ غيابه يُعلَن لا يُخفى.
+const pdfText = (file) => {
+  try { return execFileSync('pdftotext', ['-layout', file, '-'], { maxBuffer: 64 * 1024 * 1024 }).toString('utf8') } catch { return null }
 }
 
 const index = { _readme: 'دليل جلب CI لمصادر السلاسل الرسمية — يقرؤه بشر/موجة استيراد، لا مستورد آلي.', fetchedAt: new Date().toISOString(), results: [] }
@@ -55,6 +67,13 @@ for (const s of sources) {
     const file = isPdf ? 'raw.pdf' : 'raw.html'
     writeFileSync(resolve(dir, file), buf)
     row.raw = { status: res.status, contentType: type, bytes: buf.length, file }
+    if (isPdf) {
+      const txt = pdfText(resolve(dir, file))
+      if (txt) { writeFileSync(resolve(dir, 'text.txt'), txt); row.text = { from: 'pdftotext', bytes: Buffer.byteLength(txt) } } else row.text = { error: 'pdftotext unavailable' }
+    } else if (!s.render && res.status === 200) {
+      const txt = type.includes('json') ? buf.toString('utf8') : stripHtml(buf.toString('utf8'))
+      writeFileSync(resolve(dir, 'text.txt'), txt); row.text = { from: 'raw', bytes: Buffer.byteLength(txt) }
+    }
     console.log(`✓ ${s.slug.padEnd(26)} raw ${res.status} ${type.split(';')[0]} ${buf.length}b`)
   } catch (err) {
     row.raw = { error: String(err?.message ?? err) }
@@ -67,10 +86,15 @@ for (const s of sources) {
       const page = await browser.newPage({ userAgent: UA, viewport: { width: 1280, height: 2000 } })
       await page.goto(s.url, { waitUntil: 'domcontentloaded', timeout: 60000 })
       await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => { /* صفحات لا تهدأ شبكتها — نلتقط ما استقرّ */ })
+      // تمرير حتى الأسفل: قوائم كثيرة تحمّل أصنافها كسولًا عند الظهور.
+      await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight && y < 40000; y += 800) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)) } window.scrollTo(0, 0) }).catch(() => {})
+      await page.waitForTimeout(1500)
       let html = await page.content()
       const truncated = Buffer.byteLength(html) > RENDER_CAP_BYTES
       if (truncated) html = html.slice(0, RENDER_CAP_BYTES)
       writeFileSync(resolve(dir, 'rendered.html'), html)
+      const txt = stripHtml(html)
+      writeFileSync(resolve(dir, 'text.txt'), txt); row.text = { from: 'rendered', bytes: Buffer.byteLength(txt) }
       await page.screenshot({ path: resolve(dir, 'shot.png'), fullPage: false })
       row.rendered = { bytes: Buffer.byteLength(html), truncated }
       row.screenshot = 'shot.png'
