@@ -184,7 +184,7 @@ const PARSERS = {
       const unit = pick ? String(pick.modifier ?? pick.unit ?? pick.description ?? '') : ''
       const n = e.per100g
       const per = (v) => Math.round((v * g) / 10) / 10
-      byChain[row.chain].push({ id: slugify(row.nameEn), nameAr: row.nameAr, nameEn: row.nameEn, sourceName: e.description, fdcId: e.fdcId, dataType: e.dataType, servingGrams: g, servingLabelAr: pick ? `${AR_UNIT(unit)} (${g}غ)` : 'لكل 100غ', kcal: Math.round((n.kcal * g) / 100), protein: per(n.protein), carbs: per(n.carbs), fat: per(n.fat), ...(typeof n.fiber === 'number' ? { fiber: per(n.fiber) } : {}), type: row.type, keywords: [], usdaPortion: unit || null })
+      byChain[row.chain].push({ id: slugify(row.nameEn), nameAr: row.nameAr, nameEn: row.nameEn, sourceName: e.description, fdcId: e.fdcId, dataType: e.dataType, servingGrams: g, servingLabelAr: pick ? `${typeof pick.amount === 'number' && pick.amount > 1 ? `${pick.amount} ${AR_UNIT(unit) === 'قطعة' ? 'قطع' : AR_UNIT(unit)}` : AR_UNIT(unit)} (${g}غ)` : 'لكل 100غ', kcal: Math.round((n.kcal * g) / 100), protein: per(n.protein), carbs: per(n.carbs), fat: per(n.fat), ...(typeof n.fiber === 'number' ? { fiber: per(n.fiber) } : {}), type: row.type, keywords: [], usdaPortion: unit || null })
     }
     const docs = {}
     for (const [chain, items] of Object.entries(byChain)) {

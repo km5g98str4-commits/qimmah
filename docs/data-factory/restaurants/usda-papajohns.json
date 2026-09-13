@@ -1,0 +1,94 @@
+{
+ "chain": {
+  "slug": "papajohns",
+  "ar": "بابا جونز",
+  "en": "Papa John's",
+  "keywords": [
+   "papa johns",
+   "papa john's",
+   "بابا جونز"
+  ]
+ },
+ "source": {
+  "url": "https://fdc.nal.usda.gov/",
+  "kind": "usda-branded-record",
+  "market": "US",
+  "accessed": "2026-09-13",
+  "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
+ },
+ "items": [
+  {
+   "id": "14-cheese-pizza-original-crust-slice",
+   "nameAr": "بيتزا جبن (شريحة ١٤\")",
+   "nameEn": "14\" Cheese Pizza, Original Crust (slice)",
+   "sourceName": "PAPA JOHN'S 14\" Cheese Pizza, Original Crust",
+   "fdcId": 173284,
+   "dataType": "SR Legacy",
+   "servingGrams": 117,
+   "servingLabelAr": "شريحة (117غ)",
+   "kcal": 304,
+   "protein": 13.5,
+   "carbs": 38.3,
+   "fat": 10.8,
+   "fiber": 2.2,
+   "type": "pizza",
+   "keywords": [],
+   "usdaPortion": "slice"
+  },
+  {
+   "id": "14-pepperoni-pizza-original-crust-slice",
+   "nameAr": "بيتزا بيبروني (شريحة ١٤\")",
+   "nameEn": "14\" Pepperoni Pizza, Original Crust (slice)",
+   "sourceName": "PAPA JOHN'S 14\" Pepperoni Pizza, Original Crust",
+   "fdcId": 173285,
+   "dataType": "SR Legacy",
+   "servingGrams": 123,
+   "servingLabelAr": "شريحة (123غ)",
+   "kcal": 338,
+   "protein": 14.8,
+   "carbs": 36.9,
+   "fat": 14.6,
+   "fiber": 1.5,
+   "type": "pizza",
+   "keywords": [],
+   "usdaPortion": "slice"
+  },
+  {
+   "id": "14-the-works-pizza-slice",
+   "nameAr": "بيتزا الأعمال (شريحة ١٤\")",
+   "nameEn": "14\" The Works Pizza (slice)",
+   "sourceName": "PAPA JOHN'S 14\" The Works Pizza, Original Crust",
+   "fdcId": 173286,
+   "dataType": "SR Legacy",
+   "servingGrams": 153,
+   "servingLabelAr": "شريحة (153غ)",
+   "kcal": 367,
+   "protein": 15.8,
+   "carbs": 40.9,
+   "fat": 15.6,
+   "fiber": 3.8,
+   "type": "pizza",
+   "keywords": [],
+   "usdaPortion": "slice"
+  },
+  {
+   "id": "14-cheese-pizza-thin-crust-slice",
+   "nameAr": "بيتزا جبن رقيقة (شريحة ١٤\")",
+   "nameEn": "14\" Cheese Pizza, Thin Crust (slice)",
+   "sourceName": "PAPA JOHN'S 14\" Cheese Pizza, Thin Crust",
+   "fdcId": 173287,
+   "dataType": "SR Legacy",
+   "servingGrams": 87,
+   "servingLabelAr": "شريحة (87غ)",
+   "kcal": 257,
+   "protein": 10.7,
+   "carbs": 22.9,
+   "fat": 13.7,
+   "fiber": 2,
+   "type": "pizza",
+   "keywords": [],
+   "usdaPortion": "slice"
+  }
+ ],
+ "quarantined": []
+}

@@ -1,0 +1,92 @@
+{
+ "chain": {
+  "slug": "applebees",
+  "ar": "آبلبيز",
+  "en": "Applebee's",
+  "keywords": [
+   "applebees",
+   "applebee's",
+   "ابلبيز",
+   "آبلبيز"
+  ]
+ },
+ "source": {
+  "url": "https://fdc.nal.usda.gov/",
+  "kind": "usda-branded-record",
+  "market": "US",
+  "accessed": "2026-09-13",
+  "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
+ },
+ "items": [
+  {
+   "id": "7-oz-sirloin-steak",
+   "nameAr": "ستيك ٧ أونصات",
+   "nameEn": "7 oz Sirloin Steak",
+   "sourceName": "APPLEBEE'S, 9 oz house sirloin steak",
+   "fdcId": 169831,
+   "dataType": "SR Legacy",
+   "servingGrams": 157,
+   "servingLabelAr": "حصة (157غ)",
+   "kcal": 297,
+   "protein": 42.1,
+   "carbs": 0,
+   "fat": 14.3,
+   "type": "plate",
+   "keywords": [],
+   "usdaPortion": "serving"
+  },
+  {
+   "id": "mozzarella-sticks",
+   "nameAr": "موزاريلا ستيكس",
+   "nameEn": "Mozzarella Sticks",
+   "sourceName": "APPLEBEE'S, mozzarella sticks",
+   "fdcId": 169011,
+   "dataType": "SR Legacy",
+   "servingGrams": 289,
+   "servingLabelAr": "حصة (289غ)",
+   "kcal": 913,
+   "protein": 43.1,
+   "carbs": 66.2,
+   "fat": 53.2,
+   "fiber": 6.1,
+   "type": "side",
+   "keywords": [],
+   "usdaPortion": "serving"
+  }
+ ],
+ "quarantined": [
+  {
+   "nameEn": "Fiesta Lime Chicken",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Grilled Chicken Caesar Salad",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Chicken Tenders",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "APPLEBEE'S, chicken tenders, from kids' menu",
+    "APPLEBEE'S, chicken tenders platter"
+   ]
+  },
+  {
+   "nameEn": "Chicken Fajitas",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Classic Burger",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Boneless Wings",
+   "why": "USDA unmatched",
+   "candidates": []
+  }
+ ]
+}

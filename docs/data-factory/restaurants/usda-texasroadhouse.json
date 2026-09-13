@@ -1,0 +1,31 @@
+{
+ "chain": {
+  "slug": "texasroadhouse",
+  "ar": "تكساس رودهاوس",
+  "en": "Texas Roadhouse",
+  "keywords": [
+   "texas roadhouse",
+   "تكساس رودهاوس"
+  ]
+ },
+ "source": {
+  "url": "https://fdc.nal.usda.gov/",
+  "kind": "usda-branded-record",
+  "market": "US",
+  "accessed": "2026-09-13",
+  "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
+ },
+ "items": [],
+ "quarantined": [
+  {
+   "nameEn": "Dallas Filet",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Ribs",
+   "why": "USDA unmatched",
+   "candidates": []
+  }
+ ]
+}

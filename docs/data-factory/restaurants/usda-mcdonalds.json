@@ -1,0 +1,259 @@
+{
+ "chain": {
+  "slug": "mcdonalds",
+  "ar": "ماكدونالدز",
+  "en": "McDonald's",
+  "keywords": [
+   "mcdonalds",
+   "mcdonald's",
+   "ماك",
+   "مكدونالدز",
+   "ماكدونالدز"
+  ]
+ },
+ "source": {
+  "url": "https://fdc.nal.usda.gov/",
+  "kind": "usda-branded-record",
+  "market": "US",
+  "accessed": "2026-09-13",
+  "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
+ },
+ "items": [
+  {
+   "id": "quarter-pounder-with-cheese",
+   "nameAr": "كوارتر باوندر بالجبن",
+   "nameEn": "Quarter Pounder with Cheese",
+   "sourceName": "McDONALD'S, QUARTER POUNDER with Cheese",
+   "fdcId": 170719,
+   "dataType": "SR Legacy",
+   "servingGrams": 199,
+   "servingLabelAr": "حبة (199غ)",
+   "kcal": 513,
+   "protein": 29.1,
+   "carbs": 39.8,
+   "fat": 28.3,
+   "fiber": 2.8,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "item 7.1 oz"
+  },
+  {
+   "id": "double-quarter-pounder-with-cheese",
+   "nameAr": "دبل كوارتر باوندر بالجبن",
+   "nameEn": "Double Quarter Pounder with Cheese",
+   "sourceName": "McDONALD'S, DOUBLE QUARTER POUNDER with Cheese",
+   "fdcId": 172066,
+   "dataType": "SR Legacy",
+   "servingGrams": 280,
+   "servingLabelAr": "حبة (280غ)",
+   "kcal": 734,
+   "protein": 47.6,
+   "carbs": 40.3,
+   "fat": 45.4,
+   "fiber": 2.8,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "item"
+  },
+  {
+   "id": "cheeseburger",
+   "nameAr": "تشيز برجر",
+   "nameEn": "Cheeseburger",
+   "sourceName": "McDONALD'S, Cheeseburger",
+   "fdcId": 170320,
+   "dataType": "SR Legacy",
+   "servingGrams": 119,
+   "servingLabelAr": "حبة (119غ)",
+   "kcal": 313,
+   "protein": 15.5,
+   "carbs": 33.1,
+   "fat": 14,
+   "fiber": 1.3,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "item 4 oz"
+  },
+  {
+   "id": "double-cheeseburger",
+   "nameAr": "دبل تشيز برجر",
+   "nameEn": "Double Cheeseburger",
+   "sourceName": "McDONALD'S, Double Cheeseburger",
+   "fdcId": 172065,
+   "dataType": "SR Legacy",
+   "servingGrams": 155,
+   "servingLabelAr": "حبة (155غ)",
+   "kcal": 437,
+   "protein": 24,
+   "carbs": 29.1,
+   "fat": 25,
+   "fiber": 1.2,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "sandwich"
+  },
+  {
+   "id": "hamburger",
+   "nameAr": "همبرجر",
+   "nameEn": "Hamburger",
+   "sourceName": "McDONALD'S, Hamburger",
+   "fdcId": 170717,
+   "dataType": "SR Legacy",
+   "servingGrams": 95,
+   "servingLabelAr": "حبة (95غ)",
+   "kcal": 251,
+   "protein": 12.3,
+   "carbs": 28.8,
+   "fat": 9.6,
+   "fiber": 1.2,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "sandwich"
+  },
+  {
+   "id": "chicken-mcnuggets-6-pcs",
+   "nameAr": "تشيكن ماك ناجتس (٦ قطع)",
+   "nameEn": "Chicken McNuggets (6 pcs)",
+   "sourceName": "McDONALD'S, Chicken McNUGGETS",
+   "fdcId": 173297,
+   "dataType": "SR Legacy",
+   "servingGrams": 95,
+   "servingLabelAr": "6 قطع (95غ)",
+   "kcal": 287,
+   "protein": 15,
+   "carbs": 14.3,
+   "fat": 18.8,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "pieces"
+  },
+  {
+   "id": "french-fries-medium",
+   "nameAr": "بطاطس مقلية (وسط)",
+   "nameEn": "French Fries (medium)",
+   "sourceName": "McDONALD'S, french fries",
+   "fdcId": 170721,
+   "dataType": "SR Legacy",
+   "servingGrams": 117,
+   "servingLabelAr": "حصة (117غ)",
+   "kcal": 378,
+   "protein": 4,
+   "carbs": 49.8,
+   "fat": 18.1,
+   "fiber": 4.6,
+   "type": "fries",
+   "keywords": [],
+   "usdaPortion": "medium serving"
+  },
+  {
+   "id": "french-fries-large",
+   "nameAr": "بطاطس مقلية (كبير)",
+   "nameEn": "French Fries (large)",
+   "sourceName": "McDONALD'S, french fries",
+   "fdcId": 170721,
+   "dataType": "SR Legacy",
+   "servingGrams": 154,
+   "servingLabelAr": "حصة (154غ)",
+   "kcal": 497,
+   "protein": 5.3,
+   "carbs": 65.6,
+   "fat": 23.9,
+   "fiber": 6,
+   "type": "fries",
+   "keywords": [],
+   "usdaPortion": "large serving"
+  },
+  {
+   "id": "egg-mcmuffin",
+   "nameAr": "إيغ ماك مافن",
+   "nameEn": "Egg McMuffin",
+   "sourceName": "McDONALD'S, Egg McMUFFIN",
+   "fdcId": 173307,
+   "dataType": "SR Legacy",
+   "servingGrams": 126,
+   "servingLabelAr": "حبة (126غ)",
+   "kcal": 287,
+   "protein": 17.1,
+   "carbs": 27.3,
+   "fat": 12.2,
+   "fiber": 1.4,
+   "type": "breakfast",
+   "keywords": [],
+   "usdaPortion": "sandwich"
+  },
+  {
+   "id": "hash-brown",
+   "nameAr": "هاش براون",
+   "nameEn": "Hash Brown",
+   "sourceName": "McDONALD'S, Hash Brown",
+   "fdcId": 173298,
+   "dataType": "SR Legacy",
+   "servingGrams": 53,
+   "servingLabelAr": "حصة (53غ)",
+   "kcal": 144,
+   "protein": 1.3,
+   "carbs": 15.2,
+   "fat": 8.6,
+   "fiber": 1.5,
+   "type": "side",
+   "keywords": [],
+   "usdaPortion": "serving 1 patty"
+  },
+  {
+   "id": "caramel-sundae",
+   "nameAr": "آيس كريم ساندي كراميل",
+   "nameEn": "Caramel Sundae",
+   "sourceName": "McDONALD'S, Hot Caramel Sundae",
+   "fdcId": 173301,
+   "dataType": "SR Legacy",
+   "servingGrams": 182,
+   "servingLabelAr": "حبة (182غ)",
+   "kcal": 342,
+   "protein": 6.5,
+   "carbs": 60.8,
+   "fat": 8.9,
+   "fiber": 0,
+   "type": "dessert",
+   "keywords": [],
+   "usdaPortion": "item (6.4 oz)"
+  }
+ ],
+ "quarantined": [
+  {
+   "nameEn": "Big Mac",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "McDONALD'S, BIG MAC",
+    "McDONALD'S, BIG MAC (without Big Mac Sauce)"
+   ]
+  },
+  {
+   "nameEn": "McChicken",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "McDONALD'S, McCHICKEN Sandwich",
+    "McDONALD'S, McCHICKEN Sandwich (without mayonnaise)"
+   ]
+  },
+  {
+   "nameEn": "Filet-O-Fish",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "McDONALD'S, FILET-O-FISH",
+    "McDONALD'S, FILET-O-FISH (without tartar sauce)"
+   ]
+  },
+  {
+   "nameEn": "Hotcakes",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "McDONALD'S, Hotcakes (plain)",
+    "McDONALD'S, Hotcakes (with 2 pats margarine & syrup)"
+   ]
+  },
+  {
+   "nameEn": "Baked Apple Pie",
+   "why": "USDA unmatched",
+   "candidates": []
+  }
+ ]
+}

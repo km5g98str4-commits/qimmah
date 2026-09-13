@@ -1,11 +1,18 @@
 {
  "counts": {
-  "OFFICIAL_FULL": 59,
+  "OFFICIAL_FULL": 98,
   "OFFICIAL_KCAL_ESTIMATED_MACROS": 39
  },
  "byChain": {
   "dominos": 59,
-  "shawarmer": 39
+  "shawarmer": 39,
+  "applebees": 2,
+  "burgerking": 7,
+  "kfc": 4,
+  "mcdonalds": 11,
+  "papajohns": 4,
+  "pizzahut": 5,
+  "subway": 6
  },
  "rows": [
   {
@@ -791,6 +798,318 @@
    "nameEn": "Spicy Fries Medium",
    "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
    "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-applebees-7-oz-sirloin-steak",
+   "chain": "applebees",
+   "nameAr": "ستيك ٧ أونصات",
+   "nameEn": "7 oz Sirloin Steak",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-applebees-mozzarella-sticks",
+   "chain": "applebees",
+   "nameAr": "موزاريلا ستيكس",
+   "nameEn": "Mozzarella Sticks",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-burgerking-whopper-with-cheese",
+   "chain": "burgerking",
+   "nameAr": "وابر بالجبن",
+   "nameEn": "Whopper with Cheese",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-burgerking-whopper-jr",
+   "chain": "burgerking",
+   "nameAr": "وابر جونيور",
+   "nameEn": "Whopper Jr.",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-burgerking-cheeseburger",
+   "chain": "burgerking",
+   "nameAr": "تشيز برجر",
+   "nameEn": "Cheeseburger",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-burgerking-double-cheeseburger",
+   "chain": "burgerking",
+   "nameAr": "دبل تشيز برجر",
+   "nameEn": "Double Cheeseburger",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-burgerking-original-chicken-sandwich",
+   "chain": "burgerking",
+   "nameAr": "أوريجنال تشيكن ساندويتش",
+   "nameEn": "Original Chicken Sandwich",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-burgerking-french-fries-medium",
+   "chain": "burgerking",
+   "nameAr": "بطاطس مقلية (وسط)",
+   "nameEn": "French Fries (medium)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-burgerking-onion-rings-medium",
+   "chain": "burgerking",
+   "nameAr": "حلقات بصل (وسط)",
+   "nameEn": "Onion Rings (medium)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-crispy-chicken-strips",
+   "chain": "kfc",
+   "nameAr": "كرسبي ستربس (٣ قطع)",
+   "nameEn": "Crispy Chicken Strips",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-popcorn-chicken",
+   "chain": "kfc",
+   "nameAr": "بوبكورن تشيكن",
+   "nameEn": "Popcorn Chicken",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-coleslaw",
+   "chain": "kfc",
+   "nameAr": "كول سلو",
+   "nameEn": "Coleslaw",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-biscuit",
+   "chain": "kfc",
+   "nameAr": "بسكويت",
+   "nameEn": "Biscuit",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-quarter-pounder-with-cheese",
+   "chain": "mcdonalds",
+   "nameAr": "كوارتر باوندر بالجبن",
+   "nameEn": "Quarter Pounder with Cheese",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-double-quarter-pounder-with-cheese",
+   "chain": "mcdonalds",
+   "nameAr": "دبل كوارتر باوندر بالجبن",
+   "nameEn": "Double Quarter Pounder with Cheese",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-cheeseburger",
+   "chain": "mcdonalds",
+   "nameAr": "تشيز برجر",
+   "nameEn": "Cheeseburger",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-double-cheeseburger",
+   "chain": "mcdonalds",
+   "nameAr": "دبل تشيز برجر",
+   "nameEn": "Double Cheeseburger",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-hamburger",
+   "chain": "mcdonalds",
+   "nameAr": "همبرجر",
+   "nameEn": "Hamburger",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-chicken-mcnuggets-6-pcs",
+   "chain": "mcdonalds",
+   "nameAr": "تشيكن ماك ناجتس (٦ قطع)",
+   "nameEn": "Chicken McNuggets (6 pcs)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-french-fries-medium",
+   "chain": "mcdonalds",
+   "nameAr": "بطاطس مقلية (وسط)",
+   "nameEn": "French Fries (medium)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-french-fries-large",
+   "chain": "mcdonalds",
+   "nameAr": "بطاطس مقلية (كبير)",
+   "nameEn": "French Fries (large)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-egg-mcmuffin",
+   "chain": "mcdonalds",
+   "nameAr": "إيغ ماك مافن",
+   "nameEn": "Egg McMuffin",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-hash-brown",
+   "chain": "mcdonalds",
+   "nameAr": "هاش براون",
+   "nameEn": "Hash Brown",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-caramel-sundae",
+   "chain": "mcdonalds",
+   "nameAr": "آيس كريم ساندي كراميل",
+   "nameEn": "Caramel Sundae",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-papajohns-14-cheese-pizza-original-crust-slice",
+   "chain": "papajohns",
+   "nameAr": "بيتزا جبن (شريحة ١٤\")",
+   "nameEn": "14\" Cheese Pizza, Original Crust (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-papajohns-14-pepperoni-pizza-original-crust-slice",
+   "chain": "papajohns",
+   "nameAr": "بيتزا بيبروني (شريحة ١٤\")",
+   "nameEn": "14\" Pepperoni Pizza, Original Crust (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-papajohns-14-the-works-pizza-slice",
+   "chain": "papajohns",
+   "nameAr": "بيتزا الأعمال (شريحة ١٤\")",
+   "nameEn": "14\" The Works Pizza (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-papajohns-14-cheese-pizza-thin-crust-slice",
+   "chain": "papajohns",
+   "nameAr": "بيتزا جبن رقيقة (شريحة ١٤\")",
+   "nameEn": "14\" Cheese Pizza, Thin Crust (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-pizzahut-12-cheese-pizza-pan-slice",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا جبن بان (شريحة ١٢\")",
+   "nameEn": "12\" Cheese Pizza, Pan (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-pizzahut-12-pepperoni-pizza-pan-slice",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا بيبروني بان (شريحة ١٢\")",
+   "nameEn": "12\" Pepperoni Pizza, Pan (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-pizzahut-12-cheese-pizza-thin-n-crispy-slice",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا جبن رقيقة (شريحة ١٢\")",
+   "nameEn": "12\" Cheese Pizza, Thin N Crispy (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-pizzahut-14-cheese-pizza-hand-tossed-slice",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا جبن هاند توسد (شريحة ١٤\")",
+   "nameEn": "14\" Cheese Pizza, Hand-Tossed (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-pizzahut-14-pepperoni-pizza-hand-tossed-slice",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا بيبروني هاند توسد (شريحة ١٤\")",
+   "nameEn": "14\" Pepperoni Pizza, Hand-Tossed (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-subway-6-turkey-breast",
+   "chain": "subway",
+   "nameAr": "ساندويتش تركي ٦ إنش",
+   "nameEn": "6\" Turkey Breast",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-subway-6-tuna",
+   "chain": "subway",
+   "nameAr": "ساندويتش تونة ٦ إنش",
+   "nameEn": "6\" Tuna",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-subway-6-sweet-onion-chicken-teriyaki",
+   "chain": "subway",
+   "nameAr": "ساندويتش دجاج ترياكي ٦ إنش",
+   "nameEn": "6\" Sweet Onion Chicken Teriyaki",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-subway-6-meatball-marinara",
+   "chain": "subway",
+   "nameAr": "ساندويتش ميت بول ٦ إنش",
+   "nameEn": "6\" Meatball Marinara",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-subway-6-steak-cheese",
+   "chain": "subway",
+   "nameAr": "ساندويتش ستيك وجبن ٦ إنش",
+   "nameEn": "6\" Steak & Cheese",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-subway-6-oven-roasted-chicken",
+   "chain": "subway",
+   "nameAr": "ساندويتش دجاج مشوي ٦ إنش",
+   "nameEn": "6\" Oven Roasted Chicken",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
   }
  ]
 }
