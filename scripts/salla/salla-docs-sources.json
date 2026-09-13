@@ -1,0 +1,13 @@
+{
+  "_readme": "مصادر توثيق سلة الرسمية — [SALLA-PROD-001]. تُجلب في CI (المضيفون محجوبون في بيئة الوكلاء) لتكون مصدر الحقيقة في اختيار آلية التكامل. كل مدخل: صفحة بداية + كلمات مفتاحية لتتبّع الروابط منها بعمق واحد.",
+  "maxPagesPerSeed": 40,
+  "seeds": [
+    { "slug": "docs-merchant-index", "url": "https://docs.salla.dev/docs/merchant", "follow": "webhook|digital|product|order|code|coupon|inventory|store|scope|app|partner" },
+    { "slug": "docs-root", "url": "https://docs.salla.dev/", "follow": "webhook|merchant|digital|product|order|app|partner" },
+    { "slug": "help-index", "url": "https://help.salla.sa/", "follow": "رقمي|بطاق|كود|أكواد|منتج|ويب|webhook|digital|product|تطبيق|api" },
+    { "slug": "help-digital-cards", "url": "https://help.salla.sa/?s=%D8%A8%D8%B7%D8%A7%D9%82%D8%A9+%D8%B1%D9%82%D9%85%D9%8A%D8%A9", "follow": "رقمي|بطاق|كود|أكواد" },
+    { "slug": "help-digital-products", "url": "https://help.salla.sa/?s=%D9%85%D9%86%D8%AA%D8%AC+%D8%B1%D9%82%D9%85%D9%8A", "follow": "رقمي|بطاق|كود|أكواد|منتج" },
+    { "slug": "help-webhooks", "url": "https://help.salla.sa/?s=webhook", "follow": "webhook|ويب|تطبيق|api" },
+    { "slug": "salla-dev-webhooks", "url": "https://docs.salla.dev/docs/merchant/ZG9jOjI0NDIzNzAz-webhooks", "follow": "webhook|event|order" }
+  ]
+}
