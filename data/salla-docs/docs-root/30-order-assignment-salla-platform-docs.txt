@@ -1,0 +1,128 @@
+# Order Assignment - Salla Platform Docs
+# https://docs.salla.dev/889079f0
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Order Status
+Order Histories
+Order Options
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+APIs
+Copy Page
+Order Assignment
+List Auto Assignment Rules
+GET
+/orders/assignment/rules
+This endpoint allows you to retrieve all the orders auto-assignment rules per employee. `orders.read` - Orders Read Only
+Update Auto Assignment Rule
+PUT
+/orders/assignment/rules/{rule_id}
+This endpoint allows you to update the order rules per employee by passing the rule_id as the path parameter. `orders.read_write` - Orders Read & Wri...
+Create Auto Assignment Rules
+POST
+/orders/assignment/rules
+This endpoint allows you to create multiple order auto assignment rules. `orders.read_write` - Orders Read & Write
+Order Assigned Employees Details
+GET
+/orders/assignment/{order_id}
+This endpoint allows you to fetch the assigned employees&#39; details for a specific order by passing the order_id as a path parameter.
+Previous
+Order Option Details
+Next
+List Auto Assignment Rules
+LLMs.txt
+Export

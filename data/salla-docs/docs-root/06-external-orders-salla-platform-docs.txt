@@ -1,0 +1,528 @@
+# External Orders - Salla Platform Docs
+# https://docs.salla.dev/orders/external-orders
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Create Order
+POST
+Relocate Order Stock
+POST
+External Orders
+POST
+List Orders
+GET
+Order Details
+GET
+Create Drafted Order
+POST
+Update Order
+PUT
+Duplicate Order
+POST
+Order Actions
+POST
+Order Status
+Order Histories
+Order Options
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+Orders
+MCP
+Copy Page
+External Orders
+Production
+POST
+https://api.salla.dev/admin/v2/orders/external
+Try it
+Last modified:
+6 days ago
+This endpoint allows you to create external orders, that happened out of Salla platform.
+Scopes
+orders.read_write - Orders Read & Write
+Request
+Authorization
+Add the parameter Authorization to Headers，whose value is to concatenate the Token after the Bearer.
+Example:
+Authorization: Bearer ********************
+Body Params
+application/json
+Generate Code
+external_order_id
+string 
+required
+Unique identifier for the order from the external system. Must be unique - duplicate IDs will be rejected.
+date
+string 
+optional
+Order creation date in ISO 8601 format (e.g., '2024-01-15T10:30:00Z'). Used for backdating imported orders.
+source
+string 
+optional
+Supported order sources: shopify, woocommerce, wix, trendyol, amazon, prestashop, magento, sitecore, zid, other (default).
+status_name
+string 
+optional
+Name of the order status (e.g., 'completed', 'pending'). Can be a native status or custom status name.
+currency
+string 
+required
+Currency code for the order (e.g., 'SAR', 'USD'). Used for currency exchange calculations.
+exchange_currency_rate
+number 
+optional
+Exchange rate for the order currency. If not provided, the system will automatically calculate the rate based on current exchange rates.
+subtotal
+number 
+required
+Order subtotal amount before tax, shipping, and discounts.
+tax
+object 
+required
+Tax information for the entire order.
+rate
+number 
+optional
+Tax rate percentage (e.g., 15 for 15%). If not provided but value is set, rate is calculated automatically.
+value
+number 
+required
+Absolute tax amount in the order currency.
+customer
+object 
+required
+Customer information for the order.
+id
+integer 
+optional
+Existing customer ID in the Salla system. Required to associate order with a customer.Required if not guest.
+name
+string 
+optional
+Customer Name, in case customer does not exist.
+mobile
+string 
+optional
+Customer's mobile phone number.
+email
+string 
+optional
+Customer Email, in case customer does not exist.
+is_guest
+boolean 
+optional
+Whether the customer is a guest (not registered).
+products
+array [object] 
+required
+List of products/items in the order.
+name
+string 
+required
+Product name/title to display in the order.
+price
+number 
+required
+Unit price per item in the order currency.
+cost_price
+number 
+optional
+Cost price for profit margin calculations.
+sku
+string 
+optional
+Stock Keeping Unit code for inventory tracking.
+weight
+number 
+optional
+Product weight for shipping calculations.
+quantity
+integer 
+optional
+Number of units ordered. Defaults to 1 if not provided.
+weight_type
+string 
+optional
+Unit of weight measurement (e.g., 'kg', 'g', 'lb'). Uses store default if not specified.
+require_shipping
+boolean 
+optional
+Whether this product requires physical shipping. Defaults to true.
+product_type
+string 
+optional
+Type of product (e.g., 'product', 'digital', 'codes'). Affects shipping and fulfillment.
+mpn
+string 
+optional
+Manufacturer Part Number for product identification.
+gtin
+string 
+optional
+Global Trade Item Number (barcode) such as UPC, EAN, or ISBN.
+product_discount
+number 
+optional
+Discount amount applied to this specific product.
+thumbnail
+string 
+optional
+URL of the product thumbnail image.
+tax
+object 
+required
+Tax information for this specific product.
+discounts
+object 
+optional
+Discount/coupon information applied to the order.
+code
+string 
+required
+External reference code for the discount/coupon.
+amount
+number 
+required
+Discount amount applied to products.
+shipping_amount
+number 
+required
+Discount amount applied to shipping. Must equal shipping_cost for free shipping.
+payment
+object 
+required
+Payment details for the order.
+status
+string 
+required
+Payment status. Allowed values: 'paid' or 'pending_payment'.
+method
+string 
+required
+"Payment method used. Only 'cod' (Cash on Delivery) or 'external_epayment' are accepted. Required when status is 'paid'."
+gateway
+object 
+required
+Custom payment gateway information for tracking purposes.
+cash_on_delivery
+object 
+required
+Cash on delivery fee details.
+receiver
+object 
+required
+Shipping recipient information (person receiving the order).
+name
+string 
+required
+Full name of the receiver. Must be 4-200 characters.
+phone
+string 
+required
+Phone number of the receiver (validated against country_code).
+country_code
+string 
+required
+ISO country code for phone validation (e.g., 'SA', 'AE').
+email
+string 
+required
+Email address of the receiver for notifications.
+notify
+integer 
+required
+Whether to send order notifications to the receiver (0 or 1).
+delivery_method
+string 
+optional
+Delivery method for the order. Values: 'shipping' (home delivery) or 'pickup' (store pickup).
+courier_id
+integer 
+optional
+ID of the shipping company/courier. Must be a valid enabled courier for the store.
+shipping_cost
+number 
+optional
+Shipping cost amount. Set to 0 for free shipping.
+ship_to
+object 
+optional
+Shipping destination address details.
+country
+integer 
+required
+Country ID from Salla's country list. Required if shippable.
+city
+integer 
+required
+City ID from Salla's city list. Required if shippable.
+block
+string 
+optional
+Block/area identifier within the address.
+district
+integer 
+optional
+District ID from Salla's district list.
+street_number
+string 
+optional
+Street number of the delivery address.
+address
+string 
+optional
+Primary address line/location description.
+address_line
+string 
+optional
+Additional address line (stored as additional_number).
+postal_code
+string 
+optional
+Postal/ZIP code for the delivery address.
+geo_coordinates
+object 
+optional
+Geographic coordinates for precise delivery location.
+house_desc
+string 
+optional
+Building/house description or number.
+branch_id
+integer 
+optional
+Store branch ID for pickup orders or to specify the shipping origin branch.
+Example
+{
+    "external_order_id": "2134562477",
+    "status_name": "تم التوصيل",
+    "date": "2026-01-01 01:01",
+    "currency": "SAR",
+    "exchange_currency_rate": 1,
+    "subtotal": 120,
+    "source": "shopify",
+    "tax": {
+        "rate": 15,
+        "value": 18.75
+    },
+    "customer": {
+        "id": 1298199463
+    },
+    "products": [
+        {
+            "name": "Product One",
+            "price": 120,
+            "cost_price": 0,
+            "sku": "SKU-125",
+            "weight": 10,
+            "quantity": 1,
+            "weight_type": "g",
+            "require_shipping": 1,
+            "product_type": "product",
+            "mpn": "12345678",
+            "gtin": "12345678",
+            "product_discount": 30,
+            "thumbnail": "https://cdn.salla.sa/nhoyP0xlOvBvoWe37IsTqkmvbfDpBTK6NkENayQ5.png",
+            "tax": {
+                "rate": 15,
+                "value": 13.5
+            }
+        }
+    ],
+    "discounts": {
+        "code": "123",
+        "amount": 30,
+        "shipping_amount": 0
+    },
+    "payment": {
+        "status": "paid",
+        "method": "cod",
+        "receipt_image_path": "",
+        "gateway": {
+            "label": "geidia",
+            "reference_id": "423423423423"
+        },
+        "cash_on_delivery": {
+            "amount": 15
+        }
+    },
+    "receiver": {
+        "name": "Mohammed",
+        "phone": "+966507564233",
+        "country_code": "sa",
+        "email": "customer@email.com",
+        "notify": 1
+    },
+    "delivery_method": "shipping",
+    "courier_id": 665151403,
+    "shipping_cost": 20,
+    "ship_to": {
+        "country": 1473353380,
+        "city": 1473353380,
+        "block": "حي العمل",
+        "district": 1473353380,
+        "street_number": "street",
+        "address": "street",
+        "address_line": "building",
+        "postal_code": "12345",
+        "geo_coordinates": {
+            "lat": 24.774265,
+            "lng": 46.738586
+        },
+        "house_desc": "building",
+        "branch_id": null
+    }
+}
+Request Code Samples
+Shell
+JavaScript
+Java
+Swift
+Go
+PHP
+Python
+HTTP
+C
+C#
+Objective-C
+Ruby
+OCaml
+Dart
+R
+Responses
+🟢200
+Success
+application/json
+Generate Code
+status
+integer 
+optional
+Response status code, a numeric or alphanumeric identifier used to convey the outcome or status of a request, operation, or transaction in various systems and applications, typically indicating whether the action was successful, encountered an error, or resulted in a specific condition.
+success
+boolean 
+optional
+Response flag, boolean indicator used to signal a particular condition or state in the response of a system or application, often representing the presence or absence of certain conditions or outcomes.
+data
+object 
+optional
+Detailed structure of the Order model object showing its fields and data types.
+id
+integer 
+required
+A unique alphanumeric code or identifier assigned to a specific order.
+reference_id
+integer 
+required
+A specific alphanumeric identifier associated with an order.
+Example
+{
+    "status": 201,
+    "success": true,
+    "data": {
+        "id": 590266928,
+        "reference_id": 49301
+    }
+}
+🟠422
+Validation Error
+🟠401
+Unauthorized
+Modified at 6 days ago
+Previous
+Relocate Order Stock
+Next
+List Orders
+LLMs.txt
+Export

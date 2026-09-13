@@ -1,0 +1,855 @@
+# Create Order -Salla Merchant API | Salla Docs
+# https://docs.salla.dev/orders/create
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Create Order
+POST
+Relocate Order Stock
+POST
+External Orders
+POST
+List Orders
+GET
+Order Details
+GET
+Create Drafted Order
+POST
+Update Order
+PUT
+Duplicate Order
+POST
+Order Actions
+POST
+Order Status
+Order Histories
+Order Options
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+Orders
+MCP
+Copy Page
+Create Order
+Production
+POST
+https://api.salla.dev/admin/v2/orders
+Try it
+Last modified:
+6 days ago
+This endpoint allows you to create an order related to your store. It supports both standard one-time purchases and subscription-based orders.
+Scopes
+orders.read_write - Orders Read & Write
+Request
+Authorization
+Add the parameter Authorization to Headers，whose value is to concatenate the Token after the Bearer.
+Example:
+Authorization: Bearer ********************
+Body Params
+application/json
+Generate Code
+customer
+object 
+optional
+id
+number 
+optional
+Customer ID. Required if both variables customer.mobile and customer.name are not in the request. List of customer ID can be found here.
+mobile
+string 
+optional
+Customer Mobile. Required if the variable customer.id is not in the request.
+Example:
++9665305305300
+name
+string 
+optional
+Customer Name. Required if the variable customer.id is not in the request.
+email
+string 
+optional
+Customer Email. Required if the variable customer.id is not in the request.
+receiver
+object 
+optional
+name
+string 
+optional
+Receiver Name
+country
+string 
+optional
+Receiver Country. Fetch a list of country codes using this endpoint.
+phone
+string 
+optional
+Receiver Phone
+Example:
++9665305305300
+email
+string 
+optional
+Receiver Email
+notify
+boolean 
+optional
+Whether or not to notify Receiver
+country_code
+string 
+optional
+Receiver Country Code
+Example:
+SA
+payment
+object 
+optional
+status
+enum<string> 
+required
+Payment Status
+Allowed values:
+paid
+pending_payment
+method
+enum<string> 
+optional
+Payment Methods. Required if the variable status value is set to paid
+Allowed values:
+credit_card
+mada
+bank
+cod
+subscription
+accepted_methods
+enum<string> 
+optional
+Payment Accepted Methods by the store. Required if the variable status value is set to pending_payment
+Allowed values:
+credit_card
+mada
+bank
+cod
+reference_id
+number 
+optional
+Required if the variable method value is set to bank or subscription - For bank use the id of the bank and for subscription use the id of the subscription
+receipt_image_path
+string 
+optional
+Receipt Image Path. Required if the variable method value is set to bank
+Example:
+https://example.com/order/receipt.pdf
+cash_on_delivery
+object 
+optional
+Cash on Delivery details. Required if the variable method value is set to cod
+recurring
+boolean 
+optional
+Required as true when using Recurring Payments, To create a subscription, you must include the products.recurring object for each subscription product and set the payment.recurring field to true. See the Recurring Payments API.
+delivery_method
+enum<string> 
+optional
+Delivery Method. This variable is required if one or more products require shipping
+Allowed values:
+pickup
+shipping
+null
+branch_id
+number 
+optional
+Branch ID. Required if the variable delivery_method value is set to pickup. List of branches can be found here.
+courier_id
+string 
+optional
+Courier ID. Required if the variable delivery_method value is set to shipping. List of shipping companies can be found here
+ship_to
+object 
+optional
+Ship to destination details. Required if the variable delivery_method value is shipping
+country
+number 
+required
+Ship to destination country. Fetch a list of country codes using this endpoint.
+city
+number 
+required
+Ship to destination city. Fetch a list of city codes using this endpoint.
+district
+number  | 
+null 
+required
+Ship to destination district. Fetch a list of districts codes using this endpoint.
+block
+string  | 
+null 
+required
+Ship to destination block
+street_number
+string 
+required
+Ship to destination street number
+address_line
+string 
+required
+Ship to destination address line
+postal_code
+number  | 
+null 
+required
+Ship to destination postal code
+short_address
+string  | 
+null 
+required
+A compact 8-character Saudi address code (4 letters + 4 digits), e.g., RHMA3184.
+It provides a simplified, precise version of the National Address to speed up delivery and reduce input errors. This field is required only for addresses in Saudi Arabia (KSA).
+building_number
+string  | 
+null 
+required
+The National Address building number associated with the location.This field is required only for addresses in Saudi Arabia (KSA)
+additional_number
+number  | 
+null 
+required
+An additional National Address identifier used for more precise location specification.This field is required only for addresses in Saudi Arabia (KSA).
+geo_coordinates
+object 
+required
+products
+array [object] 
+optional
+identifier_type
+enum<string> 
+optional
+Product identifier type value
+Allowed values:
+id
+sku
+identifier
+string  | 
+number 
+optional
+identifier value
+if the variable identifier_type value is set to sku, then the datatype of this variable will be string
+if the variable identifier_type value is set to id, then the datatype of this variable will be number
+quantity
+number 
+required
+Product quantity value
+options
+array [object] 
+optional
+Product options details. Required if the product has advanced options
+donating_amount
+integer 
+optional
+Product donating amount. Required if the store is of type جمعيات خيرية | charity
+recurring
+object 
+optional
+Required for creating subscription orders. Recurring payments should be enabled on the account to use this functionality
+coupon_code
+string 
+optional
+Coupon code value
+Example
+{
+    "customer": {
+        "id": 1209983424,
+        "name": "new name",
+        "mobile": "+966566666666",
+        "email": "mail@mail.com"
+    },
+    "receiver": {
+        "name": "i am the one",
+        "country_code": "SA",
+        "phone": "966566666666",
+        "email": "email@mail.com",
+        "notify": false
+    },
+    "delivery_method": "shipping",
+    "branch_id": 203948803,
+    "courier_id": 1433878184,
+    "ship_to": {
+        "country": 1473353380,
+        "city": 1939592358,
+        "district": 674989864,
+        "block": "Apt. 836",
+        "street_number": "8230",
+        "address": "24453 Rosalinda Well",
+        "address_line": "West",
+        "postal_code": "51434",
+        "geo_coordinates": {
+            "lat": 79.0225,
+            "lng": 53.5041
+        }
+    },
+    "payment": {
+        "status": "paid",
+        "method": "bank",
+        "store_bank_id": 234234,
+        "receipt_image_path": "url",
+        "accepted_methods": [
+            "bank",
+            "credit_card"
+        ],
+        "cash_on_delivery": {
+            "amount": 10,
+            "currency": "SAR"
+        }
+    },
+    "products": [
+        {
+            "identifier_type": "id",
+            "identifier": 892907448,
+            "quantity": 1,
+            "options": [
+                {
+                    "id": 1626535321,
+                    "value": [
+                        "96445177"
+                    ]
+                }
+            ],
+            "recurring":{
+                "slug": "premium-subscription-plan",
+                "interval_unit": "month",
+                "interval_count": 12,
+                "meta":{
+                    "note": "Internal note"
+                }
+            }
+        },
+        {
+            "identifier_type": "id",
+            "identifier": 728473534,
+            "quantity": 1
+        },
+        {
+            "identifier_type": "sku",
+            "identifier": "sku123",
+            "quantity": 1
+        }
+    ]
+}
+Request Code Samples
+Shell
+JavaScript
+Java
+Swift
+Go
+PHP
+Python
+HTTP
+C
+C#
+Objective-C
+Ruby
+OCaml
+Dart
+R
+Responses
+🟢200
+Success
+application/json
+Generate Code
+status
+number 
+optional
+Response status code, a numeric or alphanumeric identifier used to convey the outcome or status of a request, operation, or transaction in various systems and applications, typically indicating whether the action was successful, encountered an error, or resulted in a specific condition.
+success
+boolean 
+optional
+Response flag, boolean indicator used to signal a particular condition or state in the response of a system or application, often representing the presence or absence of certain conditions or outcomes.
+data
+object 
+(Order)
+Order
+optional
+id
+integer 
+optional
+Unique order ID.
+external_order_id
+string  | 
+null 
+optional
+External order ID, if available.
+external_reference_id
+string  | 
+null 
+optional
+External reference ID associated with the order.
+checkout_id
+string 
+optional
+Unique checkout ID associated with the order.
+reference_id
+integer 
+optional
+Order reference ID.
+urls
+object 
+optional
+URLs associated with the order.
+date
+object 
+optional
+Date and time value.
+updated_at
+object 
+optional
+Updated at associated with the order.
+source
+string 
+optional
+Source associated with the order.
+draft
+boolean 
+optional
+Indicates whether the order is a draft.
+read
+boolean 
+optional
+Indicates whether the order has been read.
+source_details
+object 
+optional
+Source details associated with the order.
+status
+object 
+optional
+Status associated with the order.
+payment_method
+string 
+optional
+Primary payment method used for the order.
+payment_methods
+array [object] 
+optional
+Payment methods associated with the order.
+receipt_image
+string  | 
+null 
+optional
+Payment receipt image URL.
+currency
+string 
+optional
+Order currency.
+amounts
+object 
+optional
+Breakdown of monetary amounts associated with the order.
+exchange_rate
+object 
+optional
+Currency exchange rate information associated with the order.
+scope_exchange_rate
+object  | 
+null 
+optional
+Scope-specific exchange rate information.
+campaign
+object 
+optional
+Marketing campaign attribution information associated with the order.
+gateway
+object  | 
+string  | 
+null 
+optional
+Payment gateway information.
+show_weight
+boolean 
+optional
+Indicates whether the order weight should be displayed.
+shipping_status
+string 
+optional
+Current shipping status.
+pending_payment_ends_at
+integer 
+optional
+Pending payment expiration value.
+total_weight
+string 
+optional
+Total order weight.
+type
+string 
+optional
+Order type.
+is_overweighted
+boolean 
+optional
+Indicates whether the order exceeds the allowed weight.
+has_customer_session
+boolean 
+optional
+Indicates whether the order has a customer session.
+features
+object 
+optional
+Features and capabilities available for the order.
+receiver
+object  | 
+null 
+optional
+Order receiver information.
+actions
+object 
+optional
+Actions currently available for the order.
+accepted_payment_methods
+array[string]
+optional
+List of payment methods accepted for the order.
+payment_actions
+object 
+optional
+Payment-related actions and payment state associated with the order.
+address_incomplete
+boolean 
+optional
+Indicates whether the address associated with the order is incomplete.
+customer
+object 
+optional
+Customer information associated with the order.
+notes
+string  | 
+null 
+optional
+Notes associated with the order, if available.
+fraud_reasons
+array [object] 
+optional
+List of fraud or suspicious-activity reasons associated with the order.
+bank
+object  | 
+null 
+optional
+Bank information associated with the order, if available.
+tags
+array [object] 
+optional
+List of tags associated with the order.
+Example
+{
+  "status": 201,
+  "success": true,
+  "data": {
+    "id": 1107722485,
+    "external_order_id": null,
+    "external_reference_id": null,
+    "checkout_id": "3058806946742845435",
+    "reference_id": 279766354,
+    "urls": {
+      "customer": "https://demostore.salla.sa/dev-qemdv5vldnohhhpq/account/orders/XArYbdA",
+      "admin": "https://s.salla.sa/orders/order/gdpNzmxoKnvLW0le85bXWyZR5DBAqwPl",
+      "rating": null,
+      "digital_content": null,
+      "gift_confirmation": null
+    },
+    "date": {
+      "date": "2026-08-24 17:38:20.000000",
+      "timezone_type": 3,
+      "timezone": "Asia/Riyadh"
+    },
+    "updated_at": {
+      "date": "2026-08-24 17:38:20.453456",
+      "timezone_type": 3,
+      "timezone": "Asia/Riyadh"
+    },
+    "source": "223306543",
+    "draft": false,
+    "read": false,
+    "source_details": {
+      "type": "223306543",
+      "value": null,
+      "device": "desktop",
+      "user-agent": "PostmanRuntime/7.56.1",
+      "utm_source": "",
+      "utm_campaign": "",
+      "utm_medium": "",
+      "utm_term": "",
+      "utm_content": "",
+      "ip": "178.73.119.76"
+    },
+    "status": {
+      "id": 566146469,
+      "name": "بإنتظار المراجعة",
+      "slug": "under_review",
+      "customized": {
+        "id": 1503099289,
+        "name": "بإنتظار المراجعة"
+      }
+    },
+    "payment_method": "cod",
+    "payment_methods": [
+      {
+        "amount": 0,
+        "payment_method": "cod",
+        "transaction_reference": null
+      }
+    ],
+    "receipt_image": null,
+    "currency": "SAR",
+    "amounts": {
+      "sub_total": {
+        "amount": 200,
+        "currency": "SAR"
+      },
+      "shipping_cost": {
+        "amount": 0,
+        "currency": "SAR",
+        "original_cost": 0,
+        "shipping_cost_discount": 0
+      },
+      "cash_on_delivery": {
+        "amount": 9000,
+        "currency": "SAR"
+      },
+      "tax": {
+        "percent": "15.00",
+        "amount": {
+          "amount": 30,
+          "currency": "SAR"
+        }
+      },
+      "discounts": [],
+      "total": {
+        "amount": 230,
+        "currency": "SAR"
+      }
+    },
+    "exchange_rate": {
+      "base_currency": "SAR",
+      "exchange_currency": "SAR",
+      "rate": "1.00000000"
+    },
+    "scope_exchange_rate": null,
+    "campaign": {
+      "medium": "",
+      "source": "",
+      "campaign": ""
+    },
+    "gateway": null,
+    "show_weight": false,
+    "shipping_status": "shipping_ready",
+    "pending_payment_ends_at": 75598,
+    "total_weight": "٢٤ كجم",
+    "type": "normal",
+    "is_overweighted": false,
+    "has_customer_session": false,
+    "features": {
+      "shippable": true,
+      "is_international": false,
+      "internationally_shippable": false,
+      "digitalable": false,
+      "pickable": true,
+      "multiple_shipments_supported": false,
+      "order_type_price_quote": false,
+      "has_suspicious_alert": false,
+      "bullet_delivery": {
+        "is_bullet_delivery": false,
+        "bullet_countdown": 0,
+        "on_demand_countdown": 0,
+        "on_demand_delivery": false,
+        "on_demand_timer": false
+      },
+      "wallet": true
+    },
+    "receiver": null,
+    "actions": {
+      "cancellable": false,
+      "reorderable": true,
+      "payable": false
+    },
+    "accepted_payment_methods": [
+      ""
+    ],
+    "payment_actions": {
+      "refund_action": {
+        "refunded_transactions": [],
+        "pending_refund_amount": null,
+        "has_refund_amount": false,
+        "payment_method_label": "دفع عند التسليم",
+        "can_print_refund_invoice": false,
+        "paid_amount": {
+          "amount": 0,
+          "currency": "SAR"
+        },
+        "refund_amount": {
+          "amount": 0,
+          "currency": "SAR"
+        },
+        "loyalty_point_programs": [],
+        "can_send_sms": false,
+        "can_send_sms_msg": "يرجى تفعيل احد مزودين خدمة SMS من صفحة ربط الخدمات",
+        "can_refund_loyalty_prize_points": false,
+        "can_restore_loyalty_buy_from_store_points": false,
+        "can_refund_to_wallet": true
+      },
+      "remaining_action": {
+        "has_remaining_amount": false,
+        "payment_method_label": "دفع عند التسليم",
+        "paid_amount": {
+          "amount": 0,
+          "currency": "SAR"
+        },
+        "checkout_url": "",
+        "remaining_amount": null
+      }
+    },
+    "address_incomplete": false,
+    "customer": {
+      "id": 1994632541,
+      "full_name": "Mohammed Ahmed",
+      "first_name": "Mohammed",
+      "last_name": "Ahmed",
+      "mobile": 557777777,
+      "mobile_code": "+966",
+      "email": "test-email@gmail.com",
+      "urls": {
+        "customer": "https://demostore.salla.sa/dev-qemdv5vldnohhhpq/account/profile",
+        "admin": "https://s.salla.sa/customers/zAB3exRyLdXv5Wpk5lDarGg4p7Ej8ZKl"
+      },
+      "avatar": "https://cdn.assets.salla.network/prod/admin/cp/assets/images/avatar_female.png",
+      "gender": "female",
+      "birthday": {
+        "date": "1987-08-12 00:00:00.000000",
+        "timezone_type": 3,
+        "timezone": "Asia/Riyadh"
+      },
+      "city": "الحميمة",
+      "country": "السعودية",
+      "country_code": "SA",
+      "currency": "SAR",
+      "location": "",
+      "lang": "ar",
+      "created_at": {
+        "date": "2025-12-25 12:41:10.000000",
+        "timezone_type": 3,
+        "timezone": "Asia/Riyadh"
+      },
+      "updated_at": {
+        "date": "2026-08-23 17:02:59.000000",
+        "timezone_type": 3,
+        "timezone": "Asia/Riyadh"
+      },
+      "type": "user",
+      "groups": []
+    },
+    "notes": null,
+    "fraud_reasons": [],
+    "bank": null,
+    "tags": []
+  }
+}
+🟠422
+Error Validation
+🟠401
+Unauthorized
+Modified at 6 days ago
+Previous
+Support
+Next
+Relocate Order Stock
+LLMs.txt
+Export
