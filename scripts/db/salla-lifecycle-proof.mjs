@@ -87,6 +87,8 @@ check('⚔️ ملف دفعة أخرى (الاسم لا يحمل الوسم) ي�
 const badIn = join(tmp, 'SALLA-TEST-001-bad.csv'); writeFileSync(badIn, ['code', ...test1.codes, test1.codes[0], 'ABC'].join('\n'))
 check('⚔️ تكرار وسطر مكسور يُرفضان بالاسم', (() => { const r = run(['--batch', 'SALLA-TEST-001', '--count', '7', '--in', badIn, '--out', join(tmp, 'x6.csv')]); return r.code === 1 && /تكرار/.test(r.out) && /شكل غير صالح/.test(r.out) })())
 check('⚔️ لا كتابة فوق ملف رفع موجود', run(['--batch', 'SALLA-TEST-001', '--count', '5', '--in', inFile, '--out', outFile]).code === 2)
+const pasteOut = join(tmp, 'SALLA-TEST-001.paste.txt')
+check('--no-header يكتب كودًا في كل سطر للّصق المباشر في سلة، بلا ترويسة', run(['--batch', 'SALLA-TEST-001', '--count', '5', '--in', inFile, '--out', pasteOut, '--no-header']).code === 0 && readFileSync(pasteOut, 'utf8').split(/\r?\n/).filter(Boolean).every((l) => /^[A-HJ-NP-Z2-9]{16}$/.test(l)))
 
 // ═══ ③ تسجيل التصدير ═══
 console.log('\n③ تسجيل التصدير في القاعدة — مرّة، عدد مطابق، دفعة بِكر، وسم القناة فقط')
