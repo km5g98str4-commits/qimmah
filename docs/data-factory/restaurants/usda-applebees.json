@@ -36,6 +36,24 @@
    "usdaPortion": "serving"
   },
   {
+   "id": "chicken-tenders",
+   "nameAr": "شرائح دجاج مقرمشة",
+   "nameEn": "Chicken Tenders",
+   "sourceName": "APPLEBEE'S, chicken tenders platter",
+   "fdcId": 169841,
+   "dataType": "SR Legacy",
+   "servingGrams": 209,
+   "servingLabelAr": "حصة (209غ)",
+   "kcal": 621,
+   "protein": 41,
+   "carbs": 37.6,
+   "fat": 33.9,
+   "fiber": 2.1,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "serving"
+  },
+  {
    "id": "mozzarella-sticks",
    "nameAr": "موزاريلا ستيكس",
    "nameEn": "Mozzarella Sticks",
@@ -64,14 +82,6 @@
    "nameEn": "Grilled Chicken Caesar Salad",
    "why": "USDA unmatched",
    "candidates": []
-  },
-  {
-   "nameEn": "Chicken Tenders",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "APPLEBEE'S, chicken tenders, from kids' menu",
-    "APPLEBEE'S, chicken tenders platter"
-   ]
   },
   {
    "nameEn": "Chicken Fajitas",

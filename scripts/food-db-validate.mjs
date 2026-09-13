@@ -55,7 +55,7 @@ const restaurantCount = restaurantItems.length
 // التقدير عن الجميع والصنف المعروض للمستخدم صامت — الوسم الآن حيث يُقرأ.
 const restaurantsEstimated = restaurantItems.filter((f) => typeof f.notesAr === 'string' && f.notesAr.includes('تقديري')).length
 // [RESTAURANT-MENUS-001] أصناف المصادر الرسمية (rst-*): سعراتها رسمية، وملاحظتها تسمّي المصدر أو تسم التقدير الجزئي.
-const restaurantsSourced = restaurantItems.filter((f) => String(f.id).startsWith('rst-') && typeof f.notesAr === 'string' && /رسمي/.test(f.notesAr)).length
+const restaurantsSourced = restaurantItems.filter((f) => String(f.id).startsWith('rst-') && typeof f.notesAr === 'string' && /رسمي|USDA/.test(f.notesAr)).length
 const restaurantsHand = restaurantItems.filter((f) => !String(f.id).startsWith('rst-')).length
 const r2Items = foodItems.filter((f) => typeof f.id === 'string' && f.id.startsWith('r2-eat-'))
 const r2Estimated = r2Items.filter((f) => typeof f.notesAr === 'string' && f.notesAr.includes('تقديري')).length

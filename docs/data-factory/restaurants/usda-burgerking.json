@@ -19,6 +19,24 @@
  },
  "items": [
   {
+   "id": "whopper",
+   "nameAr": "وابر",
+   "nameEn": "Whopper",
+   "sourceName": "Whopper (Burger King)",
+   "fdcId": 2706931,
+   "dataType": "FNDDS",
+   "servingGrams": 270,
+   "servingLabelAr": "حبة (270غ)",
+   "kcal": 610,
+   "protein": 30.5,
+   "carbs": 46.7,
+   "fat": 33.5,
+   "fiber": 4.1,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "1 hamburger"
+  },
+  {
    "id": "whopper-with-cheese",
    "nameAr": "وابر بالجبن",
    "nameEn": "Whopper with Cheese",
@@ -145,14 +163,6 @@
   }
  ],
  "quarantined": [
-  {
-   "nameEn": "Whopper",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "Whopper Jr (Burger King)",
-    "Whopper (Burger King)"
-   ]
-  },
   {
    "nameEn": "Double Whopper",
    "why": "USDA unmatched",

@@ -20,6 +20,24 @@
  },
  "items": [
   {
+   "id": "big-mac",
+   "nameAr": "بيج ماك",
+   "nameEn": "Big Mac",
+   "sourceName": "McDONALD'S, BIG MAC",
+   "fdcId": 170720,
+   "dataType": "SR Legacy",
+   "servingGrams": 219,
+   "servingLabelAr": "حبة (219غ)",
+   "kcal": 563,
+   "protein": 25.8,
+   "carbs": 44,
+   "fat": 32.9,
+   "fiber": 3.5,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "item 7.6 oz"
+  },
+  {
    "id": "quarter-pounder-with-cheese",
    "nameAr": "كوارتر باوندر بالجبن",
    "nameEn": "Quarter Pounder with Cheese",
@@ -106,6 +124,42 @@
    "fat": 9.6,
    "fiber": 1.2,
    "type": "burger",
+   "keywords": [],
+   "usdaPortion": "sandwich"
+  },
+  {
+   "id": "mcchicken",
+   "nameAr": "ماك تشيكن",
+   "nameEn": "McChicken",
+   "sourceName": "McDONALD'S, McCHICKEN Sandwich",
+   "fdcId": 173305,
+   "dataType": "SR Legacy",
+   "servingGrams": 131,
+   "servingLabelAr": "حبة (131غ)",
+   "kcal": 358,
+   "protein": 13.6,
+   "carbs": 36.7,
+   "fat": 17.3,
+   "fiber": 1.7,
+   "type": "sandwich",
+   "keywords": [],
+   "usdaPortion": "sandwich"
+  },
+  {
+   "id": "filet-o-fish",
+   "nameAr": "فيليه أو فيش",
+   "nameEn": "Filet-O-Fish",
+   "sourceName": "McDONALD'S, FILET-O-FISH",
+   "fdcId": 170319,
+   "dataType": "SR Legacy",
+   "servingGrams": 134,
+   "servingLabelAr": "حبة (134غ)",
+   "kcal": 378,
+   "protein": 15.1,
+   "carbs": 35.4,
+   "fat": 19.6,
+   "fiber": 1.9,
+   "type": "sandwich",
    "keywords": [],
    "usdaPortion": "sandwich"
   },
@@ -199,6 +253,24 @@
    "usdaPortion": "serving 1 patty"
   },
   {
+   "id": "hotcakes",
+   "nameAr": "هوت كيك (٣ قطع)",
+   "nameEn": "Hotcakes",
+   "sourceName": "McDONALD'S, Hotcakes (with 2 pats margarine & syrup)",
+   "fdcId": 173311,
+   "dataType": "SR Legacy",
+   "servingGrams": 221,
+   "servingLabelAr": "حبة (221غ)",
+   "kcal": 601,
+   "protein": 9,
+   "carbs": 101.9,
+   "fat": 17.8,
+   "fiber": 2,
+   "type": "breakfast",
+   "keywords": [],
+   "usdaPortion": "item"
+  },
+  {
    "id": "caramel-sundae",
    "nameAr": "آيس كريم ساندي كراميل",
    "nameEn": "Caramel Sundae",
@@ -218,38 +290,6 @@
   }
  ],
  "quarantined": [
-  {
-   "nameEn": "Big Mac",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "McDONALD'S, BIG MAC",
-    "McDONALD'S, BIG MAC (without Big Mac Sauce)"
-   ]
-  },
-  {
-   "nameEn": "McChicken",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "McDONALD'S, McCHICKEN Sandwich",
-    "McDONALD'S, McCHICKEN Sandwich (without mayonnaise)"
-   ]
-  },
-  {
-   "nameEn": "Filet-O-Fish",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "McDONALD'S, FILET-O-FISH",
-    "McDONALD'S, FILET-O-FISH (without tartar sauce)"
-   ]
-  },
-  {
-   "nameEn": "Hotcakes",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "McDONALD'S, Hotcakes (plain)",
-    "McDONALD'S, Hotcakes (with 2 pats margarine & syrup)"
-   ]
-  },
   {
    "nameEn": "Baked Apple Pie",
    "why": "USDA unmatched",
