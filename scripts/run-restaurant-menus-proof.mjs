@@ -47,7 +47,7 @@ check('الماكروز تعيد بناء السعرات الرسمية (رسم�
 {
   const ids = new Set(); const dupId = items.filter((f) => ids.has(f.id) || !ids.add(f.id))
   check('لا معرّف مكرّر', dupId.length === 0)
-  const hand = food.foodItems.filter((f) => !/^(gen|bk|rst)-/.test(f.id))
+  const hand = food.foodItems.filter((f) => !/^(gen|bakery|rst)-/.test(f.id))
   const handAr = new Set(hand.map((f) => food.normalizeSearch(f.nameAr)))
   const dup = items.filter((f) => handAr.has(food.normalizeSearch(f.nameAr)))
   check('لا اسم عربي مولَّد يكرّر صنفًا يدويًّا', dup.length === 0, dup.map((d) => d.nameAr).join('، '))

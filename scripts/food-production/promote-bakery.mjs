@@ -57,7 +57,7 @@ for (const row of map.rows) {
   const portion = choosePortion(e.portions ?? [])
   const g = portion.grams
   const sourceMatch = row.proxy ? 'proxy' : 'exact'
-  const id = `bk-${row.id.toLowerCase()}`
+  const id = `bakery-${row.id.toLowerCase()}`
   items.push({
     id, nameAr: row.nameAr, nameEn: row.nameEn, category: row.category, servingLabelAr: portion.labelAr, servingGrams: g,
     calories: per(n.kcal, g), protein: per1(n.protein, g), carbs: per1(n.carbs, g), fat: per1(n.fat, g),
