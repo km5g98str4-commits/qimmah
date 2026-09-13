@@ -13,6 +13,10 @@
 الفرع     : claude/qimmah-production-readiness-13cyt7 — جولات دليل في CI ثم ترقية
 الترقية   : main @ 1efd576 (CI #642 أخضر على dc189b3؛ دفعات الدليل بعدها طوابع زمنية فقط)
             ثم main @ 4f17979 — تصحيح PARTIAL-NUTRITION-001 (CI #646 أخضر على 151d061)
+            ثم main @ 46bfcb2 — SALLA-PROD-001 (CI #655 أخضر على b5b1631؛ هجرة 20260913120001 + حزمة 09)
+التراجع   : git revert 46bfcb2..756d688 (الكود) · الهجرة إضافية: drop function founder_mark_purchase_batch_exported,
+            founder_salla_inventory, founder_code_lookup; drop table purchase_batch_exports; وإعادة founder_purchase_batches
+            من 20260829120001 — لا تلمس access_codes ولا سجلّ الاسترداد
 القاعدة   : السعرات رسمية دائمًا أو USDA؛ الماكروز رسمية أو تقدير **موسوم** يراه المستخدم؛ لا اسم بلا مصدر
 ```
 
