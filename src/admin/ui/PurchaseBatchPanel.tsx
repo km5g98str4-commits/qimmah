@@ -457,7 +457,7 @@ export function PurchaseBatchPanel({
                 <input dir="ltr" inputMode="numeric" data-testid="salla-mark-count" value={markCount} onChange={(e) => { setMarkCount(e.target.value); setMarkLocalError(null) }} className="mt-1 min-h-11 w-full rounded-xl border border-line bg-surface px-3 py-2 text-base font-bold text-ink-900 outline-none focus:border-primary-c" />
               </label>
               <label className="block text-[0.72rem] font-bold text-ink-700 sm:col-span-2">{t.markDigestLabel}
-                <input dir="ltr" data-testid="salla-mark-digest" value={markDigest} onChange={(e) => { setMarkDigest(e.target.value.trim().toLowerCase()); setMarkLocalError(null) }} autoComplete="off" spellCheck={false} className="mt-1 min-h-11 w-full rounded-xl border border-line bg-surface px-3 py-2 font-mono text-sm text-ink-900 outline-none focus:border-primary-c" />
+                <input dir="ltr" data-testid="salla-mark-digest" value={markDigest} onChange={(e) => { setMarkDigest(e.target.value.trim().toLowerCase()); setMarkLocalError(null) }} autoComplete="off" spellCheck={false} className="mt-1 min-h-11 w-full rounded-xl border border-line bg-surface px-3 py-2 font-mono text-base text-ink-900 outline-none focus:border-primary-c" />
                 <span className="mt-1 block text-[0.68rem] font-normal text-ink-400">{t.markDigestHint}</span>
               </label>
               <label className="block text-[0.72rem] font-bold text-ink-700 sm:col-span-2">{t.markNoteLabel}
