@@ -1,0 +1,5 @@
+kind,t_start_ms,t_end_ms,ref_litres,ref_seconds,note
+OVERFLOW,0,0,0,0,"example: dribble 0.1 L/min trial 1 — fill from log markers"
+STILL,0,0,0,600,"example: 10-min no-flow window"
+DRAIN,0,0,0,600,"example: outlet at ~1 L/min for 10 min"
+REFILL,0,0,0,0,"example: float refilling"
