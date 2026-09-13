@@ -17,8 +17,10 @@ on:
   push:
     branches:
       - codex/qimmah-final-sovereign-convergence-001
+      - claude/qimmah-production-readiness-13cyt7
     paths:
       - scripts/food-production/chain-evidence-sources.json
+      - scripts/food-production/fetch-chain-evidence.mjs
 
 permissions:
   contents: write
@@ -30,7 +32,7 @@ concurrency:
 jobs:
   fetch:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
         with:
@@ -46,6 +48,9 @@ jobs:
 
       - name: Install Chromium for rendered captures
         run: npx playwright install --with-deps chromium
+
+      - name: Install pdftotext (poppler) for PDF nutrition guides
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
 
       - name: Fetch official chain sources (raw + rendered + screenshot)
         run: node scripts/food-production/fetch-chain-evidence.mjs

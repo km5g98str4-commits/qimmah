@@ -1,19 +1,334 @@
 {
-  "_readme": "سجلّ مصادر التغذية الرسمية للسلاسل — [مهمة الصقل §5]. مصدره docs/content/CHAIN-MENU-SOURCES.md §3. يقرؤه fetch-chain-evidence.mjs في CI (شبكة العدّاء مفتوحة بينما بيئة الوكلاء تحجب هذه المضيفين — مقيس CONNECT 403). render=true يلتقط الصفحة بعد تنفيذ JS لأن قوائم كثيرة تُرسم عميلًا. اللقطات دليل قراءة فعلية، لا مصدر استيراد آلي: الاستيراد يبقى موجة مُراجَعة تقرأ الدليل وتلتزم شرط القبول (ماكروز أربعة كاملة من المصدر).",
-  "sources": [
-    { "slug": "mcdonalds-sa", "chain": "ماكدونالدز السعودية", "url": "https://www.mcdonalds.com/sa/en-sa.html", "render": true, "note": "فهرس — صفحات المنتجات تحت /sa/en-sa/<city>/product/*.html" },
-    { "slug": "herfy-calculator", "chain": "هرفي", "url": "https://herfy.com/calculator/", "render": true, "note": "حاسبة التغذية الرسمية" },
-    { "slug": "subway-sa-nutrition", "chain": "صب واي", "url": "https://www.subway.com/ar-SA/MenuNutrition", "render": true, "note": "صفحة التغذية الرسمية للسوق السعودي" },
-    { "slug": "shawarmer-menu", "chain": "شاورمر", "url": "https://shawarmer.com/en/menu/83", "render": true, "note": "المنيو الرسمي بسعرات الأصناف" },
-    { "slug": "alromansiah", "chain": "الرومانسية", "url": "https://www.alromansiah.com/", "render": true, "note": "فهرس — المنيو الرسمي يعرض سعرات بتفويض SFDA" },
-    { "slug": "mamanoura-menu", "chain": "ماما نورة", "url": "https://mamanoura.my.taker.io/", "render": true, "note": "منصة الطلب الرسمية بسعرات الأصناف" },
-    { "slug": "maestro-help", "chain": "مايسترو", "url": "https://help.maestropizza.com/", "render": true, "note": "مركز المساعدة الرسمي — سعرات لكل سلايس" },
-    { "slug": "dominos-us-nutrition-pdf", "chain": "دومينوز (دليل US)", "url": "https://cache.dominos.com/olo/6_152_7/assets/build/market/US/_en/pdf/DominosNutritionGuide.pdf", "render": false, "note": "كامل الماكروز لسوق أمريكا — اعتماده للسوق السعودي قرار منتج معلّق" },
-    { "slug": "kudu", "chain": "كودو", "url": "https://kudu.com.sa/", "render": true, "note": "فهرس — السعرات في تطبيق كودو" },
-    { "slug": "pizzahut-sa", "chain": "بيتزا هت", "url": "https://www.pizzahut.sa/", "render": true, "note": "فهرس — لا PDF سعودي معروف" },
-    { "slug": "kfc-sa", "chain": "كنتاكي", "url": "https://www.kfc.com.sa/", "render": true, "note": "فهرس — دليل الإمارات الرسمي يُطلب من أصله لا من scribd" },
-    { "slug": "albaik", "chain": "البيك", "url": "https://albaik.com/", "render": true, "note": "توثيق غياب/وجود قسم تغذية رسمي — كل نتائج البحث مواقع معجبين" },
-    { "slug": "burgerizzr", "chain": "برجرايزر", "url": "https://burgerizzr.com/", "render": true, "note": "فهرس — لا مصدر تغذية معروف" },
-    { "slug": "papajohns-sa", "chain": "بابا جونز", "url": "https://papajohns.sa/", "render": true, "note": "فهرس — لم يُمسح مصدره بعد" }
-  ]
+ "_readme": "سجلّ مصادر التغذية الرسمية للسلاسل — [RESTAURANT-MENUS-001]. يقرؤه fetch-chain-evidence.mjs في CI (شبكة العدّاء مفتوحة؛ بيئة الوكلاء تحجب هذه المضيفين — CONNECT 403 مقيس). render=true يلتقط الصفحة بعد JS. لكل مصدر يُستخرج text.txt (نصّ مجرّد من الوسوم أو pdftotext) ليُقرأ رخيصًا. الاستيراد يبقى موجة مُراجَعة: العالمية بدليلها الرسمي كامل الماكروز موسومةً بسوق المصدر، والسعودية بسعرات المنيو الرسمي (SFDA) والماكروز الناقصة تقديرٌ موسوم لا رقم رسمي.",
+ "sources": [
+  {
+   "slug": "mcd-us-nutrition-calc",
+   "chain": "ماكدونالدز (US)",
+   "url": "https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html",
+   "render": true,
+   "note": "حاسبة التغذية الرسمية — ماكروز كاملة"
+  },
+  {
+   "slug": "mcd-us-categories-json",
+   "chain": "ماكدونالدز (US) — JSON",
+   "url": "https://www.mcdonalds.com/wws/json/getCategories.htm?country=US&language=en&showLiveData=true",
+   "render": false,
+   "note": "واجهة الفئات الرسمية (إن بقيت حيّة)"
+  },
+  {
+   "slug": "mcd-us-item-json",
+   "chain": "ماكدونالدز (US) — صنف JSON",
+   "url": "https://www.mcdonalds.com/dnaapp/itemDetails?country=US&language=en&showLiveData=true&item=200000",
+   "render": false,
+   "note": "Big Mac كنموذج لبنية JSON"
+  },
+  {
+   "slug": "mcd-sa-full-menu",
+   "chain": "ماكدونالدز السعودية",
+   "url": "https://www.mcdonalds.com/sa/ar-sa/full-menu.html",
+   "render": true,
+   "note": "المنيو السعودي الرسمي — سعرات SFDA"
+  },
+  {
+   "slug": "kfc-us-nutrition",
+   "chain": "كنتاكي (US)",
+   "url": "https://www.kfc.com/nutrition",
+   "render": true,
+   "note": "دليل التغذية الرسمي"
+  },
+  {
+   "slug": "kfc-arabia",
+   "chain": "كنتاكي (أمريكانا)",
+   "url": "https://www.kfc-arabia.com/",
+   "render": true,
+   "note": "فهرس أمريكانا"
+  },
+  {
+   "slug": "kfc-sa",
+   "chain": "كنتاكي السعودية",
+   "url": "https://www.kfc.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "bk-us-pdf",
+   "chain": "برجر كنج (US) PDF",
+   "url": "https://www.bk.com/pdfs/nutrition.pdf",
+   "render": false,
+   "note": "دليل رسمي كامل الماكروز"
+  },
+  {
+   "slug": "bk-sa",
+   "chain": "برجر كنج السعودية",
+   "url": "https://www.burgerking.com.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "hardees-us-nutrition",
+   "chain": "هارديز (US)",
+   "url": "https://www.hardees.com/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "hardees-arabia",
+   "chain": "هارديز (أمريكانا)",
+   "url": "https://www.hardees-arabia.com/",
+   "render": true,
+   "note": "فهرس أمريكانا"
+  },
+  {
+   "slug": "subway-us-nutrition",
+   "chain": "صب واي (US)",
+   "url": "https://www.subway.com/en-us/menunutrition/nutrition",
+   "render": true,
+   "note": "صفحة التغذية الرسمية"
+  },
+  {
+   "slug": "subway-sa",
+   "chain": "صب واي السعودية",
+   "url": "https://subway.sa/",
+   "render": true,
+   "note": "المنيو السعودي"
+  },
+  {
+   "slug": "dominos-us-nutrition-pdf",
+   "chain": "دومينوز (دليل US)",
+   "url": "https://cache.dominos.com/olo/6_152_7/assets/build/market/US/_en/pdf/DominosNutritionGuide.pdf",
+   "render": false,
+   "note": "كامل الماكروز — يُستخرج نصًّا"
+  },
+  {
+   "slug": "dominos-sa",
+   "chain": "دومينوز السعودية",
+   "url": "https://www.dominos.com.sa/",
+   "render": true,
+   "note": "المنيو السعودي"
+  },
+  {
+   "slug": "pizzahut-us-nutrition",
+   "chain": "بيتزا هت (US)",
+   "url": "https://www.pizzahut.com/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "pizzahut-sa",
+   "chain": "بيتزا هت السعودية",
+   "url": "https://www.pizzahut.com.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "fiveguys-us-nutrition",
+   "chain": "فايف غايز (US)",
+   "url": "https://www.fiveguys.com/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "shakeshack-nutrition",
+   "chain": "شيك شاك (US)",
+   "url": "https://www.shakeshack.com/nutrition/",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "texasroadhouse-nutrition",
+   "chain": "تكساس رودهاوس (US)",
+   "url": "https://www.texasroadhouse.com/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "pfchangs-nutrition",
+   "chain": "بي إف تشانغز (US)",
+   "url": "https://www.pfchangs.com/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "chilis-nutrition",
+   "chain": "تشيليز (US)",
+   "url": "https://www.chilis.com/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "applebees-nutrition",
+   "chain": "آبلبيز (US)",
+   "url": "https://www.applebees.com/en/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "raisingcanes-nutrition",
+   "chain": "ريزينغ كينز (US)",
+   "url": "https://www.raisingcanes.com/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "raisingcanes-sa",
+   "chain": "ريزينغ كينز السعودية",
+   "url": "https://raisingcanes.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "papajohns-us-nutrition",
+   "chain": "بابا جونز (US)",
+   "url": "https://www.papajohns.com/nutrition",
+   "render": true,
+   "note": "دليل رسمي"
+  },
+  {
+   "slug": "albaik",
+   "chain": "البيك",
+   "url": "https://albaik.com/",
+   "render": true,
+   "note": "إعادة محاولة — كان NAME_NOT_RESOLVED"
+  },
+  {
+   "slug": "albaik-www-menu",
+   "chain": "البيك (www/menu)",
+   "url": "https://www.albaik.com/en/menu",
+   "render": true,
+   "note": "مسار منيو مرشّح"
+  },
+  {
+   "slug": "altazaj",
+   "chain": "الطازج",
+   "url": "https://www.altazaj.com/",
+   "render": true,
+   "note": "فهرس"
+  },
+  {
+   "slug": "altazaj-sa",
+   "chain": "الطازج (com.sa)",
+   "url": "https://www.altazaj.com.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "herfy-menu",
+   "chain": "هرفي (منيو)",
+   "url": "https://herfy.com/menu/",
+   "render": true,
+   "note": "المنيو الرسمي"
+  },
+  {
+   "slug": "herfy-calculator",
+   "chain": "هرفي (حاسبة)",
+   "url": "https://herfy.com/calculator/",
+   "render": true,
+   "note": "الحاسبة الرسمية — تحتاج تفاعل"
+  },
+  {
+   "slug": "kudu-sa",
+   "chain": "كودو",
+   "url": "https://kudu.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "kudu-com-sa",
+   "chain": "كودو (com.sa)",
+   "url": "https://www.kudu.com.sa/",
+   "render": true,
+   "note": "إعادة محاولة"
+  },
+  {
+   "slug": "shawarmer-menu",
+   "chain": "شاورمر",
+   "url": "https://shawarmer.com/en/menu/83",
+   "render": true,
+   "note": "المنيو الرسمي: سعرات + بروتين لكل صنف (مقيس)"
+  },
+  {
+   "slug": "shawarmer-menu-ar",
+   "chain": "شاورمر (عربي)",
+   "url": "https://shawarmer.com/ar/menu/83",
+   "render": true,
+   "note": "الأسماء العربية الرسمية"
+  },
+  {
+   "slug": "alromansiah-menu",
+   "chain": "الرومانسية (منيو)",
+   "url": "https://www.alromansiah.com/menu",
+   "render": true,
+   "note": "صفحة المنيو"
+  },
+  {
+   "slug": "alromansiah-order",
+   "chain": "الرومانسية (طلب)",
+   "url": "https://order.alromansiah.com/",
+   "render": true,
+   "note": "منصة الطلب — سعرات"
+  },
+  {
+   "slug": "mamanoura-menu",
+   "chain": "ماما نورة",
+   "url": "https://mamanoura.my.taker.io/menu",
+   "render": true,
+   "note": "منصة الطلب — تحتاج اختيار فرع"
+  },
+  {
+   "slug": "maestro-menu",
+   "chain": "مايسترو (منيو)",
+   "url": "https://www.maestropizza.com/en/menu",
+   "render": true,
+   "note": "المنيو الرسمي"
+  },
+  {
+   "slug": "maestro-root",
+   "chain": "مايسترو",
+   "url": "https://maestropizza.com/",
+   "render": true,
+   "note": "فهرس"
+  },
+  {
+   "slug": "sectionb",
+   "chain": "سكشن بي",
+   "url": "https://sectionb.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "centuryburger",
+   "chain": "سنشري برجر",
+   "url": "https://centuryburger.com/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "hamburgini",
+   "chain": "هامبرغيني",
+   "url": "https://hamburgini.com/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "janburger",
+   "chain": "جان برجر",
+   "url": "https://janburger.com/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "burgerizzr",
+   "chain": "برجرايزر",
+   "url": "https://burgerizzr.com/",
+   "render": true,
+   "note": "فهرس"
+  },
+  {
+   "slug": "papajohns-sa",
+   "chain": "بابا جونز السعودية",
+   "url": "https://papajohns.sa/",
+   "render": true,
+   "note": "فهرس"
+  }
+ ]
 }
