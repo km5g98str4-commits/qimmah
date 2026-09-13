@@ -79,6 +79,8 @@ const APPLIED_CHAIN = [DEL, CORE, RPCS, REVK, RECV, PUBX, FIX, SALLA_INGEST, INT
  */
 const DECLARED_EXCLUSIONS = new Map([
   [PRIV, 'يشترط جداول الأساس (public.profiles) ولا يبنيها هذا الصندوق — يغطّيه test:privileges بصندوق كامل'],
+  // [SALLA-PROD-001] سجلّ تصدير دفعات سلة يعيد تعريف founder_purchase_batches (ابنة 20260829120001 خارج هذه السلسلة) — يغطّيه test:salla-lifecycle بصندوق كامل.
+  ['20260913120001_salla_batch_exports.sql', 'يشترط access_codes.grant_purpose وfounder_purchase_batches من 20260829120001 (خارج سلسلة عصر FIX) — يغطّيه test:salla-lifecycle (٤٨) وtest:purchase-credential بصندوق كامل'],
 ])
 
 const results = []
