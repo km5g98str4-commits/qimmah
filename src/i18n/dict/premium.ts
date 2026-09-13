@@ -59,6 +59,8 @@ export interface PremiumStrings {
   /** الشراء. */
   buyHeading: string
   buyBody: string
+  /** [SALLA-PROD-001] الرحلة في سطر: أين الدفع، أين يصل الكود، أين يُكتب. */
+  buySteps: string
   buyCta: string
 
   /** الكود. */
@@ -67,6 +69,8 @@ export interface PremiumStrings {
   codeLabel: string
   codePlaceholder: string
   codeHint: string
+  /** [SALLA-PROD-001] ما تفعله إن لم يصل الكود أو رُفض — سطر واحد. */
+  codeHelp: string
   codeSubmit: string
   codeOpen: string
 
@@ -110,6 +114,7 @@ export const premiumStrings: Record<'ar' | 'en', PremiumStrings> = {
 
     buyHeading: 'قِمّة Premium',
     buyBody: 'شراء واحد يفتح قِمّة كاملة.',
+    buySteps: 'الدفع في سلة ← كود التفعيل يوصلك في صفحة الطلب وبالبريد ← الصقه هنا في «كود التفعيل».',
     buyCta: 'اشترِ Premium',
 
     codeHeading: 'عندك كود؟',
@@ -117,6 +122,7 @@ export const premiumStrings: Record<'ar' | 'en', PremiumStrings> = {
     codeLabel: 'الكود',
     codePlaceholder: 'مثال: QMH-XXXX-XXXX',
     codeHint: 'انسخ الكود والصقه كما هو. ما يفرق حروف كبيرة أو صغيرة.',
+    codeHelp: 'ما وصلك الكود أو ما ضبط؟ تأكّد من صفحة طلبك في سلة وبريدك (والمهملات)، وإلّا راسل الدعم برقم الطلب.',
     codeSubmit: 'فعّل',
     codeOpen: 'تفعيل كود',
 
@@ -158,6 +164,7 @@ export const premiumStrings: Record<'ar' | 'en', PremiumStrings> = {
 
     buyHeading: 'Qimmah Premium',
     buyBody: 'One purchase unlocks all of Qimmah.',
+    buySteps: 'Pay on Salla → your activation code appears on the order page and by email → paste it here under “Activation code”.',
     buyCta: 'Buy Premium',
 
     codeHeading: 'Got a code?',
@@ -165,6 +172,7 @@ export const premiumStrings: Record<'ar' | 'en', PremiumStrings> = {
     codeLabel: 'Code',
     codePlaceholder: 'e.g. QMH-XXXX-XXXX',
     codeHint: 'Copy and paste it as-is. Upper or lower case makes no difference.',
+    codeHelp: 'No code, or it didn’t work? Check your Salla order page and email (including spam), otherwise contact support with your order number.',
     codeSubmit: 'Activate',
     codeOpen: 'Activate a code',
 

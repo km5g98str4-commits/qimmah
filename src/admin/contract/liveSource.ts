@@ -42,6 +42,9 @@ import {
   PURCHASE_BATCHES_RPC,
   PURCHASE_BATCH_ISSUE_RPC,
   PURCHASE_BATCH_DISABLE_RPC,
+  PURCHASE_BATCH_MARK_EXPORTED_RPC,
+  SALLA_INVENTORY_RPC,
+  CODE_LOOKUP_RPC,
   EMAIL_HEALTH_RPC,
   GRANTS_BY_SOURCE_RPC,
   FOOD_SUBMISSIONS_RPC,
@@ -73,6 +76,8 @@ import type {
   SeriesPoint,
   UserCodeHistoryEntry,
   UserFoodSubmissionEntry,
+  SallaInventoryRow,
+  CodeLookupRow,
 } from './types'
 import { ready, unavailable } from './types'
 
@@ -833,6 +838,58 @@ export async function loadPurchaseBatches(
     codesUnredeemed: numOrNull(r.codes_unredeemed),
     lastIssuedAt: txtOrNull(r.last_issued_at),
     lastRedeemedAt: txtOrNull(r.last_redeemed_at),
+    exportedChannel: txtOrNull(r.exported_channel),
+    exportedAt: txtOrNull(r.exported_at),
+  }))
+}
+
+/** [SALLA-PROD-001] مخزون قناة سلة بالدفعة — إنذار النفاد يحسبه الخادم بعتبة معلنة. */
+export async function loadSallaInventory(decision: AdminRoleDecision, lowThreshold = 20): Promise<ListResult<SallaInventoryRow>> {
+  return readRows(decision, SALLA_INVENTORY_RPC, { p_low_threshold: lowThreshold }, (r) => ({
+    label: txtOrNull(r.label),
+    exportedAt: txtOrNull(r.exported_at),
+    expectedCount: numOrNull(r.expected_count),
+    digestPrefix: txtOrNull(r.file_digest_prefix),
+    codesIssued: numOrNull(r.codes_issued),
+    codesRedeemed: numOrNull(r.codes_redeemed),
+    codesDisabledUnredeemed: numOrNull(r.codes_disabled_unredeemed),
+    codesUnredeemed: numOrNull(r.codes_unredeemed),
+    lowStock: r.low_stock === true,
+    countMatches: r.count_matches === true,
+  }))
+}
+
+/** [SALLA-PROD-001] يسجّل دفعة مصدَّرة إلى سلة — الخادم يفرض: وسم القناة، عدد مطابق، دفعة بِكر، مرّة واحدة. */
+export async function markPurchaseBatchExported(
+  decision: AdminRoleDecision,
+  input: { label: string; count: number; digest: string; note: string | null },
+): Promise<WriteOutcome<{ label: string; expectedCount: number }>> {
+  if (!canWrite(decision)) return { ok: false, live: 'not-founder' }
+  const client = await getSupabase()
+  if (!client) return { ok: false, live: 'no-backend' }
+  try {
+    const { data, error } = await client.rpc(PURCHASE_BATCH_MARK_EXPORTED_RPC, {
+      p_label: input.label, p_channel: 'salla', p_count: input.count, p_digest: input.digest, p_note: input.note,
+    })
+    if (error) return { ok: false, live: classify(error) }
+    const rec = (data ?? {}) as Record<string, unknown>
+    if (typeof rec.expected_count !== 'number') return { ok: false, live: 'failed' }
+    return { ok: true, value: { label: typeof rec.label === 'string' ? rec.label : input.label, expectedCount: rec.expected_count } }
+  } catch {
+    return { ok: false, live: 'failed' }
+  }
+}
+
+/** [SALLA-PROD-001] بحث دعم: الخادم يبصم ما أُلصق ويعيد الحالة — لا نصّ يعود ولا يُخزَّن. */
+export async function lookupCode(decision: AdminRoleDecision, code: string): Promise<ListResult<CodeLookupRow>> {
+  return readRows(decision, CODE_LOOKUP_RPC, { p_code: code }, (r) => ({
+    found: r.found === true,
+    status: typeof r.status === 'string' ? r.status : 'unknown',
+    label: txtOrNull(r.label),
+    grantPurpose: txtOrNull(r.grant_purpose),
+    lastRedeemedAt: txtOrNull(r.last_redeemed_at),
+    disabledReason: txtOrNull(r.disabled_reason),
+    exportedChannel: txtOrNull(r.exported_channel),
   }))
 }
 
