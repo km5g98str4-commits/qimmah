@@ -54,7 +54,7 @@ check("الفئتان 'أفران' و'وجبات جاهزة' معرَّفتان 
   check('المُتحقَّق في القرار = المولَّد في الملف', c.VERIFIED_AND_LOGGABLE === items.length)
   check('كل محجور بسبب مسمّى', resolution.rows.filter((r) => r.status === 'QUARANTINED').every((r) => typeof r.why === 'string' && r.why.length > 2))
   check('الوكيل مُعلَن بملاحظة والمطابق بلا ملاحظة', items.every((f) => (prov[f.id].sourceMatch === 'exact' && prov[f.id].proxyNote === null) || (prov[f.id].sourceMatch === 'proxy' && prov[f.id].proxyNote.length > 5)))
-  const hand = food.foodItems.filter((f) => !/^(gen|bk|rst)-/.test(f.id))
+  const hand = food.foodItems.filter((f) => !/^(gen|bakery|rst)-/.test(f.id))
   const handAr = new Set(hand.map((f) => food.normalizeSearch(f.nameAr)))
   const dup = items.filter((f) => handAr.has(food.normalizeSearch(f.nameAr)))
   check('لا اسم عربي مولَّد يكرّر صنفًا يدويًّا', dup.length === 0, dup.map((d) => d.nameAr).join('، '))
