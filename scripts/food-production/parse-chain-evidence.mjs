@@ -147,12 +147,66 @@ const PARSERS = {
       items,
     }
   },
+  // سجلّات USDA للسلاسل (SR Legacy «Fast Foods/Restaurant Foods» + FNDDS): منتجات السوق الأمريكي
+  // مقيسة مخبريًّا — كاملة الماكروز لكل ١٠٠غ مع حصص. الخريطة docs/data-factory/chains/USDA-MAP.json
+  // والدليل data/food-production/chains/usda-evidence.json (جلب CI). يُنتج ملفًا لكل سلسلة.
+  usda() {
+    const map = JSON.parse(readFileSync(resolve(ROOT, 'docs/data-factory/chains/USDA-MAP.json'), 'utf8'))
+    const evidence = JSON.parse(readFileSync(resolve(ROOT, 'data/food-production/chains/usda-evidence.json'), 'utf8'))
+    const ev = Object.fromEntries(evidence.results.map((r) => [r.id, r]))
+    const CHAIN = {
+      mcdonalds: { ar: 'ماكدونالدز', en: "McDonald's", keywords: ['mcdonalds', "mcdonald's", 'ماك', 'مكدونالدز', 'ماكدونالدز'] },
+      kfc: { ar: 'كنتاكي', en: 'KFC', keywords: ['kfc', 'كنتاكي', 'كي إف سي'] },
+      burgerking: { ar: 'برجر كنج', en: 'Burger King', keywords: ['burger king', 'برجر كنج', 'برغر كنغ', 'bk'] },
+      pizzahut: { ar: 'بيتزا هت', en: 'Pizza Hut', keywords: ['pizza hut', 'بيتزا هت', 'بيتزا هات'] },
+      papajohns: { ar: 'بابا جونز', en: "Papa John's", keywords: ['papa johns', "papa john's", 'بابا جونز'] },
+      subway: { ar: 'صب واي', en: 'Subway', keywords: ['subway', 'صب واي', 'صبواي'] },
+      applebees: { ar: 'آبلبيز', en: "Applebee's", keywords: ['applebees', "applebee's", 'ابلبيز', 'آبلبيز'] },
+      chilis: { ar: 'تشيليز', en: "Chili's", keywords: ['chilis', "chili's", 'تشيليز', 'شيليز'] },
+      hardees: { ar: 'هارديز', en: "Hardee's", keywords: ['hardees', "hardee's", 'هارديز', "carl's jr"] },
+      fiveguys: { ar: 'فايف غايز', en: 'Five Guys', keywords: ['five guys', 'فايف قايز', 'فايف غايز'] },
+      texasroadhouse: { ar: 'تكساس رودهاوس', en: 'Texas Roadhouse', keywords: ['texas roadhouse', 'تكساس رودهاوس'] },
+      pfchangs: { ar: 'بي إف تشانغز', en: "P.F. Chang's", keywords: ['pf changs', "p.f. chang's", 'بي اف تشانغز', 'بي إف تشانغز'] },
+      shakeshack: { ar: 'شيك شاك', en: 'Shake Shack', keywords: ['shake shack', 'شيك شاك', 'شيك شك'] },
+      raisingcanes: { ar: 'ريزينغ كينز', en: "Raising Cane's", keywords: ['raising canes', "raising cane's", 'كينز', 'ريزنق كينز', 'ريزينغ كينز'] },
+    }
+    const PORTION_PICK = /sandwich|burger|piece|slice|serving|order|item|cup|each|biscuit|cookie|pie|sundae|muffin|hotcake|wrap|salad|entree|plate/i
+    const AR_UNIT = (u) => (/slice/i.test(u) ? 'شريحة' : /cup/i.test(u) ? 'كوب' : /piece|nugget|strip|tender|finger/i.test(u) ? 'قطعة' : /serving|order|entree|plate|salad/i.test(u) ? 'حصة' : 'حبة')
+    const byChain = {}
+    for (const row of map.rows) {
+      const e = ev[row.id]
+      byChain[row.chain] ??= []
+      if (!e || e.status !== 'matched') { byChain[row.chain].push({ id: slugify(row.nameEn), nameAr: row.nameAr, nameEn: row.nameEn, sourceName: null, kcal: null, type: row.type, quarantine: e ? `USDA ${e.status}` : 'بلا دليل', candidates: e?.candidates?.map((c) => c.description) ?? [] }); continue }
+      const portions = (e.portions ?? []).filter((p) => p.grams >= 10 && p.grams <= 900)
+      const hint = row.serving ? portions.find((p) => new RegExp(row.serving, 'i').test(String(p.modifier ?? p.unit ?? p.description ?? ''))) : null
+      const pick = hint ?? portions.find((p) => PORTION_PICK.test(String(p.modifier ?? p.unit ?? p.description ?? ''))) ?? portions[0] ?? null
+      const g = pick ? Math.round(pick.grams) : 100
+      const unit = pick ? String(pick.modifier ?? pick.unit ?? pick.description ?? '') : ''
+      const n = e.per100g
+      const per = (v) => Math.round((v * g) / 10) / 10
+      byChain[row.chain].push({ id: slugify(row.nameEn), nameAr: row.nameAr, nameEn: row.nameEn, sourceName: e.description, fdcId: e.fdcId, dataType: e.dataType, servingGrams: g, servingLabelAr: pick ? `${AR_UNIT(unit)} (${g}غ)` : 'لكل 100غ', kcal: Math.round((n.kcal * g) / 100), protein: per(n.protein), carbs: per(n.carbs), fat: per(n.fat), ...(typeof n.fiber === 'number' ? { fiber: per(n.fiber) } : {}), type: row.type, keywords: [], usdaPortion: unit || null })
+    }
+    const docs = {}
+    for (const [chain, items] of Object.entries(byChain)) {
+      const kept = items.filter((i) => !i.quarantine)
+      docs[`usda-${chain}`] = {
+        chain: { slug: chain, ...CHAIN[chain] },
+        source: { url: 'https://fdc.nal.usda.gov/', kind: 'usda-branded-record', market: 'US', accessed: String(evidence.generated_at).slice(0, 10), note: 'سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف.' },
+        items: kept,
+        quarantined: items.filter((i) => i.quarantine).map((i) => ({ nameEn: i.nameEn, why: i.quarantine, candidates: i.candidates })),
+      }
+    }
+    return docs
+  },
 }
 
 const which = process.argv[2]
 if (!which || !PARSERS[which]) { console.error(`استعمال: parse-chain-evidence.mjs <${Object.keys(PARSERS).join('|')}>`); process.exit(2) }
-const doc = PARSERS[which]()
-const out = resolve(ROOT, 'docs/data-factory/restaurants', `${which}.json`)
-writeFileSync(out, JSON.stringify(doc, null, 1) + '\n')
-const missingAr = doc.items.filter((i) => !i.nameAr).length
-console.log(`${which}: ${doc.items.length} صنفًا → ${out}${missingAr ? ` · ⚠️ ${missingAr} بلا اسم عربي (الصفحة العربية لم تُلتقط بعد)` : ''}`)
+const result = PARSERS[which]()
+const docs = which === 'usda' ? result : { [which]: result }
+for (const [name, doc] of Object.entries(docs)) {
+  const out = resolve(ROOT, 'docs/data-factory/restaurants', `${name}.json`)
+  writeFileSync(out, JSON.stringify(doc, null, 1) + '\n')
+  const missingAr = doc.items.filter((i) => !i.nameAr).length
+  console.log(`${name}: ${doc.items.length} صنفًا${doc.quarantined?.length ? ` · محجور ${doc.quarantined.length}` : ''} → ${out}${missingAr ? ` · ⚠️ ${missingAr} بلا اسم عربي` : ''}`)
+}
