@@ -54,6 +54,24 @@
    "usdaPortion": "slice"
   },
   {
+   "id": "12-super-supreme-pizza-hand-tossed-slice",
+   "nameAr": "بيتزا سوبر سوبريم هاند توسد (شريحة ١٢\")",
+   "nameEn": "12\" Super Supreme Pizza, Hand-Tossed (slice)",
+   "sourceName": "PIZZA HUT 12\" Super Supreme Pizza, Hand-Tossed Crust",
+   "fdcId": 173281,
+   "dataType": "SR Legacy",
+   "servingGrams": 127,
+   "servingLabelAr": "شريحة (127غ)",
+   "kcal": 309,
+   "protein": 13.8,
+   "carbs": 32.5,
+   "fat": 13.6,
+   "fiber": 2.5,
+   "type": "pizza",
+   "keywords": [],
+   "usdaPortion": "slice"
+  },
+  {
    "id": "12-cheese-pizza-thin-n-crispy-slice",
    "nameAr": "بيتزا جبن رقيقة (شريحة ١٢\")",
    "nameEn": "12\" Cheese Pizza, Thin N Crispy (slice)",
@@ -109,11 +127,6 @@
   }
  ],
  "quarantined": [
-  {
-   "nameEn": "12\" Super Supreme Pizza, Pan (slice)",
-   "why": "USDA unmatched",
-   "candidates": []
-  },
   {
    "nameEn": "12\" Pepperoni Pizza, Thin N Crispy (slice)",
    "why": "USDA unmatched",

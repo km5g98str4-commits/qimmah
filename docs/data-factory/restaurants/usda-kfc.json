@@ -18,6 +18,110 @@
  },
  "items": [
   {
+   "id": "original-recipe-chicken-breast",
+   "nameAr": "صدر أوريجنال",
+   "nameEn": "Original Recipe Chicken Breast",
+   "sourceName": "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat and skin with breading",
+   "fdcId": 170744,
+   "dataType": "SR Legacy",
+   "servingGrams": 152,
+   "servingLabelAr": "حبة (152غ)",
+   "kcal": 351,
+   "protein": 33.3,
+   "carbs": 9.5,
+   "fat": 19.9,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "breast, without skin"
+  },
+  {
+   "id": "original-recipe-chicken-thigh",
+   "nameAr": "فخذ أوريجنال",
+   "nameEn": "Original Recipe Chicken Thigh",
+   "sourceName": "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat and skin with breading",
+   "fdcId": 170346,
+   "dataType": "SR Legacy",
+   "servingGrams": 135,
+   "servingLabelAr": "حبة (135غ)",
+   "kcal": 363,
+   "protein": 25.5,
+   "carbs": 11.4,
+   "fat": 23.9,
+   "fiber": 0,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "thigh, with skin"
+  },
+  {
+   "id": "original-recipe-chicken-drumstick",
+   "nameAr": "دبوس أوريجنال",
+   "nameEn": "Original Recipe Chicken Drumstick",
+   "sourceName": "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat and skin with breading",
+   "fdcId": 170745,
+   "dataType": "SR Legacy",
+   "servingGrams": 57,
+   "servingLabelAr": "حبة (57غ)",
+   "kcal": 136,
+   "protein": 12.7,
+   "carbs": 3.1,
+   "fat": 8.1,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "drumstick, without skin"
+  },
+  {
+   "id": "original-recipe-chicken-wing",
+   "nameAr": "جناح أوريجنال",
+   "nameEn": "Original Recipe Chicken Wing",
+   "sourceName": "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat and skin with breading",
+   "fdcId": 170347,
+   "dataType": "SR Legacy",
+   "servingGrams": 39,
+   "servingLabelAr": "حبة (39غ)",
+   "kcal": 116,
+   "protein": 8.5,
+   "carbs": 3.9,
+   "fat": 7.4,
+   "fiber": 0,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "wing, without skin"
+  },
+  {
+   "id": "extra-crispy-chicken-breast",
+   "nameAr": "صدر كرسبي",
+   "nameEn": "Extra Crispy Chicken Breast",
+   "sourceName": "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat and skin with breading",
+   "fdcId": 170348,
+   "dataType": "SR Legacy",
+   "servingGrams": 121,
+   "servingLabelAr": "حبة (121غ)",
+   "kcal": 324,
+   "protein": 25.7,
+   "carbs": 10.2,
+   "fat": 20.1,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "breast, bone and skin removed"
+  },
+  {
+   "id": "extra-crispy-chicken-thigh",
+   "nameAr": "فخذ كرسبي",
+   "nameEn": "Extra Crispy Chicken Thigh",
+   "sourceName": "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat and skin with breading",
+   "fdcId": 170746,
+   "dataType": "SR Legacy",
+   "servingGrams": 152,
+   "servingLabelAr": "حبة (152غ)",
+   "kcal": 470,
+   "protein": 26.1,
+   "carbs": 15.7,
+   "fat": 33.6,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "thigh, with skin"
+  },
+  {
    "id": "crispy-chicken-strips",
    "nameAr": "كرسبي ستربس (٣ قطع)",
    "nameEn": "Crispy Chicken Strips",
@@ -91,54 +195,6 @@
   }
  ],
  "quarantined": [
-  {
-   "nameEn": "Original Recipe Chicken Breast",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat only, skin and breading removed",
-    "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat and skin with breading"
-   ]
-  },
-  {
-   "nameEn": "Original Recipe Chicken Thigh",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat and skin with breading",
-    "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat only, skin and breading removed"
-   ]
-  },
-  {
-   "nameEn": "Original Recipe Chicken Drumstick",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat only, skin and breading removed",
-    "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat and skin with breading"
-   ]
-  },
-  {
-   "nameEn": "Original Recipe Chicken Wing",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat only, skin and breading removed",
-    "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat and skin with breading"
-   ]
-  },
-  {
-   "nameEn": "Extra Crispy Chicken Breast",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat only, skin and breading removed",
-    "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat and skin with breading"
-   ]
-  },
-  {
-   "nameEn": "Extra Crispy Chicken Thigh",
-   "why": "USDA ambiguous",
-   "candidates": [
-    "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat only, skin and breading removed",
-    "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat and skin with breading"
-   ]
-  },
   {
    "nameEn": "Mashed Potatoes with Gravy",
    "why": "USDA unmatched",

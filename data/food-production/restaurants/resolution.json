@@ -1,17 +1,17 @@
 {
  "counts": {
-  "OFFICIAL_FULL": 98,
+  "OFFICIAL_FULL": 111,
   "OFFICIAL_KCAL_ESTIMATED_MACROS": 39
  },
  "byChain": {
   "dominos": 59,
   "shawarmer": 39,
-  "applebees": 2,
-  "burgerking": 7,
-  "kfc": 4,
-  "mcdonalds": 11,
+  "applebees": 3,
+  "burgerking": 8,
+  "kfc": 10,
+  "mcdonalds": 15,
   "papajohns": 4,
-  "pizzahut": 5,
+  "pizzahut": 6,
   "subway": 6
  },
  "rows": [
@@ -808,10 +808,26 @@
    "macros": "official"
   },
   {
+   "id": "rst-applebees-chicken-tenders",
+   "chain": "applebees",
+   "nameAr": "شرائح دجاج مقرمشة",
+   "nameEn": "Chicken Tenders",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
    "id": "rst-applebees-mozzarella-sticks",
    "chain": "applebees",
    "nameAr": "موزاريلا ستيكس",
    "nameEn": "Mozzarella Sticks",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-burgerking-whopper",
+   "chain": "burgerking",
+   "nameAr": "وابر",
+   "nameEn": "Whopper",
    "status": "OFFICIAL_FULL",
    "macros": "official"
   },
@@ -872,6 +888,54 @@
    "macros": "official"
   },
   {
+   "id": "rst-kfc-original-recipe-chicken-breast",
+   "chain": "kfc",
+   "nameAr": "صدر أوريجنال",
+   "nameEn": "Original Recipe Chicken Breast",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-original-recipe-chicken-thigh",
+   "chain": "kfc",
+   "nameAr": "فخذ أوريجنال",
+   "nameEn": "Original Recipe Chicken Thigh",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-original-recipe-chicken-drumstick",
+   "chain": "kfc",
+   "nameAr": "دبوس أوريجنال",
+   "nameEn": "Original Recipe Chicken Drumstick",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-original-recipe-chicken-wing",
+   "chain": "kfc",
+   "nameAr": "جناح أوريجنال",
+   "nameEn": "Original Recipe Chicken Wing",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-extra-crispy-chicken-breast",
+   "chain": "kfc",
+   "nameAr": "صدر كرسبي",
+   "nameEn": "Extra Crispy Chicken Breast",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-kfc-extra-crispy-chicken-thigh",
+   "chain": "kfc",
+   "nameAr": "فخذ كرسبي",
+   "nameEn": "Extra Crispy Chicken Thigh",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
    "id": "rst-kfc-crispy-chicken-strips",
    "chain": "kfc",
    "nameAr": "كرسبي ستربس (٣ قطع)",
@@ -900,6 +964,14 @@
    "chain": "kfc",
    "nameAr": "بسكويت",
    "nameEn": "Biscuit",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-big-mac",
+   "chain": "mcdonalds",
+   "nameAr": "بيج ماك",
+   "nameEn": "Big Mac",
    "status": "OFFICIAL_FULL",
    "macros": "official"
   },
@@ -944,6 +1016,22 @@
    "macros": "official"
   },
   {
+   "id": "rst-mcdonalds-mcchicken",
+   "chain": "mcdonalds",
+   "nameAr": "ماك تشيكن",
+   "nameEn": "McChicken",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-filet-o-fish",
+   "chain": "mcdonalds",
+   "nameAr": "فيليه أو فيش",
+   "nameEn": "Filet-O-Fish",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
    "id": "rst-mcdonalds-chicken-mcnuggets-6-pcs",
    "chain": "mcdonalds",
    "nameAr": "تشيكن ماك ناجتس (٦ قطع)",
@@ -980,6 +1068,14 @@
    "chain": "mcdonalds",
    "nameAr": "هاش براون",
    "nameEn": "Hash Brown",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-mcdonalds-hotcakes",
+   "chain": "mcdonalds",
+   "nameAr": "هوت كيك (٣ قطع)",
+   "nameEn": "Hotcakes",
    "status": "OFFICIAL_FULL",
    "macros": "official"
   },
@@ -1036,6 +1132,14 @@
    "chain": "pizzahut",
    "nameAr": "بيتزا بيبروني بان (شريحة ١٢\")",
    "nameEn": "12\" Pepperoni Pizza, Pan (slice)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-pizzahut-12-super-supreme-pizza-hand-tossed-slice",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا سوبر سوبريم هاند توسد (شريحة ١٢\")",
+   "nameEn": "12\" Super Supreme Pizza, Hand-Tossed (slice)",
    "status": "OFFICIAL_FULL",
    "macros": "official"
   },

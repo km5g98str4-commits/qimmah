@@ -2516,6 +2516,8 @@ const foodItemsSource: FoodItem[] = [
   },
 
   // ===== مطاعم وسلاسل معروفة في السعودية (قيم تقديرية) =====
+  // [RESTAURANT-MENUS-001] بيج ماك · ماك تشيكن · فيليه أو فيش · ناجتس ٦ · وابر: حُذفت تقديراتها اليدوية
+  // لأن سجلّ USDA المقيس لها هبط في restaurantFoods.generated.ts (rst-*) — القياس يحلّ محلّ التقدير.
   // أسماء السلاسل مذكورة نصًّا فقط للتعريف — بلا شعارات أو صور.
   // كل القيم تقديرية وقد تختلف حسب الفرع والحجم وطريقة التحضير.
 
@@ -2751,65 +2753,6 @@ const foodItemsSource: FoodItem[] = [
 
   // --- ماكدونالدز ---
   {
-    id: 'mcd-big-mac',
-    nameAr: 'ماكدونالدز - بيج ماك',
-    nameEn: "McDonald's - Big Mac",
-    category: 'مطاعم',
-    servingLabelAr: 'برجر (215غ)',
-    servingGrams: 215,
-    calories: 550,
-    protein: 25,
-    carbs: 45,
-    fat: 30,
-    fiber: 3,
-    keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز', 'بيق ماك'],
-    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
-  },
-  {
-    id: 'mcd-mcchicken',
-    nameAr: 'ماكدونالدز - ماك تشيكن',
-    nameEn: "McDonald's - McChicken",
-    category: 'مطاعم',
-    servingLabelAr: 'ساندويتش (175غ)',
-    servingGrams: 175,
-    calories: 400,
-    protein: 14,
-    carbs: 40,
-    fat: 21,
-    fiber: 2,
-    keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز'],
-    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
-  },
-  {
-    id: 'mcd-filet-o-fish',
-    nameAr: 'ماكدونالدز - فيليه أو فيش',
-    nameEn: "McDonald's - Filet-O-Fish",
-    category: 'مطاعم',
-    servingLabelAr: 'ساندويتش (140غ)',
-    servingGrams: 140,
-    calories: 380,
-    protein: 16,
-    carbs: 38,
-    fat: 18,
-    fiber: 2,
-    keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز', 'فيش'],
-    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
-  },
-  {
-    id: 'mcd-nuggets-6',
-    nameAr: 'ماكدونالدز - ناجتس (6 قطع)',
-    nameEn: "McDonald's - Chicken McNuggets (6 pcs)",
-    category: 'مطاعم',
-    servingLabelAr: '6 قطع (100غ)',
-    servingGrams: 100,
-    calories: 270,
-    protein: 14,
-    carbs: 16,
-    fat: 17,
-    keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز', 'nuggets', 'ناجتس'],
-    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
-  },
-  {
     id: 'mcd-fries-medium',
     nameAr: 'ماكدونالدز - بطاطس',
     nameEn: "McDonald's - French fries",
@@ -2831,21 +2774,6 @@ const foodItemsSource: FoodItem[] = [
   },
 
   // --- برجر كنج ---
-  {
-    id: 'bk-whopper',
-    nameAr: 'برجر كنج - وابر',
-    nameEn: 'Burger King - Whopper',
-    category: 'مطاعم',
-    servingLabelAr: 'برجر (270غ)',
-    servingGrams: 270,
-    calories: 660,
-    protein: 28,
-    carbs: 49,
-    fat: 40,
-    fiber: 2,
-    keywords: ['burger king', 'bk', 'برجر كنق', 'وابر', 'whopper'],
-    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
-  },
   {
     id: 'bk-double-whopper',
     nameAr: 'برجر كنج - دبل وابر',
