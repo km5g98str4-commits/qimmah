@@ -81,6 +81,12 @@ export const PURCHASE_BATCH_ISSUE_RPC = 'founder_issue_purchase_batch'
  * دفعيّ عمدًا — تمكينُ دفعةٍ مخترقة من متصفّح أداةُ منحٍ جماعي.
  */
 export const PURCHASE_BATCH_DISABLE_RPC = 'founder_disable_purchase_batch'
+/** [SALLA-PROD-001] تسجيل دفعة مصدَّرة إلى سلة — فعل، للمؤسس وحده، مرّة لكل وسم. */
+export const PURCHASE_BATCH_MARK_EXPORTED_RPC = 'founder_mark_purchase_batch_exported'
+/** [SALLA-PROD-001] مخزون قناة سلة وإنذار النفاد — قراءة. */
+export const SALLA_INVENTORY_RPC = 'founder_salla_inventory'
+/** [SALLA-PROD-001] بحث دعم بالبصمة — قراءة، لا نصّ. */
+export const CODE_LOOKUP_RPC = 'founder_code_lookup'
 export const EMAIL_HEALTH_RPC = 'founder_email_health'
 export const GRANTS_BY_SOURCE_RPC = 'founder_grants_by_source'
 export const FOOD_SUBMISSIONS_RPC = 'founder_food_submissions'

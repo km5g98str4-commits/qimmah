@@ -150,6 +150,8 @@ const ADMIN_READS = [
   'founder_failed_orders', 'founder_pending_orders', 'founder_code_redemptions', 'founder_code_batches',
   'founder_email_health', 'founder_grants_by_source', 'founder_food_submissions',
   'founder_purchase_batches',
+  // [SALLA-PROD-001] قراءتا قناة سلة: المخزون وبحث الدعم بالبصمة — يبلغهما الدعم (require_admin).
+  'founder_salla_inventory', 'founder_code_lookup',
 ]
 /** أفعال لا رجعة فيها: للمؤسس وحده.
  *  [COMMERCE-W1] إصدار صكوك الشراء فعلٌ — صكّ حامل لمنحة دائمة، لا يبلغه الدعم. */
@@ -161,6 +163,8 @@ const FOUNDER_WRITES = [
   // [WAVE3] إطفاء دفعة الصكوك — فعلٌ هدّام باتجاه واحد (يسحب ولا يمنح)،
   // للمؤسس وحده، ولا يبلغه الدعم.
   'founder_disable_purchase_batch',
+  // [SALLA-PROD-001] تسجيل دفعة مصدَّرة إلى سلة — فعل مؤسس (require_founder)، مرّة لكل وسم.
+  'founder_mark_purchase_batch_exported',
 ]
 const known = new Set([...ADMIN_READS, ...FOUNDER_WRITES])
 const unclassified = bodies.rows.filter((r) => !known.has(r.proname)).map((r) => r.proname)

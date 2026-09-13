@@ -463,6 +463,34 @@ export interface PurchaseBatchRow {
   readonly codesUnredeemed: number | null
   readonly lastIssuedAt: string | null
   readonly lastRedeemedAt: string | null
+  /** [SALLA-PROD-001] قناة التصدير المسجَّلة (salla) وتاريخه — null = لم تُسجَّل مصدَّرة. */
+  readonly exportedChannel: string | null
+  readonly exportedAt: string | null
+}
+
+/** [SALLA-PROD-001] مخزون قناة سلة بالدفعة — صفّ من `founder_salla_inventory`. */
+export interface SallaInventoryRow {
+  readonly label: string | null
+  readonly exportedAt: string | null
+  readonly expectedCount: number | null
+  readonly digestPrefix: string | null
+  readonly codesIssued: number | null
+  readonly codesRedeemed: number | null
+  readonly codesDisabledUnredeemed: number | null
+  readonly codesUnredeemed: number | null
+  readonly lowStock: boolean
+  readonly countMatches: boolean
+}
+
+/** [SALLA-PROD-001] نتيجة بحث الدعم بالبصمة — لا نصّ صكّ فيها. */
+export interface CodeLookupRow {
+  readonly found: boolean
+  readonly status: string
+  readonly label: string | null
+  readonly grantPurpose: string | null
+  readonly lastRedeemedAt: string | null
+  readonly disabledReason: string | null
+  readonly exportedChannel: string | null
 }
 
 /**

@@ -575,7 +575,8 @@ await mustFail('الحزام البنيوي: العدّاد لا يتجاوز ا
 
 // نسخة ما قبل الهجرة: القدرة غائبة كلّها — فمصدرها هذه الهجرة لا غيرها.
 {
-  const { db: oldDb } = await createSandbox({ exclude: [MIG, MIG_HARDENING] })
+  // [SALLA-PROD-001] سجلّ التصدير ابن القدرة نفسها (يعيد إعلان founder_purchase_batches) — يُستبعد معها.
+  const { db: oldDb } = await createSandbox({ exclude: [MIG, MIG_HARDENING, '20260913120001_salla_batch_exports.sql'] })
   const missing = (await oldDb.query(
     `select to_regprocedure('public.founder_issue_purchase_batch(text, text, int, timestamptz)') as f1,
             to_regprocedure('public.founder_purchase_batches(int)') as f2,

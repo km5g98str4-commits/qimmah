@@ -246,6 +246,9 @@ export function PremiumView({ lang, signedIn, onBack, onSignIn }: PremiumViewPro
                   >
                     {redeemMsg ?? ''}
                   </p>
+                  {redeemToneNow === 'refusal' && redeemMsg ? (
+                    <p data-testid="premium-code-help" className="mt-1.5 text-[0.7rem] leading-relaxed text-ink-400">{s.codeHelp}</p>
+                  ) : null}
                   {/* لا سطر «تمّ» هنا: النجاح يرفع الحالة فيصير `offersCode`
                       كاذبًا ويُفكَّك هذا القسم كلّه. فالتأكيد هو **بطاقة الحالة**
                       («عندك قِمّة Premium») — وهي تبقى بعد إعادة التحميل، والرسالةُ
@@ -261,6 +264,7 @@ export function PremiumView({ lang, signedIn, onBack, onSignIn }: PremiumViewPro
               <h2 className="text-base font-black text-ink-900">{s.buyHeading}</h2>
               <p className="mt-1 text-sm leading-relaxed text-ink-500">{s.buyBody}</p>
               <p className="mt-1.5 text-[0.8rem] font-bold text-primary-c">{s.premiumNote}</p>
+              <p className="mt-2 text-[0.78rem] leading-relaxed text-ink-600" data-testid="premium-buy-steps">{s.buySteps}</p>
               <a
                 href={product.checkoutUrl}
                 target="_blank"

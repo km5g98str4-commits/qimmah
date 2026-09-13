@@ -30,6 +30,9 @@ import {
   issueAccessCodeBatch,
   loadCodeBatches,
   loadPurchaseBatches,
+  loadSallaInventory,
+  markPurchaseBatchExported,
+  lookupCode,
   issuePurchaseBatch,
   disablePurchaseBatch,
   loadCodeRedemptions,
@@ -52,8 +55,7 @@ import type {
   IssuedCodeBatch,
   MetricValue,
   IssuedPurchaseBatch,
-  PurchaseBatchRow,
-} from '../contract/types'
+  PurchaseBatchRow, SallaInventoryRow, CodeLookupRow } from '../contract/types'
 import { unavailable } from '../contract/types'
 import { AdminDenied } from './AdminDenied'
 import { AdminShell } from './AdminShell'
@@ -118,6 +120,13 @@ export function AdminRoute() {
   const [issuedBatch, setIssuedBatch] = useState<IssuedCodeBatch | null>(null)
   // [WAVE2-PURCHASE-OPS] مخزون صكوك الشراء — حالة مستقلّة عن حملات الوصول.
   const [purchaseBatches, setPurchaseBatches] = useState<PanelList<PurchaseBatchRow>>({ kind: 'loading' })
+  // [SALLA-PROD-001] مخزون قناة سلة وتسجيل التصدير وبحث الدعم.
+  const [sallaInventory, setSallaInventory] = useState<PanelList<SallaInventoryRow>>({ kind: 'loading' })
+  const [markBusy, setMarkBusy] = useState(false)
+  const [markResult, setMarkResult] = useState<{ label: string; expectedCount: number } | null>(null)
+  const [markError, setMarkError] = useState<LiveReadState | null>(null)
+  const [lookupBusy, setLookupBusy] = useState(false)
+  const [lookupResult, setLookupResult] = useState<PanelList<CodeLookupRow> | null>(null)
   const purchaseRunRef = useRef(0)
   // النصوص الخام تعيش هنا وحدها — ذاكرة اللحظة، بلا تخزين متصفّح ولا سجلّ.
   const [issuedPurchase, setIssuedPurchase] = useState<IssuedPurchaseBatch | null>(null)
@@ -271,6 +280,9 @@ export function AdminRoute() {
       if (!alive || run !== purchaseRunRef.current) return
       // الغياب يبقى مسمّى: هجرة غير مطبَّقة تصل الشاشة `rpc-missing` لا جدولًا فارغًا.
       setPurchaseBatches(res.ok ? { kind: 'rows', rows: res.rows } : { kind: 'gap', why: res.live })
+      const inv = await loadSallaInventory(decision)
+      if (!alive || run !== purchaseRunRef.current) return
+      setSallaInventory(inv.ok ? { kind: 'rows', rows: inv.rows } : { kind: 'gap', why: inv.live })
     })()
     return () => {
       alive = false
@@ -443,6 +455,34 @@ export function AdminRoute() {
   )
   const onDismissDisableResult = useCallback(() => setBatchDisableResult(null), [])
 
+  const onMarkExported = useCallback(
+    (input: { label: string; count: number; digest: string; note: string | null }) => {
+      setMarkBusy(true)
+      setMarkError(null)
+      void (async () => {
+        const res = await markPurchaseBatchExported(decision, input)
+        setMarkBusy(false)
+        if (!res.ok) { setMarkError(res.live); return }
+        setMarkResult(res.value)
+        setCodeNonce((n) => n + 1)
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+  const onLookupCode = useCallback(
+    (code: string) => {
+      setLookupBusy(true)
+      void (async () => {
+        const res = await lookupCode(decision, code)
+        setLookupBusy(false)
+        setLookupResult(res.ok ? { kind: 'rows', rows: res.rows } : { kind: 'gap', why: res.live })
+      })()
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [auth.user?.id],
+  )
+
   if (!allowed) return <AdminDenied decision={decision} />
   if (!snapshot) return <AdminLoading label={t.states.loading} />
 
@@ -497,6 +537,15 @@ export function AdminRoute() {
         disableResult: batchDisableResult,
         onDismissDisableResult,
         disableError: batchDisableError,
+        sallaInventory,
+        onMarkExported,
+        markBusy,
+        markResult,
+        onDismissMarkResult: () => setMarkResult(null),
+        markError,
+        onLookupCode,
+        lookupBusy,
+        lookupResult,
       }}
     />
   )

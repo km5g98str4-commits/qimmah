@@ -74,6 +74,38 @@ export interface PurchaseBatchStrings {
   batchDisableWorking: string
   batchDisableDone: (count: number, label: string) => string
   batchDisableFailed: (why: string) => string
+
+  /** [SALLA-PROD-001] قناة سلة: عمود التصدير، تسجيل الرفع، المخزون وإنذار النفاد، بحث الدعم. */
+  colChannel: string
+  notExported: string
+  sallaHeading: string
+  sallaNote: string
+  markHeading: string
+  markLabelLabel: string
+  markCountLabel: string
+  markDigestLabel: string
+  markDigestHint: string
+  markNoteLabel: string
+  markButton: string
+  markWorking: string
+  markDone: (label: string, count: number) => string
+  markFailed: (why: string) => string
+  markInvalid: string
+  inventoryTitle: string
+  inventoryEmpty: string
+  colExpected: string
+  colStock: string
+  colMatch: string
+  lowStockBanner: (labels: string) => string
+  lowStockHint: string
+  countMismatch: string
+  lookupHeading: string
+  lookupNote: string
+  lookupLabel: string
+  lookupButton: string
+  lookupStatus: (status: string) => string
+  lookupNotFound: string
+  lookupMalformed: string
 }
 
 export const purchaseBatchStrings: Record<'ar' | 'en', PurchaseBatchStrings> = {
@@ -135,6 +167,36 @@ export const purchaseBatchStrings: Record<'ar' | 'en', PurchaseBatchStrings> = {
     batchDisableWorking: 'جارٍ الإطفاء…',
     batchDisableDone: (count, label) => `تمّ — أُطفئ ${count} صكًّا غير مستردّ في «${label}». تفعيلات Premium القائمة ما انمست.`,
     batchDisableFailed: (why) => `ما نُفّذ الإطفاء — ${why}`,
+    colChannel: 'القناة',
+    notExported: '—',
+    sallaHeading: 'قناة سلة — التصدير والمخزون',
+    sallaNote: 'الدفعة تُصدَّر مرّة واحدة بأداة التصدير، ثم تُسجَّل هنا بالعدد والبصمة التي طبعتها الأداة. الاحتياطي لا يُسجَّل لسلة أبدًا.',
+    markHeading: 'سُجِّلت مرفوعة إلى سلة',
+    markLabelLabel: 'وسم الدفعة (SALLA-TEST-001 / SALLA-LAUNCH-001)',
+    markCountLabel: 'العدد المرفوع',
+    markDigestLabel: 'بصمة المجموعة (من أداة التصدير)',
+    markDigestHint: '٦٤ خانة ست عشرية — تُطابَق لاحقًا بلا أي نصّ خام.',
+    markNoteLabel: 'ملاحظة (اختياري)',
+    markButton: 'سجّل التصدير',
+    markWorking: 'يُسجَّل…',
+    markDone: (label, count) => `سُجِّلت ${label} مصدَّرة إلى سلة (${count}).`,
+    markFailed: (why) => `ما سُجِّل التصدير — ${why}`,
+    markInvalid: 'الوسم بنمط SALLA-TEST/LAUNCH-nnn، والعدد رقم، والبصمة ست عشرية.',
+    inventoryTitle: 'مخزون سلة بالدفعة',
+    inventoryEmpty: 'لا دفعة مسجَّلة مصدَّرة إلى سلة بعد.',
+    colExpected: 'المسجَّل',
+    colStock: 'غير مستردّ',
+    colMatch: 'مطابقة',
+    lowStockBanner: (labels) => `المخزون قارب النفاد: ${labels}. أصدر دفعة جديدة (SALLA-LAUNCH-nnn) وصدِّرها وارفعها إلى سلة.`,
+    lowStockHint: 'عتبة الإنذار ٢٠ صكًّا غير مستردّ لكل دفعة مصدَّرة.',
+    countMismatch: 'العدد المسجَّل لا يساوي الصادر — راجع الدفعة.',
+    lookupHeading: 'بحث دعم بصكّ',
+    lookupNote: 'الصق الصكّ كما أرسله العميل. يُبصم ويُقارن ولا يُخزَّن ولا يُسجَّل.',
+    lookupLabel: 'الصكّ',
+    lookupButton: 'ابحث',
+    lookupStatus: (status) => ({ issued: 'صادر — لم يُستردّ', redeemed: 'مستردّ', disabled: 'معطَّل', expired: 'منتهٍ' } as Record<string, string>)[status] ?? status,
+    lookupNotFound: 'لا صكّ بهذه البصمة — قد يكون مكتوبًا خطأً أو من قناة أخرى.',
+    lookupMalformed: 'الشكل غير صالح — الصكّ ١٦ رمزًا من حروف وأرقام.',
   },
   en: {
     heading: 'Purchase codes',
@@ -194,5 +256,35 @@ export const purchaseBatchStrings: Record<'ar' | 'en', PurchaseBatchStrings> = {
     batchDisableWorking: 'Disabling…',
     batchDisableDone: (count, label) => `Done — disabled ${count} unredeemed codes in "${label}". Existing Premium activations are untouched.`,
     batchDisableFailed: (why) => `Disable did not run — ${why}`,
+    colChannel: 'Channel',
+    notExported: '—',
+    sallaHeading: 'Salla channel — export & inventory',
+    sallaNote: 'A batch is exported once with the export tool, then registered here with the count and digest the tool printed. The reserve is never registered for Salla.',
+    markHeading: 'Registered as uploaded to Salla',
+    markLabelLabel: 'Batch label (SALLA-TEST-001 / SALLA-LAUNCH-001)',
+    markCountLabel: 'Uploaded count',
+    markDigestLabel: 'Set digest (from the export tool)',
+    markDigestHint: '64 hex characters — reconciled later without any plaintext.',
+    markNoteLabel: 'Note (optional)',
+    markButton: 'Register export',
+    markWorking: 'Registering…',
+    markDone: (label, count) => `${label} registered as exported to Salla (${count}).`,
+    markFailed: (why) => `Export was not registered — ${why}`,
+    markInvalid: 'Label must be SALLA-TEST/LAUNCH-nnn, count a number, digest hex.',
+    inventoryTitle: 'Salla inventory by batch',
+    inventoryEmpty: 'No batch registered as exported to Salla yet.',
+    colExpected: 'Registered',
+    colStock: 'Unredeemed',
+    colMatch: 'Match',
+    lowStockBanner: (labels) => `Inventory nearly exhausted: ${labels}. Issue a new batch (SALLA-LAUNCH-nnn), export it and upload it to Salla.`,
+    lowStockHint: 'Alert threshold: 20 unredeemed codes per exported batch.',
+    countMismatch: 'Registered count differs from issued — review the batch.',
+    lookupHeading: 'Support lookup by code',
+    lookupNote: 'Paste the code as the customer sent it. It is hashed and compared — never stored or logged.',
+    lookupLabel: 'Code',
+    lookupButton: 'Look up',
+    lookupStatus: (status) => ({ issued: 'issued — not redeemed', redeemed: 'redeemed', disabled: 'disabled', expired: 'expired' } as Record<string, string>)[status] ?? status,
+    lookupNotFound: 'No code with this fingerprint — a typo, or another channel.',
+    lookupMalformed: 'Invalid shape — a code is 16 letters/digits.',
   },
 }
