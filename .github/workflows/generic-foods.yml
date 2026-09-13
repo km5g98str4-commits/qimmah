@@ -17,6 +17,7 @@ on:
       - .github/generic-foods-request
       - docs/data-factory/generic/USDA-MAP.json
       - docs/data-factory/bakery/USDA-MAP.json
+      - docs/data-factory/chains/USDA-MAP.json
 
 permissions:
   contents: write
@@ -56,12 +57,13 @@ jobs:
           echo "sr=$SR foundation=$FO fndds=$FN"
           node --max-old-space-size=6144 scripts/food-production/research-usda.mjs --sr "$SR" --foundation "$FO" --fndds "$FN"
           node --max-old-space-size=6144 scripts/food-production/research-usda.mjs --sr "$SR" --foundation "$FO" --fndds "$FN" --map docs/data-factory/bakery/USDA-MAP.json --out data/food-production/bakery/usda-evidence.json
+          node --max-old-space-size=6144 scripts/food-production/research-usda.mjs --sr "$SR" --foundation "$FO" --fndds "$FN" --map docs/data-factory/chains/USDA-MAP.json --out data/food-production/chains/usda-evidence.json
 
       - name: Commit and push the evidence to this branch
         run: |
           git config user.name 'qimmah-usda-research'
           git config user.email 'actions@users.noreply.github.com'
-          git add data/food-production/generic data/food-production/bakery
+          git add data/food-production/generic data/food-production/bakery data/food-production/chains
           if git diff --cached --quiet; then
             echo 'no evidence change - nothing to push.'
             exit 0
