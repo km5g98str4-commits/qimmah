@@ -22,6 +22,8 @@ const NOUNS: { ar: string; en: string }[] = [
   { ar: 'ملعقة', en: 'spoon' },
   { ar: 'كوب', en: 'cup' },
   { ar: 'صحن', en: 'plate' },
+  { ar: 'بوكس', en: 'box' },
+  { ar: 'ساندويتش', en: 'sandwich' },
   { ar: 'قطعة', en: 'piece' },
   { ar: 'حبة', en: 'piece' },
   { ar: 'شريحة', en: 'slice' },
