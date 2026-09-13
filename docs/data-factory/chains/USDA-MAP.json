@@ -1,0 +1,1236 @@
+{
+ "version": 1,
+ "note": "USDA-MAP لسجلّات السلاسل في USDA (SR Legacy «Fast Foods/Restaurant Foods» + FNDDS) — [RESTAURANT-MENUS-001]. القيم مقيسة على منتج السوق الأمريكي؛ تُوسم بسوق المصدر. الغائب يُحجر لا يُخترع.",
+ "rows": [
+  {
+   "id": "CH001",
+   "chain": "mcdonalds",
+   "nameAr": "بيج ماك",
+   "nameEn": "Big Mac",
+   "q": "mcdonald's big mac",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH002",
+   "chain": "mcdonalds",
+   "nameAr": "كوارتر باوندر بالجبن",
+   "nameEn": "Quarter Pounder with Cheese",
+   "q": "mcdonald's quarter pounder with cheese",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "double",
+    "bacon",
+    "deluxe"
+   ]
+  },
+  {
+   "id": "CH003",
+   "chain": "mcdonalds",
+   "nameAr": "دبل كوارتر باوندر بالجبن",
+   "nameEn": "Double Quarter Pounder with Cheese",
+   "q": "mcdonald's double quarter pounder with cheese",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH004",
+   "chain": "mcdonalds",
+   "nameAr": "تشيز برجر",
+   "nameEn": "Cheeseburger",
+   "q": "mcdonald's cheeseburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "double",
+    "quarter",
+    "bacon"
+   ]
+  },
+  {
+   "id": "CH005",
+   "chain": "mcdonalds",
+   "nameAr": "دبل تشيز برجر",
+   "nameEn": "Double Cheeseburger",
+   "q": "mcdonald's double cheeseburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH006",
+   "chain": "mcdonalds",
+   "nameAr": "همبرجر",
+   "nameEn": "Hamburger",
+   "q": "mcdonald's hamburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "double",
+    "cheese"
+   ]
+  },
+  {
+   "id": "CH007",
+   "chain": "mcdonalds",
+   "nameAr": "ماك تشيكن",
+   "nameEn": "McChicken",
+   "q": "mcdonald's mcchicken",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "spicy",
+    "deluxe"
+   ]
+  },
+  {
+   "id": "CH008",
+   "chain": "mcdonalds",
+   "nameAr": "فيليه أو فيش",
+   "nameEn": "Filet-O-Fish",
+   "q": "mcdonald's filet-o-fish",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH009",
+   "chain": "mcdonalds",
+   "nameAr": "تشيكن ماك ناجتس (٦ قطع)",
+   "nameEn": "Chicken McNuggets (6 pcs)",
+   "q": "mcdonald's chicken mcnuggets",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "serving": "6 pieces"
+  },
+  {
+   "id": "CH010",
+   "chain": "mcdonalds",
+   "nameAr": "بطاطس مقلية (وسط)",
+   "nameEn": "French Fries (medium)",
+   "q": "mcdonald's french fries",
+   "type": "fries",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "serving": "medium"
+  },
+  {
+   "id": "CH011",
+   "chain": "mcdonalds",
+   "nameAr": "بطاطس مقلية (كبير)",
+   "nameEn": "French Fries (large)",
+   "q": "mcdonald's french fries",
+   "type": "fries",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "serving": "large"
+  },
+  {
+   "id": "CH012",
+   "chain": "mcdonalds",
+   "nameAr": "إيغ ماك مافن",
+   "nameEn": "Egg McMuffin",
+   "q": "mcdonald's egg mcmuffin",
+   "type": "breakfast",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "sausage"
+   ]
+  },
+  {
+   "id": "CH013",
+   "chain": "mcdonalds",
+   "nameAr": "هاش براون",
+   "nameEn": "Hash Brown",
+   "q": "mcdonald's hash brown",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH014",
+   "chain": "mcdonalds",
+   "nameAr": "هوت كيك (٣ قطع)",
+   "nameEn": "Hotcakes",
+   "q": "mcdonald's hotcakes",
+   "type": "breakfast",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "sausage"
+   ]
+  },
+  {
+   "id": "CH015",
+   "chain": "mcdonalds",
+   "nameAr": "آيس كريم ساندي كراميل",
+   "nameEn": "Caramel Sundae",
+   "q": "mcdonald's caramel sundae",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH016",
+   "chain": "mcdonalds",
+   "nameAr": "فطيرة تفاح",
+   "nameEn": "Baked Apple Pie",
+   "q": "mcdonald's apple pie",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH017",
+   "chain": "kfc",
+   "nameAr": "صدر أوريجنال",
+   "nameEn": "Original Recipe Chicken Breast",
+   "q": "kfc original recipe chicken breast",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "skin removed",
+    "without skin"
+   ]
+  },
+  {
+   "id": "CH018",
+   "chain": "kfc",
+   "nameAr": "فخذ أوريجنال",
+   "nameEn": "Original Recipe Chicken Thigh",
+   "q": "kfc original recipe chicken thigh",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "skin removed",
+    "without skin"
+   ]
+  },
+  {
+   "id": "CH019",
+   "chain": "kfc",
+   "nameAr": "دبوس أوريجنال",
+   "nameEn": "Original Recipe Chicken Drumstick",
+   "q": "kfc original recipe chicken drumstick",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "skin removed",
+    "without skin"
+   ]
+  },
+  {
+   "id": "CH020",
+   "chain": "kfc",
+   "nameAr": "جناح أوريجنال",
+   "nameEn": "Original Recipe Chicken Wing",
+   "q": "kfc original recipe chicken wing",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "skin removed",
+    "without skin"
+   ]
+  },
+  {
+   "id": "CH021",
+   "chain": "kfc",
+   "nameAr": "صدر كرسبي",
+   "nameEn": "Extra Crispy Chicken Breast",
+   "q": "kfc extra crispy chicken breast",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH022",
+   "chain": "kfc",
+   "nameAr": "فخذ كرسبي",
+   "nameEn": "Extra Crispy Chicken Thigh",
+   "q": "kfc extra crispy chicken thigh",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH023",
+   "chain": "kfc",
+   "nameAr": "كرسبي ستربس (٣ قطع)",
+   "nameEn": "Crispy Chicken Strips",
+   "q": "kfc crispy strips",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH024",
+   "chain": "kfc",
+   "nameAr": "بوبكورن تشيكن",
+   "nameEn": "Popcorn Chicken",
+   "q": "kfc popcorn chicken",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH025",
+   "chain": "kfc",
+   "nameAr": "كول سلو",
+   "nameEn": "Coleslaw",
+   "q": "kfc coleslaw",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH026",
+   "chain": "kfc",
+   "nameAr": "بطاطس مهروسة بالمرق",
+   "nameEn": "Mashed Potatoes with Gravy",
+   "q": "kfc mashed potatoes with gravy",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH027",
+   "chain": "kfc",
+   "nameAr": "بسكويت",
+   "nameEn": "Biscuit",
+   "q": "kfc biscuit",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH028",
+   "chain": "kfc",
+   "nameAr": "بطاطس ودجز",
+   "nameEn": "Potato Wedges",
+   "q": "kfc potato wedges",
+   "type": "fries",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH029",
+   "chain": "burgerking",
+   "nameAr": "وابر",
+   "nameEn": "Whopper",
+   "q": "burger king whopper",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "junior",
+    "double",
+    "triple",
+    "cheese",
+    "with cheese"
+   ]
+  },
+  {
+   "id": "CH030",
+   "chain": "burgerking",
+   "nameAr": "وابر بالجبن",
+   "nameEn": "Whopper with Cheese",
+   "q": "burger king whopper with cheese",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "junior",
+    "double",
+    "triple"
+   ]
+  },
+  {
+   "id": "CH031",
+   "chain": "burgerking",
+   "nameAr": "دبل وابر",
+   "nameEn": "Double Whopper",
+   "q": "burger king double whopper",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "cheese"
+   ]
+  },
+  {
+   "id": "CH032",
+   "chain": "burgerking",
+   "nameAr": "وابر جونيور",
+   "nameEn": "Whopper Jr.",
+   "q": "burger king whopper jr",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "cheese"
+   ]
+  },
+  {
+   "id": "CH033",
+   "chain": "burgerking",
+   "nameAr": "تشيز برجر",
+   "nameEn": "Cheeseburger",
+   "q": "burger king cheeseburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "double",
+    "bacon"
+   ]
+  },
+  {
+   "id": "CH034",
+   "chain": "burgerking",
+   "nameAr": "دبل تشيز برجر",
+   "nameEn": "Double Cheeseburger",
+   "q": "burger king double cheeseburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "bacon"
+   ]
+  },
+  {
+   "id": "CH035",
+   "chain": "burgerking",
+   "nameAr": "أوريجنال تشيكن ساندويتش",
+   "nameEn": "Original Chicken Sandwich",
+   "q": "burger king chicken sandwich",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "crispy",
+    "spicy",
+    "jr"
+   ]
+  },
+  {
+   "id": "CH036",
+   "chain": "burgerking",
+   "nameAr": "تشيكن ناجتس (٤ قطع)",
+   "nameEn": "Chicken Nuggets",
+   "q": "burger king chicken nuggets",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH037",
+   "chain": "burgerking",
+   "nameAr": "بطاطس مقلية (وسط)",
+   "nameEn": "French Fries (medium)",
+   "q": "burger king french fries",
+   "type": "fries",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "serving": "medium"
+  },
+  {
+   "id": "CH038",
+   "chain": "burgerking",
+   "nameAr": "حلقات بصل (وسط)",
+   "nameEn": "Onion Rings (medium)",
+   "q": "burger king onion rings",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "serving": "medium"
+  },
+  {
+   "id": "CH039",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا جبن بان (شريحة ١٢\")",
+   "nameEn": "12\" Cheese Pizza, Pan (slice)",
+   "q": "pizza hut 12 cheese pizza pan",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH040",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا بيبروني بان (شريحة ١٢\")",
+   "nameEn": "12\" Pepperoni Pizza, Pan (slice)",
+   "q": "pizza hut 12 pepperoni pizza pan",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH041",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا سوبريم بان (شريحة ١٢\")",
+   "nameEn": "12\" Super Supreme Pizza, Pan (slice)",
+   "q": "pizza hut 12 super supreme pizza pan",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH042",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا جبن رقيقة (شريحة ١٢\")",
+   "nameEn": "12\" Cheese Pizza, Thin N Crispy (slice)",
+   "q": "pizza hut 12 cheese pizza thin",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH043",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا بيبروني رقيقة (شريحة ١٢\")",
+   "nameEn": "12\" Pepperoni Pizza, Thin N Crispy (slice)",
+   "q": "pizza hut 12 pepperoni pizza thin",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH044",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا جبن هاند توسد (شريحة ١٤\")",
+   "nameEn": "14\" Cheese Pizza, Hand-Tossed (slice)",
+   "q": "pizza hut 14 cheese pizza hand tossed",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH045",
+   "chain": "pizzahut",
+   "nameAr": "بيتزا بيبروني هاند توسد (شريحة ١٤\")",
+   "nameEn": "14\" Pepperoni Pizza, Hand-Tossed (slice)",
+   "q": "pizza hut 14 pepperoni pizza hand tossed",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH046",
+   "chain": "pizzahut",
+   "nameAr": "بريد ستيكس",
+   "nameEn": "Breadsticks",
+   "q": "pizza hut breadsticks",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH047",
+   "chain": "papajohns",
+   "nameAr": "بيتزا جبن (شريحة ١٤\")",
+   "nameEn": "14\" Cheese Pizza, Original Crust (slice)",
+   "q": "papa john's 14 cheese pizza original",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH048",
+   "chain": "papajohns",
+   "nameAr": "بيتزا بيبروني (شريحة ١٤\")",
+   "nameEn": "14\" Pepperoni Pizza, Original Crust (slice)",
+   "q": "papa john's 14 pepperoni pizza original",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH049",
+   "chain": "papajohns",
+   "nameAr": "بيتزا الأعمال (شريحة ١٤\")",
+   "nameEn": "14\" The Works Pizza (slice)",
+   "q": "papa john's 14 the works",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH050",
+   "chain": "papajohns",
+   "nameAr": "بيتزا جبن رقيقة (شريحة ١٤\")",
+   "nameEn": "14\" Cheese Pizza, Thin Crust (slice)",
+   "q": "papa john's 14 cheese pizza thin",
+   "type": "pizza",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH051",
+   "chain": "subway",
+   "nameAr": "ساندويتش تركي ٦ إنش",
+   "nameEn": "6\" Turkey Breast",
+   "q": "subway turkey breast sub",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "bacon",
+    "ham",
+    "footlong"
+   ]
+  },
+  {
+   "id": "CH052",
+   "chain": "subway",
+   "nameAr": "ساندويتش تونة ٦ إنش",
+   "nameEn": "6\" Tuna",
+   "q": "subway tuna sub",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "footlong"
+   ]
+  },
+  {
+   "id": "CH053",
+   "chain": "subway",
+   "nameAr": "ساندويتش دجاج ترياكي ٦ إنش",
+   "nameEn": "6\" Sweet Onion Chicken Teriyaki",
+   "q": "subway sweet onion chicken teriyaki",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "footlong"
+   ]
+  },
+  {
+   "id": "CH054",
+   "chain": "subway",
+   "nameAr": "ساندويتش ميت بول ٦ إنش",
+   "nameEn": "6\" Meatball Marinara",
+   "q": "subway meatball marinara",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "footlong"
+   ]
+  },
+  {
+   "id": "CH055",
+   "chain": "subway",
+   "nameAr": "ساندويتش خضار ٦ إنش",
+   "nameEn": "6\" Veggie Delite",
+   "q": "subway veggie delite",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "footlong",
+    "salad"
+   ]
+  },
+  {
+   "id": "CH056",
+   "chain": "subway",
+   "nameAr": "ساندويتش ستيك وجبن ٦ إنش",
+   "nameEn": "6\" Steak & Cheese",
+   "q": "subway steak cheese sub",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "footlong"
+   ]
+  },
+  {
+   "id": "CH057",
+   "chain": "subway",
+   "nameAr": "ساندويتش دجاج مشوي ٦ إنش",
+   "nameEn": "6\" Oven Roasted Chicken",
+   "q": "subway oven roasted chicken",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "not": [
+    "footlong"
+   ]
+  },
+  {
+   "id": "CH058",
+   "chain": "subway",
+   "nameAr": "كوكيز شوكولاتة",
+   "nameEn": "Chocolate Chip Cookie",
+   "q": "subway chocolate chip cookie",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH059",
+   "chain": "applebees",
+   "nameAr": "فييستا لايم تشيكن",
+   "nameEn": "Fiesta Lime Chicken",
+   "q": "applebee's fiesta lime chicken",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH060",
+   "chain": "applebees",
+   "nameAr": "دجاج مشوي على السيزر سلطة",
+   "nameEn": "Grilled Chicken Caesar Salad",
+   "q": "applebee's chicken caesar salad",
+   "type": "salad",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH061",
+   "chain": "applebees",
+   "nameAr": "ستيك ٧ أونصات",
+   "nameEn": "7 oz Sirloin Steak",
+   "q": "applebee's sirloin steak",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH062",
+   "chain": "applebees",
+   "nameAr": "شرائح دجاج مقرمشة",
+   "nameEn": "Chicken Tenders",
+   "q": "applebee's chicken tenders",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH063",
+   "chain": "applebees",
+   "nameAr": "فاهيتا دجاج",
+   "nameEn": "Chicken Fajitas",
+   "q": "applebee's chicken fajitas",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH064",
+   "chain": "applebees",
+   "nameAr": "برجر كلاسيك",
+   "nameEn": "Classic Burger",
+   "q": "applebee's classic burger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH065",
+   "chain": "applebees",
+   "nameAr": "موزاريلا ستيكس",
+   "nameEn": "Mozzarella Sticks",
+   "q": "applebee's mozzarella sticks",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH066",
+   "chain": "applebees",
+   "nameAr": "بونليس وينجز",
+   "nameEn": "Boneless Wings",
+   "q": "applebee's boneless wings",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH067",
+   "chain": "chilis",
+   "nameAr": "فاهيتا دجاج",
+   "nameEn": "Chicken Fajitas",
+   "q": "chili's chicken fajitas",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH068",
+   "chain": "chilis",
+   "nameAr": "كريسبرز دجاج",
+   "nameEn": "Chicken Crispers",
+   "q": "chili's chicken crispers",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH069",
+   "chain": "chilis",
+   "nameAr": "برجر أولد تايمر",
+   "nameEn": "Oldtimer Burger",
+   "q": "chili's oldtimer burger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH070",
+   "chain": "chilis",
+   "nameAr": "باجا ريبلتس",
+   "nameEn": "Baby Back Ribs",
+   "q": "chili's baby back ribs",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH071",
+   "chain": "hardees",
+   "nameAr": "فيموس ستار",
+   "nameEn": "Famous Star with Cheese",
+   "q": "carl's jr famous star",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH072",
+   "chain": "hardees",
+   "nameAr": "ثيك برجر",
+   "nameEn": "Thickburger",
+   "q": "hardee's thickburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH073",
+   "chain": "hardees",
+   "nameAr": "هاند بريديد تشيكن",
+   "nameEn": "Hand-Breaded Chicken Sandwich",
+   "q": "hardee's hand-breaded chicken sandwich",
+   "type": "sandwich",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH074",
+   "chain": "hardees",
+   "nameAr": "بطاطس مقلية",
+   "nameEn": "French Fries",
+   "q": "hardee's french fries",
+   "type": "fries",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH075",
+   "chain": "fiveguys",
+   "nameAr": "همبرجر",
+   "nameEn": "Hamburger",
+   "q": "five guys hamburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH076",
+   "chain": "fiveguys",
+   "nameAr": "تشيز برجر",
+   "nameEn": "Cheeseburger",
+   "q": "five guys cheeseburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH077",
+   "chain": "fiveguys",
+   "nameAr": "بطاطس مقلية",
+   "nameEn": "Fries",
+   "q": "five guys fries",
+   "type": "fries",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH078",
+   "chain": "texasroadhouse",
+   "nameAr": "ستيك دالاس فيليه",
+   "nameEn": "Dallas Filet",
+   "q": "texas roadhouse dallas filet",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH079",
+   "chain": "texasroadhouse",
+   "nameAr": "ريبز",
+   "nameEn": "Ribs",
+   "q": "texas roadhouse ribs",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH080",
+   "chain": "pfchangs",
+   "nameAr": "دجاج بالبرتقال",
+   "nameEn": "Orange Chicken",
+   "q": "p.f. chang's orange chicken",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH081",
+   "chain": "pfchangs",
+   "nameAr": "دجاج كونغ باو",
+   "nameEn": "Kung Pao Chicken",
+   "q": "p.f. chang's kung pao chicken",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH082",
+   "chain": "pfchangs",
+   "nameAr": "دجاج لفائف الخس",
+   "nameEn": "Chicken Lettuce Wraps",
+   "q": "p.f. chang's chicken lettuce wraps",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH083",
+   "chain": "pfchangs",
+   "nameAr": "رز مقلي بالدجاج",
+   "nameEn": "Chicken Fried Rice",
+   "q": "p.f. chang's fried rice chicken",
+   "type": "plate",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH084",
+   "chain": "shakeshack",
+   "nameAr": "شاك برجر",
+   "nameEn": "ShackBurger",
+   "q": "shake shack shackburger",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH085",
+   "chain": "shakeshack",
+   "nameAr": "بطاطس كرينكل",
+   "nameEn": "Crinkle Cut Fries",
+   "q": "shake shack fries",
+   "type": "fries",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH086",
+   "chain": "raisingcanes",
+   "nameAr": "بوكس كومبو (٤ قطع)",
+   "nameEn": "The Box Combo",
+   "q": "raising cane's box combo",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  },
+  {
+   "id": "CH087",
+   "chain": "raisingcanes",
+   "nameAr": "تشيكن فنجر",
+   "nameEn": "Chicken Finger",
+   "q": "raising cane's chicken finger",
+   "type": "fried_chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ]
+  }
+ ]
+}
