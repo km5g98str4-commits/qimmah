@@ -16,8 +16,9 @@
 //   • شكل كل كود: ١٦ رمزًا من أبجدية قِمّة (بلا 0 O 1 I L) بعد نزع الشرطات؛ لا تكرار؛ لا فراغ.
 //
 // ═══ ما يكتبه ═══
-//   • ملف سلة: عمود واحد بالترويسة التي يطلبها قالب سلة (`--header`، الافتراض `code`) —
-//     **لا شيء غيره** (لا وسم، لا تاريخ، لا بريد).
+//   • ملف سلة: عمود واحد — «كود التفعيل» هو الحقل الإلزامي الوحيد في سلة (help.salla.sa: إضافة
+//     البطاقات الرقمية). الافتراض ترويسة `code` (`--header` لاسم عمود قالب سلة)، و`--no-header` يكتب
+//     كودًا في كل سطر للّصق المباشر في «الإدخال اليدوي». **لا شيء غيره** (لا وسم، لا تاريخ، لا بريد).
 //   • بيان `<out>.manifest.json`: الوسم · العدد · بصمة المجموعة (sha256 للمرتَّب) · الوقت.
 //     البصمة هي ما يُسجَّل في `founder_mark_purchase_batch_exported` — تسوية بلا نصّ خام.
 //   • الطرفية: العدد والبصمة فقط. **لا كود يُطبع أبدًا.**
@@ -34,7 +35,7 @@ const argOf = (f, d) => { const i = args.indexOf(f); return i >= 0 ? args[i + 1]
 const fail = (msg, code = 2) => { console.error(`⛔ ${msg}`); process.exit(code) }
 
 const BATCH = argOf('--batch'); const COUNT = Number(argOf('--count')); const IN = argOf('--in'); const OUT = argOf('--out')
-const HEADER = argOf('--header', 'code'); const TEST_PASSED = argOf('--test-lifecycle-passed')
+const HEADER = argOf('--header', 'code'); const TEST_PASSED = argOf('--test-lifecycle-passed'); const NO_HEADER = args.includes('--no-header')
 if (!BATCH || !IN || !OUT || !Number.isInteger(COUNT)) fail('usage: --batch SALLA-TEST-001 --count N --in <export.csv> --out <salla.csv> [--header code] [--test-lifecycle-passed SALLA-TEST-001]')
 
 export const SALLA_LABEL = /^SALLA-(TEST|LAUNCH|SUPPORT)-[0-9]{3}$/
@@ -64,9 +65,9 @@ if (problems.length) fail(`${problems.length} مشكلة في الملف:\n  ${p
 if (codes.length !== COUNT) fail(`العدد في الملف ${codes.length} ≠ --count ${COUNT}.`, 1)
 
 const digest = createHash('sha256').update([...codes].sort().join('\n')).digest('hex')
-writeFileSync(OUT, [HEADER, ...codes].join('\r\n') + '\r\n', { mode: 0o600 })
-const manifest = { batch: BATCH, channel: 'salla', count: codes.length, digest, header: HEADER, createdAt: new Date().toISOString(), testLifecyclePassed: TEST_PASSED ?? null }
+writeFileSync(OUT, (NO_HEADER ? codes : [HEADER, ...codes]).join('\r\n') + '\r\n', { mode: 0o600 })
+const manifest = { batch: BATCH, channel: 'salla', count: codes.length, digest, header: NO_HEADER ? null : HEADER, createdAt: new Date().toISOString(), testLifecyclePassed: TEST_PASSED ?? null }
 writeFileSync(`${OUT}.manifest.json`, JSON.stringify(manifest, null, 2) + '\n', { mode: 0o600 })
-console.log(`✓ ${BATCH}: ${codes.length} كودًا · ترويسة «${HEADER}» · بصمة ${digest}`)
+console.log(`✓ ${BATCH}: ${codes.length} كودًا · ${NO_HEADER ? 'بلا ترويسة (للّصق)' : `ترويسة «${HEADER}»`} · بصمة ${digest}`)
 console.log(`  → ${OUT}\n  → ${OUT}.manifest.json`)
 console.log('  التالي: #/admin ← دفعات الشراء ← «سُجِّلت مرفوعة إلى سلة» بالعدد والبصمة أعلاه، ثم احذف ملفي التنزيل والرفع من جهازك بعد الرفع.')
