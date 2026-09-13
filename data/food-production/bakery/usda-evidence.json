@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T10:41:28.970Z",
+  "generated_at": "2026-09-13T10:43:15.341Z",
   "source": "USDA FoodData Central (SR Legacy 2018-04 · Foundation Foods · FNDDS 2021-2023) — public domain (CC0)",
   "datasets": [
     {
@@ -16,12 +16,12 @@
     }
   ],
   "stats": {
-    "matched": 38,
+    "matched": 45,
     "exact": 0,
-    "single": 38,
-    "ambiguous": 4,
-    "unmatched": 13,
-    "skipped": 5
+    "single": 45,
+    "ambiguous": 3,
+    "unmatched": 3,
+    "skipped": 9
   },
   "results": [
     {
@@ -126,95 +126,108 @@
     },
     {
       "id": "BK003",
-      "status": "unmatched"
-    },
-    {
-      "id": "BK004",
       "status": "matched",
       "how": "single",
-      "fdcId": 2706630,
+      "fdcId": 2708615,
       "dataType": "FNDDS",
-      "description": "Pot pie, beef",
+      "description": "Pizza, cheese, from restaurant or fast food, thin crust",
       "publicationDate": "10/31/2024",
       "ndbNumber": null,
-      "foodCode": "27317010",
+      "foodCode": "58106220",
       "per100g": {
-        "kcal": 271,
-        "protein": 8.92,
-        "carbs": 24,
-        "fat": 15.4,
-        "fiber": 2,
-        "sugar": 3.33,
-        "sodium": 374,
-        "satFat": 5.45
+        "kcal": 266,
+        "protein": 11.4,
+        "carbs": 33.3,
+        "fat": 9.69,
+        "fiber": 2.3,
+        "sugar": 3.58,
+        "sodium": 540,
+        "satFat": 4.46
       },
       "portions": [
         {
-          "grams": 1260,
+          "grams": 86,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "1 pie, any size"
+          "modifier": "1 piece, large pizza"
         },
         {
-          "grams": 200,
+          "grams": 86,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "1 cup"
+          "modifier": "1 piece, NFS"
         },
         {
-          "grams": 10,
+          "grams": 500,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "1 cubic inch"
+          "modifier": "1 medium pizza (11-12\" diameter)"
         },
         {
-          "grams": 250,
+          "grams": 691,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 large pizza (13-15\" diameter)"
+        },
+        {
+          "grams": 172,
           "amount": null,
           "unit": "undetermined",
           "modifier": "Quantity not specified"
         },
         {
-          "grams": 210,
+          "grams": 353,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "1 slice, any size"
+          "modifier": "1 small pizza (8-10\" diameter)"
         },
         {
-          "grams": 250,
+          "grams": 59,
           "amount": null,
           "unit": "undetermined",
-          "modifier": "1 individual pie"
+          "modifier": "1 piece, small pizza"
+        },
+        {
+          "grams": 977,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 extra-large pizza (16-18\" diameter)"
+        },
+        {
+          "grams": 63,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece, medium pizza"
+        },
+        {
+          "grams": 4.5,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 surface inch"
+        },
+        {
+          "grams": 98,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece, extra-large pizza"
+        },
+        {
+          "grams": 127,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 personal size pizza (5-7\" diameter)"
         }
       ]
     },
     {
+      "id": "BK004",
+      "status": "skipped",
+      "reason": "quarantine"
+    },
+    {
       "id": "BK005",
-      "status": "matched",
-      "how": "single",
-      "fdcId": 169780,
-      "dataType": "SR Legacy",
-      "description": "Turnover, chicken- or turkey-, and vegetable-filled, reduced fat, frozen",
-      "publicationDate": "4/1/2019",
-      "ndbNumber": 32026,
-      "foodCode": null,
-      "per100g": {
-        "kcal": 168,
-        "protein": 7.87,
-        "carbs": 21.7,
-        "fat": 5.51,
-        "fiber": 3.1,
-        "sugar": 3.94,
-        "sodium": 276,
-        "satFat": 2.76
-      },
-      "portions": [
-        {
-          "grams": 127,
-          "amount": 1,
-          "unit": "undetermined",
-          "modifier": "piece turnover 1 serving"
-        }
-      ]
+      "status": "skipped",
+      "reason": "quarantine"
     },
     {
       "id": "BK006",
@@ -223,17 +236,36 @@
     },
     {
       "id": "BK007",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2708726,
+      "dataType": "FNDDS",
+      "description": "Pastry, cheese-filled",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "58124210",
+      "per100g": {
+        "kcal": 274,
+        "protein": 9.92,
+        "carbs": 15.4,
+        "fat": 19.2,
+        "fiber": 0.4,
+        "sugar": 2.19,
+        "sodium": 531,
+        "satFat": 6.14
+      },
+      "portions": [
         {
-          "fdcId": 2708726,
-          "dataType": "FNDDS",
-          "description": "Pastry, cheese-filled"
+          "grams": 70,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
         },
         {
-          "fdcId": 2708727,
-          "dataType": "FNDDS",
-          "description": "Pastry, egg and cheese filled"
+          "grams": 28,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 pastry"
         }
       ]
     },
@@ -333,48 +365,61 @@
     },
     {
       "id": "BK010",
-      "status": "matched",
-      "how": "single",
-      "fdcId": 2708730,
-      "dataType": "FNDDS",
-      "description": "Samosa",
-      "publicationDate": "10/31/2024",
-      "ndbNumber": null,
-      "foodCode": "58124500",
-      "per100g": {
-        "kcal": 310,
-        "protein": 5.14,
-        "carbs": 33.2,
-        "fat": 17.5,
-        "fiber": 1.8,
-        "sugar": 1.28,
-        "sodium": 388,
-        "satFat": 4.41
-      },
-      "portions": [
-        {
-          "grams": 25,
-          "amount": null,
-          "unit": "undetermined",
-          "modifier": "1 small/individual"
-        },
-        {
-          "grams": 100,
-          "amount": null,
-          "unit": "undetermined",
-          "modifier": "1 regular/large"
-        },
-        {
-          "grams": 75,
-          "amount": null,
-          "unit": "undetermined",
-          "modifier": "Quantity not specified"
-        }
-      ]
+      "status": "skipped",
+      "reason": "quarantine"
     },
     {
       "id": "BK011",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 174987,
+      "dataType": "SR Legacy",
+      "description": "Croissants, butter",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 18239,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 406,
+        "protein": 8.2,
+        "carbs": 45.8,
+        "fat": 21,
+        "fiber": 2.6,
+        "sugar": 11.3,
+        "sodium": 384,
+        "satFat": 11.7
+      },
+      "portions": [
+        {
+          "grams": 28,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "croissant, mini"
+        },
+        {
+          "grams": 57,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "croissant, medium"
+        },
+        {
+          "grams": 67,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "croissant, large"
+        },
+        {
+          "grams": 28.35,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "oz"
+        },
+        {
+          "grams": 42,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "croissant, small"
+        }
+      ]
     },
     {
       "id": "BK012",
@@ -771,17 +816,36 @@
     },
     {
       "id": "BK020",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 174915,
+      "dataType": "SR Legacy",
+      "description": "Bread, pita, white, enriched",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 18041,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 275,
+        "protein": 9.1,
+        "carbs": 55.7,
+        "fat": 1.2,
+        "fiber": 2.2,
+        "sugar": 1.3,
+        "sodium": 536,
+        "satFat": 0.166
+      },
+      "portions": [
         {
-          "fdcId": 172816,
-          "dataType": "SR Legacy",
-          "description": "Bread, pita, white, unenriched"
+          "grams": 28,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pita, small  (4\" dia)"
         },
         {
-          "fdcId": 174915,
-          "dataType": "SR Legacy",
-          "description": "Bread, pita, white, enriched"
+          "grams": 60,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pita, large (6-1/2\" dia)"
         }
       ]
     },
@@ -1070,7 +1134,98 @@
     },
     {
       "id": "BK026",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2708615,
+      "dataType": "FNDDS",
+      "description": "Pizza, cheese, from restaurant or fast food, thin crust",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "58106220",
+      "per100g": {
+        "kcal": 266,
+        "protein": 11.4,
+        "carbs": 33.3,
+        "fat": 9.69,
+        "fiber": 2.3,
+        "sugar": 3.58,
+        "sodium": 540,
+        "satFat": 4.46
+      },
+      "portions": [
+        {
+          "grams": 86,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece, large pizza"
+        },
+        {
+          "grams": 86,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece, NFS"
+        },
+        {
+          "grams": 500,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 medium pizza (11-12\" diameter)"
+        },
+        {
+          "grams": 691,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 large pizza (13-15\" diameter)"
+        },
+        {
+          "grams": 172,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
+        },
+        {
+          "grams": 353,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 small pizza (8-10\" diameter)"
+        },
+        {
+          "grams": 59,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece, small pizza"
+        },
+        {
+          "grams": 977,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 extra-large pizza (16-18\" diameter)"
+        },
+        {
+          "grams": 63,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece, medium pizza"
+        },
+        {
+          "grams": 4.5,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 surface inch"
+        },
+        {
+          "grams": 98,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece, extra-large pizza"
+        },
+        {
+          "grams": 127,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 personal size pizza (5-7\" diameter)"
+        }
+      ]
     },
     {
       "id": "BK027",
@@ -1173,7 +1328,19 @@
     },
     {
       "id": "BK029",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2708639,
+          "dataType": "FNDDS",
+          "description": "Pizza with pepperoni, from restaurant or fast food, thin crust"
+        },
+        {
+          "fdcId": 2708650,
+          "dataType": "FNDDS",
+          "description": "Pizza with meat other than pepperoni, from restaurant or fast food, thin crust"
+        }
+      ]
     },
     {
       "id": "BK030",
@@ -1334,7 +1501,32 @@
     },
     {
       "id": "BK035",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 169775,
+      "dataType": "SR Legacy",
+      "description": "Turnover, cheese-filled, tomato-based sauce, frozen, unprepared",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 32015,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 235,
+        "protein": 10.2,
+        "carbs": 27.3,
+        "fat": 9.45,
+        "fiber": 1.6,
+        "sugar": 7.87,
+        "sodium": 598,
+        "satFat": 4.72
+      },
+      "portions": [
+        {
+          "grams": 127,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving 4.5 oz"
+        }
+      ]
     },
     {
       "id": "BK040",
@@ -1391,7 +1583,49 @@
     },
     {
       "id": "BK041",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 167671,
+          "dataType": "SR Legacy",
+          "description": "CRACKER BARREL, macaroni n' cheese plate, from kid's menu"
+        },
+        {
+          "fdcId": 168078,
+          "dataType": "SR Legacy",
+          "description": "DENNY'S, macaroni & cheese, from kid's menu"
+        },
+        {
+          "fdcId": 169010,
+          "dataType": "SR Legacy",
+          "description": "APPLEBEE'S, KRAFT, Macaroni & Cheese, from kid's menu"
+        },
+        {
+          "fdcId": 169776,
+          "dataType": "SR Legacy",
+          "description": "Macaroni or noodles with cheese, microwaveable, unprepared"
+        },
+        {
+          "fdcId": 169835,
+          "dataType": "SR Legacy",
+          "description": "T.G.I. FRIDAY'S, macaroni & cheese, from kid's menu"
+        },
+        {
+          "fdcId": 169839,
+          "dataType": "SR Legacy",
+          "description": "Restaurant, family style, macaroni & cheese, from kids' menu"
+        },
+        {
+          "fdcId": 169849,
+          "dataType": "SR Legacy",
+          "description": "CRACKER BARREL, macaroni n' cheese"
+        },
+        {
+          "fdcId": 172259,
+          "dataType": "SR Legacy",
+          "description": "Babyfood, macaroni and cheese, toddler"
+        }
+      ]
     },
     {
       "id": "BK042",
@@ -1430,7 +1664,44 @@
     },
     {
       "id": "BK043",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 2706088,
+      "dataType": "FNDDS",
+      "description": "Chicken patty, breaded",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "24198671",
+      "per100g": {
+        "kcal": 287,
+        "protein": 14.8,
+        "carbs": 12.8,
+        "fat": 19.6,
+        "fiber": 0.3,
+        "sugar": 0,
+        "sodium": 532,
+        "satFat": 3.66
+      },
+      "portions": [
+        {
+          "grams": 75,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
+        },
+        {
+          "grams": 75,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 patty"
+        },
+        {
+          "grams": 17,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cubic inch"
+        }
+      ]
     },
     {
       "id": "BK044",
@@ -1469,17 +1740,90 @@
     },
     {
       "id": "BK045",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2708613,
+      "dataType": "FNDDS",
+      "description": "Pizza, cheese, from frozen, thick crust",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "58106205",
+      "per100g": {
+        "kcal": 268,
+        "protein": 10.4,
+        "carbs": 29,
+        "fat": 12.3,
+        "fiber": 2.2,
+        "sugar": 3.57,
+        "sodium": 447,
+        "satFat": 4.27
+      },
+      "portions": [
         {
-          "fdcId": 2708613,
-          "dataType": "FNDDS",
-          "description": "Pizza, cheese, from frozen, thick crust"
+          "grams": 7.1,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 surface inch"
         },
         {
-          "fdcId": 2708625,
-          "dataType": "FNDDS",
-          "description": "Pizza, cheese with vegetables, from frozen, thick crust"
+          "grams": 93,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1/2 bagel"
+        },
+        {
+          "grams": 147,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 French bread"
+        },
+        {
+          "grams": 54,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1/2 English muffin"
+        },
+        {
+          "grams": 799,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 frozen medium pizza (11-13\" diameter)"
+        },
+        {
+          "grams": 133,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 piece, NFS"
+        },
+        {
+          "grams": 22,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 Bagel Bite"
+        },
+        {
+          "grams": 1255,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 frozen large pizza (14-16\" diameter)"
+        },
+        {
+          "grams": 260,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 frozen personal size pizza (5-7\" diameter)"
+        },
+        {
+          "grams": 452,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 frozen small pizza (8-10\" diameter)"
+        },
+        {
+          "grams": 266,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -1684,7 +2028,44 @@
     },
     {
       "id": "BK051",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172802,
+      "dataType": "SR Legacy",
+      "description": "Wonton wrappers (includes egg roll wrappers)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 18368,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 291,
+        "protein": 9.8,
+        "carbs": 57.9,
+        "fat": 1.5,
+        "fiber": 1.8,
+        "sugar": null,
+        "sodium": 572,
+        "satFat": 0.263
+      },
+      "portions": [
+        {
+          "grams": 32,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "wrapper, eggroll (7\" square)"
+        },
+        {
+          "grams": 28.35,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "oz"
+        },
+        {
+          "grams": 8,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "wrapper, wonton (3-1/2\" square)"
+        }
+      ]
     },
     {
       "id": "BK052",
@@ -1803,27 +2184,36 @@
     },
     {
       "id": "BK056",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2707462,
+      "dataType": "FNDDS",
+      "description": "Soup, lentil",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "41603010",
+      "per100g": {
+        "kcal": 60,
+        "protein": 3.82,
+        "carbs": 10.2,
+        "fat": 0.69,
+        "fiber": 3.7,
+        "sugar": 1.72,
+        "sodium": 244,
+        "satFat": 0.098
+      },
+      "portions": [
         {
-          "fdcId": 2707460,
-          "dataType": "FNDDS",
-          "description": "Soup, lentil, canned"
+          "grams": 255,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 cup"
         },
         {
-          "fdcId": 2707461,
-          "dataType": "FNDDS",
-          "description": "Soup, lentil, canned, reduced sodium"
-        },
-        {
-          "fdcId": 2707462,
-          "dataType": "FNDDS",
-          "description": "Soup, lentil"
-        },
-        {
-          "fdcId": 2707463,
-          "dataType": "FNDDS",
-          "description": "Soup, lentil, with meat"
+          "grams": 255,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
         }
       ]
     },
@@ -2003,11 +2393,54 @@
     },
     {
       "id": "BK063",
-      "status": "unmatched"
+      "status": "skipped",
+      "reason": "quarantine"
     },
     {
       "id": "BK064",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 2709152,
+          "dataType": "FNDDS",
+          "description": "Soup, ramen noodles, water added"
+        },
+        {
+          "fdcId": 2709153,
+          "dataType": "FNDDS",
+          "description": "Ramen bowl, NFS"
+        },
+        {
+          "fdcId": 2709154,
+          "dataType": "FNDDS",
+          "description": "Ramen bowl with beef"
+        },
+        {
+          "fdcId": 2709155,
+          "dataType": "FNDDS",
+          "description": "Ramen bowl with chicken"
+        },
+        {
+          "fdcId": 2709156,
+          "dataType": "FNDDS",
+          "description": "Ramen bowl with fish"
+        },
+        {
+          "fdcId": 2709157,
+          "dataType": "FNDDS",
+          "description": "Ramen bowl, vegetarian"
+        },
+        {
+          "fdcId": 2709158,
+          "dataType": "FNDDS",
+          "description": "Ramen bowl with meat and egg"
+        },
+        {
+          "fdcId": 2709159,
+          "dataType": "FNDDS",
+          "description": "Ramen bowl, vegetarian with egg"
+        }
+      ]
     }
   ]
 }
