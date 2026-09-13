@@ -278,7 +278,8 @@ check('ولا «سالمو» الناقصة تُكافأ «سلمون»', !searc
 // يحرس ألّا تتضخّم النتيجة بلا سبب مسمّى، لا ألّا تتغيّر أبدًا.
 // [FOOD-GENERIC-001] الأصناف العامّة المولَّدة (gen-*) تُضيف نتائج **مسمّاة بمصدرها**
 // (برغل جافّ · تمر مدجول…) — الضابط يقيس المنسَّق اليدوي وحده، فيبقى معناه: لا ضجيج تعميم.
-const hand = (q) => searchFood(q).filter((f) => !f.id.startsWith('gen-'))
+// [BAKERY-READY-001][RESTAURANT-MENUS-001] وكذلك bk-* (أفران/وجبات جاهزة بسند USDA) وrst-* (قوائم مطاعم بمصدر رسمي).
+const hand = (q) => searchFood(q).filter((f) => !/^(gen|bk|rst)-/.test(f.id))
 for (const [query, expect] of [['برغل', 1], ['فطيرة', 6], ['تمر', 16], ['شوفان', 3], ['بطاطس', 16]]) {
   check(`ضابط: «${query}» ما زال يُرجع ${expect} من المنسَّق اليدوي`, hand(query).length === expect, `${hand(query).length}`)
 }
