@@ -2,6 +2,8 @@ import { saudiTraditionalFoods } from './saudiFoods'
 import { gccStaples } from './gccStaples'
 import { foodR2EatingOut } from './foodR2EatingOut'
 import { genericFoods, GENERIC_COVERED_IDS, GENERIC_COVERED_KEYWORDS } from './genericFoods.generated'
+import { bakeryFoods } from './bakeryFoods.generated'
+import { restaurantFoods } from './restaurantFoods.generated'
 
 export type FoodCategory =
   | 'بروتين'
@@ -14,6 +16,8 @@ export type FoodCategory =
   | 'أطباق سعودية تقليدية'
   | 'مطاعم/وجبات سريعة تقديرية'
   | 'مطاعم'
+  | 'أفران'
+  | 'وجبات جاهزة'
   | 'مشروبات'
   | 'فواكه'
   | 'خضار'
@@ -80,6 +84,8 @@ export const foodCategoryEn: Record<FoodCategory, string> = {
   'أطباق سعودية تقليدية': 'Traditional Saudi dishes',
   'مطاعم/وجبات سريعة تقديرية': 'Restaurants / fast food (est.)',
   'مطاعم': 'Restaurants',
+  'أفران': 'Bakeries',
+  'وجبات جاهزة': 'Ready meals',
   'مشروبات': 'Drinks',
   'فواكه': 'Fruits',
   'خضار': 'Vegetables',
@@ -5765,6 +5771,8 @@ const foodItemsSource: FoodItem[] = [
   ...foodR2EatingOut,
   // ===== [FOOD-GENERIC-001] أطعمة عامّة مُتحقَّق منها من USDA — ملف مولَّد =====
   ...genericFoods,
+  ...bakeryFoods,
+  ...restaurantFoods,
 ]
 
 export const foodItems: FoodItem[] = foodItemsSource.map((f) => {

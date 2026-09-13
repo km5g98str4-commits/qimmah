@@ -33,7 +33,15 @@
     "sr",
     "foundation"
    ],
-   "pick": "Pizza with extra meat, thin crust"
+   "pick": "Pizza with extra meat, thin crust",
+   "keywords": [
+    "مناقيش",
+    "منقوشه",
+    "لحم بعجين",
+    "manakish",
+    "manaqish",
+    "lahm bi ajeen"
+   ]
   },
   {
    "id": "BK003",
@@ -54,6 +62,13 @@
    ],
    "prefer": [
     "fndds"
+   ],
+   "keywords": [
+    "مناقيش",
+    "منقوشه",
+    "manakish",
+    "manaqish",
+    "جبنة وزعتر"
    ]
   },
   {
@@ -113,7 +128,13 @@
     "sr",
     "foundation"
    ],
-   "pick": "Pastry, cheese-filled"
+   "pick": "Pastry, cheese-filled",
+   "keywords": [
+    "فطاير",
+    "فطائر",
+    "حلومي",
+    "fatayer"
+   ]
   },
   {
    "id": "BK008",
@@ -125,6 +146,13 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "فطاير",
+    "فطائر",
+    "فطيرة سبانخ",
+    "fatayer",
+    "spinach pie"
    ]
   },
   {
@@ -143,7 +171,13 @@
     "beef",
     "chicken"
    ],
-   "proxy": "سمبوسة عامّة — السجلّ لا يميّز الحشوة"
+   "proxy": "سمبوسة عامّة — السجلّ لا يميّز الحشوة",
+   "keywords": [
+    "سمبوسه",
+    "سمبوسك",
+    "samboosa",
+    "sambusa"
+   ]
   },
   {
    "id": "BK010",
@@ -179,6 +213,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "كرواسان",
+    "croissant"
    ]
   },
   {
@@ -191,6 +229,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "كرواسان",
+    "كرواسون جبنة"
    ]
   },
   {
@@ -203,6 +245,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "كرواسان",
+    "كرواسون شوكولا"
    ]
   },
   {
@@ -215,6 +261,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "دانيش",
+    "danish"
    ]
   },
   {
@@ -227,6 +277,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "دانيش",
+    "danish"
    ]
   },
   {
@@ -243,7 +297,12 @@
     "sr",
     "foundation"
    ],
-   "pick": "Roll, sweet, cinnamon bun, frosted"
+   "pick": "Roll, sweet, cinnamon bun, frosted",
+   "keywords": [
+    "سينابون",
+    "cinnabon",
+    "رول قرفة"
+   ]
   },
   {
    "id": "BK017",
@@ -263,6 +322,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "مافن",
+    "muffin"
    ]
   },
   {
@@ -275,6 +338,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "مافن",
+    "muffin"
    ]
   },
   {
@@ -290,6 +357,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "نان",
+    "naan"
    ]
   },
   {
@@ -307,7 +378,13 @@
     "foundation"
    ],
    "proxy": "قرص تنور ⇐ خبز بيتا أبيض (أقرب خبز مسطّح مخبوز)",
-   "pick": "Bread, pita, white, enriched"
+   "pick": "Bread, pita, white, enriched",
+   "keywords": [
+    "تنور",
+    "خبز تنور",
+    "tannour",
+    "tandoor"
+   ]
   },
   {
    "id": "BK021",
@@ -323,7 +400,11 @@
     "sr",
     "foundation"
    ],
-   "pick": "Garlic bread, NFS"
+   "pick": "Garlic bread, NFS",
+   "keywords": [
+    "قارلك بريد",
+    "garlic bread"
+   ]
   },
   {
    "id": "BK022",
@@ -336,7 +417,11 @@
     "sr",
     "foundation"
    ],
-   "pick": "Bread, cheese"
+   "pick": "Bread, cheese",
+   "keywords": [
+    "خبز جبن",
+    "cheese bread"
+   ]
   },
   {
    "id": "BK023",
@@ -348,6 +433,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "فوكاشيا",
+    "focaccia"
    ]
   },
   {
@@ -361,7 +450,11 @@
     "sr",
     "foundation"
    ],
-   "pick": "Breadsticks, soft, NFS"
+   "pick": "Breadsticks, soft, NFS",
+   "keywords": [
+    "بريد ستيك",
+    "breadsticks"
+   ]
   },
   {
    "id": "BK025",
@@ -374,7 +467,11 @@
     "sr",
     "foundation"
    ],
-   "pick": "Calzone, with meat and cheese"
+   "pick": "Calzone, with meat and cheese",
+   "keywords": [
+    "كالزون",
+    "calzone"
+   ]
   },
   {
    "id": "BK026",
@@ -395,6 +492,12 @@
    ],
    "prefer": [
     "fndds"
+   ],
+   "keywords": [
+    "بيتزا",
+    "فرن حطب",
+    "pizza",
+    "margherita"
    ]
   },
   {
@@ -411,7 +514,12 @@
     "sr",
     "foundation"
    ],
-   "pick": "Pizza, cheese, with vegetables, from restaurant or fast food, thin crust"
+   "pick": "Pizza, cheese, with vegetables, from restaurant or fast food, thin crust",
+   "keywords": [
+    "بيتزا",
+    "فرن حطب",
+    "pizza"
+   ]
   },
   {
    "id": "BK028",
@@ -429,6 +537,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "بيتزا",
+    "pizza chicken"
    ]
   },
   {
@@ -444,6 +556,11 @@
    ],
    "prefer": [
     "fndds"
+   ],
+   "keywords": [
+    "بيتزا",
+    "بيبروني",
+    "pepperoni"
    ]
   },
   {
@@ -456,6 +573,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "كيش",
+    "quiche"
    ]
   },
   {
@@ -471,6 +592,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "سبرنق رول",
+    "spring roll"
    ]
   },
   {
@@ -483,6 +608,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "بف باستري",
+    "puff pastry"
    ]
   },
   {
@@ -529,6 +658,10 @@
     "turkey",
     "reduced",
     "pizza"
+   ],
+   "keywords": [
+    "فطيرة تفاح",
+    "apple pie"
    ]
   },
   {
@@ -541,6 +674,12 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "لازانيا",
+    "lasagna",
+    "مجمد",
+    "مجمّد"
    ]
   },
   {
@@ -563,6 +702,11 @@
     "soup",
     "vegetables",
     "tuna"
+   ],
+   "keywords": [
+    "ماك اند تشيز",
+    "mac and cheese",
+    "مكرونة جبن"
    ]
   },
   {
@@ -576,7 +720,13 @@
     "sr",
     "foundation"
    ],
-   "pick": "Chicken, nuggets, white meat, precooked, frozen, not reheated"
+   "pick": "Chicken, nuggets, white meat, precooked, frozen, not reheated",
+   "keywords": [
+    "ناجتس",
+    "نقتس",
+    "nuggets",
+    "مجمد"
+   ]
   },
   {
    "id": "BK043",
@@ -594,6 +744,10 @@
     "sandwich",
     "potatoes",
     "nuggets"
+   ],
+   "keywords": [
+    "برجر دجاج مجمد",
+    "chicken patty"
    ]
   },
   {
@@ -606,6 +760,11 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "فش فنجر",
+    "fish fingers",
+    "سمك مجمد"
    ]
   },
   {
@@ -624,7 +783,11 @@
     "DIGIORNO",
     "whole grain"
    ],
-   "pick": "Pizza, cheese, from frozen, thick crust"
+   "pick": "Pizza, cheese, from frozen, thick crust",
+   "keywords": [
+    "بيتزا مجمدة",
+    "frozen pizza"
+   ]
   },
   {
    "id": "BK046",
@@ -643,6 +806,11 @@
     "BIG DADDY",
     "TONY",
     "stuffed"
+   ],
+   "keywords": [
+    "بيتزا مجمدة",
+    "frozen pizza",
+    "بيبروني"
    ]
   },
   {
@@ -655,6 +823,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "بوريتو",
+    "burrito"
    ]
   },
   {
@@ -667,6 +839,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "بوت باي",
+    "pot pie"
    ]
   },
   {
@@ -680,7 +856,12 @@
     "sr",
     "foundation"
    ],
-   "pick": "Meatballs, frozen, Italian style"
+   "pick": "Meatballs, frozen, Italian style",
+   "keywords": [
+    "كرات لحم",
+    "ميت بول",
+    "meatballs"
+   ]
   },
   {
    "id": "BK050",
@@ -692,6 +873,11 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "برجر مجمد",
+    "قرص لحم",
+    "beef patty"
    ]
   },
   {
@@ -709,6 +895,11 @@
     "meatless",
     "vegetable",
     "shrimp"
+   ],
+   "keywords": [
+    "سبرنق رول",
+    "spring roll",
+    "egg roll"
    ]
   },
   {
@@ -722,7 +913,11 @@
     "sr",
     "foundation"
    ],
-   "pick": "Chicken, fried, with potatoes, vegetable, frozen meal"
+   "pick": "Chicken, fried, with potatoes, vegetable, frozen meal",
+   "keywords": [
+    "وجبة مجمدة",
+    "frozen dinner"
+   ]
   },
   {
    "id": "BK053",
@@ -735,7 +930,11 @@
     "sr",
     "foundation"
    ],
-   "pick": "Salisbury steak with gravy, potatoes, vegetable, frozen meal"
+   "pick": "Salisbury steak with gravy, potatoes, vegetable, frozen meal",
+   "keywords": [
+    "وجبة مجمدة",
+    "frozen dinner"
+   ]
   },
   {
    "id": "BK054",
@@ -749,7 +948,11 @@
     "foundation"
    ],
    "pick": "Chicken in soy-based sauce, rice and vegetables, frozen meal",
-   "proxy": "رز بالخضار مجمَّد ⇐ وجبة دجاج ورز وخضار مجمَّدة (أقرب تركيب متاح)"
+   "proxy": "رز بالخضار مجمَّد ⇐ وجبة دجاج ورز وخضار مجمَّدة (أقرب تركيب متاح)",
+   "keywords": [
+    "رز مجمد",
+    "frozen rice"
+   ]
   },
   {
    "id": "BK055",
@@ -766,6 +969,12 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "كباب دجاج",
+    "شيش طاووق",
+    "shish tawook",
+    "chicken kebab"
    ]
   },
   {
@@ -785,7 +994,11 @@
     "sr",
     "foundation"
    ],
-   "pick": "Soup, lentil"
+   "pick": "Soup, lentil",
+   "keywords": [
+    "شوربة عدس",
+    "lentil soup"
+   ]
   },
   {
    "id": "BK057",
@@ -798,7 +1011,11 @@
     "sr",
     "foundation"
    ],
-   "pick": "Soup, chicken noodle, canned, prepared with equal volume water"
+   "pick": "Soup, chicken noodle, canned, prepared with equal volume water",
+   "keywords": [
+    "شوربة دجاج",
+    "chicken soup"
+   ]
   },
   {
    "id": "BK058",
@@ -810,6 +1027,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "حمص",
+    "hummus"
    ]
   },
   {
@@ -822,6 +1043,10 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "تبولة",
+    "tabbouleh"
    ]
   },
   {
@@ -835,7 +1060,12 @@
     "sr",
     "foundation"
    ],
-   "pick": "Grape leaves stuffed with rice"
+   "pick": "Grape leaves stuffed with rice",
+   "keywords": [
+    "ورق عنب",
+    "يبرق",
+    "dolma"
+   ]
   },
   {
    "id": "BK061",
@@ -864,7 +1094,12 @@
     "sr",
     "foundation"
    ],
-   "pick": "Falafel"
+   "pick": "Falafel",
+   "keywords": [
+    "فلافل",
+    "طعمية",
+    "falafel"
+   ]
   },
   {
    "id": "BK063",
@@ -897,6 +1132,13 @@
     "fndds",
     "sr",
     "foundation"
+   ],
+   "keywords": [
+    "اندومي",
+    "نودلز",
+    "indomie",
+    "ramen",
+    "instant noodles"
    ]
   }
  ]
