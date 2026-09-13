@@ -1,113 +1,189 @@
 {
   "_readme": "دليل جلب CI لمصادر السلاسل الرسمية — يقرؤه بشر/موجة استيراد، لا مستورد آلي.",
-  "fetchedAt": "2026-08-27T01:09:00.106Z",
+  "fetchedAt": "2026-09-13T10:39:26.655Z",
   "results": [
     {
-      "slug": "mcdonalds-sa",
-      "chain": "ماكدونالدز السعودية",
-      "url": "https://www.mcdonalds.com/sa/en-sa.html",
+      "slug": "mcd-us-nutrition-calc",
+      "chain": "ماكدونالدز (US)",
+      "url": "https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html",
       "raw": {
         "error": "The operation was aborted due to timeout"
       },
       "rendered": {
-        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com/sa/en-sa.html\nCall log:\n  - navigating to \"https://www.mcdonalds.com/sa/en-sa.html\", waiting until \"domcontentloaded\"\n"
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html\nCall log:\n  - navigating to \"https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html\", waiting until \"domcontentloaded\"\n"
       },
       "screenshot": null
     },
     {
-      "slug": "herfy-calculator",
-      "chain": "هرفي",
-      "url": "https://herfy.com/calculator/",
+      "slug": "mcd-us-categories-json",
+      "chain": "ماكدونالدز (US) — JSON",
+      "url": "https://www.mcdonalds.com/wws/json/getCategories.htm?country=US&language=en&showLiveData=true",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": null,
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-us-item-json",
+      "chain": "ماكدونالدز (US) — صنف JSON",
+      "url": "https://www.mcdonalds.com/dnaapp/itemDetails?country=US&language=en&showLiveData=true&item=200000",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": null,
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-sa-full-menu",
+      "chain": "ماكدونالدز السعودية",
+      "url": "https://www.mcdonalds.com/sa/ar-sa/full-menu.html",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com/sa/ar-sa/full-menu.html\nCall log:\n  - navigating to \"https://www.mcdonalds.com/sa/ar-sa/full-menu.html\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "kfc-us-nutrition",
+      "chain": "كنتاكي (US)",
+      "url": "https://www.kfc.com/nutrition",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.kfc.com/nutrition\nCall log:\n  - navigating to \"https://www.kfc.com/nutrition\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "kfc-arabia",
+      "chain": "كنتاكي (أمريكانا)",
+      "url": "https://www.kfc-arabia.com/",
       "raw": {
         "status": 200,
-        "contentType": "text/html; charset=UTF-8",
-        "bytes": 404700,
+        "contentType": "text/html",
+        "bytes": 386829,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 401098,
+        "bytes": 382864,
         "truncated": false
       },
-      "screenshot": "shot.png"
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 8299
+      }
     },
     {
-      "slug": "subway-sa-nutrition",
-      "chain": "صب واي",
-      "url": "https://www.subway.com/ar-SA/MenuNutrition",
+      "slug": "kfc-sa",
+      "chain": "كنتاكي السعودية",
+      "url": "https://www.kfc.sa/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.kfc.sa/\nCall log:\n  - navigating to \"https://www.kfc.sa/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "bk-us-pdf",
+      "chain": "برجر كنج (US) PDF",
+      "url": "https://www.bk.com/pdfs/nutrition.pdf",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 3381,
+        "file": "raw.pdf"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "error": "pdftotext unavailable"
+      }
+    },
+    {
+      "slug": "bk-sa",
+      "chain": "برجر كنج السعودية",
+      "url": "https://www.burgerking.com.sa/",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 1748,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 211282,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 3962
+      }
+    },
+    {
+      "slug": "hardees-us-nutrition",
+      "chain": "هارديز (US)",
+      "url": "https://www.hardees.com/nutrition",
       "raw": {
         "status": 404,
         "contentType": "text/html; charset=utf-8",
-        "bytes": 2999,
+        "bytes": 34563,
         "file": "raw.html"
       },
       "rendered": {
-        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.subway.com/ar-SA/MenuNutrition\nCall log:\n  - navigating to \"https://www.subway.com/ar-SA/MenuNutrition\", waiting until \"domcontentloaded\"\n"
+        "bytes": 173498,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 2424
+      }
+    },
+    {
+      "slug": "hardees-arabia",
+      "chain": "هارديز (أمريكانا)",
+      "url": "https://www.hardees-arabia.com/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://www.hardees-arabia.com/\nCall log:\n  - navigating to \"https://www.hardees-arabia.com/\", waiting until \"domcontentloaded\"\n"
       },
       "screenshot": null
     },
     {
-      "slug": "shawarmer-menu",
-      "chain": "شاورمر",
-      "url": "https://shawarmer.com/en/menu/83",
+      "slug": "subway-us-nutrition",
+      "chain": "صب واي (US)",
+      "url": "https://www.subway.com/en-us/menunutrition/nutrition",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=utf-8",
-        "bytes": 31051,
+        "bytes": 15984,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 185791,
-        "truncated": false
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.subway.com/en-us/menunutrition/nutrition\nCall log:\n  - navigating to \"https://www.subway.com/en-us/menunutrition/nutrition\", waiting until \"domcontentloaded\"\n"
       },
-      "screenshot": "shot.png"
+      "screenshot": null
     },
     {
-      "slug": "alromansiah",
-      "chain": "الرومانسية",
-      "url": "https://www.alromansiah.com/",
+      "slug": "subway-sa",
+      "chain": "صب واي السعودية",
+      "url": "https://subway.sa/",
       "raw": {
-        "status": 200,
-        "contentType": "text/html; charset=utf-8",
-        "bytes": 231940,
-        "file": "raw.html"
+        "error": "fetch failed"
       },
       "rendered": {
-        "bytes": 241860,
-        "truncated": false
+        "error": "page.goto: net::ERR_CERT_COMMON_NAME_INVALID at https://subway.sa/\nCall log:\n  - navigating to \"https://subway.sa/\", waiting until \"domcontentloaded\"\n"
       },
-      "screenshot": "shot.png"
-    },
-    {
-      "slug": "mamanoura-menu",
-      "chain": "ماما نورة",
-      "url": "https://mamanoura.my.taker.io/",
-      "raw": {
-        "status": 200,
-        "contentType": "text/html; charset=UTF-8",
-        "bytes": 13578,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 54825,
-        "truncated": false
-      },
-      "screenshot": "shot.png"
-    },
-    {
-      "slug": "maestro-help",
-      "chain": "مايسترو",
-      "url": "https://help.maestropizza.com/",
-      "raw": {
-        "status": 200,
-        "contentType": "text/html; charset=utf-8",
-        "bytes": 83881,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 83685,
-        "truncated": false
-      },
-      "screenshot": "shot.png"
+      "screenshot": null
     },
     {
       "slug": "dominos-us-nutrition-pdf",
@@ -120,43 +196,227 @@
         "file": "raw.pdf"
       },
       "rendered": null,
-      "screenshot": null
+      "screenshot": null,
+      "text": {
+        "from": "pdftotext",
+        "bytes": 323180
+      }
     },
     {
-      "slug": "kudu",
-      "chain": "كودو",
-      "url": "https://kudu.com.sa/",
+      "slug": "dominos-sa",
+      "chain": "دومينوز السعودية",
+      "url": "https://www.dominos.com.sa/",
       "raw": {
-        "error": "fetch failed"
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 40878,
+        "file": "raw.html"
       },
       "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://kudu.com.sa/\nCall log:\n  - navigating to \"https://kudu.com.sa/\", waiting until \"domcontentloaded\"\n"
+        "bytes": 113883,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 1391
+      }
+    },
+    {
+      "slug": "pizzahut-us-nutrition",
+      "chain": "بيتزا هت (US)",
+      "url": "https://www.pizzahut.com/nutrition",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.pizzahut.com/nutrition\nCall log:\n  - navigating to \"https://www.pizzahut.com/nutrition\", waiting until \"domcontentloaded\"\n"
       },
       "screenshot": null
     },
     {
       "slug": "pizzahut-sa",
-      "chain": "بيتزا هت",
-      "url": "https://www.pizzahut.sa/",
+      "chain": "بيتزا هت السعودية",
+      "url": "https://www.pizzahut.com.sa/",
       "raw": {
         "error": "fetch failed"
       },
       "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.pizzahut.sa/\nCall log:\n  - navigating to \"https://www.pizzahut.sa/\", waiting until \"domcontentloaded\"\n"
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.pizzahut.com.sa/\nCall log:\n  - navigating to \"https://www.pizzahut.com.sa/\", waiting until \"domcontentloaded\"\n"
       },
       "screenshot": null
     },
     {
-      "slug": "kfc-sa",
-      "chain": "كنتاكي",
-      "url": "https://www.kfc.com.sa/",
+      "slug": "fiveguys-us-nutrition",
+      "chain": "فايف غايز (US)",
+      "url": "https://www.fiveguys.com/nutrition",
+      "raw": {
+        "status": 404,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 93963,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 231361,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 7057
+      }
+    },
+    {
+      "slug": "shakeshack-nutrition",
+      "chain": "شيك شاك (US)",
+      "url": "https://www.shakeshack.com/nutrition/",
+      "raw": {
+        "status": 403,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 5489,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 84822,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 2200
+      }
+    },
+    {
+      "slug": "texasroadhouse-nutrition",
+      "chain": "تكساس رودهاوس (US)",
+      "url": "https://www.texasroadhouse.com/nutrition",
+      "raw": {
+        "status": 403,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 22451,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 31106,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 776
+      }
+    },
+    {
+      "slug": "pfchangs-nutrition",
+      "chain": "بي إف تشانغز (US)",
+      "url": "https://www.pfchangs.com/nutrition",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 80717,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 106290,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 4063
+      }
+    },
+    {
+      "slug": "chilis-nutrition",
+      "chain": "تشيليز (US)",
+      "url": "https://www.chilis.com/nutrition",
+      "raw": {
+        "status": 404,
+        "contentType": "text/html",
+        "bytes": 76772,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 182787,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 1821
+      }
+    },
+    {
+      "slug": "applebees-nutrition",
+      "chain": "آبلبيز (US)",
+      "url": "https://www.applebees.com/en/nutrition",
+      "raw": {
+        "status": 403,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 4550,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 4274,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 762
+      }
+    },
+    {
+      "slug": "raisingcanes-nutrition",
+      "chain": "ريزينغ كينز (US)",
+      "url": "https://www.raisingcanes.com/nutrition",
+      "raw": {
+        "status": 403,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 864526,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 864082,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 230
+      }
+    },
+    {
+      "slug": "raisingcanes-sa",
+      "chain": "ريزينغ كينز السعودية",
+      "url": "https://raisingcanes.sa/",
       "raw": {
         "error": "fetch failed"
       },
       "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.kfc.com.sa/\nCall log:\n  - navigating to \"https://www.kfc.com.sa/\", waiting until \"domcontentloaded\"\n"
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://raisingcanes.sa/\nCall log:\n  - navigating to \"https://raisingcanes.sa/\", waiting until \"domcontentloaded\"\n"
       },
       "screenshot": null
+    },
+    {
+      "slug": "papajohns-us-nutrition",
+      "chain": "بابا جونز (US)",
+      "url": "https://www.papajohns.com/nutrition",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 20779,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 25467,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 2032
+      }
     },
     {
       "slug": "albaik",
@@ -169,6 +429,326 @@
         "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://albaik.com/\nCall log:\n  - navigating to \"https://albaik.com/\", waiting until \"domcontentloaded\"\n"
       },
       "screenshot": null
+    },
+    {
+      "slug": "albaik-www-menu",
+      "chain": "البيك (www/menu)",
+      "url": "https://www.albaik.com/en/menu",
+      "raw": {
+        "status": 404,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 1722,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 1720,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 226
+      }
+    },
+    {
+      "slug": "altazaj",
+      "chain": "الطازج",
+      "url": "https://www.altazaj.com/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.altazaj.com/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "altazaj-sa",
+      "chain": "الطازج (com.sa)",
+      "url": "https://www.altazaj.com.sa/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.altazaj.com.sa/\nCall log:\n  - navigating to \"https://www.altazaj.com.sa/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "herfy-menu",
+      "chain": "هرفي (منيو)",
+      "url": "https://herfy.com/menu/",
+      "raw": {
+        "status": 404,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 396308,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 393378,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 1588
+      }
+    },
+    {
+      "slug": "herfy-calculator",
+      "chain": "هرفي (حاسبة)",
+      "url": "https://herfy.com/calculator/",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 404700,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 401098,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 1448
+      }
+    },
+    {
+      "slug": "kudu-sa",
+      "chain": "كودو",
+      "url": "https://kudu.sa/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://kudu.sa/\nCall log:\n  - navigating to \"https://kudu.sa/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "kudu-com-sa",
+      "chain": "كودو (com.sa)",
+      "url": "https://www.kudu.com.sa/",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 2882,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 50303,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 3227
+      }
+    },
+    {
+      "slug": "shawarmer-menu",
+      "chain": "شاورمر",
+      "url": "https://shawarmer.com/en/menu/83",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 31927,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 175549,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 7623
+      }
+    },
+    {
+      "slug": "shawarmer-menu-ar",
+      "chain": "شاورمر (عربي)",
+      "url": "https://shawarmer.com/ar/menu/83",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 32289,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 181973,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 11827
+      }
+    },
+    {
+      "slug": "alromansiah-menu",
+      "chain": "الرومانسية (منيو)",
+      "url": "https://www.alromansiah.com/menu",
+      "raw": {
+        "status": 404,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 14667,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 23576,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 308
+      }
+    },
+    {
+      "slug": "alromansiah-order",
+      "chain": "الرومانسية (طلب)",
+      "url": "https://order.alromansiah.com/",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html",
+        "bytes": 4155,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 32131,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 740
+      }
+    },
+    {
+      "slug": "mamanoura-menu",
+      "chain": "ماما نورة",
+      "url": "https://mamanoura.my.taker.io/menu",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 13605,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 54899,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 1990
+      }
+    },
+    {
+      "slug": "maestro-menu",
+      "chain": "مايسترو (منيو)",
+      "url": "https://www.maestropizza.com/en/menu",
+      "raw": {
+        "status": 404,
+        "contentType": "text/html",
+        "bytes": 118,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 111,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 27
+      }
+    },
+    {
+      "slug": "maestro-root",
+      "chain": "مايسترو",
+      "url": "https://maestropizza.com/",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 305004,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 609319,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 11340
+      }
+    },
+    {
+      "slug": "sectionb",
+      "chain": "سكشن بي",
+      "url": "https://sectionb.sa/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://sectionb.sa/\nCall log:\n  - navigating to \"https://sectionb.sa/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "centuryburger",
+      "chain": "سنشري برجر",
+      "url": "https://centuryburger.com/",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 694380,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 706086,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 1209
+      }
+    },
+    {
+      "slug": "hamburgini",
+      "chain": "هامبرغيني",
+      "url": "https://hamburgini.com/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_CONNECTION_CLOSED at https://hamburgini.com/\nCall log:\n  - navigating to \"https://hamburgini.com/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "janburger",
+      "chain": "جان برجر",
+      "url": "https://janburger.com/",
+      "raw": {
+        "status": 403,
+        "contentType": "text/html",
+        "bytes": 21,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 60,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 20
+      }
     },
     {
       "slug": "burgerizzr",
@@ -184,23 +764,31 @@
         "bytes": 13511,
         "truncated": false
       },
-      "screenshot": "shot.png"
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 1372
+      }
     },
     {
       "slug": "papajohns-sa",
-      "chain": "بابا جونز",
+      "chain": "بابا جونز السعودية",
       "url": "https://papajohns.sa/",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=utf-8",
-        "bytes": 43368,
+        "bytes": 42349,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 58975,
+        "bytes": 57134,
         "truncated": false
       },
-      "screenshot": "shot.png"
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 6052
+      }
     }
   ]
 }
