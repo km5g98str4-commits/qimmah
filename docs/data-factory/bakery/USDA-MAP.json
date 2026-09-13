@@ -47,7 +47,7 @@
     "DOMINO",
     "PAPA JOHN",
     "LITTLE CAESARS",
-    "Fast Food",
+    "chain",
     "vegetables",
     "meat",
     "white"
@@ -61,7 +61,6 @@
    "nameAr": "فطيرة لحم (سفيحة)",
    "nameEn": "Meat pie (sfiha)",
    "category": "أفران",
-   "q": "beef pie",
    "not": [
     "frozen"
    ],
@@ -69,19 +68,22 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "المطابق الوحيد فطيرة لحم غربية (Pot pie) — لا يمثّل السفيحة"
   },
   {
    "id": "BK005",
    "nameAr": "فطيرة دجاج",
    "nameEn": "Chicken pie",
    "category": "أفران",
-   "q": "turnover chicken filled",
    "prefer": [
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "المطابق فطيرة دجاج مجمَّدة قليلة الدسم — لا يمثّل فطيرة الفرن"
   },
   {
    "id": "BK006",
@@ -110,7 +112,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Pastry, cheese-filled"
   },
   {
    "id": "BK008",
@@ -126,8 +129,8 @@
   },
   {
    "id": "BK009",
-   "nameAr": "سمبوسة خضار",
-   "nameEn": "Vegetable samosa",
+   "nameAr": "سمبوسة (فرن)",
+   "nameEn": "Samosa (bakery)",
    "category": "أفران",
    "q": "samosa",
    "prefer": [
@@ -139,14 +142,14 @@
     "meat",
     "beef",
     "chicken"
-   ]
+   ],
+   "proxy": "سمبوسة عامّة — السجلّ لا يميّز الحشوة"
   },
   {
    "id": "BK010",
    "nameAr": "سمبوسة دجاج",
    "nameEn": "Chicken samosa",
    "category": "أفران",
-   "q": "samosa",
    "prefer": [
     "fndds",
     "sr",
@@ -155,20 +158,22 @@
    "not": [
     "vegetable",
     "potato"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "نفس سجلّ السمبوسة العامّ (BK009) — لا تكرار"
   },
   {
    "id": "BK011",
    "nameAr": "كرواسون زعتر",
    "nameEn": "Zaatar croissant",
    "category": "أفران",
-   "q": "croissant butter",
+   "q": "croissants butter",
    "proxy": "كرواسون زعتر ⇐ كرواسون زبدة (الزعتر غرامات قليلة)",
    "not": [
-    "HOT POCKETS",
     "cheese",
     "chocolate",
-    "sandwich"
+    "sandwich",
+    "pocket"
    ],
    "prefer": [
     "fndds",
@@ -245,11 +250,14 @@
    "nameAr": "مفن توت",
    "nameEn": "Blueberry muffin",
    "category": "أفران",
-   "q": "muffin blueberry commercially prepared",
+   "q": "muffin blueberry",
    "not": [
-    "low-fat",
+    "low fat",
+    "fat free",
     "cereal",
-    "toaster"
+    "toaster",
+    "mix",
+    "tops"
    ],
    "prefer": [
     "fndds",
@@ -298,7 +306,8 @@
     "sr",
     "foundation"
    ],
-   "proxy": "قرص تنور ⇐ خبز بيتا أبيض (أقرب خبز مسطّح مخبوز)"
+   "proxy": "قرص تنور ⇐ خبز بيتا أبيض (أقرب خبز مسطّح مخبوز)",
+   "pick": "Bread, pita, white, enriched"
   },
   {
    "id": "BK021",
@@ -379,7 +388,7 @@
     "DOMINO",
     "PAPA JOHN",
     "LITTLE CAESARS",
-    "Fast Food",
+    "chain",
     "vegetables",
     "meat",
     "white"
@@ -409,11 +418,12 @@
    "nameAr": "بيتزا دجاج (شريحة)",
    "nameEn": "Chicken pizza slice",
    "category": "أفران",
-   "q": "pizza chicken thin crust",
+   "q": "pizza chicken",
    "not": [
     "frozen",
     "white",
-    "BBQ"
+    "bbq",
+    "pizza chain"
    ],
    "prefer": [
     "fndds",
@@ -430,7 +440,7 @@
    "not": [
     "PIZZA HUT",
     "DOMINO",
-    "Fast Food"
+    "chain"
    ],
    "prefer": [
     "fndds"
@@ -506,11 +516,19 @@
    "nameAr": "فطيرة تفاح",
    "nameEn": "Apple turnover",
    "category": "أفران",
-   "q": "turnover fruit filled",
+   "q": "turnover",
    "prefer": [
     "fndds",
     "sr",
     "foundation"
+   ],
+   "not": [
+    "chicken",
+    "meat",
+    "beef",
+    "turkey",
+    "reduced",
+    "pizza"
    ]
   },
   {
@@ -530,16 +548,21 @@
    "nameAr": "مكرونة بالجبن (جاهزة)",
    "nameEn": "Macaroni and cheese (prepared)",
    "category": "وجبات جاهزة",
-   "q": "macaroni or noodles with cheese frozen",
+   "q": "macaroni cheese",
    "prefer": [
     "fndds",
     "sr",
     "foundation"
    ],
-   "pick": "Salisbury steak with gravy, macaroni and cheese, frozen meal",
    "not": [
     "salisbury",
-    "meat"
+    "meat",
+    "frozen meal",
+    "dry",
+    "mix",
+    "soup",
+    "vegetables",
+    "tuna"
    ]
   },
   {
@@ -560,7 +583,7 @@
    "nameAr": "برجر دجاج مجمّد (قرص)",
    "nameEn": "Frozen breaded chicken patty",
    "category": "وجبات جاهزة",
-   "q": "chicken patty breaded cooked",
+   "q": "chicken patty breaded",
    "prefer": [
     "fndds",
     "sr",
@@ -568,8 +591,9 @@
    ],
    "not": [
     "frozen meal",
+    "sandwich",
     "potatoes",
-    "sandwich"
+    "nuggets"
    ]
   },
   {
@@ -599,7 +623,8 @@
     "School Lunch",
     "DIGIORNO",
     "whole grain"
-   ]
+   ],
+   "pick": "Pizza, cheese, from frozen, thick crust"
   },
   {
    "id": "BK046",
@@ -674,11 +699,16 @@
    "nameAr": "سبرنغ رول مجمّد",
    "nameEn": "Frozen spring roll",
    "category": "وجبات جاهزة",
-   "q": "egg roll frozen",
+   "q": "egg roll",
    "prefer": [
     "fndds",
     "sr",
     "foundation"
+   ],
+   "not": [
+    "meatless",
+    "vegetable",
+    "shrimp"
    ]
   },
   {
@@ -726,9 +756,11 @@
    "nameAr": "كباب دجاج مجمّد (مطهو)",
    "nameEn": "Frozen chicken kebab, cooked",
    "category": "وجبات جاهزة",
-   "q": "chicken shish kabob",
+   "q": "kabob chicken",
    "not": [
-    "vegetables"
+    "vegetables",
+    "rice",
+    "potatoes"
    ],
    "prefer": [
     "fndds",
@@ -752,7 +784,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "pick": "Soup, lentil"
   },
   {
    "id": "BK057",
@@ -838,7 +871,6 @@
    "nameAr": "شاورما دجاج جاهزة (كيس)",
    "nameEn": "Ready chicken shawarma meat",
    "category": "وجبات جاهزة",
-   "q": "gyro chicken",
    "prefer": [
     "fndds",
     "sr",
@@ -846,16 +878,20 @@
    ],
    "not": [
     "sandwich"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "لا سجلّ USDA لشاورما الدجاج الجاهزة"
   },
   {
    "id": "BK064",
    "nameAr": "نودلز سريعة التحضير (كوب)",
    "nameEn": "Instant noodles cup",
    "category": "وجبات جاهزة",
-   "q": "instant noodles",
+   "q": "ramen",
    "not": [
-    "dry"
+    "dry",
+    "uncooked",
+    "mix"
    ],
    "prefer": [
     "fndds",
