@@ -1,0 +1,32 @@
+{
+ "chain": {
+  "slug": "shakeshack",
+  "ar": "شيك شاك",
+  "en": "Shake Shack",
+  "keywords": [
+   "shake shack",
+   "شيك شاك",
+   "شيك شك"
+  ]
+ },
+ "source": {
+  "url": "https://fdc.nal.usda.gov/",
+  "kind": "usda-branded-record",
+  "market": "US",
+  "accessed": "2026-09-13",
+  "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
+ },
+ "items": [],
+ "quarantined": [
+  {
+   "nameEn": "ShackBurger",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Crinkle Cut Fries",
+   "why": "USDA unmatched",
+   "candidates": []
+  }
+ ]
+}

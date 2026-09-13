@@ -1,0 +1,167 @@
+{
+ "chain": {
+  "slug": "burgerking",
+  "ar": "برجر كنج",
+  "en": "Burger King",
+  "keywords": [
+   "burger king",
+   "برجر كنج",
+   "برغر كنغ",
+   "bk"
+  ]
+ },
+ "source": {
+  "url": "https://fdc.nal.usda.gov/",
+  "kind": "usda-branded-record",
+  "market": "US",
+  "accessed": "2026-09-13",
+  "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
+ },
+ "items": [
+  {
+   "id": "whopper-with-cheese",
+   "nameAr": "وابر بالجبن",
+   "nameEn": "Whopper with Cheese",
+   "sourceName": "BURGER KING, WHOPPER, with cheese",
+   "fdcId": 170728,
+   "dataType": "SR Legacy",
+   "servingGrams": 316,
+   "servingLabelAr": "حبة (316غ)",
+   "kcal": 790,
+   "protein": 35.4,
+   "carbs": 52.8,
+   "fat": 48.3,
+   "fiber": 3.2,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "item"
+  },
+  {
+   "id": "whopper-jr",
+   "nameAr": "وابر جونيور",
+   "nameEn": "Whopper Jr.",
+   "sourceName": "Whopper Jr (Burger King)",
+   "fdcId": 2706923,
+   "dataType": "FNDDS",
+   "servingGrams": 135,
+   "servingLabelAr": "حبة (135غ)",
+   "kcal": 292,
+   "protein": 14.4,
+   "carbs": 28.5,
+   "fat": 12.9,
+   "fiber": 1.4,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "1 hamburger"
+  },
+  {
+   "id": "cheeseburger",
+   "nameAr": "تشيز برجر",
+   "nameEn": "Cheeseburger",
+   "sourceName": "BURGER KING, Cheeseburger",
+   "fdcId": 170329,
+   "dataType": "SR Legacy",
+   "servingGrams": 133,
+   "servingLabelAr": "حبة (133غ)",
+   "kcal": 380,
+   "protein": 19.4,
+   "carbs": 31.5,
+   "fat": 19.7,
+   "fiber": 1.3,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "item"
+  },
+  {
+   "id": "double-cheeseburger",
+   "nameAr": "دبل تشيز برجر",
+   "nameEn": "Double Cheeseburger",
+   "sourceName": "BURGER KING, Double Cheeseburger",
+   "fdcId": 170374,
+   "dataType": "SR Legacy",
+   "servingGrams": 162,
+   "servingLabelAr": "حبة (162غ)",
+   "kcal": 457,
+   "protein": 27.2,
+   "carbs": 28.2,
+   "fat": 26.1,
+   "type": "burger",
+   "keywords": [],
+   "usdaPortion": "sandwich"
+  },
+  {
+   "id": "original-chicken-sandwich",
+   "nameAr": "أوريجنال تشيكن ساندويتش",
+   "nameEn": "Original Chicken Sandwich",
+   "sourceName": "BURGER KING, Original Chicken Sandwich",
+   "fdcId": 170331,
+   "dataType": "SR Legacy",
+   "servingGrams": 199,
+   "servingLabelAr": "حبة (199غ)",
+   "kcal": 569,
+   "protein": 24.1,
+   "carbs": 52.1,
+   "fat": 29.3,
+   "fiber": 4.8,
+   "type": "sandwich",
+   "keywords": [],
+   "usdaPortion": "sandwich"
+  },
+  {
+   "id": "french-fries-medium",
+   "nameAr": "بطاطس مقلية (وسط)",
+   "nameEn": "French Fries (medium)",
+   "sourceName": "BURGER KING, french fries",
+   "fdcId": 170327,
+   "dataType": "SR Legacy",
+   "servingGrams": 117,
+   "servingLabelAr": "حصة (117غ)",
+   "kcal": 328,
+   "protein": 3.8,
+   "carbs": 45.3,
+   "fat": 14.6,
+   "fiber": 3.4,
+   "type": "fries",
+   "keywords": [],
+   "usdaPortion": "medium serving"
+  },
+  {
+   "id": "onion-rings-medium",
+   "nameAr": "حلقات بصل (وسط)",
+   "nameEn": "Onion Rings (medium)",
+   "sourceName": "BURGER KING, Onion Rings",
+   "fdcId": 170771,
+   "dataType": "SR Legacy",
+   "servingGrams": 117,
+   "servingLabelAr": "حبة (117غ)",
+   "kcal": 488,
+   "protein": 4.5,
+   "carbs": 51,
+   "fat": 29.5,
+   "fiber": 3.2,
+   "type": "side",
+   "keywords": [],
+   "usdaPortion": "medium"
+  }
+ ],
+ "quarantined": [
+  {
+   "nameEn": "Whopper",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "Whopper Jr (Burger King)",
+    "Whopper (Burger King)"
+   ]
+  },
+  {
+   "nameEn": "Double Whopper",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Chicken Nuggets",
+   "why": "USDA unmatched",
+   "candidates": []
+  }
+ ]
+}

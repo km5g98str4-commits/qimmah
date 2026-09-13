@@ -1,0 +1,153 @@
+{
+ "chain": {
+  "slug": "kfc",
+  "ar": "كنتاكي",
+  "en": "KFC",
+  "keywords": [
+   "kfc",
+   "كنتاكي",
+   "كي إف سي"
+  ]
+ },
+ "source": {
+  "url": "https://fdc.nal.usda.gov/",
+  "kind": "usda-branded-record",
+  "market": "US",
+  "accessed": "2026-09-13",
+  "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
+ },
+ "items": [
+  {
+   "id": "crispy-chicken-strips",
+   "nameAr": "كرسبي ستربس (٣ قطع)",
+   "nameEn": "Crispy Chicken Strips",
+   "sourceName": "KFC, Crispy Chicken Strips",
+   "fdcId": 170341,
+   "dataType": "SR Legacy",
+   "servingGrams": 47,
+   "servingLabelAr": "قطعة (47غ)",
+   "kcal": 129,
+   "protein": 9.5,
+   "carbs": 6.4,
+   "fat": 7.2,
+   "fiber": 0.7,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "strip"
+  },
+  {
+   "id": "popcorn-chicken",
+   "nameAr": "بوبكورن تشيكن",
+   "nameEn": "Popcorn Chicken",
+   "sourceName": "KFC, Popcorn Chicken",
+   "fdcId": 170737,
+   "dataType": "SR Legacy",
+   "servingGrams": 56,
+   "servingLabelAr": "10 قطع (56غ)",
+   "kcal": 197,
+   "protein": 9.9,
+   "carbs": 11.9,
+   "fat": 12.2,
+   "fiber": 0.6,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "pieces"
+  },
+  {
+   "id": "coleslaw",
+   "nameAr": "كول سلو",
+   "nameEn": "Coleslaw",
+   "sourceName": "KFC, Coleslaw",
+   "fdcId": 170340,
+   "dataType": "SR Legacy",
+   "servingGrams": 191,
+   "servingLabelAr": "كوب (191غ)",
+   "kcal": 275,
+   "protein": 1.7,
+   "carbs": 29.8,
+   "fat": 16.5,
+   "fiber": 3.8,
+   "type": "side",
+   "keywords": [],
+   "usdaPortion": "cup"
+  },
+  {
+   "id": "biscuit",
+   "nameAr": "بسكويت",
+   "nameEn": "Biscuit",
+   "sourceName": "KFC, biscuit",
+   "fdcId": 170339,
+   "dataType": "SR Legacy",
+   "servingGrams": 49,
+   "servingLabelAr": "حبة (49غ)",
+   "kcal": 175,
+   "protein": 3.7,
+   "carbs": 21.4,
+   "fat": 8.3,
+   "fiber": 1,
+   "type": "side",
+   "keywords": [],
+   "usdaPortion": "biscuit"
+  }
+ ],
+ "quarantined": [
+  {
+   "nameEn": "Original Recipe Chicken Breast",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat only, skin and breading removed",
+    "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat and skin with breading"
+   ]
+  },
+  {
+   "nameEn": "Original Recipe Chicken Thigh",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat and skin with breading",
+    "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat only, skin and breading removed"
+   ]
+  },
+  {
+   "nameEn": "Original Recipe Chicken Drumstick",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat only, skin and breading removed",
+    "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat and skin with breading"
+   ]
+  },
+  {
+   "nameEn": "Original Recipe Chicken Wing",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat only, skin and breading removed",
+    "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat and skin with breading"
+   ]
+  },
+  {
+   "nameEn": "Extra Crispy Chicken Breast",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat only, skin and breading removed",
+    "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat and skin with breading"
+   ]
+  },
+  {
+   "nameEn": "Extra Crispy Chicken Thigh",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat only, skin and breading removed",
+    "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat and skin with breading"
+   ]
+  },
+  {
+   "nameEn": "Mashed Potatoes with Gravy",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Potato Wedges",
+   "why": "USDA unmatched",
+   "candidates": []
+  }
+ ]
+}

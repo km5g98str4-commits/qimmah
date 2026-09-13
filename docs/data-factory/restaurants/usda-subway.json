@@ -1,0 +1,141 @@
+{
+ "chain": {
+  "slug": "subway",
+  "ar": "صب واي",
+  "en": "Subway",
+  "keywords": [
+   "subway",
+   "صب واي",
+   "صبواي"
+  ]
+ },
+ "source": {
+  "url": "https://fdc.nal.usda.gov/",
+  "kind": "usda-branded-record",
+  "market": "US",
+  "accessed": "2026-09-13",
+  "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
+ },
+ "items": [
+  {
+   "id": "6-turkey-breast",
+   "nameAr": "ساندويتش تركي ٦ إنش",
+   "nameEn": "6\" Turkey Breast",
+   "sourceName": "SUBWAY, turkey breast sub on white bread with lettuce and tomato",
+   "fdcId": 170711,
+   "dataType": "SR Legacy",
+   "servingGrams": 367,
+   "servingLabelAr": "12 حبة (367غ)",
+   "kcal": 539,
+   "protein": 33.5,
+   "carbs": 82.2,
+   "fat": 8.5,
+   "fiber": 4.8,
+   "type": "sandwich",
+   "keywords": [],
+   "usdaPortion": "inch sub"
+  },
+  {
+   "id": "6-tuna",
+   "nameAr": "ساندويتش تونة ٦ إنش",
+   "nameEn": "6\" Tuna",
+   "sourceName": "SUBWAY, tuna sub on white bread with lettuce and tomato",
+   "fdcId": 170316,
+   "dataType": "SR Legacy",
+   "servingGrams": 237,
+   "servingLabelAr": "6 حبة (237غ)",
+   "kcal": 524,
+   "protein": 29.2,
+   "carbs": 37.9,
+   "fat": 28.4,
+   "fiber": 1.7,
+   "type": "sandwich",
+   "keywords": [],
+   "usdaPortion": "inch sub"
+  },
+  {
+   "id": "6-sweet-onion-chicken-teriyaki",
+   "nameAr": "ساندويتش دجاج ترياكي ٦ إنش",
+   "nameEn": "6\" Sweet Onion Chicken Teriyaki",
+   "sourceName": "SUBWAY, sweet onion chicken teriyaki sub on white bread with lettuce, tomato and sweet onion sauce",
+   "fdcId": 170705,
+   "dataType": "SR Legacy",
+   "servingGrams": 228,
+   "servingLabelAr": "6 حبة (228غ)",
+   "kcal": 353,
+   "protein": 24.9,
+   "carbs": 51.3,
+   "fat": 5.4,
+   "fiber": 2.7,
+   "type": "sandwich",
+   "keywords": [],
+   "usdaPortion": "inch sub"
+  },
+  {
+   "id": "6-meatball-marinara",
+   "nameAr": "ساندويتش ميت بول ٦ إنش",
+   "nameEn": "6\" Meatball Marinara",
+   "sourceName": "SUBWAY, meatball marinara sub on white bread (no toppings)",
+   "fdcId": 170708,
+   "dataType": "SR Legacy",
+   "servingGrams": 209,
+   "servingLabelAr": "6 حبة (209غ)",
+   "kcal": 458,
+   "protein": 20.4,
+   "carbs": 54.3,
+   "fat": 17.7,
+   "fiber": 4.4,
+   "type": "sandwich",
+   "keywords": [],
+   "usdaPortion": "inch sub"
+  },
+  {
+   "id": "6-steak-cheese",
+   "nameAr": "ساندويتش ستيك وجبن ٦ إنش",
+   "nameEn": "6\" Steak & Cheese",
+   "sourceName": "SUBWAY, steak & cheese sub on white bread with American cheese, lettuce and tomato",
+   "fdcId": 170310,
+   "dataType": "SR Legacy",
+   "servingGrams": 401,
+   "servingLabelAr": "12 حبة (401غ)",
+   "kcal": 734,
+   "protein": 49.3,
+   "carbs": 86.2,
+   "fat": 21.4,
+   "fiber": 4.8,
+   "type": "sandwich",
+   "keywords": [],
+   "usdaPortion": "inch sub"
+  },
+  {
+   "id": "6-oven-roasted-chicken",
+   "nameAr": "ساندويتش دجاج مشوي ٦ إنش",
+   "nameEn": "6\" Oven Roasted Chicken",
+   "sourceName": "SUBWAY, oven roasted chicken sub on white bread with lettuce and tomato",
+   "fdcId": 170314,
+   "dataType": "SR Legacy",
+   "servingGrams": 198,
+   "servingLabelAr": "6 حبة (198غ)",
+   "kcal": 311,
+   "protein": 21.4,
+   "carbs": 42.4,
+   "fat": 6.2,
+   "fiber": 2.4,
+   "type": "sandwich",
+   "keywords": [],
+   "usdaPortion": "inch sub"
+  }
+ ],
+ "quarantined": [
+  {
+   "nameEn": "6\" Veggie Delite",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Chocolate Chip Cookie",
+   "why": "USDA unmatched",
+   "candidates": []
+  }
+ ]
+}
