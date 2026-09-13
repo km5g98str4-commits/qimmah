@@ -1,5 +1,796 @@
 {
- "counts": {},
- "byChain": {},
- "rows": []
+ "counts": {
+  "OFFICIAL_FULL": 59,
+  "OFFICIAL_KCAL_ESTIMATED_MACROS": 39
+ },
+ "byChain": {
+  "dominos": 59,
+  "shawarmer": 39
+ },
+ "rows": [
+  {
+   "id": "rst-dominos-buffalo-chicken-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا بافلو تشيكن (شريحة وسط 1/5)",
+   "nameEn": "Buffalo Chicken (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-buffalo-chicken-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا بافلو تشيكن (شريحة كبيرة 1/8)",
+   "nameEn": "Buffalo Chicken (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-deluxe-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا ديلوكس (شريحة وسط 1/5)",
+   "nameEn": "Deluxe (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-deluxe-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا ديلوكس (شريحة كبيرة 1/8)",
+   "nameEn": "Deluxe (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-extravaganzza-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا إكسترافاغانزا (شريحة وسط 1/5)",
+   "nameEn": "ExtravaganZZa (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-extravaganzza-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا إكسترافاغانزا (شريحة كبيرة 1/8)",
+   "nameEn": "ExtravaganZZa (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-meatzza-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا ميتزا (شريحة وسط 1/5)",
+   "nameEn": "MeatZZa (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-meatzza-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا ميتزا (شريحة كبيرة 1/8)",
+   "nameEn": "MeatZZa (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-memphis-bbq-chicken-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا دجاج باربكيو (شريحة وسط 1/5)",
+   "nameEn": "Memphis BBQ Chicken (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-memphis-bbq-chicken-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا دجاج باربكيو (شريحة كبيرة 1/8)",
+   "nameEn": "Memphis BBQ Chicken (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-pacific-veggie-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا خضار باسيفيك (شريحة وسط 1/5)",
+   "nameEn": "Pacific Veggie (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-pacific-veggie-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا خضار باسيفيك (شريحة كبيرة 1/8)",
+   "nameEn": "Pacific Veggie (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-philly-cheese-steak-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا فيلي تشيز ستيك (شريحة وسط 1/5)",
+   "nameEn": "Philly Cheese Steak (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-philly-cheese-steak-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا فيلي تشيز ستيك (شريحة كبيرة 1/8)",
+   "nameEn": "Philly Cheese Steak (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-spinach-feta-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا سبانخ وفيتا (شريحة وسط 1/5)",
+   "nameEn": "Spinach & Feta (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-spinach-feta-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا سبانخ وفيتا (شريحة كبيرة 1/8)",
+   "nameEn": "Spinach & Feta (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-ultimate-pepperoni-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا ألتيميت بيبروني (شريحة وسط 1/5)",
+   "nameEn": "Ultimate Pepperoni (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-ultimate-pepperoni-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا ألتيميت بيبروني (شريحة كبيرة 1/8)",
+   "nameEn": "Ultimate Pepperoni (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-wisconsin-6-cheese-m-1-5-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا ستّ أجبان (شريحة وسط 1/5)",
+   "nameEn": "Wisconsin 6 Cheese (M, 1/5 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-wisconsin-6-cheese-l-1-8-pizza",
+   "chain": "dominos",
+   "nameAr": "بيتزا ستّ أجبان (شريحة كبيرة 1/8)",
+   "nameEn": "Wisconsin 6 Cheese (L, 1/8 pizza)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-garlic-bread-twists-2-pieces",
+   "chain": "dominos",
+   "nameAr": "خبز بالثوم (قطعتان)",
+   "nameEn": "Garlic Bread Twists (2 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-parmesan-bread-twists-2-pieces",
+   "chain": "dominos",
+   "nameAr": "خبز بارميزان (قطعتان)",
+   "nameEn": "Parmesan Bread Twists (2 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-stuffed-cheesy-bread-1-piece",
+   "chain": "dominos",
+   "nameAr": "خبز محشو بالجبن (قطعة)",
+   "nameEn": "Stuffed Cheesy Bread (1 piece)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-pepperoni-stuffed-cheesy-bread-1-piece",
+   "chain": "dominos",
+   "nameAr": "خبز محشو بالجبن والبيبروني (قطعة)",
+   "nameEn": "Pepperoni Stuffed Cheesy Bread (1 piece)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-spinach-feta-stuffed-cheesy-bread-1-piece",
+   "chain": "dominos",
+   "nameAr": "خبز محشو بالسبانخ والفيتا (قطعة)",
+   "nameEn": "Spinach & Feta Stuffed Cheesy Bread (1 piece)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-parmesan-bread-bites-4-pieces",
+   "chain": "dominos",
+   "nameAr": "كرات خبز بارميزان (٤ قطع)",
+   "nameEn": "Parmesan Bread Bites (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-boneless-chicken-3-pieces",
+   "chain": "dominos",
+   "nameAr": "دجاج بلا عظم (٣ قطع)",
+   "nameEn": "Boneless Chicken (3 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-plain-wings-no-sauce-4-pieces",
+   "chain": "dominos",
+   "nameAr": "أجنحة دجاج سادة (٤ قطع)",
+   "nameEn": "Plain Wings (No sauce) (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-honey-bbq-wings-4-pieces",
+   "chain": "dominos",
+   "nameAr": "أجنحة باربكيو بالعسل (٤ قطع)",
+   "nameEn": "Honey BBQ Wings (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-hot-buffalo-wings-4-pieces",
+   "chain": "dominos",
+   "nameAr": "أجنحة بافلو حارّة (٤ قطع)",
+   "nameEn": "Hot Buffalo Wings (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-mild-buffalo-wings-4-pieces",
+   "chain": "dominos",
+   "nameAr": "أجنحة بافلو خفيفة (٤ قطع)",
+   "nameEn": "Mild Buffalo Wings (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-garlic-parmesan-wings-4-pieces",
+   "chain": "dominos",
+   "nameAr": "أجنحة ثوم وبارميزان (٤ قطع)",
+   "nameEn": "Garlic Parmesan Wings (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-sweet-mango-habanero-wings-4-pieces",
+   "chain": "dominos",
+   "nameAr": "أجنحة مانجو هابانيرو (٤ قطع)",
+   "nameEn": "Sweet Mango Habanero Wings (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-classic-hot-buffalo-loaded-chicken-4-pieces",
+   "chain": "dominos",
+   "nameAr": "دجاج محمَّل بافلو (٤ قطع)",
+   "nameEn": "Classic Hot Buffalo Loaded Chicken (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-spicy-jalapeno-pineapple-loaded-chicken-4-pieces",
+   "chain": "dominos",
+   "nameAr": "دجاج محمَّل هالبينو وأناناس (٤ قطع)",
+   "nameEn": "Spicy Jalapeno & Pineapple Loaded Chicken (4 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-chocolate-lava-crunch-cake-1-cake",
+   "chain": "dominos",
+   "nameAr": "كيك لافا شوكولاتة",
+   "nameEn": "Chocolate Lava Crunch Cake (1 cake)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-marbled-cookie-brownie-1-brownie",
+   "chain": "dominos",
+   "nameAr": "براوني كوكيز",
+   "nameEn": "Marbled Cookie Brownie (1 brownie)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-cinnamon-bread-twists-2-pieces",
+   "chain": "dominos",
+   "nameAr": "خبز قرفة (قطعتان)",
+   "nameEn": "Cinnamon Bread Twists (2 pieces)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-honey-bbq-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص باربكيو بالعسل (كوب)",
+   "nameEn": "Honey BBQ (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-blue-cheese-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص جبنة زرقاء (كوب)",
+   "nameEn": "Blue Cheese (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-garlic-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص ثوم (كوب)",
+   "nameEn": "Garlic (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-hot-buffalo-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص بافلو حار (كوب)",
+   "nameEn": "Hot Buffalo (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-marinara-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص مارينارا (كوب)",
+   "nameEn": "Marinara (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-ranch-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص رانش (كوب)",
+   "nameEn": "Ranch (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-sweet-icing-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص آيسنغ حلو (كوب)",
+   "nameEn": "Sweet Icing (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-sweet-mango-habanero-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص مانجو هابانيرو (كوب)",
+   "nameEn": "Sweet Mango Habanero (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-nacho-cheese-dipping-cup-1-cup",
+   "chain": "dominos",
+   "nameAr": "صوص جبنة ناتشو (كوب)",
+   "nameEn": "Nacho Cheese Dipping Cup (1 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-melty-3-cheese-loaded-tots-1-4-of-loaded-tots",
+   "chain": "dominos",
+   "nameAr": "بطاطس توتس بثلاث أجبان (ربع)",
+   "nameEn": "Melty 3-Cheese Loaded Tots (1/4 of Loaded Tots)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-philly-cheese-steak-loaded-tots-1-4-of-loaded-tots",
+   "chain": "dominos",
+   "nameAr": "بطاطس توتس فيلي (ربع)",
+   "nameEn": "Philly Cheese Steak Loaded Tots (1/4 of Loaded Tots)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-cheesy-marinara-dip-2-tbsp",
+   "chain": "dominos",
+   "nameAr": "غموس مارينارا بالجبن (ملعقتان)",
+   "nameEn": "Cheesy Marinara Dip (2 tbsp)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-5-cheese-dip-2-tbsp",
+   "chain": "dominos",
+   "nameAr": "غموس خمس أجبان (ملعقتان)",
+   "nameEn": "5-Cheese Dip (2 tbsp)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-buffalo-chicken-1-2-sandwich",
+   "chain": "dominos",
+   "nameAr": "ساندويتش بافلو تشيكن (نصف)",
+   "nameEn": "Buffalo Chicken (1/2 Sandwich)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-chicken-parm-1-2-sandwich",
+   "chain": "dominos",
+   "nameAr": "ساندويتش دجاج بارميزان (نصف)",
+   "nameEn": "Chicken Parm (1/2 Sandwich)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-philly-cheese-steak-1-2-sandwich",
+   "chain": "dominos",
+   "nameAr": "ساندويتش فيلي تشيز ستيك (نصف)",
+   "nameEn": "Philly Cheese Steak (1/2 Sandwich)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-sweet-spicy-chicken-habanero-1-2-sandwich",
+   "chain": "dominos",
+   "nameAr": "ساندويتش دجاج هابانيرو (نصف)",
+   "nameEn": "Sweet & Spicy Chicken Habanero (1/2 Sandwich)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-chicken-alfredo-1-dish",
+   "chain": "dominos",
+   "nameAr": "باستا دجاج ألفريدو (طبق)",
+   "nameEn": "Chicken Alfredo (1 dish)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-5-cheese-mac-cheese-1-dish",
+   "chain": "dominos",
+   "nameAr": "ماك آند تشيز خمس أجبان (طبق)",
+   "nameEn": "5-Cheese Mac & Cheese (1 Dish)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-spicy-buffalo-5-cheese-mac-cheese-1-dish",
+   "chain": "dominos",
+   "nameAr": "ماك آند تشيز بافلو حار (طبق)",
+   "nameEn": "Spicy Buffalo 5-Cheese Mac & Cheese (1 Dish)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-dominos-classic-garden-salad-1-5-cup",
+   "chain": "dominos",
+   "nameAr": "سلطة الحديقة (١٫٥ كوب)",
+   "nameEn": "Classic Garden Salad (1.5 cup)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official"
+  },
+  {
+   "id": "rst-shawarmer-bites-sarokh",
+   "chain": "shawarmer",
+   "nameAr": "صاروخ بايتس",
+   "nameEn": "Bites Sarokh",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-enjoooy-batranah",
+   "chain": "shawarmer",
+   "nameAr": "انبسطووووا بطرانة",
+   "nameEn": "Enjoooy Batranah",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-enjoooy-abo-alsawarikh",
+   "chain": "shawarmer",
+   "nameAr": "انبسطووووا أبو الصواريخ",
+   "nameEn": "Enjoooy Abo Alsawarikh",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-enjoooy-nahyfat",
+   "chain": "shawarmer",
+   "nameAr": "انبسطووووا نحيفات",
+   "nameEn": "Enjoooy Nahyfat",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-two-arabi",
+   "chain": "shawarmer",
+   "nameAr": "اثنين عربي",
+   "nameEn": "Two Arabi",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-abo-alsawarikh",
+   "chain": "shawarmer",
+   "nameAr": "أبو الصواريخ",
+   "nameEn": "Abo Alsawarikh",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-two-saji",
+   "chain": "shawarmer",
+   "nameAr": "اثنين صاجي",
+   "nameEn": "Two Saji",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-two-garsa-meal",
+   "chain": "shawarmer",
+   "nameAr": "اثنين قرصة وجبة",
+   "nameEn": "Two Garsa Meal",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-two-garsa",
+   "chain": "shawarmer",
+   "nameAr": "اثنين قرصة",
+   "nameEn": "Two Garsa",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-two-mafloqah",
+   "chain": "shawarmer",
+   "nameAr": "اثنين مفلوقة",
+   "nameEn": "Two Mafloqah",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-hamad-gonzalos",
+   "chain": "shawarmer",
+   "nameAr": "حمد قونزالوس",
+   "nameEn": "Hamad Gonzalos",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-alrahiyah",
+   "chain": "shawarmer",
+   "nameAr": "الراهية النسخة المدخنة",
+   "nameEn": "Alrahiyah",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-al-batranah",
+   "chain": "shawarmer",
+   "nameAr": "البطرانة",
+   "nameEn": "Al Batranah",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-nahyfat",
+   "chain": "shawarmer",
+   "nameAr": "نحيفات",
+   "nameEn": "Nahyfat",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-sabbah",
+   "chain": "shawarmer",
+   "nameAr": "صبة",
+   "nameEn": "Sabbah",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-shatshaweesh",
+   "chain": "shawarmer",
+   "nameAr": "شطشويش",
+   "nameEn": "Shatshaweesh",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-tannouri",
+   "chain": "shawarmer",
+   "nameAr": "تنوري",
+   "nameEn": "Tannouri",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-abo-khalta",
+   "chain": "shawarmer",
+   "nameAr": "أبو خلطة",
+   "nameEn": "Abo Khalta",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-keto-shawarma",
+   "chain": "shawarmer",
+   "nameAr": "شاورما كيتو",
+   "nameEn": "Keto Shawarma",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-althaybah",
+   "chain": "shawarmer",
+   "nameAr": "الذايبة",
+   "nameEn": "Althaybah",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-arabo-chicken-double-box",
+   "chain": "shawarmer",
+   "nameAr": "دبل عربو دجاج بوكس",
+   "nameEn": "Arabo Chicken Double Box",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-arabo-chicken-box",
+   "chain": "shawarmer",
+   "nameAr": "عربو دجاج بوكس",
+   "nameEn": "Arabo Chicken Box",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-alsandouk",
+   "chain": "shawarmer",
+   "nameAr": "الصندوق",
+   "nameEn": "Alsandouk",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-sahen",
+   "chain": "shawarmer",
+   "nameAr": "صحن",
+   "nameEn": "Sahen",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-falafel-box",
+   "chain": "shawarmer",
+   "nameAr": "فلافل بوكس",
+   "nameEn": "Falafel Box",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-raj-raj",
+   "chain": "shawarmer",
+   "nameAr": "رجرج",
+   "nameEn": "Raj Raj",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-spicy-raj-raj",
+   "chain": "shawarmer",
+   "nameAr": "رجرج حار",
+   "nameEn": "Spicy Raj Raj",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-protein-51",
+   "chain": "shawarmer",
+   "nameAr": "بروتين 51",
+   "nameEn": "Protein 51",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-salad-al-salad",
+   "chain": "shawarmer",
+   "nameAr": "سلطة السلطة",
+   "nameEn": "Salad Al Salad",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-world-cup-gathering",
+   "chain": "shawarmer",
+   "nameAr": "جمعات كاس العالم",
+   "nameEn": "World Cup Gathering",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-al-azeima",
+   "chain": "shawarmer",
+   "nameAr": "العزيمة",
+   "nameEn": "Al Azeima",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-tagamees",
+   "chain": "shawarmer",
+   "nameAr": "تغاميس",
+   "nameEn": "Tagamees",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-shawarma-nachos",
+   "chain": "shawarmer",
+   "nameAr": "ناتشو شاورما",
+   "nameEn": "Shawarma Nachos",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-mozzarella-sticks",
+   "chain": "shawarmer",
+   "nameAr": "أصابع موزاريلا",
+   "nameEn": "Mozzarella Sticks",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-chicken-bites",
+   "chain": "shawarmer",
+   "nameAr": "تشيكن بايتس",
+   "nameEn": "Chicken Bites",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-family-fries",
+   "chain": "shawarmer",
+   "nameAr": "بطاطس جمعات",
+   "nameEn": "Family Fries",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-family-spicy-fries",
+   "chain": "shawarmer",
+   "nameAr": "بطاطس جمعات حار",
+   "nameEn": "Family Spicy Fries",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-fries-medium",
+   "chain": "shawarmer",
+   "nameAr": "بطاطس مقلية وسط",
+   "nameEn": "Fries Medium",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  },
+  {
+   "id": "rst-shawarmer-spicy-fries-medium",
+   "chain": "shawarmer",
+   "nameAr": "بطاطس مقلية حارة وسط",
+   "nameEn": "Spicy Fries Medium",
+   "status": "OFFICIAL_KCAL_ESTIMATED_MACROS",
+   "macros": "partial-estimated"
+  }
+ ]
 }

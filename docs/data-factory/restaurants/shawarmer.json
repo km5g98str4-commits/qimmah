@@ -20,7 +20,7 @@
  "items": [
   {
    "id": "bites-sarokh",
-   "nameAr": null,
+   "nameAr": "صاروخ بايتس",
    "nameEn": "Bites Sarokh",
    "sourceName": "Bites Sarokh",
    "kcal": 1111,
@@ -33,7 +33,7 @@
   },
   {
    "id": "enjoooy-batranah",
-   "nameAr": null,
+   "nameAr": "انبسطووووا بطرانة",
    "nameEn": "Enjoooy Batranah",
    "sourceName": "Enjoooy Batranah",
    "kcal": 1896,
@@ -46,7 +46,7 @@
   },
   {
    "id": "enjoooy-abo-alsawarikh",
-   "nameAr": null,
+   "nameAr": "انبسطووووا أبو الصواريخ",
    "nameEn": "Enjoooy Abo Alsawarikh",
    "sourceName": "Enjoooy Abo Alsawarikh",
    "kcal": 1347,
@@ -59,7 +59,7 @@
   },
   {
    "id": "enjoooy-nahyfat",
-   "nameAr": null,
+   "nameAr": "انبسطووووا نحيفات",
    "nameEn": "Enjoooy Nahyfat",
    "sourceName": "Enjoooy Nahyfat",
    "kcal": 1478,
@@ -67,16 +67,16 @@
    "type": "wrap",
    "servingLabelAr": "حبة",
    "keywords": [],
-   "descEn": "3 chicken toasted shawarma with mutawam sauce. served with fries, mutawam sauceand gum.",
+   "descEn": "3 chicken toasted shawarma with mutawam sauce. served with fries, mutawam sauce.",
    "priceSar": 22
   },
   {
    "id": "two-arabi",
-   "nameAr": null,
+   "nameAr": "اثنين عربي",
    "nameEn": "Two Arabi",
    "sourceName": "Two Arabi",
    "kcal": 864,
-   "protein": 42,
+   "protein": 43,
    "type": "wrap",
    "servingLabelAr": "حبة",
    "keywords": [],
@@ -85,7 +85,7 @@
   },
   {
    "id": "abo-alsawarikh",
-   "nameAr": null,
+   "nameAr": "أبو الصواريخ",
    "nameEn": "Abo Alsawarikh",
    "sourceName": "Abo Alsawarikh",
    "kcal": 619,
@@ -98,7 +98,7 @@
   },
   {
    "id": "two-saji",
-   "nameAr": null,
+   "nameAr": "اثنين صاجي",
    "nameEn": "Two Saji",
    "sourceName": "Two Saji",
    "kcal": 816,
@@ -110,8 +110,21 @@
    "priceSar": 20
   },
   {
+   "id": "two-garsa-meal",
+   "nameAr": "اثنين قرصة وجبة",
+   "nameEn": "Two Garsa Meal",
+   "sourceName": "Two Garsa Meal",
+   "kcal": 778,
+   "protein": 24,
+   "type": "wrap",
+   "servingLabelAr": "حبة",
+   "keywords": [],
+   "descEn": "2 chicken shawarma in garsan bread with fries, pickles, and mutawam sauce, served with fries and a soft drink.",
+   "priceSar": 24
+  },
+  {
    "id": "two-garsa",
-   "nameAr": null,
+   "nameAr": "اثنين قرصة",
    "nameEn": "Two Garsa",
    "sourceName": "Two Garsa",
    "kcal": 406,
@@ -124,7 +137,7 @@
   },
   {
    "id": "two-mafloqah",
-   "nameAr": null,
+   "nameAr": "اثنين مفلوقة",
    "nameEn": "Two Mafloqah",
    "sourceName": "Two Mafloqah",
    "kcal": 712,
@@ -137,7 +150,7 @@
   },
   {
    "id": "hamad-gonzalos",
-   "nameAr": null,
+   "nameAr": "حمد قونزالوس",
    "nameEn": "Hamad Gonzalos",
    "sourceName": "Hamad Gonzalos",
    "kcal": 903,
@@ -150,7 +163,7 @@
   },
   {
    "id": "alrahiyah",
-   "nameAr": null,
+   "nameAr": "الراهية النسخة المدخنة",
    "nameEn": "Alrahiyah",
    "sourceName": "Alrahiyah",
    "kcal": 1154,
@@ -163,7 +176,7 @@
   },
   {
    "id": "al-batranah",
-   "nameAr": null,
+   "nameAr": "البطرانة",
    "nameEn": "Al Batranah",
    "sourceName": "Al Batranah",
    "kcal": 1177,
@@ -176,7 +189,7 @@
   },
   {
    "id": "nahyfat",
-   "nameAr": null,
+   "nameAr": "نحيفات",
    "nameEn": "Nahyfat",
    "sourceName": "Nahyfat",
    "kcal": 734,
@@ -189,7 +202,7 @@
   },
   {
    "id": "sabbah",
-   "nameAr": null,
+   "nameAr": "صبة",
    "nameEn": "Sabbah",
    "sourceName": "Sabbah",
    "kcal": 1337,
@@ -202,7 +215,7 @@
   },
   {
    "id": "shatshaweesh",
-   "nameAr": null,
+   "nameAr": "شطشويش",
    "nameEn": "Shatshaweesh",
    "sourceName": "Shatshaweesh",
    "kcal": 803,
@@ -215,7 +228,7 @@
   },
   {
    "id": "tannouri",
-   "nameAr": null,
+   "nameAr": "تنوري",
    "nameEn": "Tannouri",
    "sourceName": "Tannouri",
    "kcal": 714,
@@ -228,7 +241,7 @@
   },
   {
    "id": "abo-khalta",
-   "nameAr": null,
+   "nameAr": "أبو خلطة",
    "nameEn": "Abo Khalta",
    "sourceName": "Abo Khalta",
    "kcal": 823,
@@ -241,7 +254,7 @@
   },
   {
    "id": "keto-shawarma",
-   "nameAr": null,
+   "nameAr": "شاورما كيتو",
    "nameEn": "Keto Shawarma",
    "sourceName": "Keto Shawarma",
    "kcal": 574,
@@ -254,7 +267,7 @@
   },
   {
    "id": "althaybah",
-   "nameAr": null,
+   "nameAr": "الذايبة",
    "nameEn": "Althaybah",
    "sourceName": "Althaybah",
    "kcal": 1662,
@@ -267,7 +280,7 @@
   },
   {
    "id": "arabo-chicken-double-box",
-   "nameAr": null,
+   "nameAr": "دبل عربو دجاج بوكس",
    "nameEn": "Arabo Chicken Double Box",
    "sourceName": "Arabo Chicken Double Box",
    "kcal": 2164,
@@ -280,7 +293,7 @@
   },
   {
    "id": "arabo-chicken-box",
-   "nameAr": null,
+   "nameAr": "عربو دجاج بوكس",
    "nameEn": "Arabo Chicken Box",
    "sourceName": "Arabo Chicken Box",
    "kcal": 1312,
@@ -293,7 +306,7 @@
   },
   {
    "id": "alsandouk",
-   "nameAr": null,
+   "nameAr": "الصندوق",
    "nameEn": "Alsandouk",
    "sourceName": "Alsandouk",
    "kcal": 1451,
@@ -306,7 +319,7 @@
   },
   {
    "id": "sahen",
-   "nameAr": null,
+   "nameAr": "صحن",
    "nameEn": "Sahen",
    "sourceName": "Sahen",
    "kcal": 1456,
@@ -319,7 +332,7 @@
   },
   {
    "id": "falafel-box",
-   "nameAr": null,
+   "nameAr": "فلافل بوكس",
    "nameEn": "Falafel Box",
    "sourceName": "Falafel Box",
    "kcal": 851,
@@ -332,7 +345,7 @@
   },
   {
    "id": "raj-raj",
-   "nameAr": null,
+   "nameAr": "رجرج",
    "nameEn": "Raj Raj",
    "sourceName": "Raj Raj",
    "kcal": 744,
@@ -345,7 +358,7 @@
   },
   {
    "id": "spicy-raj-raj",
-   "nameAr": null,
+   "nameAr": "رجرج حار",
    "nameEn": "Spicy Raj Raj",
    "sourceName": "Spicy Raj Raj",
    "kcal": 733,
@@ -358,7 +371,7 @@
   },
   {
    "id": "protein-51",
-   "nameAr": null,
+   "nameAr": "بروتين 51",
    "nameEn": "Protein 51",
    "sourceName": "Protein 51",
    "kcal": 410,
@@ -371,7 +384,7 @@
   },
   {
    "id": "salad-al-salad",
-   "nameAr": null,
+   "nameAr": "سلطة السلطة",
    "nameEn": "Salad Al Salad",
    "sourceName": "Salad Al Salad",
    "kcal": 277,
@@ -384,7 +397,7 @@
   },
   {
    "id": "world-cup-gathering",
-   "nameAr": null,
+   "nameAr": "جمعات كاس العالم",
    "nameEn": "World Cup Gathering",
    "sourceName": "World Cup Gathering",
    "kcal": 7728,
@@ -397,7 +410,7 @@
   },
   {
    "id": "al-azeima",
-   "nameAr": null,
+   "nameAr": "العزيمة",
    "nameEn": "Al Azeima",
    "sourceName": "Al Azeima",
    "kcal": 4069,
@@ -410,7 +423,7 @@
   },
   {
    "id": "tagamees",
-   "nameAr": null,
+   "nameAr": "تغاميس",
    "nameEn": "Tagamees",
    "sourceName": "Tagamees",
    "kcal": 2034,
@@ -423,7 +436,7 @@
   },
   {
    "id": "shawarma-nachos",
-   "nameAr": null,
+   "nameAr": "ناتشو شاورما",
    "nameEn": "Shawarma Nachos",
    "sourceName": "Shawarma Nachos",
    "kcal": 444,
@@ -436,7 +449,7 @@
   },
   {
    "id": "mozzarella-sticks",
-   "nameAr": null,
+   "nameAr": "أصابع موزاريلا",
    "nameEn": "Mozzarella Sticks",
    "sourceName": "Mozzarella Sticks",
    "kcal": 259,
@@ -449,7 +462,7 @@
   },
   {
    "id": "chicken-bites",
-   "nameAr": null,
+   "nameAr": "تشيكن بايتس",
    "nameEn": "Chicken Bites",
    "sourceName": "Chicken Bites",
    "kcal": 533,
@@ -462,7 +475,7 @@
   },
   {
    "id": "family-fries",
-   "nameAr": null,
+   "nameAr": "بطاطس جمعات",
    "nameEn": "Family Fries",
    "sourceName": "Family Fries",
    "kcal": 1334,
@@ -475,7 +488,7 @@
   },
   {
    "id": "family-spicy-fries",
-   "nameAr": null,
+   "nameAr": "بطاطس جمعات حار",
    "nameEn": "Family Spicy Fries",
    "sourceName": "Family Spicy Fries",
    "kcal": 1408,
@@ -487,34 +500,8 @@
    "priceSar": 23
   },
   {
-   "id": "fries-large",
-   "nameAr": null,
-   "nameEn": "Fries Large",
-   "sourceName": "Fries Large",
-   "kcal": 445,
-   "protein": 3,
-   "type": "fries",
-   "servingLabelAr": "حبة",
-   "keywords": [],
-   "descEn": "French fries large",
-   "priceSar": 13
-  },
-  {
-   "id": "spicy-fries-large",
-   "nameAr": null,
-   "nameEn": "Spicy Fries Large",
-   "sourceName": "Spicy Fries Large",
-   "kcal": 469,
-   "protein": 3,
-   "type": "fries",
-   "servingLabelAr": "حبة",
-   "keywords": [],
-   "descEn": "Spicy fries large",
-   "priceSar": 15
-  },
-  {
    "id": "fries-medium",
-   "nameAr": null,
+   "nameAr": "بطاطس مقلية وسط",
    "nameEn": "Fries Medium",
    "sourceName": "Fries Medium",
    "kcal": 361,
@@ -527,7 +514,7 @@
   },
   {
    "id": "spicy-fries-medium",
-   "nameAr": null,
+   "nameAr": "بطاطس مقلية حارة وسط",
    "nameEn": "Spicy Fries Medium",
    "sourceName": "Spicy Fries Medium",
    "kcal": 381,
