@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  
+  <title>Page not found</title>
+  <script nonce="5RHBqJRLGl4VuYm7QQyiJvxe" type="text/javascript">
+    window.isErrorPage = true;
+    window.errorCode = '404';
+
+    let localeSegment = (window.location.pathname.split('/').filter(Boolean)[0] || 'en-us').trim();
+    if (localeSegment === '/') {
+      localeSegment = 'en-us';
+    }
+
+    const navMeta = document.createElement('meta');
+    navMeta.name = 'nav';
+    navMeta.content = `/${localeSegment}/nav`;
+    document.head.appendChild(navMeta);
+
+    const footerMeta = document.createElement('meta');
+    footerMeta.name = 'footer';
+    footerMeta.content = `/${localeSegment}/footer`;
+    document.head.appendChild(footerMeta);
+
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta property="og:title" content="Page not found">
+  <script nonce="5RHBqJRLGl4VuYm7QQyiJvxe" src="/scripts/scripts.js" type="module"></script>
+  <script nonce="5RHBqJRLGl4VuYm7QQyiJvxe" type="module">
+    import { sampleRUM } from '/scripts/aem.js';
+    import { fetchLocalePlaceholders } from '/scripts/placeholder.js';
+
+    sampleRUM('404', { source: document.referrer });
+
+    const p = await fetchLocalePlaceholders();
+
+    const titleEl = document.querySelector('.error-title');
+    const descEl = document.querySelector('.error-desc');
+    const btnEl = document.querySelector('.error-button-home');
+
+    if (p.errorTitle && titleEl) titleEl.textContent = p.errorTitle;
+    if (p.errorTitle) document.title = p.errorTitle;
+    const desc = p.errorDescription ?? p.errorDescritpion;
+    if (desc && descEl) descEl.textContent = desc;
+    if (p.errorButtonText && btnEl) btnEl.textContent = p.errorButtonText;
+  </script>
+  <link rel="stylesheet" href="/styles/tailwind.css">
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/styles/lazy-styles.css">
+</head>
+
+<body>
+  <header></header>
+  <main class="error">
+    <div class="section itemnotfound">
+      <h2 class="error-title">Oops! This page doesn’t exist.</h2>
+      <p class="error-desc">We’re working quickly to fix it so you can get back to ordering your favorite
+        Footlong subs. To order ahead and earn Subway MyWay® Rewards, please download our iOS or Android mobile app.
+      </p>
+      <p class="button-container">
+        <a href="/" class="button btn-primary error-button-home">Back to Home</a>
+      </p>
+    </div>
+  </main>
+  <footer></footer>
+<script type="text/javascript" nonce="03f0dbf0f248e0efa96d40eb4f752d5e" src="/nKyIb/6kRo/3a-8/1X/LfMnF/5hkO8GwQEOSwwQ/bUw8AQ/FzZt/NkM1JXA"></script><link rel="stylesheet" type="text/css" nonce="03f0dbf0f248e0efa96d40eb4f752d5e" href="/nKyIb/6kRo/3a-8/1X/LfMnF/Vk/IBMlAQ/XzJP/b3UzPC9X"><script nonce="03f0dbf0f248e0efa96d40eb4f752d5e" src="/nKyIb/6kRo/3a-8/1X/LfMnF/Vk/IBMlAQ/FHVn/fBdyBCkp" async defer></script><div id="sec-overlay" style="display:none;"><div id="sec-container"></div></div></body>
+
+</html>

@@ -1,0 +1,28 @@
+Nutrition
+Nutrition &#x26; Allergies
+Nutrition details
+Let us fuel you. And your taste buds. Learn more about our ingredients, allergy information and nutrition facts.
+style
+contained, equal-padding
+Nutrition Data Tables (USA)
+https://media.subway.com/dam/urn:aaid:aem:2278372c-147b-42f2-8edc-7d8d94d1f07e/original/as/us-nutrition-en.pdf
+Allergy &#x26; Ingredient Info (USA)
+https://media.subway.com/dam/urn:aaid:aem:c47e1a3c-6d6c-45c0-8186-c9f4c183646a/original/as/us-allergens-en.pdf
+Ingredient Guide (USA)
+https://media.subway.com/dam/urn:aaid:aem:aa3ade30-7496-41bd-a7e1-4964bebb89de/original/as/us-ingredients-en.pdf
+style
+equal-padding, contained
+Craving more?
+Find answers to your nutrition and ingredient questions.
+FAQS
+https://subway.service-now.com/guest_csp?lang=en&#x26;country=US
+Read More
+btn-secondary btn-light
+style
+full-bleed
+Order how you want, when you want
+Getting Subway® has never been easier!
+ORDER NOW
+https://apps.apple.com/us/app/subway/id901941015
+https://play.google.com/store/apps/details?id=com.subway.mobile.subwayapp03&#x26;hl=en
+true
