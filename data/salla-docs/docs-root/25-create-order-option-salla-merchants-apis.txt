@@ -1,0 +1,427 @@
+# Create Order Option- Salla Merchants APIs
+# https://docs.salla.dev/order-options/create
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Order Status
+Order Histories
+Order Options
+Create Order Option
+POST
+Update Order Option
+PUT
+List Order Options
+GET
+Delete Order Options
+DELETE
+Order Option Details
+GET
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+Order Options
+MCP
+Copy Page
+Create Order Option
+Production
+POST
+https://api.salla.dev/admin/v2/orders/options
+Try it
+Last modified:
+6 days ago
+This endpoint allows you to create an order option associated with an order.
+Scopes
+orders.read_write - Orders Read & Write
+Request
+Authorization
+Add the parameter Authorization to Headers，whose value is to concatenate the Token after the Bearer.
+Example:
+Authorization: Bearer ********************
+Body Params
+application/json
+Generate Code
+Dynamic cart-level options that allow users to make selections during checkout
+name
+string 
+required
+The label or textual identifier for the checkout field option
+description
+string  | 
+null 
+optional
+Additional details about this checkout field option
+is_required
+string 
+optional
+Whether this field is mandatory during checkout
+type
+enum<string> 
+required
+The type of input field to render
+Allowed values:
+text
+Text input field
+number
+Numeric input field
+checkbox
+Checkbox selection
+date
+Date picker field
+length
+integer 
+optional
+Maximum length for text/number input fields
+is_multi_choice
+boolean 
+optional
+Whether multiple selections are allowed
+selected_products
+boolean 
+optional
+Whether this option applies to specific products
+categories
+array[integer]
+optional
+The Product Categories this option applies to
+price
+number 
+optional
+Price adjustment for this option
+options
+object 
+optional
+Configuration for option choices
+name
+string 
+required
+Name of the option choice
+price
+integer  | 
+null 
+optional
+Price adjustment for this option choiceThe ad
+cost
+integer  | 
+null 
+optional
+Cost associated with this option choice
+weight
+integer  | 
+null 
+optional
+Weight adjustment for this option choice
+is_default
+boolean 
+optional
+The default choice in the cart
+Default:
+false
+booking_details
+object 
+optional
+Configuration for bookable options
+type
+enum<string> 
+required
+Type of booking date selection
+Allowed values:
+date
+Date only selection
+date_time
+Date and time selection
+location
+string 
+optional
+Location where the booking takes place
+sessions_count
+integer 
+required
+Number of sessions included in the booking
+time_strict
+integer 
+required
+Time restriction value for bookings
+time_strict_type
+string 
+required
+Type of time restriction for the booking
+maximum_quantity_per_order
+integer 
+optional
+Maximum number of bookings allowed per order
+availabilities
+array [object] 
+required
+Available booking slots
+overrides
+array [object] 
+optional
+List of scheduling overrides
+Example
+{
+    "name": "Order Option Name",
+    "description": "Order Option Description",
+    "is_required": true,
+    "type": "text",
+    "length": "80|200",
+    "is_multi_choice": false,
+    "selected_products": true,
+    "categories": [
+        212,
+        223,
+        224
+    ]
+}
+Request Code Samples
+Shell
+JavaScript
+Java
+Swift
+Go
+PHP
+Python
+HTTP
+C
+C#
+Objective-C
+Ruby
+OCaml
+Dart
+R
+Responses
+🟢200
+Success
+application/json
+Generate Code
+status
+integer 
+required
+Response status code, a numeric or alphanumeric identifier used to convey the outcome or status of a request, operation, or transaction in various systems and applications, typically indicating whether the action was successful, encountered an error, or resulted in a specific condition.
+success
+boolean 
+required
+Response flag, boolean indicator used to signal a particular condition or state in the response of a system or application, often representing the presence or absence of certain conditions or outcomes.
+data
+object 
+(Order Options)
+Order Options
+required
+id
+integer 
+optional
+Unique identifier associated with the order option
+name
+string 
+optional
+Title or lable of the order option
+reference_id
+integer 
+optional
+Unique identifier associated with the refrence
+description
+string 
+optional
+Description of the order options
+status
+boolean 
+optional
+The status of the order options
+is_required
+boolean 
+optional
+Whether or not the order option is required
+type
+enum<string> 
+optional
+Type of the order option
+Allowed values:
+date
+The date of the booking option
+checkbox
+The selected order option type
+text
+The selected description of the order option
+number
+The selected order option number
+date_time
+The selected order option date and time of the order option
+length
+string 
+optional
+Length of order option.
+is_multi_choice
+boolean 
+optional
+Whether or not order option is multi option.
+selected_products
+boolean 
+optional
+Whether or not order options is in the selected products.
+categories
+array [object] 
+optional
+Order options categories
+price
+integer 
+optional
+Monetary value of the order option.
+currency
+string 
+optional
+Currency of the order option price.
+options
+array [object] 
+optional
+List of options for the order.
+booking_details
+object 
+optional
+Configuration for bookable options.
+session_duration
+integer 
+optional
+The duration the session.
+session_gap
+integer 
+optional
+The time between sessions
+Examples
+Text Option
+Number Option
+Checkbox Option
+Days Option
+Days & Times Option
+{
+    "status": 200,
+    "success": true,
+    "data": {
+        "id": 123456789,
+        "name": "Order Option Name",
+        "description": "Order Option Description",
+        "is_required": true,
+        "type": "text",
+        "status": true,
+        "length": "80|200",
+        "is_multi_choice": false,
+        "selected_products": true,
+        "categories": [
+            {
+                "id": 123456788,
+                "name": "category name"
+            },
+            {
+                "id": 123456789,
+                "name": "another category name"
+            }
+        ],
+        "price": 0,
+        "currency": "SAR"
+    }
+}
+🟠404
+Not Found
+🟠422
+Error Validation
+🟠401
+Uauthorized
+🟠422
+Max Number of Options Exceeded
+Modified at 6 days ago
+Previous
+Order Options
+Next
+Update Order Option
+LLMs.txt
+Export

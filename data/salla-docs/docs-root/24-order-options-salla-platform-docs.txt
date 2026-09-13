@@ -1,0 +1,132 @@
+# Order Options - Salla Platform Docs
+# https://docs.salla.dev/841787f0
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Order Status
+Order Histories
+Order Options
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+APIs
+Copy Page
+Order Options
+Create Order Option
+POST
+/orders/options
+This endpoint allows you to create an order option associated with an order.orders.read_write - Orders Read &amp; Write
+Update Order Option
+PUT
+/orders/options/{id}
+This endpoint allows you to update a specific order option associated with an order. `orders.read_write` - Orders Read & Write
+List Order Options
+GET
+/orders/options
+This endpoint allows you to list all available order options. `orders.read` - Orders Read Only
+Delete Order Options
+DELETE
+/orders/options/{id}
+This endpoint allows you to delete a particular option from a specific order by passing the id as a path parameter for the order and the option_id as ...
+Order Option Details
+GET
+/orders/options/{id}
+This endpoint allows you to list a specific order option details `orders.read` - Orders Read Only
+Previous
+Create Order History
+Next
+Create Order Option
+LLMs.txt
+Export

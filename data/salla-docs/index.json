@@ -1,0 +1,893 @@
+{
+  "fetchedAt": "2026-09-13T14:43:37.272Z",
+  "seeds": [
+    {
+      "slug": "docs-merchant-index",
+      "url": "https://docs.salla.dev/docs/merchant",
+      "pages": [
+        {
+          "file": "00-seed.txt",
+          "title": "Salla Platform Docs",
+          "url": "https://docs.salla.dev/docs/merchant",
+          "bytes": 31
+        }
+      ]
+    },
+    {
+      "slug": "docs-root",
+      "url": "https://docs.salla.dev/",
+      "pages": [
+        {
+          "file": "00-seed.txt",
+          "title": "Salla Partners' documentations",
+          "url": "https://docs.salla.dev/",
+          "bytes": 4675
+        },
+        {
+          "file": "01-create-your-first-app-salla-platform-docs.txt",
+          "title": "Create Your First App - Salla Platform Docs",
+          "url": "https://docs.salla.dev/create-app",
+          "bytes": 8212
+        },
+        {
+          "file": "02-webhooks.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/webhooks",
+          "bytes": 0
+        },
+        {
+          "file": "03-conditional-webhooks-merchant-api-salla-docs.txt",
+          "title": "Conditional Webhooks - Merchant API | Salla Docs",
+          "url": "https://docs.salla.dev/conditional-webhooks",
+          "bytes": 8024
+        },
+        {
+          "file": "04-create-order.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/create",
+          "bytes": 0
+        },
+        {
+          "file": "05-relocate-order-stock.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/relocate-order",
+          "bytes": 0
+        },
+        {
+          "file": "06-external-orders.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/external-orders",
+          "bytes": 0
+        },
+        {
+          "file": "07-list-orders.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/list",
+          "bytes": 0
+        },
+        {
+          "file": "08-order-details.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/details",
+          "bytes": 0
+        },
+        {
+          "file": "09-create-drafted-order.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/drafted-order",
+          "bytes": 0
+        },
+        {
+          "file": "10-update-order.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/update",
+          "bytes": 0
+        },
+        {
+          "file": "11-duplicate-order.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/duplicate",
+          "bytes": 0
+        },
+        {
+          "file": "12-order-actions.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/orders/order-actions",
+          "bytes": 0
+        },
+        {
+          "file": "13-order-status.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/841786f0",
+          "bytes": 0
+        },
+        {
+          "file": "14-update-order-status.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-status/update-order-status",
+          "bytes": 0
+        },
+        {
+          "file": "15-create-custom-order-status.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-status/create-custom-order-status",
+          "bytes": 0
+        },
+        {
+          "file": "16-list-order-statuses.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-status/list-order-statuses",
+          "bytes": 0
+        },
+        {
+          "file": "17-order-status-details.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-status/order-status-details",
+          "bytes": 0
+        },
+        {
+          "file": "18-update-custom-order-status.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-status/update-custom-order-status",
+          "bytes": 0
+        },
+        {
+          "file": "19-update-bulk-orders-statuses.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-status/update-bulk-order-statuses",
+          "bytes": 0
+        },
+        {
+          "file": "20-sort-orders-statuses.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-status/sort-order-statuses",
+          "bytes": 0
+        },
+        {
+          "file": "21-order-histories-salla-platform-docs.txt",
+          "title": "Order Histories - Salla Platform Docs",
+          "url": "https://docs.salla.dev/841790f0",
+          "bytes": 1775
+        },
+        {
+          "file": "22-list-orders-histories-salla-merchant-api-salla-docs.txt",
+          "title": "List Orders Histories - Salla Merchant API | Salla Docs",
+          "url": "https://docs.salla.dev/order-histories/list",
+          "bytes": 5374
+        },
+        {
+          "file": "23-create-orders-histories-salla-merchant-api-salla-docs.txt",
+          "title": "Create Orders Histories - Salla Merchant API | Salla Docs",
+          "url": "https://docs.salla.dev/order-histories/create",
+          "bytes": 4001
+        },
+        {
+          "file": "24-order-options-salla-platform-docs.txt",
+          "title": "Order Options - Salla Platform Docs",
+          "url": "https://docs.salla.dev/841787f0",
+          "bytes": 2171
+        },
+        {
+          "file": "25-create-order-option-salla-merchants-apis.txt",
+          "title": "Create Order Option- Salla Merchants APIs",
+          "url": "https://docs.salla.dev/order-options/create",
+          "bytes": 7224
+        },
+        {
+          "file": "26-update-order-option.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-options/update",
+          "bytes": 0
+        },
+        {
+          "file": "27-list-order-options.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-options/list",
+          "bytes": 0
+        },
+        {
+          "file": "28-delete-order-options.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-options/delete",
+          "bytes": 0
+        },
+        {
+          "file": "29-order-option-details.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-options/details",
+          "bytes": 0
+        },
+        {
+          "file": "30-order-assignment.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/889079f0",
+          "bytes": 0
+        },
+        {
+          "file": "31-list-auto-assignment-rules.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-assignment/list",
+          "bytes": 0
+        },
+        {
+          "file": "32-update-auto-assignment-rule.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-assignment/update",
+          "bytes": 0
+        },
+        {
+          "file": "33-create-auto-assignment-rules.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-assignment/create",
+          "bytes": 0
+        },
+        {
+          "file": "34-order-assigned-employees-details.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-assignment/details",
+          "bytes": 0
+        },
+        {
+          "file": "35-order-invoice.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/841788f0",
+          "bytes": 0
+        },
+        {
+          "file": "36-create-invoice.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-invoice/create",
+          "bytes": 0
+        },
+        {
+          "file": "37-list-invoices.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-invoice/list",
+          "bytes": 0
+        },
+        {
+          "file": "38-invoice-details.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-invoice/details",
+          "bytes": 0
+        },
+        {
+          "file": "39-send-order-invoice.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-invoice/send",
+          "bytes": 0
+        },
+        {
+          "file": "40-create-order-invoice.txt",
+          "title": "",
+          "url": "https://docs.salla.dev/order-invoice/create-order",
+          "bytes": 0
+        }
+      ]
+    },
+    {
+      "slug": "help-index",
+      "url": "https://help.salla.sa/",
+      "pages": [
+        {
+          "file": "00-seed.txt",
+          "title": "مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/",
+          "bytes": 34392
+        },
+        {
+          "file": "01-أدر-إشعارات-webhooks-واربط-خدماتك-مركز-المساعدة-سلة.txt",
+          "title": "أدر إشعارات Webhooks واربط خدماتك | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B1%D8%B3%D8%A7%D9%84-%D8%A7%D9%84%D8%A5%D8%AE%D8%B7%D8%A7%D8%B1%D8%A7%D8%AA-%D9%84%D8%AE%D8%AF%D9%85%D8%A7%D8%AA-%D8%A3%D8%AE%D8%B1%D9%89-%D8%B9%D8%A8%D8%B1-%D8%A7%D9%84%D9%88%D9%8A%D8%A8-%D9%87%D9%88%D9%83-webhooks-1/fzsikgjw2m8dfm8j5ep2ez4e",
+          "bytes": 42126
+        },
+        {
+          "file": "02-احمِ-حقوق-ملفات-منتجاتك-الرقمية-مركز-المساعدة-سلة.txt",
+          "title": "احمِ حقوق ملفات منتجاتك الرقمية | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AD%D9%85%D8%A7%D9%8A%D8%A9-%D8%A7%D9%84%D8%AD%D9%82%D9%88%D9%82-%D8%A7%D9%84%D9%81%D9%83%D8%B1%D9%8A%D8%A9-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A-1/djhm5xfcrvl3e1ulrqg8nzts",
+          "bytes": 37916
+        },
+        {
+          "file": "03-أضف-gtin-وmpn-لتحسين-ظهور-المنتجات-مركز-المساعدة-سلة.txt",
+          "title": "أضف GTIN وMPN لتحسين ظهور المنتجات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-mpn-gtin-%D9%84%D8%AA%D8%B9%D8%B2%D9%8A%D8%B2-%D8%B8%D9%87%D9%88%D8%B1-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D8%B9%D9%84%D9%89-%D9%85%D8%AD%D8%B1%D9%83%D8%A7%D8%AA-%D8%A7%D9%84%D8%A8%D8%AD%D8%AB/e66aj1t93yqvmixcw3dk06t2",
+          "bytes": 44010
+        },
+        {
+          "file": "04-إضافة-صور-وفيديوهات-المنتج-مركز-المساعدة-سلة.txt",
+          "title": "إضافة صور وفيديوهات المنتج | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D8%B5%D9%88%D8%B1-%D9%88%D9%81%D9%8A%D8%AF%D9%8A%D9%88%D9%87%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/o67hdm4qs3h30gubvyfk7v9y",
+          "bytes": 42841
+        },
+        {
+          "file": "05-ميزة-معاينة-المنتج-قبل-النشر-مركز-المساعدة-سلة.txt",
+          "title": "ميزة معاينة المنتج قبل النشر | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D9%85%D9%8A%D8%B2%D8%A9-%D9%85%D8%B9%D8%A7%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/pdf44nq6y45z09u5s2kwkax6",
+          "bytes": 40980
+        },
+        {
+          "file": "06-تطبيق-المنتجات-التي-تم-عرضها-مؤخراً-مركز-المساعدة-سلة.txt",
+          "title": "تطبيق المنتجات التي تم عرضها مؤخراً | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%B7%D8%A8%D9%8A%D9%82-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D9%8A-%D8%AA%D9%85-%D8%B9%D8%B1%D8%B6%D9%87%D8%A7-%D9%85%D8%A4%D8%AE%D8%B1%D8%A7/t57lzgbxa2vmzwg891xzipt4",
+          "bytes": 39368
+        },
+        {
+          "file": "07-الشراء-الفوري-في-سلة-تحويل-الإعلانات-إلى-مبيعات-مباشرة-وزيادة-التحويلات-مركز-الم.txt",
+          "title": "الشراء الفوري في سلة | تحويل الإعلانات إلى مبيعات مباشرة وزيادة التحويلات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%B4%D8%B1%D8%A7%D8%A1-%D8%A7%D9%84%D9%81%D9%88%D8%B1%D9%8A-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/yep7x3si9eld07sra41y1jha",
+          "bytes": 41133
+        },
+        {
+          "file": "08-أفكار-واستراتيجيات-لاستخدام-مجموعة-المنتجات-لزيادة-المبيعات-وتحسين-تجربة-الشراء-.txt",
+          "title": "أفكار واستراتيجيات لاستخدام مجموعة المنتجات لزيادة المبيعات وتحسين تجربة الشراء | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A3%D9%85%D8%AB%D9%84%D8%A9-%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%D9%8A%D8%A9-%D9%84%D8%A5%D9%86%D8%B4%D8%A7%D8%A1-%D9%85%D8%AC%D9%85%D9%88%D8%B9%D8%A9-%D9%85%D8%AE%D8%B5%D8%B5%D8%A9-%D9%85%D9%86-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/bjk03v9g8332gri7njj4xnh5",
+          "bytes": 47810
+        },
+        {
+          "file": "09-إضافة-البطاقات-الرقمية-في-سلة-إدارة-الأكواد-حسب-الدول-والبيع-الرقمي-مركز-المساعد.txt",
+          "title": "إضافة البطاقات الرقمية في سلة | إدارة الأكواد حسب الدول والبيع الرقمي | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D8%A8%D8%B7%D8%A7%D9%82%D8%A9-%D8%B1%D9%82%D9%85%D9%8A%D8%A9/c2yraikcafs5lyefnai9glt2",
+          "bytes": 48912
+        },
+        {
+          "file": "10-إنشاء-وإدارة-منتج-الحجوزات-في-سلة-الجدولة-ونموذج-الطلب-والحقول-المخصصة-مركز-المس.txt",
+          "title": "إنشاء وإدارة منتج الحجوزات في سلة | الجدولة ونموذج الطلب والحقول المخصصة | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D9%85%D9%86%D8%AA%D8%AC-%D8%A7%D9%84%D8%AD%D8%AC%D9%88%D8%B2%D8%A7%D8%AA/gea2uoqanu6oku9a9seoqbfk",
+          "bytes": 48681
+        },
+        {
+          "file": "11-إضافة-منتج-ملموس-جاهز-إلى-متجرك-مركز-المساعدة-سلة.txt",
+          "title": "إضافة منتج ملموس جاهز إلى متجرك | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D9%85%D9%86%D8%AA%D8%AC-%D9%85%D9%84%D9%85%D9%88%D8%B3-%D8%AC%D8%A7%D9%87%D8%B2/j26383gile80wtexu77744u9",
+          "bytes": 47855
+        },
+        {
+          "file": "12-إضافة-وإدارة-منتج-أكل-ومشروبات-مركز-المساعدة-سلة.txt",
+          "title": "إضافة وإدارة منتج أكل ومشروبات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D9%85%D9%86%D8%AA%D8%AC-%D8%A7%D9%84%D8%A3%D9%83%D9%84-%D9%88%D8%A7%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%A8%D8%A7%D8%AA/lxw4akyvaqfv741s8ops4niv",
+          "bytes": 46941
+        },
+        {
+          "file": "13-الأسئلة-الشائعة-حول-إدارة-المنتجات-في-سلة-الباركود-والمشاركة-والإخفاء-مركز-المسا.txt",
+          "title": "الأسئلة الشائعة حول إدارة المنتجات في سلة | الباركود والمشاركة والإخفاء | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A3%D8%B3%D8%A6%D9%84%D8%A9-%D8%B4%D8%A7%D8%A6%D8%B9%D8%A9-%D8%AD%D9%88%D9%84-%D8%A8%D8%B7%D8%A7%D9%82%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/qgwyiec4fxe4itj3ocwl3w2h",
+          "bytes": 40695
+        },
+        {
+          "file": "14-إضافة-منتج-جديد-مركز-المساعدة-سلة.txt",
+          "title": "إضافة منتج جديد | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/subcategory/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D9%85%D9%86%D8%AA%D8%AC-%D8%AC%D8%AF%D9%8A%D8%AF/lsj5o1bz6fwtorzedv9rwjox",
+          "bytes": 36535
+        },
+        {
+          "file": "15-الإجراءات-على-منتج-محدد-مركز-المساعدة-سلة.txt",
+          "title": "الإجراءات على منتج محدد | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%A5%D8%AC%D8%B1%D8%A7%D8%A1%D8%A7%D8%AA-%D8%B9%D9%84%D9%89-%D9%85%D9%86%D8%AA%D8%AC-%D9%85%D8%AD%D8%AF%D8%AF/d5r56l6y5r9uwbrhyejeo0t8",
+          "bytes": 44570
+        },
+        {
+          "file": "16-قيود-المنتج-وتحديد-كمية-الشراء-مركز-المساعدة-سلة.txt",
+          "title": "قيود المنتج وتحديد كمية الشراء | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D9%86%D8%B4%D8%A7%D8%A1-%D9%82%D9%8A%D9%88%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D9%88%D8%A7%D9%84%D8%AA%D8%AD%D9%83%D9%85-%D8%A8%D9%87%D8%A7/f9bsa0insqb43sh6r41i4gfm",
+          "bytes": 41614
+        },
+        {
+          "file": "17-تتبع-أكواد-سجل-البطاقات-الرقمية-مركز-المساعدة-سلة.txt",
+          "title": "تتبع أكواد سجل البطاقات الرقمية | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%B3%D8%AC%D9%84-%D8%A7%D9%84%D8%A8%D8%B7%D8%A7%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9/jfnhmrlwg0a8l6d93qt0tvgd",
+          "bytes": 40773
+        },
+        {
+          "file": "18-إدارة-المنتجات-مركز-المساعدة-سلة.txt",
+          "title": "إدارة المنتجات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/oc3r8o7ofidik6zykxwznrxu",
+          "bytes": 42606
+        },
+        {
+          "file": "19-إدارة-المنتجات-مركز-المساعدة-سلة.txt",
+          "title": "إدارة المنتجات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/subcategory/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/zqrhimqs7us8x2z7wt0xlhf8",
+          "bytes": 38395
+        },
+        {
+          "file": "20-عدّل-عدة-منتجات-من-جدول-واحد-مركز-المساعدة-سلة.txt",
+          "title": "عدّل عدة منتجات من جدول واحد | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D9%85%D8%AD%D8%B1%D8%B1-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%AC%D8%AF%D9%88%D9%84-%D8%AA%D8%B9%D8%AF%D9%8A%D9%84%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/zdc2im216kmp4wdw0i6pwhuh",
+          "bytes": 40929
+        },
+        {
+          "file": "21-إضافة-فلاتر-تصفية-المنتجات-للمتجر-مركز-المساعدة-سلة.txt",
+          "title": "إضافة فلاتر تصفية المنتجات للمتجر | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%B5%D9%81%D9%8A%D8%A9-%D9%88%D9%81%D9%84%D8%AA%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/fj9xwn0a8ear6hegg2mm5qyy",
+          "bytes": 38567
+        },
+        {
+          "file": "22-إدارة-خيارات-المنتج-نص-ولون-وصورة-مركز-المساعدة-سلة.txt",
+          "title": "إدارة خيارات المنتج: نص ولون وصورة | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%AE%D9%8A%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/fz6e4g9ohl7rnv4g561vexl6",
+          "bytes": 43276
+        },
+        {
+          "file": "23-إدارة-تصنيفات-المنتجات-في-متجرك-مركز-المساعدة-سلة.txt",
+          "title": "إدارة تصنيفات المنتجات في متجرك | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%AA%D8%B5%D9%86%D9%8A%D9%81%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/ghxuwuy7ivin8wyath9w22ch",
+          "bytes": 44486
+        },
+        {
+          "file": "24-إنشاء-جدول-مقاسات-المنتجات-وتخصيصه-مركز-المساعدة-سلة.txt",
+          "title": "إنشاء جدول مقاسات المنتجات وتخصيصه | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AC%D8%AF%D9%88%D9%84-%D9%85%D9%82%D8%A7%D8%B3%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/s3cn5560ardf7fae5f11wlkn",
+          "bytes": 40011
+        },
+        {
+          "file": "25-إضافة-الحقول-المخصصة-لبطاقة-المنتج-مركز-المساعدة-سلة.txt",
+          "title": "إضافة الحقول المخصصة لبطاقة المنتج | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D8%AD%D9%82%D9%88%D9%84-%D8%A7%D9%84%D9%85%D8%AE%D8%B5%D8%B5%D8%A9-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/tluw12cjwxp6vi30d8of7d1g",
+          "bytes": 41423
+        },
+        {
+          "file": "26-إعدادات-المنتجات-في-لوحة-التحكم-مركز-المساعدة-سلة.txt",
+          "title": "إعدادات المنتجات في لوحة التحكم | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B9%D8%AF%D8%A7%D8%AF%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/fv57kk7875flos1wo9zsneht",
+          "bytes": 46155
+        },
+        {
+          "file": "27-نقل-منتجاتك-من-ووكومرس-عبر-ملف-التصدير-مركز-المساعدة-سلة.txt",
+          "title": "نقل منتجاتك من ووكومرس عبر ملف التصدير | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%86%D8%B5%D8%A9-%D9%88%D9%88%D9%83%D9%88%D9%85%D8%B1%D8%B3/i61eurublp93t853j9ljp1o1",
+          "bytes": 39130
+        },
+        {
+          "file": "28-أنشئ-قوالب-مخصصة-لتصدير-المنتجات-مركز-المساعدة-سلة.txt",
+          "title": "أنشئ قوالب مخصصة لتصدير المنتجات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D9%82%D9%88%D8%A7%D9%84%D8%A8-%D8%AA%D8%B5%D8%AF%D9%8A%D8%B1-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/jibspe51v9tae4jpzeizeasp",
+          "bytes": 38343
+        },
+        {
+          "file": "29-استيراد-المنتجات-من-شوبيفاي-بالربط-المباشر-مركز-المساعدة-سلة.txt",
+          "title": "استيراد المنتجات من شوبيفاي بالربط المباشر | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%86%D8%B5%D8%A9-%D8%B4%D9%88%D8%A8%D9%8A%D9%81%D8%A7%D9%8A/km1meyt3ld1jhx2l5jm7artj",
+          "bytes": 42732
+        },
+        {
+          "file": "30-استيراد-المنتجات-من-زد-وشوبيفاي-وماجينتو-مركز-المساعدة-سلة.txt",
+          "title": "استيراد المنتجات من زد وشوبيفاي وماجينتو | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%86%D8%B5%D8%A7%D8%AA-%D8%A3%D8%AE%D8%B1%D9%89/mtdg1com53fnlfgt14twklrm",
+          "bytes": 47664
+        },
+        {
+          "file": "31-استيراد-المنتجات-التجربة-الجديدة-مركز-المساعدة-سلة.txt",
+          "title": "استيراد المنتجات | التجربة الجديدة | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D8%AC%D8%B1%D8%A8%D8%A9-%D8%A7%D9%84%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9/nn2cwjg0e40thkq0tqjs442h",
+          "bytes": 50267
+        },
+        {
+          "file": "32-استيراد-المنتجات-من-ماجينتو-خطوة-بخطوة-مركز-المساعدة-سلة.txt",
+          "title": "استيراد المنتجات من ماجينتو خطوة بخطوة | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%86%D8%B5%D8%A9-%D9%85%D8%A7%D8%AC%D9%8A%D9%86%D8%AA%D9%88/vfcqecwtxh08dtkrljba02t0",
+          "bytes": 40096
+        },
+        {
+          "file": "33-التحكم-بكميات-المنتج-في-الفروع-مركز-المساعدة-سلة.txt",
+          "title": "التحكم بكميات المنتج في الفروع | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%AA%D8%AD%D9%83%D9%85-%D8%A8%D9%83%D9%85%D9%8A%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D9%81%D9%8A-%D8%A7%D9%84%D9%81%D8%B1%D9%88%D8%B9-1/clgcsqhcbuilvkylf449ga6f",
+          "bytes": 37782
+        },
+        {
+          "file": "34-أنشئ-حملة-تسويقية-عبر-رسائل-sms-مركز-المساعدة-سلة.txt",
+          "title": "أنشئ حملة تسويقية عبر رسائل SMS | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%AD%D9%85%D9%84%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D8%B3%D9%88%D9%8A%D9%82%D9%8A%D8%A9-%D8%B9%D8%A8%D8%B1-%D8%A7%D9%84%D8%AA%D8%B7%D8%A8%D9%8A%D9%82-%D9%88%D8%B1%D8%B3%D8%A7%D8%A6%D9%84-sms/f9eq00unb3ov9tgobrq0a8cb",
+          "bytes": 39424
+        },
+        {
+          "file": "35-أنشئ-حملة-عبر-إشعارات-التطبيق-مركز-المساعدة-سلة.txt",
+          "title": "أنشئ حملة عبر إشعارات التطبيق | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%AD%D9%85%D9%84%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D8%B3%D9%88%D9%8A%D9%82%D9%8A%D8%A9-%D8%B9%D8%A8%D8%B1-%D8%A5%D8%B4%D8%B9%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D8%B7%D8%A8%D9%8A%D9%82/ls2818rwe3x39m8yt6war9kw",
+          "bytes": 41930
+        },
+        {
+          "file": "36-ربط-متجرك-مع-tiktok-business-extension-مركز-المساعدة-سلة.txt",
+          "title": "ربط متجرك مع TikTok Business Extension | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%B1%D8%A8%D8%B7-%D9%85%D8%B9-%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D9%8A%D9%83-%D8%AA%D9%88%D9%83-%D9%85%D9%86-%D8%AE%D9%84%D8%A7%D9%84-tiktok-business-extension/qsocu1p1hcsme3yjmq4qc09c",
+          "bytes": 43733
+        },
+        {
+          "file": "37-إعلانات-سناب-شات-snapchat-وربط-المتجر-مركز-المساعدة-سلة.txt",
+          "title": "إعلانات سناب شات Snapchat وربط المتجر | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AF%D9%84%D9%8A%D9%84%D9%83-%D8%A7%D9%84%D8%B4%D8%A7%D9%85%D9%84-%D9%84%D8%A5%D8%B9%D9%84%D8%A7%D9%86%D8%A7%D8%AA-%D8%B3%D9%86%D8%A7%D8%A8-%D8%B4%D8%A7%D8%AA-%D8%A7%D9%84%D9%86%D8%A7%D8%AC%D8%AD%D8%A9-snapchat/zkseapii940r3oard6w8uet7",
+          "bytes": 45822
+        },
+        {
+          "file": "38-نظام-الإهداء-للمنتجات-الرقمية-والملموسة-مركز-المساعدة-سلة.txt",
+          "title": "نظام الإهداء للمنتجات الرقمية والملموسة | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D9%86%D8%B8%D8%A7%D9%85-%D8%A7%D9%84%D8%A5%D9%87%D8%AF%D8%A7%D8%A1-%D9%84%D8%A5%D9%87%D8%AF%D8%A7%D8%A1-%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%B1%D9%82%D9%85%D9%8A%D8%A9-%D9%88%D9%85%D9%84%D9%85%D9%88%D8%B3%D8%A9-1/jdp7jsgo6axct2md8yce6lcn",
+          "bytes": 49190
+        },
+        {
+          "file": "39-اربط-سناب-عبر-snap-business-extension-مركز-المساعدة-سلة.txt",
+          "title": "اربط سناب عبر Snap Business Extension | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%B1%D8%A8%D8%B7-%D9%85%D8%B9-%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D8%B3%D9%86%D8%A7%D8%A8-%D9%85%D9%86-%D8%AE%D9%84%D8%A7%D9%84-snap-business-extension/bc4caiy58eek7dmswse6vii4",
+          "bytes": 41253
+        },
+        {
+          "file": "40-تخصيص-الثيم-باستخدام-الأكواد-مركز-المساعدة-سلة.txt",
+          "title": "تخصيص الثيم باستخدام الأكواد | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%AE%D8%B5%D9%8A%D8%B5-%D8%A7%D9%84%D8%AB%D9%8A%D9%85-%D8%A8%D8%A7%D8%B3%D8%AA%D8%AE%D8%AF%D8%A7%D9%85-%D8%A7%D9%84%D8%A3%D9%83%D9%88%D8%A7%D8%AF/nh50c1dsu3w8pu1mbl62k4dw",
+          "bytes": 40096
+        }
+      ]
+    },
+    {
+      "slug": "help-digital-cards",
+      "url": "https://help.salla.sa/?s=%D8%A8%D8%B7%D8%A7%D9%82%D8%A9+%D8%B1%D9%82%D9%85%D9%8A%D8%A9",
+      "pages": [
+        {
+          "file": "00-seed.txt",
+          "title": "مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/?s=%D8%A8%D8%B7%D8%A7%D9%82%D8%A9+%D8%B1%D9%82%D9%85%D9%8A%D8%A9",
+          "bytes": 34392
+        },
+        {
+          "file": "01-احمِ-حقوق-ملفات-منتجاتك-الرقمية-مركز-المساعدة-سلة.txt",
+          "title": "احمِ حقوق ملفات منتجاتك الرقمية | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AD%D9%85%D8%A7%D9%8A%D8%A9-%D8%A7%D9%84%D8%AD%D9%82%D9%88%D9%82-%D8%A7%D9%84%D9%81%D9%83%D8%B1%D9%8A%D8%A9-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A-1/djhm5xfcrvl3e1ulrqg8nzts",
+          "bytes": 37916
+        },
+        {
+          "file": "02-إضافة-البطاقات-الرقمية-في-سلة-إدارة-الأكواد-حسب-الدول-والبيع-الرقمي-مركز-المساعد.txt",
+          "title": "إضافة البطاقات الرقمية في سلة | إدارة الأكواد حسب الدول والبيع الرقمي | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D8%A8%D8%B7%D8%A7%D9%82%D8%A9-%D8%B1%D9%82%D9%85%D9%8A%D8%A9/c2yraikcafs5lyefnai9glt2",
+          "bytes": 48912
+        },
+        {
+          "file": "03-الأسئلة-الشائعة-حول-إدارة-المنتجات-في-سلة-الباركود-والمشاركة-والإخفاء-مركز-المسا.txt",
+          "title": "الأسئلة الشائعة حول إدارة المنتجات في سلة | الباركود والمشاركة والإخفاء | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A3%D8%B3%D8%A6%D9%84%D8%A9-%D8%B4%D8%A7%D8%A6%D8%B9%D8%A9-%D8%AD%D9%88%D9%84-%D8%A8%D8%B7%D8%A7%D9%82%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/qgwyiec4fxe4itj3ocwl3w2h",
+          "bytes": 40695
+        },
+        {
+          "file": "04-تتبع-أكواد-سجل-البطاقات-الرقمية-مركز-المساعدة-سلة.txt",
+          "title": "تتبع أكواد سجل البطاقات الرقمية | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%B3%D8%AC%D9%84-%D8%A7%D9%84%D8%A8%D8%B7%D8%A7%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9/jfnhmrlwg0a8l6d93qt0tvgd",
+          "bytes": 40773
+        },
+        {
+          "file": "05-نظام-الإهداء-للمنتجات-الرقمية-والملموسة-مركز-المساعدة-سلة.txt",
+          "title": "نظام الإهداء للمنتجات الرقمية والملموسة | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D9%86%D8%B8%D8%A7%D9%85-%D8%A7%D9%84%D8%A5%D9%87%D8%AF%D8%A7%D8%A1-%D9%84%D8%A5%D9%87%D8%AF%D8%A7%D8%A1-%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%B1%D9%82%D9%85%D9%8A%D8%A9-%D9%88%D9%85%D9%84%D9%85%D9%88%D8%B3%D8%A9-1/jdp7jsgo6axct2md8yce6lcn",
+          "bytes": 49190
+        },
+        {
+          "file": "06-تخصيص-الثيم-باستخدام-الأكواد-مركز-المساعدة-سلة.txt",
+          "title": "تخصيص الثيم باستخدام الأكواد | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%AE%D8%B5%D9%8A%D8%B5-%D8%A7%D9%84%D8%AB%D9%8A%D9%85-%D8%A8%D8%A7%D8%B3%D8%AA%D8%AE%D8%AF%D8%A7%D9%85-%D8%A7%D9%84%D8%A3%D9%83%D9%88%D8%A7%D8%AF/nh50c1dsu3w8pu1mbl62k4dw",
+          "bytes": 40096
+        },
+        {
+          "file": "07-ثيم-رقمي-لمتاجر-البطاقات-الرقمية-مركز-المساعدة-سلة.txt",
+          "title": "ثيم رقمي لمتاجر البطاقات الرقمية | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AB%D9%8A%D9%85-%D8%B1%D9%82%D9%85%D9%8A-1/eutqg70o8fgy7tburwvaxkr6",
+          "bytes": 42583
+        },
+        {
+          "file": "08-الشحن-الدولي-وكود-التنسيق-الجمركي-hs-code-مركز-المساعدة-سلة.txt",
+          "title": "الشحن الدولي وكود التنسيق الجمركي HS code | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%B4%D8%B1%D9%88%D8%B7-%D8%A7%D9%84%D8%B4%D8%AD%D9%86-%D8%A7%D9%84%D8%AF%D9%88%D9%84%D9%8A-%D9%88%D8%AA%D9%81%D8%B9%D9%8A%D9%84-%D9%83%D9%88%D8%AF-%D8%A7%D9%84%D8%AA%D9%86%D8%B3%D9%8A%D9%82-%D8%A7%D9%84%D8%AC%D9%85%D8%B1%D9%83%D9%8A-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC-hs-code-1/c0f9bwthj2g6rhuvjilwaboc",
+          "bytes": 40278
+        },
+        {
+          "file": "09-تدشين-تطبيق-المتجر-الرقمي-لدى-أبل-وجوجل-مركز-المساعدة-سلة.txt",
+          "title": "تدشين تطبيق المتجر الرقمي لدى أبل وجوجل | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%AD%D8%AF%D9%8A%D8%AB-%D9%88%D8%AA%D8%AF%D8%B4%D9%8A%D9%86-%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D8%AA%D8%A7%D8%AC%D8%B1-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9/k7b83th33345bftbhyxzkld5",
+          "bytes": 40351
+        },
+        {
+          "file": "10-تفعيل-الدفع-بالبطاقة-softpos-مع-جيديا-مركز-المساعدة-سلة.txt",
+          "title": "تفعيل الدفع بالبطاقة SoftPOS مع جيديا | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AA%D9%81%D8%B9%D9%8A%D9%84-%D8%A7%D9%84%D8%AF%D9%81%D8%B9-%D8%A8%D8%A7%D9%84%D8%A8%D8%B7%D8%A7%D9%82%D8%A9-%D9%81%D9%8A-%D8%B3%D9%84%D8%A9-%D8%A8%D9%88%D9%8A%D9%86%D8%AA/hy4mv5r6yqoyjifiy7659nzk",
+          "bytes": 43342
+        },
+        {
+          "file": "11-الإجراءات-على-بطاقة-العميل-في-المتجر-مركز-المساعدة-سلة.txt",
+          "title": "الإجراءات على بطاقة العميل في المتجر | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%A5%D8%AC%D8%B1%D8%A7%D8%A1%D8%A7%D8%AA-%D8%B9%D9%84%D9%89-%D8%A8%D8%B7%D8%A7%D9%82%D8%A9-%D8%A7%D9%84%D8%B9%D9%85%D9%8A%D9%84/k4j1z7b3c8lzqh16g8r2hsxn",
+          "bytes": 42931
+        },
+        {
+          "file": "12-تطبيق-دقق-dgg-لتجهيز-الطلبات-بالباركود-مركز-المساعدة-سلة.txt",
+          "title": "تطبيق دقق DGG لتجهيز الطلبات بالباركود | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%B7%D8%A8%D9%8A%D9%82-%D8%AF%D9%82%D9%82-dgg/ex3spp3dfvjlk4tkbt4iafkh",
+          "bytes": 38326
+        },
+        {
+          "file": "13-تطبيق-دروب-كارد-dropcard-للمنتجات-الرقمية-مركز-المساعدة-سلة.txt",
+          "title": "تطبيق دروب كارد DropCard للمنتجات الرقمية | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AF%D8%B1%D9%88%D8%A8-%D9%83%D8%A7%D8%B1%D8%AF-dropcard-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%88%D8%A7%D9%84%D8%AE%D8%AF%D9%85%D8%A7%D8%AA-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9/agtqnfh1wn88myrwcjz7c377",
+          "bytes": 38290
+        },
+        {
+          "file": "14-سديم-لتسليم-المنتجات-الرقمية-آلياً-مركز-المساعدة-سلة.txt",
+          "title": "سديم لتسليم المنتجات الرقمية آلياً | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%B3%D8%AF%D9%8A%D9%85-%D9%84%D8%AA%D8%B3%D9%84%D9%8A%D9%85-%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA%D9%83-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9/c3u7dbyji2q8u610vnp15t94",
+          "bytes": 38716
+        }
+      ]
+    },
+    {
+      "slug": "help-digital-products",
+      "url": "https://help.salla.sa/?s=%D9%85%D9%86%D8%AA%D8%AC+%D8%B1%D9%82%D9%85%D9%8A",
+      "pages": [
+        {
+          "file": "00-seed.txt",
+          "title": "مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/?s=%D9%85%D9%86%D8%AA%D8%AC+%D8%B1%D9%82%D9%85%D9%8A",
+          "bytes": 34392
+        },
+        {
+          "file": "01-احمِ-حقوق-ملفات-منتجاتك-الرقمية-مركز-المساعدة-سلة.txt",
+          "title": "احمِ حقوق ملفات منتجاتك الرقمية | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AD%D9%85%D8%A7%D9%8A%D8%A9-%D8%A7%D9%84%D8%AD%D9%82%D9%88%D9%82-%D8%A7%D9%84%D9%81%D9%83%D8%B1%D9%8A%D8%A9-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A-1/djhm5xfcrvl3e1ulrqg8nzts",
+          "bytes": 37916
+        },
+        {
+          "file": "02-أضف-gtin-وmpn-لتحسين-ظهور-المنتجات-مركز-المساعدة-سلة.txt",
+          "title": "أضف GTIN وMPN لتحسين ظهور المنتجات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-mpn-gtin-%D9%84%D8%AA%D8%B9%D8%B2%D9%8A%D8%B2-%D8%B8%D9%87%D9%88%D8%B1-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D8%B9%D9%84%D9%89-%D9%85%D8%AD%D8%B1%D9%83%D8%A7%D8%AA-%D8%A7%D9%84%D8%A8%D8%AD%D8%AB/e66aj1t93yqvmixcw3dk06t2",
+          "bytes": 44010
+        },
+        {
+          "file": "03-إضافة-صور-وفيديوهات-المنتج-مركز-المساعدة-سلة.txt",
+          "title": "إضافة صور وفيديوهات المنتج | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D8%B5%D9%88%D8%B1-%D9%88%D9%81%D9%8A%D8%AF%D9%8A%D9%88%D9%87%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/o67hdm4qs3h30gubvyfk7v9y",
+          "bytes": 42841
+        },
+        {
+          "file": "04-ميزة-معاينة-المنتج-قبل-النشر-مركز-المساعدة-سلة.txt",
+          "title": "ميزة معاينة المنتج قبل النشر | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D9%85%D9%8A%D8%B2%D8%A9-%D9%85%D8%B9%D8%A7%D9%8A%D9%86%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/pdf44nq6y45z09u5s2kwkax6",
+          "bytes": 40980
+        },
+        {
+          "file": "05-تطبيق-المنتجات-التي-تم-عرضها-مؤخراً-مركز-المساعدة-سلة.txt",
+          "title": "تطبيق المنتجات التي تم عرضها مؤخراً | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%B7%D8%A8%D9%8A%D9%82-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D9%8A-%D8%AA%D9%85-%D8%B9%D8%B1%D8%B6%D9%87%D8%A7-%D9%85%D8%A4%D8%AE%D8%B1%D8%A7/t57lzgbxa2vmzwg891xzipt4",
+          "bytes": 39368
+        },
+        {
+          "file": "06-الشراء-الفوري-في-سلة-تحويل-الإعلانات-إلى-مبيعات-مباشرة-وزيادة-التحويلات-مركز-الم.txt",
+          "title": "الشراء الفوري في سلة | تحويل الإعلانات إلى مبيعات مباشرة وزيادة التحويلات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%B4%D8%B1%D8%A7%D8%A1-%D8%A7%D9%84%D9%81%D9%88%D8%B1%D9%8A-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/yep7x3si9eld07sra41y1jha",
+          "bytes": 41133
+        },
+        {
+          "file": "07-أفكار-واستراتيجيات-لاستخدام-مجموعة-المنتجات-لزيادة-المبيعات-وتحسين-تجربة-الشراء-.txt",
+          "title": "أفكار واستراتيجيات لاستخدام مجموعة المنتجات لزيادة المبيعات وتحسين تجربة الشراء | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A3%D9%85%D8%AB%D9%84%D8%A9-%D8%AA%D8%B7%D8%A8%D9%8A%D9%82%D9%8A%D8%A9-%D9%84%D8%A5%D9%86%D8%B4%D8%A7%D8%A1-%D9%85%D8%AC%D9%85%D9%88%D8%B9%D8%A9-%D9%85%D8%AE%D8%B5%D8%B5%D8%A9-%D9%85%D9%86-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/bjk03v9g8332gri7njj4xnh5",
+          "bytes": 47810
+        },
+        {
+          "file": "08-إضافة-البطاقات-الرقمية-في-سلة-إدارة-الأكواد-حسب-الدول-والبيع-الرقمي-مركز-المساعد.txt",
+          "title": "إضافة البطاقات الرقمية في سلة | إدارة الأكواد حسب الدول والبيع الرقمي | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D8%A8%D8%B7%D8%A7%D9%82%D8%A9-%D8%B1%D9%82%D9%85%D9%8A%D8%A9/c2yraikcafs5lyefnai9glt2",
+          "bytes": 48912
+        },
+        {
+          "file": "09-إنشاء-وإدارة-منتج-الحجوزات-في-سلة-الجدولة-ونموذج-الطلب-والحقول-المخصصة-مركز-المس.txt",
+          "title": "إنشاء وإدارة منتج الحجوزات في سلة | الجدولة ونموذج الطلب والحقول المخصصة | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D9%85%D9%86%D8%AA%D8%AC-%D8%A7%D9%84%D8%AD%D8%AC%D9%88%D8%B2%D8%A7%D8%AA/gea2uoqanu6oku9a9seoqbfk",
+          "bytes": 48681
+        },
+        {
+          "file": "10-إضافة-منتج-ملموس-جاهز-إلى-متجرك-مركز-المساعدة-سلة.txt",
+          "title": "إضافة منتج ملموس جاهز إلى متجرك | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D9%85%D9%86%D8%AA%D8%AC-%D9%85%D9%84%D9%85%D9%88%D8%B3-%D8%AC%D8%A7%D9%87%D8%B2/j26383gile80wtexu77744u9",
+          "bytes": 47855
+        },
+        {
+          "file": "11-إضافة-وإدارة-منتج-أكل-ومشروبات-مركز-المساعدة-سلة.txt",
+          "title": "إضافة وإدارة منتج أكل ومشروبات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D9%85%D9%86%D8%AA%D8%AC-%D8%A7%D9%84%D8%A3%D9%83%D9%84-%D9%88%D8%A7%D9%84%D9%85%D8%B4%D8%B1%D9%88%D8%A8%D8%A7%D8%AA/lxw4akyvaqfv741s8ops4niv",
+          "bytes": 46941
+        },
+        {
+          "file": "12-الأسئلة-الشائعة-حول-إدارة-المنتجات-في-سلة-الباركود-والمشاركة-والإخفاء-مركز-المسا.txt",
+          "title": "الأسئلة الشائعة حول إدارة المنتجات في سلة | الباركود والمشاركة والإخفاء | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A3%D8%B3%D8%A6%D9%84%D8%A9-%D8%B4%D8%A7%D8%A6%D8%B9%D8%A9-%D8%AD%D9%88%D9%84-%D8%A8%D8%B7%D8%A7%D9%82%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/qgwyiec4fxe4itj3ocwl3w2h",
+          "bytes": 40695
+        },
+        {
+          "file": "13-إضافة-منتج-جديد-مركز-المساعدة-سلة.txt",
+          "title": "إضافة منتج جديد | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/subcategory/%D8%A5%D8%B6%D8%A7%D9%81%D8%A9-%D9%85%D9%86%D8%AA%D8%AC-%D8%AC%D8%AF%D9%8A%D8%AF/lsj5o1bz6fwtorzedv9rwjox",
+          "bytes": 36535
+        },
+        {
+          "file": "14-الإجراءات-على-منتج-محدد-مركز-المساعدة-سلة.txt",
+          "title": "الإجراءات على منتج محدد | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%A5%D8%AC%D8%B1%D8%A7%D8%A1%D8%A7%D8%AA-%D8%B9%D9%84%D9%89-%D9%85%D9%86%D8%AA%D8%AC-%D9%85%D8%AD%D8%AF%D8%AF/d5r56l6y5r9uwbrhyejeo0t8",
+          "bytes": 44570
+        },
+        {
+          "file": "15-قيود-المنتج-وتحديد-كمية-الشراء-مركز-المساعدة-سلة.txt",
+          "title": "قيود المنتج وتحديد كمية الشراء | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D9%86%D8%B4%D8%A7%D8%A1-%D9%82%D9%8A%D9%88%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D9%88%D8%A7%D9%84%D8%AA%D8%AD%D9%83%D9%85-%D8%A8%D9%87%D8%A7/f9bsa0insqb43sh6r41i4gfm",
+          "bytes": 41614
+        },
+        {
+          "file": "16-تتبع-أكواد-سجل-البطاقات-الرقمية-مركز-المساعدة-سلة.txt",
+          "title": "تتبع أكواد سجل البطاقات الرقمية | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%B3%D8%AC%D9%84-%D8%A7%D9%84%D8%A8%D8%B7%D8%A7%D9%82%D8%A7%D8%AA-%D8%A7%D9%84%D8%B1%D9%82%D9%85%D9%8A%D8%A9/jfnhmrlwg0a8l6d93qt0tvgd",
+          "bytes": 40773
+        },
+        {
+          "file": "17-إدارة-المنتجات-مركز-المساعدة-سلة.txt",
+          "title": "إدارة المنتجات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/oc3r8o7ofidik6zykxwznrxu",
+          "bytes": 42606
+        },
+        {
+          "file": "18-إدارة-المنتجات-مركز-المساعدة-سلة.txt",
+          "title": "إدارة المنتجات | مركز المساعدة - سلة",
+          "url": "https://help.salla.sa/subcategory/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/zqrhimqs7us8x2z7wt0xlhf8",
+          "bytes": 38395
+        },
+        {
+          "file": "19-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D9%85%D8%AD%D8%B1%D8%B1-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%AC%D8%AF%D9%88%D9%84-%D8%AA%D8%B9%D8%AF%D9%8A%D9%84%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/zdc2im216kmp4wdw0i6pwhuh",
+          "bytes": 166
+        },
+        {
+          "file": "20-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%B5%D9%81%D9%8A%D8%A9-%D9%88%D9%81%D9%84%D8%AA%D8%B1%D8%A9-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/fj9xwn0a8ear6hegg2mm5qyy",
+          "bytes": 166
+        },
+        {
+          "file": "21-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%AE%D9%8A%D8%A7%D8%B1%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/fz6e4g9ohl7rnv4g561vexl6",
+          "bytes": 166
+        },
+        {
+          "file": "22-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%AA%D8%B5%D9%86%D9%8A%D9%81%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/ghxuwuy7ivin8wyath9w22ch",
+          "bytes": 166
+        },
+        {
+          "file": "23-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%AC%D8%AF%D9%88%D9%84-%D9%85%D9%82%D8%A7%D8%B3%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/s3cn5560ardf7fae5f11wlkn",
+          "bytes": 166
+        },
+        {
+          "file": "24-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%A7%D9%84%D8%AD%D9%82%D9%88%D9%84-%D8%A7%D9%84%D9%85%D8%AE%D8%B5%D8%B5%D8%A9-%D9%84%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/tluw12cjwxp6vi30d8of7d1g",
+          "bytes": 166
+        },
+        {
+          "file": "25-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%B9%D8%AF%D8%A7%D8%AF%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/fv57kk7875flos1wo9zsneht",
+          "bytes": 166
+        },
+        {
+          "file": "26-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%86%D8%B5%D8%A9-%D9%88%D9%88%D9%83%D9%88%D9%85%D8%B1%D8%B3/i61eurublp93t853j9ljp1o1",
+          "bytes": 166
+        },
+        {
+          "file": "27-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D9%82%D9%88%D8%A7%D9%84%D8%A8-%D8%AA%D8%B5%D8%AF%D9%8A%D8%B1-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA/jibspe51v9tae4jpzeizeasp",
+          "bytes": 166
+        },
+        {
+          "file": "28-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%86%D8%B5%D8%A9-%D8%B4%D9%88%D8%A8%D9%8A%D9%81%D8%A7%D9%8A/km1meyt3ld1jhx2l5jm7artj",
+          "bytes": 166
+        },
+        {
+          "file": "29-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%86%D8%B5%D8%A7%D8%AA-%D8%A3%D8%AE%D8%B1%D9%89/mtdg1com53fnlfgt14twklrm",
+          "bytes": 166
+        },
+        {
+          "file": "30-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%A7%D9%84%D8%AA%D8%AC%D8%B1%D8%A8%D8%A9-%D8%A7%D9%84%D8%AC%D8%AF%D9%8A%D8%AF%D8%A9/nn2cwjg0e40thkq0tqjs442h",
+          "bytes": 166
+        },
+        {
+          "file": "31-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A7%D8%B3%D8%AA%D9%8A%D8%B1%D8%A7%D8%AF-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%85%D9%86-%D9%85%D9%86%D8%B5%D8%A9-%D9%85%D8%A7%D8%AC%D9%8A%D9%86%D8%AA%D9%88/vfcqecwtxh08dtkrljba02t0",
+          "bytes": 166
+        },
+        {
+          "file": "32-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%AA%D8%AD%D9%83%D9%85-%D8%A8%D9%83%D9%85%D9%8A%D8%A7%D8%AA-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC-%D9%81%D9%8A-%D8%A7%D9%84%D9%81%D8%B1%D9%88%D8%B9-1/clgcsqhcbuilvkylf449ga6f",
+          "bytes": 166
+        },
+        {
+          "file": "33-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D9%86%D8%B8%D8%A7%D9%85-%D8%A7%D9%84%D8%A5%D9%87%D8%AF%D8%A7%D8%A1-%D9%84%D8%A5%D9%87%D8%AF%D8%A7%D8%A1-%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D8%B1%D9%82%D9%85%D9%8A%D8%A9-%D9%88%D9%85%D9%84%D9%85%D9%88%D8%B3%D8%A9-1/jdp7jsgo6axct2md8yce6lcn",
+          "bytes": 166
+        },
+        {
+          "file": "34-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%AE%D8%B5%D9%8A%D8%B5-%D8%A7%D9%84%D8%AB%D9%8A%D9%85-%D8%A8%D8%A7%D8%B3%D8%AA%D8%AE%D8%AF%D8%A7%D9%85-%D8%A7%D9%84%D8%A3%D9%83%D9%88%D8%A7%D8%AF/nh50c1dsu3w8pu1mbl62k4dw",
+          "bytes": 166
+        },
+        {
+          "file": "35-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%AA%D8%AE%D8%B5%D9%8A%D8%B5-%D8%B5%D9%81%D8%AD%D8%A9-%D9%87%D8%A8%D9%88%D8%B7-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/b2o5ia7c0geti9wed359wc4r",
+          "bytes": 166
+        },
+        {
+          "file": "36-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%AF%D8%B9%D9%85-%D9%85%D9%86%D8%AA%D8%AC-%D8%AD%D8%B3%D8%A8-%D8%A7%D9%84%D8%B7%D9%84%D8%A8-%D9%81%D9%8A-%D8%B5%D9%81%D8%AD%D8%A9-%D8%A7%D9%84%D9%87%D8%A8%D9%88%D8%B7/kucn44jeylp5ogxt7w5xh7ls",
+          "bytes": 166
+        },
+        {
+          "file": "37-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A7%D9%84%D8%A3%D8%B3%D8%A6%D9%84%D8%A9-%D8%A7%D9%84%D8%B4%D8%A7%D8%A6%D8%B9%D8%A9-%D8%AD%D9%88%D9%84-%D8%B5%D9%81%D8%AD%D8%A7%D8%AA-%D9%87%D8%A8%D9%88%D8%B7-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/pkr5imdo3w9jr0guxnvj8pvm",
+          "bytes": 166
+        },
+        {
+          "file": "38-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9-%D8%B5%D9%81%D8%AD%D8%A7%D8%AA-%D9%87%D8%A8%D9%88%D8%B7-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC/tdv9ztwxkf2u1ahgyy1yevmc",
+          "bytes": 166
+        },
+        {
+          "file": "39-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%AB%D9%8A%D9%85-%D8%B1%D9%82%D9%85%D9%8A-1/eutqg70o8fgy7tburwvaxkr6",
+          "bytes": 166
+        },
+        {
+          "file": "40-لحظة.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/article/%D8%AA%D9%82%D8%A7%D8%B1%D9%8A%D8%B1-%D8%A7%D9%84%D9%85%D9%86%D8%AA%D8%AC%D8%A7%D8%AA-%D9%88%D8%A7%D9%84%D9%85%D8%AE%D8%B2%D9%88%D9%86/s9crhspc32l1ud8tfj8a1zbl",
+          "bytes": 166
+        }
+      ]
+    },
+    {
+      "slug": "help-webhooks",
+      "url": "https://help.salla.sa/?s=webhook",
+      "pages": [
+        {
+          "file": "00-seed.txt",
+          "title": "لحظة…",
+          "url": "https://help.salla.sa/?s=webhook",
+          "bytes": 166
+        }
+      ]
+    },
+    {
+      "slug": "salla-dev-webhooks",
+      "url": "https://docs.salla.dev/docs/merchant/ZG9jOjI0NDIzNzAz-webhooks",
+      "pages": [
+        {
+          "file": "00-seed.txt",
+          "title": "Salla Platform Docs",
+          "url": "https://docs.salla.dev/docs/merchant/ZG9jOjI0NDIzNzAz-webhooks",
+          "bytes": 31
+        }
+      ]
+    }
+  ]
+}

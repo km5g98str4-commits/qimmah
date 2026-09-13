@@ -1,0 +1,263 @@
+# Conditional Webhooks - Merchant API | Salla Docs
+# https://docs.salla.dev/conditional-webhooks
+
+Salla Platform Docs
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Order Status
+Order Histories
+Order Options
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+Merchant API
+Conditional Webhooks
+Webhooks provide a streamlined approach to facilitate communication between applications, offering the advantage of receiving notifications whenever an app receives data from another app. They play a critical role in establishing an event-based communication channel, connecting application owners with Salla. The primary purpose of webhooks is to ensure the synchronization of data between two separate applications.
+Webhooks form the foundation of the infrastructure that supports numerous online activities. By subscribing to a webhook, developers anticipate receiving a payload that contains relevant information pertaining to the events they are interested in. However, dealing with large volumes of content within these payloads can sometimes be overwhelming and challenging to navigate. This is where Salla Rules comes into play.
+Salla Rules offers developers the ability to exercise control and customization over webhooks, utilizing the supported attributes. Rules enable the breakdown of simple business rules into smaller specification objects, which can later be combined to express more complex rules. This modular approach allows you as a developer to tailor their webhook experiences according to their specific needs and requirements.
+Importance of Rules
+Webhooks Targeting
+Narrowing down the received payload is an achievable goal, as rules introduce you to conditional webhooks. Your communication now turns out to be an event-based communication with Salla, and the same is applied in the received payload.
+Salla has provided the configurability feature to webhooks. In a sense, Rules contain basic filtering, which allow writing conditions and then afterwards receive particular payload based on the written condition.
+As your business grows, you will need to redouble on your service quality served, accuracy delievred, and effort done. With rules, you can easily reduce the amount of the events you listen to, as they usually come loaded in payloads. That said, you only recieve the payloads you are in need in your app.
+With rules, you get to head directly to take actions as decisions are easily made, and that means no more time wasted on time-consuming processes. Check for an overview of webhooks on Salla docs for more details.
+Use Cases
+The following are some use cases that webhooks can be used for:
+You can use rules in webhooks to filter updated carts that contain specific coupon codes.
+You can use rules in webhooks to uniquely identify specific order from a list of orders.
+You can also use rules in webhooks to recognize a specific product using its attributes (SKU, name, etc.).
+General Standards in Attributes
+Some Binary, Relational, and Logical operators are used when writing rules for a Salla webhook, such as equality, bitwise, and more.
+Following the general standards is a must to obtain successful responses, so make sure to follow them. These rules act like conditional webhooks, for you to receive specific data.
+Operations, expressions, and conditions to your webhook can be written. For instance, you may use =,!=,AND,OR etc in such a manner: payment_method = YOUR_PAYMENT_METHOD or in combination payment_method = mada OR price < 50. That adds more capability to filter the response based on conditionalities. In the following section, you can look up more into how you can construct your own rules using real-world examples.
+Write Your First Rule
+The following payload registers a new webhook on the Merchant's dashboard, not on the Partners Portal, where the developer will be notified whenever the Merchant created an order.
+{
+  "name": "Salla Order Created Event",
+  "event": "order.created",
+  "url": "https://webhook.site/a61ca376-dd98-4053-b2c4-8ba9cca470fc",
+  "version": 2,
+  "rule": "total > 100",
+  "headers": [
+    {
+      "key": "Authorization",
+      "value": "Your Secret token"
+    },
+    {
+      "key": "Accept-Language",
+      "value": "AR"
+    }
+  ]
+}
+That said, you have successfully set your first webhook with rules. The next section will be rules to apply in other webhooks' events.
+Examples
+The following two examples showcase how conditional webhooks can be implemented practically in your webhook rules queries.
+Special Offer Webhook Request
+Customer Webhook Request
+{
+  "name": "Salla Special Offer Created Event",
+  "event": "specialoffer.created",
+  "url": "https://webhook.site/a61ca376-dd98-4053-b2c4-8ba9cca470fc",
+  "version": 2,
+  "rule": "status = `active` OR applied_to = `first_order`",
+  "headers": [
+    {
+      "key": "Authorization",
+      "value": "Your Secret token"
+    },
+    {
+      "key": "Accept-Language",
+      "value": "AR"
+    }
+  ]
+}
+In the above example the webhook was set the event to specialoffer.created. In the rule section, we added OR
+that means, when one of the conditions are true, this wil trigger the webhook. In our example, the webhook will be triggered whenever there is a status equaling to active, or the the special offer created is applied to order.
+Attributes
+The following attributes allow you to write conditions only based on them. For example, if you want to write conditions for the Category event, use in the rule section one or more of the following:
+
+id
+name
+parent_id
+status
+sort_order
+And the same logic goes for all the supported attributes:
+Order
+Product
+Customer
+Special Offers
+Category
+Brand
+Cart
+Miscellaneous
+Order
+Events
+Properties
+The supported events are the following:
+Event Name
+order.created
+order.updated
+order.status.updated
+order.cancelled
+order.refunded
+order.deleted
+order.products.updated
+order.payment.updated
+order.coupon.updated
+order.total.price.updated
+order.shipment.creating
+order.shipment.created
+order.shipment.cancelled
+order.shipment.return.creating
+order.shipment.return.created
+order.shipment.return.cancelled
+order.shipping.address.updated
+Product
+Events
+Properties
+The supported events are the following:
+Event Name
+product.created
+product.updated
+product.deleted
+product.available
+product.quantity.low
+Customer
+Events
+Properties
+The supported events are the following:
+Event Name
+customer.created
+customer.updated
+customer.login
+customer.otp.request
+Special Offers
+Events
+Properties
+The supported events are the following:
+Event Name
+specialoffer.created
+specialoffer.updated
+Category
+Events
+Properties
+The supported events are the following:
+Event Name
+category.created
+category.updated
+Brand
+Events
+Properties
+The supported events are the following:
+Event Name
+brand.created
+brand.updated
+brand.deleted
+Cart
+Events
+Properties
+The supported event is the following:
+Event Name
+abandoned.cart
+Miscellaneous
+Events
+Properties
+The supported event is the following:
+Event Name
+review.added
+Modified at about 2 months ago
+Previous
+Webhooks
+Next
+Security Considerations
+Export
