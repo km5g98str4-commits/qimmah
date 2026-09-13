@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- قِمّة — حزمة تشغيل staging 8/8
+-- قِمّة — حزمة تشغيل staging 8/9
 -- ═══════════════════════════════════════════════════════════════════════════
 -- ⚠️ **الترتيب مُلزَم.** الحزم تُلصَق ١ ثم ٢ ثم ٣ … ولا تُقفز واحدة: بعض
 --    الهجرات تعيد تعريف دوالّ سابقة، وعكس الترتيب يجعل الأقدم يكتب فوق
@@ -1145,47 +1145,10 @@ $qimmah_mig_20260831120001_wrap$;
 
 -- ── صفّ الحزمة: ماذا فعلت هذه اللصقة بالضبط ───────────────────────────────
 select
-  '8/8'                                                     as bundle,
+  '8/9'                                                     as bundle,
   count(*) filter (where m.version is not null)                   as registered,
   3                                                  as expected,
   case when count(*) filter (where m.version is not null) = 3
        then 'OK' else 'INCOMPLETE' end                            as status
 from (values ('20260829120001'), ('20260830120001'), ('20260831120001')) as v(version)
 left join supabase_migrations.schema_migrations m on m.version = v.version;
-
--- ═══════════════════════════════════════════════════════════════════════════
--- الحزمة الأخيرة — بذرة الملح ثم التحقّق
--- ═══════════════════════════════════════════════════════════════════════════
---
--- ⚠️ **بذرة الملح خطوة لا تنشئها أي هجرة — لأنها سرّ.** وبدونها ترفع كل
---    دالّة كتابة `identity_pepper: no active version` عند أول مستخدم حقيقي.
---    ولا تُعاد إن كانت مبذورة: استبدال ملح قائم يُبطل **كل** بصمة مسجَّلة
---    (التجارب والأكواد والمشتريات). و`on conflict do nothing` يضمن ذلك.
-insert into private.identity_pepper (version, pepper)
-values (1, encode(extensions.gen_random_bytes(32), 'hex'))
-on conflict (version) do nothing;
-
--- ── التحقّق: من الكتالوج الحيّ لا من عدّ الملفات ──────────────────────────
--- عدُّ الملفات يقول «طُبِّق». الكتالوج يقول «يعمل».
-select
-  (select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where n.nspname = 'public' and c.relkind = 'r')                            as tables,
-  (select count(*) from pg_class c join pg_namespace n on n.oid = c.relnamespace
-    where n.nspname = 'public' and c.relkind = 'r' and c.relrowsecurity)       as with_rls,
-  (select count(*) from pg_policies where schemaname = 'public')               as policies,
-  (select count(*) from information_schema.role_table_grants
-    where grantee = 'anon' and table_schema = 'public'
-      and privilege_type in ('INSERT','UPDATE','DELETE'))                      as anon_writes,
-  (select count(*) from private.identity_pepper)                               as pepper,
-  (select count(*) from information_schema.role_routine_grants
-    where grantee = 'authenticated' and routine_schema = 'public'
-      and routine_name in ('my_entitlement','start_trial','redeem_access_code_v2',
-                           'claim_pending_grants','submit_missing_food','delete_own_account'))
-                                                                               as client_rpcs,
-  (select count(*) from information_schema.role_routine_grants
-    where grantee in ('anon','authenticated') and routine_schema = 'public'
-      and routine_name = 'redeem_access_code')                                 as legacy_open,
-  (select count(*) from supabase_migrations.schema_migrations)                 as migrations;
-
--- المتوقَّع: tables = with_rls · policies > 0 · anon_writes = 0 · pepper = 1
---            client_rpcs = 6 · legacy_open = 0 · migrations = 44
