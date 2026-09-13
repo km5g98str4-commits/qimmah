@@ -11,7 +11,8 @@
 
 ```
 الفرع     : claude/qimmah-production-readiness-13cyt7 — تُرقّى إلى main بعد البوابة وCI
-الترقية   : (يُملأ) FOOD-GENERIC-001 · COACH-002 · COPY-DENSITY-001 · SALLA-V1 (وثائق وأدوات فقط)
+الترقية   : main @ b525c77 (٧dc5d78 + دليل USDA 333ded1؛ CI #628 أخضر على 7dc5d78 — دفعة الدليل تغيّر طابعًا زمنيًّا فقط)
+            سبقتها 9ab1d98 (CI #625) و2899fca (CI #612)
 ```
 
 ### FOOD-GENERIC-001 — الـ٦٠٠ **مُحلولة ٦٠٠/٦٠٠** بلا رقم مخترَع
