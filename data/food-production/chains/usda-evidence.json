@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T11:04:01.940Z",
+  "generated_at": "2026-09-13T11:05:07.385Z",
   "source": "USDA FoodData Central (SR Legacy 2018-04 · Foundation Foods · FNDDS 2021-2023) — public domain (CC0)",
   "datasets": [
     {
@@ -16,27 +16,40 @@
     }
   ],
   "stats": {
-    "matched": 39,
+    "matched": 52,
     "exact": 0,
-    "single": 39,
-    "ambiguous": 12,
-    "unmatched": 36,
+    "single": 52,
+    "ambiguous": 0,
+    "unmatched": 35,
     "skipped": 0
   },
   "results": [
     {
       "id": "CH001",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 170720,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, BIG MAC",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21237,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 257,
+        "protein": 11.8,
+        "carbs": 20.1,
+        "fat": 15,
+        "fiber": 1.6,
+        "sugar": 3.97,
+        "sodium": 460,
+        "satFat": 3.8
+      },
+      "portions": [
         {
-          "fdcId": 170720,
-          "dataType": "SR Legacy",
-          "description": "McDONALD'S, BIG MAC"
-        },
-        {
-          "fdcId": 172067,
-          "dataType": "SR Legacy",
-          "description": "McDONALD'S, BIG MAC (without Big Mac Sauce)"
+          "grams": 219,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item 7.6 oz"
         }
       ]
     },
@@ -187,33 +200,59 @@
     },
     {
       "id": "CH007",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 173305,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, McCHICKEN Sandwich",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21355,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 273,
+        "protein": 10.4,
+        "carbs": 28,
+        "fat": 13.2,
+        "fiber": 1.3,
+        "sugar": 3.57,
+        "sodium": 624,
+        "satFat": 2.35
+      },
+      "portions": [
         {
-          "fdcId": 173305,
-          "dataType": "SR Legacy",
-          "description": "McDONALD'S, McCHICKEN Sandwich"
-        },
-        {
-          "fdcId": 173306,
-          "dataType": "SR Legacy",
-          "description": "McDONALD'S, McCHICKEN Sandwich (without mayonnaise)"
+          "grams": 131,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "sandwich"
         }
       ]
     },
     {
       "id": "CH008",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 170319,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, FILET-O-FISH",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21232,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 282,
+        "protein": 11.3,
+        "carbs": 26.4,
+        "fat": 14.6,
+        "fiber": 1.4,
+        "sugar": 3.67,
+        "sodium": 434,
+        "satFat": 2.83
+      },
+      "portions": [
         {
-          "fdcId": 170319,
-          "dataType": "SR Legacy",
-          "description": "McDONALD'S, FILET-O-FISH"
-        },
-        {
-          "fdcId": 173314,
-          "dataType": "SR Legacy",
-          "description": "McDONALD'S, FILET-O-FISH (without tartar sauce)"
+          "grams": 134,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "sandwich"
         }
       ]
     },
@@ -412,17 +451,30 @@
     },
     {
       "id": "CH014",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 173311,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Hotcakes (with 2 pats margarine & syrup)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21365,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 272,
+        "protein": 4.05,
+        "carbs": 46.1,
+        "fat": 8.06,
+        "fiber": 0.9,
+        "sugar": 20.6,
+        "sodium": 283,
+        "satFat": 0.818
+      },
+      "portions": [
         {
-          "fdcId": 173299,
-          "dataType": "SR Legacy",
-          "description": "McDONALD'S, Hotcakes (plain)"
-        },
-        {
-          "fdcId": 173311,
-          "dataType": "SR Legacy",
-          "description": "McDONALD'S, Hotcakes (with 2 pats margarine & syrup)"
+          "grams": 221,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item"
         }
       ]
     },
@@ -461,97 +513,247 @@
     },
     {
       "id": "CH017",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 170744,
+      "dataType": "SR Legacy",
+      "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat and skin with breading",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21434,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 231,
+        "protein": 21.9,
+        "carbs": 6.28,
+        "fat": 13.1,
+        "fiber": null,
+        "sugar": 0,
+        "sodium": 606,
+        "satFat": 2.98
+      },
+      "portions": [
         {
-          "fdcId": 170739,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat only, skin and breading removed"
+          "grams": 152,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "breast, without skin"
         },
         {
-          "fdcId": 170744,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat and skin with breading"
+          "grams": 115,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "breast, bone and skin removed"
+        },
+        {
+          "grams": 212,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "breast, with skin"
         }
       ]
     },
     {
       "id": "CH018",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 170346,
+      "dataType": "SR Legacy",
+      "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat and skin with breading",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21436,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 269,
+        "protein": 18.9,
+        "carbs": 8.46,
+        "fat": 17.7,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 781,
+        "satFat": 4.12
+      },
+      "portions": [
         {
-          "fdcId": 170346,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat and skin with breading"
+          "grams": 135,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "thigh, with skin"
         },
         {
-          "fdcId": 170741,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat only, skin and breading removed"
+          "grams": 60,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "thigh, bone and skin removed"
+        },
+        {
+          "grams": 86,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "thigh, without skin"
         }
       ]
     },
     {
       "id": "CH019",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 170745,
+      "dataType": "SR Legacy",
+      "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat and skin with breading",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21435,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 239,
+        "protein": 22.3,
+        "carbs": 5.39,
+        "fat": 14.2,
+        "fiber": null,
+        "sugar": null,
+        "sodium": 625,
+        "satFat": 3.24
+      },
+      "portions": [
         {
-          "fdcId": 170740,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat only, skin and breading removed"
+          "grams": 57,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "drumstick, without skin"
         },
         {
-          "fdcId": 170745,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat and skin with breading"
+          "grams": 40,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "drumstick, bone and skin removed"
+        },
+        {
+          "grams": 75,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "drumstick, with skin"
         }
       ]
     },
     {
       "id": "CH020",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 170347,
+      "dataType": "SR Legacy",
+      "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat and skin with breading",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21437,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 297,
+        "protein": 21.7,
+        "carbs": 9.93,
+        "fat": 18.9,
+        "fiber": 0,
+        "sugar": 0,
+        "sodium": 884,
+        "satFat": 4.25
+      },
+      "portions": [
         {
-          "fdcId": 170342,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat only, skin and breading removed"
+          "grams": 39,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "wing, without skin"
         },
         {
-          "fdcId": 170347,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat and skin with breading"
+          "grams": 23,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "wing, bone and skin removed"
+        },
+        {
+          "grams": 60,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "wing, with skin"
         }
       ]
     },
     {
       "id": "CH021",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 170348,
+      "dataType": "SR Legacy",
+      "description": "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat and skin with breading",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21438,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 268,
+        "protein": 21.2,
+        "carbs": 8.47,
+        "fat": 16.6,
+        "fiber": null,
+        "sugar": null,
+        "sodium": 607,
+        "satFat": 3.54
+      },
+      "portions": [
         {
-          "fdcId": 170344,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat only, skin and breading removed"
+          "grams": 121,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "breast, bone and skin removed"
         },
         {
-          "fdcId": 170348,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat and skin with breading"
+          "grams": 140,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "breast, without skin"
+        },
+        {
+          "grams": 212,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "breast, with skin"
         }
       ]
     },
     {
       "id": "CH022",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 170746,
+      "dataType": "SR Legacy",
+      "description": "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat and skin with breading",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21440,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 309,
+        "protein": 17.2,
+        "carbs": 10.3,
+        "fat": 22.1,
+        "fiber": null,
+        "sugar": null,
+        "sodium": 682,
+        "satFat": 4.92
+      },
+      "portions": [
         {
-          "fdcId": 170742,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat only, skin and breading removed"
+          "grams": 152,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "thigh, with skin"
         },
         {
-          "fdcId": 170746,
-          "dataType": "SR Legacy",
-          "description": "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat and skin with breading"
+          "grams": 72,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "thigh, bone and skin removed"
+        },
+        {
+          "grams": 91,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "thigh, without skin"
         }
       ]
     },
@@ -693,17 +895,36 @@
     },
     {
       "id": "CH029",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 2706931,
+      "dataType": "FNDDS",
+      "description": "Whopper (Burger King)",
+      "publicationDate": "10/31/2024",
+      "ndbNumber": null,
+      "foodCode": "27510615",
+      "per100g": {
+        "kcal": 226,
+        "protein": 11.3,
+        "carbs": 17.3,
+        "fat": 12.4,
+        "fiber": 1.5,
+        "sugar": 4,
+        "sodium": 342,
+        "satFat": 3.97
+      },
+      "portions": [
         {
-          "fdcId": 2706923,
-          "dataType": "FNDDS",
-          "description": "Whopper Jr (Burger King)"
+          "grams": 270,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "Quantity not specified"
         },
         {
-          "fdcId": 2706931,
-          "dataType": "FNDDS",
-          "description": "Whopper (Burger King)"
+          "grams": 270,
+          "amount": null,
+          "unit": "undetermined",
+          "modifier": "1 hamburger"
         }
       ]
     },
@@ -1020,7 +1241,44 @@
     },
     {
       "id": "CH041",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173281,
+      "dataType": "SR Legacy",
+      "description": "PIZZA HUT 12\" Super Supreme Pizza, Hand-Tossed Crust",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21276,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 243,
+        "protein": 10.9,
+        "carbs": 25.6,
+        "fat": 10.7,
+        "fiber": 2,
+        "sugar": 3.71,
+        "sodium": 689,
+        "satFat": 4.55
+      },
+      "portions": [
+        {
+          "grams": 127,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "slice"
+        },
+        {
+          "grams": 1107,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "pizza"
+        },
+        {
+          "grams": 541,
+          "amount": 0.5,
+          "unit": "undetermined",
+          "modifier": "pizza"
+        }
+      ]
     },
     {
       "id": "CH042",
@@ -1532,17 +1790,30 @@
     },
     {
       "id": "CH062",
-      "status": "ambiguous",
-      "candidates": [
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 169841,
+      "dataType": "SR Legacy",
+      "description": "APPLEBEE'S, chicken tenders platter",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 36023,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 297,
+        "protein": 19.6,
+        "carbs": 18,
+        "fat": 16.2,
+        "fiber": 1,
+        "sugar": 0.36,
+        "sodium": 740,
+        "satFat": 2.85
+      },
+      "portions": [
         {
-          "fdcId": 169012,
-          "dataType": "SR Legacy",
-          "description": "APPLEBEE'S, chicken tenders, from kids' menu"
-        },
-        {
-          "fdcId": 169841,
-          "dataType": "SR Legacy",
-          "description": "APPLEBEE'S, chicken tenders platter"
+          "grams": 209,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "serving"
         }
       ]
     },
