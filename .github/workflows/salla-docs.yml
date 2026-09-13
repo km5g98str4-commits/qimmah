@@ -1,0 +1,44 @@
+# جلب توثيق سلة الرسمي في CI — [SALLA-PROD-001]. مضيفو سلة محجوبون في بيئة الوكلاء؛ عدّاء GitHub
+# شبكته مفتوحة. المخرج نصوص توثيق عامّة فقط (لا أسرار ولا أكواد) تُدفع إلى الفرع نفسه.
+name: Salla docs (official reference)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/qimmah-production-readiness-13cyt7
+    paths:
+      - scripts/salla/salla-docs-sources.json
+      - scripts/salla/fetch-salla-docs.mjs
+
+permissions:
+  contents: write
+
+concurrency:
+  group: salla-docs-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: node scripts/salla/fetch-salla-docs.mjs
+      - name: Commit and push the docs snapshot
+        run: |
+          git config user.name 'qimmah-salla-docs'
+          git config user.email 'actions@users.noreply.github.com'
+          git add data/salla-docs
+          if git diff --cached --quiet; then echo 'no change'; exit 0; fi
+          git commit -m "docs(salla): [SALLA-PROD-001] official Salla documentation snapshot (CI fetch)" -m "Generated-by: .github/workflows/salla-docs.yml"
+          for i in 1 2 3; do git push origin "HEAD:${{ github.ref_name }}" && exit 0; git pull --rebase origin "${{ github.ref_name }}"; done
+          git push origin "HEAD:${{ github.ref_name }}"
