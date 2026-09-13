@@ -1,0 +1,660 @@
+{
+ "generated_at": "2026-09-13T10:41:28.970Z",
+ "counts": {
+  "QUARANTINED": 25,
+  "VERIFIED_AND_LOGGABLE": 35,
+  "proxy_of_verified": 3
+ },
+ "rows": [
+  {
+   "id": "BK001",
+   "nameAr": "منقوشة زعتر بالزيت",
+   "nameEn": "Zaatar manakish",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "لا سجلّ USDA للزعتر بالزيت — لا وكيل بيتزا للزعتر"
+  },
+  {
+   "id": "BK002",
+   "nameAr": "منقوشة لحم بعجين",
+   "nameEn": "Meat manakish (lahm bi ajeen)",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk002",
+   "fdcId": 2708657,
+   "description": "Pizza with extra meat, thin crust",
+   "sourceMatch": "proxy",
+   "proxyNote": "لحم بعجين ⇐ بيتزا رقيقة باللحم (أقرب تركيب متاح)"
+  },
+  {
+   "id": "BK003",
+   "nameAr": "منقوشة جبن وزعتر",
+   "nameEn": "Cheese and zaatar manakish",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK004",
+   "nameAr": "فطيرة لحم (سفيحة)",
+   "nameEn": "Meat pie (sfiha)",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "المطابق الوحيد فطيرة لحم غربية (Pot pie) — لا يمثّل السفيحة"
+  },
+  {
+   "id": "BK005",
+   "nameAr": "فطيرة دجاج",
+   "nameEn": "Chicken pie",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "المطابق فطيرة دجاج مجمَّدة قليلة الدسم — لا يمثّل فطيرة الفرن"
+  },
+  {
+   "id": "BK006",
+   "nameAr": "فطيرة زعتر",
+   "nameEn": "Zaatar pie",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "لا سجلّ USDA لفطيرة الزعتر"
+  },
+  {
+   "id": "BK007",
+   "nameAr": "فطيرة جبن حلوم",
+   "nameEn": "Halloumi pie",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "Pastry, cheese-filled",
+    "Pastry, egg and cheese filled"
+   ]
+  },
+  {
+   "id": "BK008",
+   "nameAr": "سبانخ فطيرة (فطاير سبانخ ٣ حبات)",
+   "nameEn": "Spinach fatayer (3 pcs)",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk008",
+   "fdcId": 2708729,
+   "description": "Spanakopita",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK009",
+   "nameAr": "سمبوسة (فرن)",
+   "nameEn": "Samosa (bakery)",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk009",
+   "fdcId": 2708730,
+   "description": "Samosa",
+   "sourceMatch": "proxy",
+   "proxyNote": "سمبوسة عامّة — السجلّ لا يميّز الحشوة"
+  },
+  {
+   "id": "BK010",
+   "nameAr": "سمبوسة دجاج",
+   "nameEn": "Chicken samosa",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "نفس سجلّ السمبوسة العامّ (BK009) — لا تكرار"
+  },
+  {
+   "id": "BK011",
+   "nameAr": "كرواسون زعتر",
+   "nameEn": "Zaatar croissant",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK012",
+   "nameAr": "كرواسون جبن",
+   "nameEn": "Cheese croissant (bakery)",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk012",
+   "fdcId": 2707679,
+   "description": "Croissant, cheese",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK013",
+   "nameAr": "كرواسون شوكولاتة",
+   "nameEn": "Chocolate croissant (bakery)",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk013",
+   "fdcId": 2707680,
+   "description": "Croissant, chocolate",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK014",
+   "nameAr": "دانش جبن",
+   "nameEn": "Cheese danish",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk014",
+   "fdcId": 2708061,
+   "description": "Danish pastry, with cheese",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK015",
+   "nameAr": "دانش فواكه",
+   "nameEn": "Fruit danish",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk015",
+   "fdcId": 2708060,
+   "description": "Danish pastry, with fruit",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK016",
+   "nameAr": "سينامون رول",
+   "nameEn": "Cinnamon roll",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk016",
+   "fdcId": 2707668,
+   "description": "Roll, sweet, cinnamon bun, frosted",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK017",
+   "nameAr": "مفن توت",
+   "nameEn": "Blueberry muffin",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK018",
+   "nameAr": "مفن شوكولاتة",
+   "nameEn": "Chocolate chip muffin",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk018",
+   "fdcId": 2707832,
+   "description": "Muffin, chocolate chip",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK019",
+   "nameAr": "خبز نان",
+   "nameEn": "Naan bread",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk019",
+   "fdcId": 2707613,
+   "description": "Bread, naan",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK020",
+   "nameAr": "خبز تنور (قرص)",
+   "nameEn": "Tannour flatbread",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "Bread, pita, white, unenriched",
+    "Bread, pita, white, enriched"
+   ]
+  },
+  {
+   "id": "BK021",
+   "nameAr": "خبز بالثوم (شريحة)",
+   "nameEn": "Garlic bread",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk021",
+   "fdcId": 2707626,
+   "description": "Garlic bread, NFS",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK022",
+   "nameAr": "خبز بالجبن (شريحة)",
+   "nameEn": "Cheese bread",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk022",
+   "fdcId": 2707618,
+   "description": "Bread, cheese",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK023",
+   "nameAr": "فوكاتشا",
+   "nameEn": "Focaccia",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk023",
+   "fdcId": 2707612,
+   "description": "Focaccia, Italian, plain",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK024",
+   "nameAr": "أعواد خبز (بريد ستيك)",
+   "nameEn": "Breadsticks",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk024",
+   "fdcId": 2707692,
+   "description": "Breadsticks, soft, NFS",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK025",
+   "nameAr": "كالزوني لحم وجبن",
+   "nameEn": "Meat and cheese calzone",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk025",
+   "fdcId": 2708685,
+   "description": "Calzone, with meat and cheese",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK026",
+   "nameAr": "بيتزا فرن حطب مارغريتا (شريحة)",
+   "nameEn": "Wood-oven margherita pizza slice",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK027",
+   "nameAr": "بيتزا فرن حطب خضار (شريحة)",
+   "nameEn": "Wood-oven vegetable pizza slice",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk027",
+   "fdcId": 2708626,
+   "description": "Pizza, cheese, with vegetables, from restaurant or fast food, thin crust",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK028",
+   "nameAr": "بيتزا دجاج (شريحة)",
+   "nameEn": "Chicken pizza slice",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK029",
+   "nameAr": "بيتزا بيبروني (شريحة)",
+   "nameEn": "Pepperoni pizza slice",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK030",
+   "nameAr": "كيش جبن",
+   "nameEn": "Cheese quiche",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk030",
+   "fdcId": 2708733,
+   "description": "Cheese quiche, meatless",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK031",
+   "nameAr": "سبرنغ رول خضار",
+   "nameEn": "Vegetable spring roll",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk031",
+   "fdcId": 2708700,
+   "description": "Egg roll, meatless",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK032",
+   "nameAr": "بف باستري لحم",
+   "nameEn": "Meat puff pastry",
+   "category": "أفران",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk032",
+   "fdcId": 2708728,
+   "description": "Pastry, meat / poultry-filled",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK033",
+   "nameAr": "خبز صاج",
+   "nameEn": "Saj bread",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "لا سجلّ USDA لخبز الصاج/اللافاش"
+  },
+  {
+   "id": "BK034",
+   "nameAr": "فطيرة بطاطس",
+   "nameEn": "Potato pie",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "المطابق فطيرة بطاطا حلوة (حلوى) لا فطيرة بطاطس مالحة"
+  },
+  {
+   "id": "BK035",
+   "nameAr": "فطيرة تفاح",
+   "nameEn": "Apple turnover",
+   "category": "أفران",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK040",
+   "nameAr": "لازانيا لحم (وجبة مجمّدة)",
+   "nameEn": "Frozen meat lasagna",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk040",
+   "fdcId": 2708754,
+   "description": "Lasagna with meat, frozen",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK041",
+   "nameAr": "مكرونة بالجبن (جاهزة)",
+   "nameEn": "Macaroni and cheese (prepared)",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK042",
+   "nameAr": "ناجتس دجاج مجمّد (مطهو)",
+   "nameEn": "Frozen chicken nuggets, cooked",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk042",
+   "fdcId": 172112,
+   "description": "Chicken, nuggets, white meat, precooked, frozen, not reheated",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK043",
+   "nameAr": "برجر دجاج مجمّد (قرص)",
+   "nameEn": "Frozen breaded chicken patty",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK044",
+   "nameAr": "أصابع سمك مجمّدة",
+   "nameEn": "Fish sticks",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk044",
+   "fdcId": 174195,
+   "description": "Fish, fish sticks, frozen, prepared",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK045",
+   "nameAr": "بيتزا مجمّدة جبن (شريحة)",
+   "nameEn": "Frozen cheese pizza slice",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "Pizza, cheese, from frozen, thick crust",
+    "Pizza, cheese with vegetables, from frozen, thick crust"
+   ]
+  },
+  {
+   "id": "BK046",
+   "nameAr": "بيتزا مجمّدة بيبروني (شريحة)",
+   "nameEn": "Frozen pepperoni pizza slice",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk046",
+   "fdcId": 172096,
+   "description": "Pizza, pepperoni topping, regular crust, frozen, cooked",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK047",
+   "nameAr": "بوريتو مجمّد لحم وفاصوليا",
+   "nameEn": "Frozen beef and bean burrito",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk047",
+   "fdcId": 173335,
+   "description": "Burrito, beef and bean, frozen",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK048",
+   "nameAr": "فطيرة دجاج بالكريمة (بوت باي)",
+   "nameEn": "Chicken pot pie",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk048",
+   "fdcId": 2706703,
+   "description": "Pot pie, chicken",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK049",
+   "nameAr": "كرات لحم مجمّدة (مطهوّة)",
+   "nameEn": "Frozen meatballs, cooked",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk049",
+   "fdcId": 171638,
+   "description": "Meatballs, frozen, Italian style",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK050",
+   "nameAr": "قرص برجر لحم مجمّد (مطهو)",
+   "nameEn": "Frozen beef patty, cooked",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk050",
+   "fdcId": 169447,
+   "description": "Beef, ground, patties, frozen, cooked, broiled",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK051",
+   "nameAr": "سبرنغ رول مجمّد",
+   "nameEn": "Frozen spring roll",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK052",
+   "nameAr": "وجبة دجاج مقلي مجمّدة (بطاطس وخضار)",
+   "nameEn": "Frozen fried chicken dinner",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk052",
+   "fdcId": 2707106,
+   "description": "Chicken, fried, with potatoes, vegetable, frozen meal",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK053",
+   "nameAr": "وجبة ستيك سالزبري مجمّدة",
+   "nameEn": "Frozen salisbury steak meal",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk053",
+   "fdcId": 2707099,
+   "description": "Salisbury steak with gravy, potatoes, vegetable, frozen meal",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK054",
+   "nameAr": "رز بالخضار مجمّد",
+   "nameEn": "Frozen rice with vegetables",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk054",
+   "fdcId": 2707115,
+   "description": "Chicken in soy-based sauce, rice and vegetables, frozen meal",
+   "sourceMatch": "proxy",
+   "proxyNote": "رز بالخضار مجمَّد ⇐ وجبة دجاج ورز وخضار مجمَّدة (أقرب تركيب متاح)"
+  },
+  {
+   "id": "BK055",
+   "nameAr": "كباب دجاج مجمّد (مطهو)",
+   "nameEn": "Frozen chicken kebab, cooked",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "id": "BK056",
+   "nameAr": "شوربة عدس جاهزة (كوب)",
+   "nameEn": "Ready lentil soup",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "USDA ambiguous",
+   "candidates": [
+    "Soup, lentil, canned",
+    "Soup, lentil, canned, reduced sodium",
+    "Soup, lentil",
+    "Soup, lentil, with meat"
+   ]
+  },
+  {
+   "id": "BK057",
+   "nameAr": "شوربة دجاج بالنودلز (معلّبة)",
+   "nameEn": "Canned chicken noodle soup",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk057",
+   "fdcId": 172909,
+   "description": "Soup, chicken noodle, canned, prepared with equal volume water",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK058",
+   "nameAr": "حمص جاهز",
+   "nameEn": "Ready-made hummus",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk058",
+   "fdcId": 174289,
+   "description": "Hummus, commercial",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK059",
+   "nameAr": "سلطة تبولة جاهزة",
+   "nameEn": "Prepared tabbouleh",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk059",
+   "fdcId": 2709131,
+   "description": "Tabbouleh",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK060",
+   "nameAr": "ورق عنب محشي جاهز",
+   "nameEn": "Stuffed grape leaves (ready)",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk060",
+   "fdcId": 2709064,
+   "description": "Grape leaves stuffed with rice",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK061",
+   "nameAr": "كبة مقلية (جاهزة)",
+   "nameEn": "Kibbeh, fried",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "لا سجلّ USDA للكبّة"
+  },
+  {
+   "id": "BK062",
+   "nameAr": "فلافل مجمّد (مطهو)",
+   "nameEn": "Frozen falafel, cooked",
+   "category": "وجبات جاهزة",
+   "status": "VERIFIED_AND_LOGGABLE",
+   "itemId": "bk-bk062",
+   "fdcId": 2707408,
+   "description": "Falafel",
+   "sourceMatch": "exact",
+   "proxyNote": null
+  },
+  {
+   "id": "BK063",
+   "nameAr": "شاورما دجاج جاهزة (كيس)",
+   "nameEn": "Ready chicken shawarma meat",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "لا سجلّ USDA لشاورما الدجاج الجاهزة"
+  },
+  {
+   "id": "BK064",
+   "nameAr": "نودلز سريعة التحضير (كوب)",
+   "nameEn": "Instant noodles cup",
+   "category": "وجبات جاهزة",
+   "status": "QUARANTINED",
+   "why": "USDA unmatched",
+   "candidates": []
+  }
+ ]
+}
