@@ -13,7 +13,8 @@
     "sr",
     "fndds",
     "foundation"
-   ]
+   ],
+   "pick": "McDONALD'S, BIG MAC"
   },
   {
    "id": "CH002",
@@ -109,7 +110,8 @@
    "not": [
     "spicy",
     "deluxe"
-   ]
+   ],
+   "pick": "McDONALD'S, McCHICKEN Sandwich"
   },
   {
    "id": "CH008",
@@ -122,7 +124,8 @@
     "sr",
     "fndds",
     "foundation"
-   ]
+   ],
+   "pick": "McDONALD'S, FILET-O-FISH"
   },
   {
    "id": "CH009",
@@ -209,7 +212,8 @@
    ],
    "not": [
     "sausage"
-   ]
+   ],
+   "pick": "McDONALD'S, Hotcakes (with 2 pats margarine & syrup)"
   },
   {
    "id": "CH015",
@@ -229,7 +233,7 @@
    "chain": "mcdonalds",
    "nameAr": "فطيرة تفاح",
    "nameEn": "Baked Apple Pie",
-   "q": "mcdonald's apple pie",
+   "q": "mcdonald's baked apple pie",
    "type": "dessert",
    "prefer": [
     "sr",
@@ -252,7 +256,8 @@
    "not": [
     "skin removed",
     "without skin"
-   ]
+   ],
+   "pick": "KFC, Fried Chicken, ORIGINAL RECIPE, Breast, meat and skin with breading"
   },
   {
    "id": "CH018",
@@ -269,7 +274,8 @@
    "not": [
     "skin removed",
     "without skin"
-   ]
+   ],
+   "pick": "KFC, Fried Chicken, ORIGINAL RECIPE, Thigh, meat and skin with breading"
   },
   {
    "id": "CH019",
@@ -286,7 +292,8 @@
    "not": [
     "skin removed",
     "without skin"
-   ]
+   ],
+   "pick": "KFC, Fried Chicken, ORIGINAL RECIPE, Drumstick, meat and skin with breading"
   },
   {
    "id": "CH020",
@@ -303,7 +310,8 @@
    "not": [
     "skin removed",
     "without skin"
-   ]
+   ],
+   "pick": "KFC, Fried Chicken, ORIGINAL RECIPE, Wing, meat and skin with breading"
   },
   {
    "id": "CH021",
@@ -316,7 +324,8 @@
     "sr",
     "fndds",
     "foundation"
-   ]
+   ],
+   "pick": "KFC, Fried Chicken, EXTRA CRISPY, Breast, meat and skin with breading"
   },
   {
    "id": "CH022",
@@ -329,7 +338,8 @@
     "sr",
     "fndds",
     "foundation"
-   ]
+   ],
+   "pick": "KFC, Fried Chicken, EXTRA CRISPY, Thigh, meat and skin with breading"
   },
   {
    "id": "CH023",
@@ -375,7 +385,7 @@
    "chain": "kfc",
    "nameAr": "بطاطس مهروسة بالمرق",
    "nameEn": "Mashed Potatoes with Gravy",
-   "q": "kfc mashed potatoes with gravy",
+   "q": "kfc mashed potatoes",
    "type": "side",
    "prefer": [
     "sr",
@@ -427,7 +437,8 @@
     "triple",
     "cheese",
     "with cheese"
-   ]
+   ],
+   "pick": "Whopper (Burger King)"
   },
   {
    "id": "CH030",
@@ -602,7 +613,7 @@
    "chain": "pizzahut",
    "nameAr": "بيتزا سوبريم بان (شريحة ١٢\")",
    "nameEn": "12\" Super Supreme Pizza, Pan (slice)",
-   "q": "pizza hut 12 super supreme pizza pan",
+   "q": "pizza hut 12 super supreme",
    "type": "pizza",
    "prefer": [
     "sr",
@@ -628,7 +639,7 @@
    "chain": "pizzahut",
    "nameAr": "بيتزا بيبروني رقيقة (شريحة ١٢\")",
    "nameEn": "12\" Pepperoni Pizza, Thin N Crispy (slice)",
-   "q": "pizza hut 12 pepperoni pizza thin",
+   "q": "pizza hut 12 pepperoni thin",
    "type": "pizza",
    "prefer": [
     "sr",
@@ -847,7 +858,7 @@
    "chain": "subway",
    "nameAr": "كوكيز شوكولاتة",
    "nameEn": "Chocolate Chip Cookie",
-   "q": "subway chocolate chip cookie",
+   "q": "subway cookie",
    "type": "dessert",
    "prefer": [
     "sr",
@@ -873,7 +884,7 @@
    "chain": "applebees",
    "nameAr": "دجاج مشوي على السيزر سلطة",
    "nameEn": "Grilled Chicken Caesar Salad",
-   "q": "applebee's chicken caesar salad",
+   "q": "applebee's caesar salad chicken",
    "type": "salad",
    "prefer": [
     "sr",
@@ -905,7 +916,8 @@
     "sr",
     "fndds",
     "foundation"
-   ]
+   ],
+   "pick": "APPLEBEE'S, chicken tenders platter"
   },
   {
    "id": "CH063",
@@ -925,7 +937,7 @@
    "chain": "applebees",
    "nameAr": "برجر كلاسيك",
    "nameEn": "Classic Burger",
-   "q": "applebee's classic burger",
+   "q": "applebee's burger",
    "type": "burger",
    "prefer": [
     "sr",

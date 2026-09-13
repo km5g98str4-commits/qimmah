@@ -75,7 +75,7 @@ for (const file of files) {
     const marketAr = MARKET_AR[source.market] ?? source.market
     const notesAr = source.market === 'SA'
       ? (macros === 'official' ? 'القيم من مصدر السلسلة الرسمي.' : macros === 'partial-estimated' ? 'السعرات والبروتين من منيو السلسلة الرسمي · الكارب والدهون تقدير.' : 'السعرات من منيو السلسلة الرسمي · الماكروز تقدير.')
-      : `القيم من دليل التغذية الرسمي للسلسلة في ${marketAr} — الوصفة السعودية قد تختلف.`
+      : source.kind === 'usda-branded-record' ? `القيم من سجلّ USDA لمنتج السلسلة في ${marketAr} — الوصفة السعودية قد تختلف.` : `القيم من دليل التغذية الرسمي للسلسلة في ${marketAr} — الوصفة السعودية قد تختلف.`
     const item = {
       id, nameAr: `${chain.ar} - ${row.nameAr}`, nameEn: `${chain.en} - ${row.nameEn}`, category: 'مطاعم',
       servingLabelAr: row.servingLabelAr ?? 'حصة', ...(typeof row.servingGrams === 'number' ? { servingGrams: row.servingGrams } : {}),
