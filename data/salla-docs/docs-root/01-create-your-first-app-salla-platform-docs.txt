@@ -1,0 +1,224 @@
+# Create Your First App - Salla Platform Docs
+# https://docs.salla.dev/create-app
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Order Status
+Order Histories
+Order Options
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+Merchant API
+Copy Page
+Create Your First App
+Salla has made it easier for developers worldwide to reach its audience of over 60,000 active retailers. Achieve more and make money by offering your services to many Merchants or by engaging them in high-touch customer interactions. You can do more, as we explained in a previous article.
+Note
+Developers can access a rich list of Salla's Partners resources using the dedicated API documentation, which provides in-depth access methods to Salla customers, stores, and more.
+With the Partners Portal, you can create Apps, test on demo stores, release them on the Salla Apps Marketplace and get paid.
+Information
+The Salla Partner Portal gives more capabilities for developers to design, develop, build, ship, and connect their apps with the Salla E-commerce portal.
+As we will be unraveling in this article, the portal will be much more effortless to workaround.
+Building an App on Salla?
+The Salla Apps Playbook walks through the full process, planning, building, publishing, and growing an app, end to end.
+Create Salla App
+To start, make sure to have a verified Salla Partners account on https://salla.partners.
+Login to your account on https://salla.partners using your credentials. Once logged in you will be redirected to the main page.
+From the left menu, can click on "My Apps". This will land on the Apps page where you can create your first app.
+Note
+With Salla App Store, you can have two types of Apps:
+Public App: your App can go into public usage and display for those users who browse the Salla App Store. The Merchants can view your App's details and may download/purchase your App.
+Private App: privately built and developed apps for integration to either larger scaled or individual Merchants. The Apps won't be displayed or accessed from the Salla App Store homepage search results and more.
+In this step, you will need to choose your App's type either Public or Private.
+Note
+Shipping App can be a Public or Private App, you will be able to choose the App category in the next section.
+Afterward, start entering the basic information of your App:
+Item	Description
+Icon	The App icon image, should have Minimum width : 250 pixels, height : 250 pixels. And the Width to high ratio : 1 : 1 .
+Name	The App name should be provided in English and Arabic
+Category	Shipping Apps for Shipping services Apps., General App for other than Shipping App
+Description	Describe your App in 50 characters
+App Website	The App website URL link
+Support Email	The App support email address
+Following is a complete example for App Basic information:
+Now you can click on "Create App".
+🥳You have successfully created your first App on Salla Partners Portal.
+Note
+Getting here, means the App was created. In order to publish you will need to continue reading.
+App Details
+After creating the App, you will be redirected to the App details page. App Details page is where you will find the App deatils inlcuding App Keys, App Scope, Webhooks Notifications App Trusted IP's, App Settings, App Snippet, Custom Plans, DNS Management, App Testing, App Testing, App Publishing. Each section will be explained in the following parts.
+1- App Keys
+The App keys details are required to authorize your App via Merchants. Such credentials include:
+Client ID
+Client Secret Key with an option to generate a new Client secret key
+OAuth Modes, either Easy Mode as in-house authorization or Custom Mode.
+2- App Scope
+After that, you will come to the "App Scope" section. This section specifies your app's scope to protect your app by identifying and restricting access to certain features and services.
+3- Webhooks and Notifications
+Next, you will have the "Webhooks/Notifications". Webhooks are one way that Apps can send automated messages or information to other apps. You can use that to be notified whenever events occur in stores, such as "create an order", "register a new customer", and others. Scrolling down, you will outlook more options:
+Adding your Webhook URL to where you will be receiving the events you choose to listen to
+Get your Webhook Secret key with the option to generate a new one
+Stream App Events
+Add Store Events
+a. App Events
+For App Events, your webhook will automatically receive the events when a merchant triggers an action on your app, such as:
+App Installed
+App Updated
+App Trial Started
+App Trial Ended
+App Subscription Started
+App Subscription Ended
+App Subscription Renewed
+App Rated
+b. Store Events
+For adding Store Events, Salla has listed out events you can listen to with each having its own attributes, such as:
+Orders
+Products
+Customers
+Categories
+Brands
+Stores
+Miscellaneous
+4- App Trusted IP
+In this section, you can add a trusted IPs for your App for more secure communication between the App and Salla API
+
+5- App Snippets
+The App snippets can be added in this section. Click on "View Snippets" to start adding.
+Read more about App Snippets here.
+
+
+6- App Settings
+In this section you can edit the App settings, including buliding the App Settings and Settings Validation URL
+
+you can follow the steps in this article for detailed guidance.
+
+
+7- Custom Plans
+This feature enables you to create unique plans and features tailored to your specific needs.
+
+Read more about Custom Plans here.
+
+
+8- DNS Management
+Managing DNS (Domain Name System) records for a Salla Store involves configuring the settings that enable the store’s domain name to be associated with its corresponding IP address, which helps to ensure that visitors can access the store using the desired domain name.
+
+More about DNS Management here
+
+
+9- App Testing
+In this section you can test your App using a demo store, the demo store will provide a real life experience of an actual store where you can test your App features.
+
+Follow the steps of creating a demo store here
+
+
+App Publishing
+App publishing allows your App to be displayed in Salla Apps Store for all Salla Merchants.
+To publish your App, scroll down on the App Details page and click on the "Start Publishing your App" button, to begin the process.
+The publishing process consists of six sections, Basic Information, App Configurations, App Features, Pricing, Contact Information and Service Trial.
+Read more about publishing Salla App here.
+
+
+With that said, we covered the Salla Partner Portal fully, with all its procedures to create your first App on the portal. Follow up with your email and portal notifications for further understanding of the portal.
+Your Gateway to Success
+With the steps mentioned above, you will create your first App on Salla with ease and a smooth process.
+Time for you to elevate your work, experience, and ability and have a solid reputation with passive income that could be higher than expected, as we have discussed.
+If you are facing any issues or have any further questions, be part of the Global Developer Community on Telegram
+Modified at 26 days ago
+Previous
+Get Started
+Next
+Authorization
+LLMs.txt
+Export

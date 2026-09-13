@@ -1,0 +1,299 @@
+# List Orders Histories - Salla Merchant API | Salla Docs
+# https://docs.salla.dev/order-histories/list
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Order Status
+Order Histories
+List Order Histories
+GET
+Create Order History
+POST
+Order Options
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+Order Histories
+MCP
+Copy Page
+List Order Histories
+Production
+GET
+https://api.salla.dev/admin/v2/orders/{order_id}/histories
+Try it
+Last modified:
+5 days ago
+This endpoint allows you to return the order history of previous and current order statuses for a specific order by passing the order_id as a path parameter.
+Request
+Authorization
+Add the parameter Authorization to Headers，whose value is to concatenate the Token after the Bearer.
+Example:
+Authorization: Bearer ********************
+Path Params
+Generate Code
+order_id
+integer 
+required
+Unique identification number assigend to an order. Get a list of Order IDs from here.
+Example:
+3155923424
+Query Params
+Generate Code
+page
+integer 
+optional
+The Pagination page number
+Example:
+5
+Request Code Samples
+Shell
+JavaScript
+Java
+Swift
+Go
+PHP
+Python
+HTTP
+C
+C#
+Objective-C
+Ruby
+OCaml
+Dart
+R
+Responses
+🟢200
+Success
+application/json
+Generate Code
+status
+number 
+optional
+Response status code, a numeric or alphanumeric identifier used to convey the outcome or status of a request, operation, or transaction in various systems and applications, typically indicating whether the action was successful, encountered an error, or resulted in a specific condition.
+success
+boolean 
+optional
+Response flag, boolean indicator used to signal a particular condition or state in the response of a system or application, often representing the presence or absence of certain conditions or outcomes.
+data
+array[object (ListOrderHistories)] 
+optional
+id
+number 
+required
+A unique identifier associated with a specific entry or record in a database that contains information about a customer's past order or transaction history.
+status
+string 
+required
+The current state of a specific order in a customer's transaction history.
+note
+string 
+required
+A written remark, or message associated with an order entry in a customer's transaction history.
+created_at
+object 
+(Date)
+Date
+required
+created_by
+object  | 
+null 
+required
+type
+enum<string> 
+required
+Type value
+Allowed values:
+comment
+Order history of type comment
+activity
+Order history of type activity.
+pagination
+object 
+(Pagination)
+Pagination
+optional
+Pagination details for the response.
+count
+integer 
+optional
+Number of items returned on the current page.
+Example:
+2
+total
+integer 
+optional
+Total number of items available across all pages.
+Example:
+1216
+perPage
+integer 
+optional
+Maximum number of items returned per page.
+Example:
+2
+currentPage
+integer 
+optional
+Current page number.
+Example:
+1
+totalPages
+integer 
+optional
+Total number of available pages.
+Example:
+608
+links
+object 
+optional
+Pagination navigation links.
+Examples
+Example
+Success | With Created_by
+{
+    "status": 200,
+    "success": true,
+    "data": [
+        {
+            "id": 213320125,
+            "status": "تم التنفيذ",
+            "note": "تم ارسال الطلب عبر شركة الشحن ارامكس",
+            "created_at": {
+                "date": "2020-04-02 18:59:47.000000",
+                "timezone_type": 3,
+                "timezone": "Asia/Riyadh"
+            }
+        },
+        {
+            "id": 213320122,
+            "status": "قيد التنفيذ",
+            "note": "الطلب قيد التنفيذ",
+            "created_at": {
+                "date": "2020-04-02 16:59:47.000000",
+                "timezone_type": 3,
+                "timezone": "Asia/Riyadh"
+            }
+        },
+        {
+            "id": 213320121,
+            "status": "تحت المراجعة",
+            "note": "الطلب تحت المراجعة",
+            "created_at": {
+                "date": "2020-04-02 16:50:47.000000",
+                "timezone_type": 3,
+                "timezone": "Asia/Riyadh"
+            }
+        }
+    ],
+    "pagination": {
+        "count": 3,
+        "total": 3,
+        "perPage": 15,
+        "currentPage": 1,
+        "totalPages": 1,
+        "links": []
+    }
+}
+🟠404
+Record Not Found
+🟠401
+Unauthorized
+Modified at 5 days ago
+Previous
+Order Histories
+Next
+Create Order History
+LLMs.txt
+Export

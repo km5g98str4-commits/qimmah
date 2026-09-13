@@ -1,0 +1,164 @@
+# Salla Partners' documentations
+# https://docs.salla.dev/
+
+Salla Platform Docs
+Search
+Welcome 👋
+Get Started
+Create Your First App
+Authorization
+Webhooks
+Conditional Webhooks
+Security Considerations
+Multi-Language Support
+Responses
+Pagination
+Rate Limiting
+Versioning
+Change Log
+Support
+APIs
+Orders
+Order Status
+Order Histories
+Order Options
+Order Assignment
+Order Invoice
+Products
+Order Reservations
+Product Tags
+Product Options
+Product Images
+Product Option Values
+Digitals Product
+Product Quantity
+Product Variants
+Settlements
+Customers
+Customer Groups
+Customer Wallet
+Abandoned Carts
+Special Offers
+Affiliates
+Coupons
+Reviews
+Feedbacks
+Order Items
+Branches
+Branches Allocations
+Shipments
+Shipping Companies
+Shipping Zones
+Shipping Routes
+Countries
+Districts
+Cities
+Product Option Templates
+Shipping Delivery Promises
+Categories
+Settings
+Store Scopes
+Brands
+Exports
+Transactions
+Payments
+Currencies
+Merchant
+Taxes
+SEO
+DNS Records
+Languages
+Employees
+Advertisements
+Webhooks
+Custom URLs
+Loyalty Points
+Branch Delivery Zones
+Webhooks
+Shippings
+Brand
+Cart
+Miscellaneous
+Customer
+Customer Wallet
+Invoice
+Store
+Shipments
+Product
+Category
+Special Offer
+Order
+Communication Webhooks
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Merchant
+Storefront
+App Functions
+Partner APIs
+Dev Tools
+Blog
+Developer Portal
+Merchant API
+Copy Page
+Welcome 👋
+Welcome to Salla Partners' documentation. Here, you will discover a comprehensive collection of guidelines for developing Apps and Themes for Salla Online Stores.
+Note
+This resource is designed to support both developers and business owners who aim to integrate with the Salla Platform.
+Whether you're starting a new project or improving your current e-commerce solution, this collection provides essential insights and instructions. Designed to simplify your integration with Salla, these guidelines cover everything from technical requirements to seamless execution, ensuring a smoother development process.
+Salla empowers its e-commerce platform for developers while allowing merchants to establish, operate, and manage their online stores with no technical hassle. Moreover, it grants them the ability to enable (or disable) the connection with any logistics company and/or payment gateway with a click of a button.
+Good To Know
+Visit the Salla Partners Blog to check out the latest updates on the Salla developers community.
+📝 Salla Documentations
+Salla Merchant API
+Salla Merchant APIs are RESTful endpoints for secure, fast access to Merchant data.
+Embedded SDK
+Salla Embedded SDK helps embedded apps integrate seamlessly with the Salla Dashboard.
+Report Builder
+Report Creator lets developers build custom analytics and reports that appear directly in the Salla Merchant Dashboard.
+Salla OAuth 2.0
+Learn how to authenticate Salla Apps using OAuth 2.0, manage access tokens, and securely access merchant data.
+Apps API
+Partner Portal features including App Settings, Subscriptions, and App Events.
+Salla Shipping and Fulfillment API
+Manage and track shipments and orders seamlessly.
+Salla CLI
+CLI tool for creating, testing, and publishing Salla Apps and Themes.
+Twilight Engine
+Build and customize themes for Salla stores.
+Twilight SDK
+JavaScript SDK for storefront APIs and frontend-backend communication.
+Twilight Web Components
+Prebuilt web components such as login forms, search bars, and localization menus.
+E-commerce Events
+Capture and process e-commerce events in real time through client-side or server-side integrations.
+Component Bundle
+Create and publish reusable theme component bundles for the Salla Themes Marketplace.
+Checkout APIs
+Manage carts, products, discounts, and checkout flows through the Checkout APIs.
+App Functions
+Run custom serverless logic in response to Salla events.
+Communication Apps
+Communication Apps let developers handle SMS, Email, and WhatsApp delivery through their own providers using Salla App Functions.
+Salla AWB
+Integrate shipping providers into Salla’s AWB workflow with App Functions.
+Recurring Payments
+Manage subscriptions, renewals, and recurring payments through Salla APIs.
+⚒️ Resources
+Utilize the following materials to familiarize yourself with the Merchant APIs: a compilation of curated blogs, a list of frequently asked questions, and a community of developers that is always willing to offer assistance:
+Salla Partners Resources
+Salla Developer Blog
+Frequently Asked Questions
+Global Developer Community
+💡 Contact Support
+Contact support either at support@salla.dev or the Global Developers Community on Telegram to get help from our team of in-house experts.
+🔗 Service Status
+Check current Salla service status from Salla Status.
+Modified at about 2 months ago
+Next
+Get Started
+LLMs.txt
+Export
+$
