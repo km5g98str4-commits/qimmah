@@ -100,7 +100,7 @@ const ar: CalcScreenStrings = {
 
   tdeeTitle: 'إجمالي صرف الطاقة اليومي (TDEE)',
   tdeeDesc:
-    'نضرب BMR في معامل نشاطك اليومي عشان نقدّر سعرات يومك الكامل (حركة + تمرين). المعامل يفصل حركة حياتك اليومية (NEAT) عن التمرين عشان ما نحسب التمرين مرتين.',
+    'BMR × معامل نشاطك اليومي = سعرات يومك كامل. حركة يومك والتمرين يُحسبان منفصلَين عشان ما يُحسب التمرين مرتين.',
   tdeeTableActivity: 'مستوى النشاط',
   tdeeTableMultiplier: 'المعامل',
   tdeeYourPick: 'اختيارك',
@@ -117,11 +117,11 @@ const ar: CalcScreenStrings = {
   proteinTitle: 'البروتين',
   proteinDesc: 'نحسب البروتين من وزنك: 1.8غ لكل كيلوغرام من وزن الجسم — لكل الأهداف.',
   proteinRationale:
-    'الأبحاث الرياضية عادة توصي بـ 1.6–2.2غ/كجم للحفاظ على العضل أو بنائه، واخترنا 1.8غ/كجم كنقطة متوازنة تناسب التنشيف والتضخيم والمحافظة.',
+    'الأبحاث توصي بـ 1.6–2.2غ/كجم للحفاظ على العضل أو بنائه، و1.8 نقطة متوازنة لكل الأهداف.',
   proteinResult: 'بروتينك اليومي',
 
   macrosTitle: 'الدهون والكربوهيدرات',
-  fatDesc: 'الدهون ~27% من سعراتك المستهدفة (ضمن نطاق الدهون المقبول للبالغين 20–35%)، وكل غرام دهون = 9 سعرات.',
+  fatDesc: 'الدهون ~27% من سعراتك (النطاق المقبول للبالغين 20–35%)، والغرام = 9 سعرات.',
   carbsDesc: 'الكربوهيدرات هي الباقي بعد البروتين والدهون، وكل غرام كارب = 4 سعرات.',
   fatLabel: 'الدهون',
   carbsLabel: 'الكربوهيدرات',
@@ -129,7 +129,7 @@ const ar: CalcScreenStrings = {
   bmiTitle: 'مؤشر كتلة الجسم (BMI)',
   bmiDesc: 'الوزن (كجم) ÷ مربّع الطول (متر). مؤشر وصفي عام لعلاقة وزنك بطولك.',
   bmiNote:
-    'مهم: BMI مؤشر وصفي بس، ما يفرّق بين العضل والدهون وما يحكم على صحتك. رياضي بعضلات كثيرة ممكن يطلع «مرتفع» وهو بصحة ممتازة. خذه كإشارة عامة، مو تشخيص.',
+    'BMI ما يفرّق بين العضل والدهون وما يحكم على صحتك — رياضي بعضلات كثيرة ممكن يطلع «مرتفع». إشارة عامة، مو تشخيص.',
   bmiResult: 'مؤشرك',
 
   unitCal: 'سعرة',
@@ -175,7 +175,7 @@ const en: CalcScreenStrings = {
 
   tdeeTitle: 'Total Daily Energy Expenditure (TDEE)',
   tdeeDesc:
-    "We multiply BMR by your daily activity factor to estimate your full-day calories (movement + training). The factor separates everyday movement (NEAT) from training so training doesn't get counted twice.",
+    "BMR × your daily activity factor = your full-day calories. Everyday movement and training are counted separately, so training isn't counted twice.",
   tdeeTableActivity: 'Activity level',
   tdeeTableMultiplier: 'Factor',
   tdeeYourPick: 'Your pick',
@@ -192,11 +192,11 @@ const en: CalcScreenStrings = {
   proteinTitle: 'Protein',
   proteinDesc: 'We set protein from your weight: 1.8 g per kilogram of bodyweight — for every goal.',
   proteinRationale:
-    'Sports research usually recommends 1.6–2.2 g/kg to keep or build muscle; we go with 1.8 g/kg as a balanced middle ground that works for cutting, bulking, and maintenance.',
+    'Research recommends 1.6–2.2 g/kg to keep or build muscle; 1.8 is a balanced middle ground for every goal.',
   proteinResult: 'Your daily protein',
 
   macrosTitle: 'Fat and carbs',
-  fatDesc: 'Fat is ~27% of your target calories (within the adult acceptable range of 20–35%); each gram of fat = 9 calories.',
+  fatDesc: 'Fat is ~27% of your calories (adult range 20–35%); a gram = 9 calories.',
   carbsDesc: 'Carbs are the remainder after protein and fat; each gram of carbs = 4 calories.',
   fatLabel: 'Fat',
   carbsLabel: 'Carbs',
@@ -204,7 +204,7 @@ const en: CalcScreenStrings = {
   bmiTitle: 'Body Mass Index (BMI)',
   bmiDesc: 'Weight (kg) ÷ height squared (m). A general descriptive index of weight relative to height.',
   bmiNote:
-    'Heads up: BMI is descriptive only. It can\'t tell muscle from fat, and it\'s not a health verdict. A muscular athlete can read as "high" while being in great health. Treat it as a general signal, not a diagnosis.',
+    'BMI can\'t tell muscle from fat and isn\'t a health verdict — a muscular athlete can read as "high". A general signal, not a diagnosis.',
   bmiResult: 'Your BMI',
 
   unitCal: 'cal',

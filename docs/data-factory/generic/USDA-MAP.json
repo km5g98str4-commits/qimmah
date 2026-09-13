@@ -4,7 +4,8 @@
  "rows": [
   {
    "id": "QF0001",
-   "q": "chicken broilers breast meat only raw"
+   "q": "chicken broilers breast meat only raw",
+   "proxy": "سجلّ الصدر النيّء «مع محلول مضاف» — الأقرب المتاح للصدر النيّء التجاري"
   },
   {
    "id": "QF0002",
@@ -87,7 +88,8 @@
     "sr",
     "foundation"
    ],
-   "pick": "Beef, steak, sirloin, lean only eaten"
+   "pick": "Beef, steak, sirloin, lean only eaten",
+   "proxy": "ستيك مشوي عامّ ⇐ سجلّ السرلوين (قطعة ممثِّلة)"
   },
   {
    "id": "QF0015",
@@ -122,7 +124,8 @@
     "foundation",
     "fndds"
    ],
-   "note": "USDA: braised (رطب) — الأقرب للمسلوق"
+   "note": "USDA: braised (رطب) — الأقرب للمسلوق",
+   "proxy": "لحم مسلوق عامّ ⇐ سجلّ الكتف المطهو ببطء (قطعة ممثِّلة)"
   },
   {
    "id": "QF0019",
@@ -416,7 +419,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "proxy": "كفتة لحم ⇐ كباب لحم بالخضار (لا سجلّ كفتة مستقلّ)"
   },
   {
    "id": "QF0058",
@@ -425,7 +429,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "proxy": "كفتة دجاج ⇐ كباب دجاج بالخضار (لا سجلّ كفتة مستقلّ)"
   },
   {
    "id": "QF0059",
@@ -455,7 +460,8 @@
   },
   {
    "id": "QF0063",
-   "exact": "Bread, multi-grain (includes whole-grain)"
+   "exact": "Bread, multi-grain (includes whole-grain)",
+   "proxy": "توست حبوب كاملة ⇐ خبز متعدّد الحبوب"
   },
   {
    "id": "QF0064",
@@ -467,11 +473,13 @@
   },
   {
    "id": "QF0066",
-   "exact": "Rolls, dinner, plain, commercially prepared (includes brown-and-serve)"
+   "exact": "Rolls, dinner, plain, commercially prepared (includes brown-and-serve)",
+   "proxy": "صمولي أبيض ⇐ خبز رول عادي"
   },
   {
    "id": "QF0067",
-   "exact": "Rolls, dinner, wheat"
+   "exact": "Rolls, dinner, wheat",
+   "proxy": "صمولي أسمر ⇐ خبز رول قمح"
   },
   {
    "id": "QF0068",
@@ -514,7 +522,8 @@
   },
   {
    "id": "QF0075",
-   "exact": "Rolls, hamburger or hotdog, plain"
+   "exact": "Rolls, hamburger or hotdog, plain",
+   "proxy": "خبز هوت دوغ ⇐ سجلّ مشترك (برجر/هوت دوغ)"
   },
   {
    "id": "QF0076",
@@ -522,11 +531,13 @@
   },
   {
    "id": "QF0077",
-   "exact": "Bread, french or vienna (includes sourdough)"
+   "exact": "Bread, french or vienna (includes sourdough)",
+   "proxy": "باجيت ⇐ الخبز الفرنسي/فيينا"
   },
   {
    "id": "QF0078",
-   "exact": "Bread, french or vienna (includes sourdough)"
+   "exact": "Bread, french or vienna (includes sourdough)",
+   "proxy": "خبز الخميرة الطبيعية ⇐ الخبز الفرنسي/فيينا (يشمله السجلّ)"
   },
   {
    "id": "QF0079",
@@ -686,7 +697,8 @@
     "foundation",
     "fndds"
    ],
-   "note": "البسمتي صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة"
+   "note": "البسمتي صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة",
+   "proxy": "البسمتي ⇐ سجلّ الأرز الأبيض طويل الحبّة (لا سجلّ بسمتي مستقلّ في USDA)"
   },
   {
    "id": "QF0104",
@@ -702,7 +714,8 @@
     "foundation",
     "fndds"
    ],
-   "note": "البسمتي صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة"
+   "note": "البسمتي صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة",
+   "proxy": "البسمتي المطبوخ ⇐ الأرز الأبيض طويل الحبّة المطبوخ"
   },
   {
    "id": "QF0105",
@@ -736,7 +749,8 @@
     "foundation",
     "fndds"
    ],
-   "note": "الياسمين صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة"
+   "note": "الياسمين صنف أرز أبيض طويل الحبّة — سجلّ USDA للفئة",
+   "proxy": "الياسمين المطبوخ ⇐ الأرز الأبيض طويل الحبّة المطبوخ"
   },
   {
    "id": "QF0108",
@@ -746,7 +760,8 @@
     "foundation",
     "fndds"
    ],
-   "pick": "Rice, white, short-grain, cooked, unenriched"
+   "pick": "Rice, white, short-grain, cooked, unenriched",
+   "proxy": "الأرز المصري ⇐ الأرز الأبيض قصير الحبّة المطبوخ"
   },
   {
    "id": "QF0109",
@@ -880,7 +895,8 @@
     "foundation",
     "fndds"
    ],
-   "pick": "Noodles, egg, enriched, cooked"
+   "pick": "Noodles, egg, enriched, cooked",
+   "proxy": "نودلز قمح ⇐ نودلز بيض"
   },
   {
    "id": "QF0131",
@@ -889,7 +905,8 @@
   },
   {
    "id": "QF0132",
-   "exact": "Pasta, cooked, enriched, without added salt"
+   "exact": "Pasta, cooked, enriched, without added salt",
+   "proxy": "شعيرية ⇐ مكرونة مطبوخة"
   },
   {
    "id": "QF0133",
@@ -980,7 +997,8 @@
     "sr",
     "foundation"
    ],
-   "pick": "Cereals ready-to-eat, RALSTON Enriched Wheat Bran flakes"
+   "pick": "Cereals ready-to-eat, RALSTON Enriched Wheat Bran flakes",
+   "proxy": "رقائق نخالة عامّة ⇐ سجلّ منتج تجاري (RALSTON) في SR Legacy"
   },
   {
    "id": "QF0142",
@@ -1023,7 +1041,8 @@
   },
   {
    "id": "QF0148",
-   "exact": "Milk, whole, 3.25% milkfat, with added vitamin D"
+   "exact": "Milk, whole, 3.25% milkfat, with added vitamin D",
+   "proxy": "حليب خالٍ من اللاكتوز ⇐ حليب كامل الدسم (الماكروز متقاربة؛ اللاكتوز محلَّل لا محذوف)"
   },
   {
    "id": "QF0149",
@@ -1035,11 +1054,13 @@
   },
   {
    "id": "QF0151",
-   "exact": "Milk, buttermilk, fluid, whole"
+   "exact": "Milk, buttermilk, fluid, whole",
+   "proxy": "لبن كامل الدسم ⇐ لبن مخيض كامل الدسم"
   },
   {
    "id": "QF0152",
-   "exact": "Milk, buttermilk, fluid, cultured, lowfat"
+   "exact": "Milk, buttermilk, fluid, cultured, lowfat",
+   "proxy": "لبن قليل الدسم ⇐ لبن مخيض قليل الدسم"
   },
   {
    "id": "QF0153",
@@ -1106,7 +1127,8 @@
   },
   {
    "id": "QF0168",
-   "exact": "Cheese, pasteurized process, American, fortified with vitamin D"
+   "exact": "Cheese, pasteurized process, American, fortified with vitamin D",
+   "proxy": "مثلّثات جبن مطبوخ ⇐ جبن أمريكي مطبوخ"
   },
   {
    "id": "QF0169",
@@ -1115,7 +1137,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "proxy": "جبن أبيض ⇐ كيسو فريسكو (أقرب جبن أبيض طازج)"
   },
   {
    "id": "QF0170",
@@ -1170,7 +1193,8 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "proxy": "زبادي شرب ⇐ زبادي سائل"
   },
   {
    "id": "QF0182",
@@ -1254,11 +1278,13 @@
   },
   {
    "id": "QF0202",
-   "exact": "Onions, raw"
+   "exact": "Onions, raw",
+   "proxy": "بصل أبيض ⇐ بصل نيّء عامّ"
   },
   {
    "id": "QF0203",
-   "exact": "Onions, raw"
+   "exact": "Onions, raw",
+   "proxy": "بصل أحمر ⇐ بصل نيّء عامّ"
   },
   {
    "id": "QF0204",
@@ -1335,11 +1361,13 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "proxy": "ملوخية ⇐ سجلّ مجموعة أوراق مطبوخة يشمل الجوت (الملوخية)"
   },
   {
    "id": "QF0222",
-   "exact": "Grape leaves, canned"
+   "exact": "Grape leaves, canned",
+   "proxy": "ورق عنب مطبوخ ⇐ ورق عنب معلّب"
   },
   {
    "id": "QF0223",
@@ -1430,7 +1458,8 @@
   },
   {
    "id": "QF0241",
-   "exact": "Tomatoes, red, ripe, raw, year round average"
+   "exact": "Tomatoes, red, ripe, raw, year round average",
+   "proxy": "طماطم كرزية ⇐ طماطم حمراء ناضجة"
   },
   {
    "id": "QF0242",
@@ -1452,7 +1481,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "proxy": "تفاح أحمر ⇐ تفاح بقشره عامّ"
   },
   {
    "id": "QF0244",
@@ -1470,7 +1500,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "proxy": "تفاح أخضر ⇐ تفاح بقشره عامّ"
   },
   {
    "id": "QF0245",
@@ -1514,11 +1545,13 @@
   },
   {
    "id": "QF0255",
-   "exact": "Grapes, red or green (European type, such as Thompson seedless), raw"
+   "exact": "Grapes, red or green (European type, such as Thompson seedless), raw",
+   "proxy": "عنب أخضر ⇐ سجلّ مشترك أحمر/أخضر"
   },
   {
    "id": "QF0256",
-   "exact": "Grapes, red or green (European type, such as Thompson seedless), raw"
+   "exact": "Grapes, red or green (European type, such as Thompson seedless), raw",
+   "proxy": "عنب أحمر ⇐ سجلّ مشترك أحمر/أخضر"
   },
   {
    "id": "QF0257",
@@ -1991,11 +2024,13 @@
   },
   {
    "id": "QF0365",
-   "exact": "Jams and preserves"
+   "exact": "Jams and preserves",
+   "proxy": "مربّى فراولة ⇐ مربّيات ومعلّبات عامّ"
   },
   {
    "id": "QF0366",
-   "exact": "Jams and preserves"
+   "exact": "Jams and preserves",
+   "proxy": "مربّى مشمش ⇐ مربّيات ومعلّبات عامّ"
   },
   {
    "id": "QF0367",
@@ -2097,7 +2132,8 @@
     "foundation"
    ],
    "pick": "Coffee, Latte",
-   "note": "FNDDS لاتيه (حليب غير محدّد)"
+   "note": "FNDDS لاتيه (حليب غير محدّد)",
+   "proxy": "لاتيه حليب كامل ⇐ لاتيه غير محدَّد الحليب"
   },
   {
    "id": "QF0381",
@@ -2272,7 +2308,9 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "المطابق منتج علامة تجارية (BURGER KING) لا صنف عامّ — يُحجر حتى سجلّ عامّ"
   },
   {
    "id": "QF0407",
@@ -2290,7 +2328,8 @@
   },
   {
    "id": "QF0408",
-   "exact": "Beverages, tea, black, brewed, prepared with tap water"
+   "exact": "Beverages, tea, black, brewed, prepared with tap water",
+   "proxy": "شاي مثلّج غير محلّى ⇐ شاي أسود مخمَّر (نفس التركيب)"
   },
   {
    "id": "QF0409",
@@ -2790,7 +2829,9 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "المطابق «خالٍ من السكر» يغيّر التركيب جوهريًّا — لا يمثّل البسكويت السادة"
   },
   {
    "id": "QF0493",
@@ -2925,7 +2966,8 @@
     "sr",
     "foundation",
     "fndds"
-   ]
+   ],
+   "proxy": "كول سلو ⇐ سجلّ مطعم عائلي"
   },
   {
    "id": "QF0514",
@@ -3180,7 +3222,8 @@
   },
   {
    "id": "QF0562",
-   "exact": "Bananas, raw"
+   "exact": "Bananas, raw",
+   "proxy": "موز مجمَّد ⇐ موز نيّء (التجميد لا يغيّر الماكروز)"
   },
   {
    "id": "QF0563",
@@ -3193,7 +3236,9 @@
     "fndds",
     "sr",
     "foundation"
-   ]
+   ],
+   "resolve": "quarantine",
+   "why": "السجلّ الوحيد المطابق طعام أطفال مهروس — لا يمثّل التوت المجمَّد؛ لا يُخترع بديل"
   },
   {
    "id": "QF0564",
@@ -3290,7 +3335,8 @@
   },
   {
    "id": "QF0582",
-   "exact": "Potatoes, mashed, home-prepared, whole milk added"
+   "exact": "Potatoes, mashed, home-prepared, whole milk added",
+   "proxy": "بطاطس مهروسة بلا زبدة ⇐ مهروسة بحليب كامل (بلا زبدة)"
   },
   {
    "id": "QF0583",

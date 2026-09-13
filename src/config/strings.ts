@@ -594,7 +594,7 @@ const ar: ShellStrings = {
     groupPrivacy: 'الخصوصية والثقة',
     groupLanguage: 'اللغة',
     languageActive: 'العربية — مفعّلة',
-    languageHint: 'النص واتجاه الصفحة يتغيّرون على طول، واختيارك ينحفظ على هذا الجهاز.',
+    languageHint: 'النص واتجاه الصفحة يتغيّرون على طول، وينحفظ على هذا الجهاز.',
     export: 'تصدير نسخة احتياطية',
     import: 'استيراد نسخة',
     reset: 'إعادة ضبط البيانات',
@@ -616,7 +616,7 @@ const ar: ShellStrings = {
     importSuccess: 'تم استيراد نسختك بنجاح.',
     importError: 'ما قدرنا نقرأ الملف. تأكّد إنه نسخة قِمّة صحيحة.',
     dataLocalNote:
-      'ملف التصدير ينسوي على جهازك بصيغة JSON، وتقدر تحفظه أو تشاركه مثل ما تبي. هذا ما يغيّر إعداد المزامنة في حسابك.',
+      'ملف JSON ينسوي على جهازك، احفظه أو شاركه مثل ما تبي. ما يغيّر إعداد المزامنة.',
     exportShared: 'تمت مشاركة نسخة بياناتك.',
     exportDownloaded: 'تم تنزيل نسخة بياناتك على جهازك.',
     exportFailed: 'ما قدرنا نسوّي نسخة التصدير.',
@@ -644,7 +644,7 @@ const ar: ShellStrings = {
     calcLink: 'كيف نحسب أرقامك؟',
     analyticsTitle: 'تحليلات مجهولة',
     analyticsDesc:
-      'إحصاءات استخدام مجهولة تمامًا (بلا اسم أو بريد أو أي بيانات شخصية) تساعدنا على تحسين قِمّة. لا نبيع بياناتك ولا نتتبّعك خارج التطبيق. تقدر توقفها في أي وقت.',
+      'إحصاءات استخدام بلا اسم أو بريد أو أي بيانات شخصية. لا نبيع بياناتك ولا نتتبّعك خارج التطبيق، وتقدر توقفها أي وقت.',
     analyticsToggle: 'المشاركة في التحليلات المجهولة',
   },
   pwa: {
@@ -654,12 +654,12 @@ const ar: ShellStrings = {
     installBtn: 'تثبيت التطبيق',
     installIosTitle: 'أضف قِمّة للشاشة الرئيسية',
     installIosBody:
-      'في متصفح آيفون: اضغط زر المشاركة ثم «أضف إلى الشاشة الرئيسية». التنبيهات محدودة في متصفح الآيفون — عشان التجربة الكاملة أضف قِمّة للشاشة الرئيسية.',
+      'في Safari: زر المشاركة ثم «أضف إلى الشاشة الرئيسية». التنبيهات في المتصفح محدودة، ومن الشاشة الرئيسية تكتمل.',
     installedTitle: 'قِمّة مثبّتة ✓',
     installedBody: 'تستخدم قِمّة كتطبيق مثبّت — استمتع بالتجربة الكاملة.',
     notifTitle: 'تنبيهات التذكير',
     notifBody:
-      'فعّل التنبيهات عشان توصلك تذكيرات لطيفة بتمرينك ووجباتك. التذكيرات محلية داخل هذا المتصفح، وممكن ما توصل في الخلفية على بعض الأجهزة — بلا وعود مضمونة.',
+      'تذكيرات بتمرينك ووجباتك. محلية داخل هذا المتصفح، وممكن ما توصل في الخلفية على بعض الأجهزة — بلا وعود مضمونة.',
     notifEnable: 'تفعيل التنبيهات',
     notifGranted: 'التنبيهات مفعّلة ✓',
     notifDenied: 'التنبيهات موقوفة من إعدادات المتصفح. فعّلها بنفسك من إعدادات الموقع.',
@@ -1055,7 +1055,7 @@ const en: ShellStrings = {
     groupPrivacy: 'Privacy & Trust',
     groupLanguage: 'Language',
     languageActive: 'Arabic — active',
-    languageHint: 'Text and page direction switch instantly, and your choice is saved on this device.',
+    languageHint: 'Switches instantly and is saved on this device.',
     export: 'Export backup',
     import: 'Import backup',
     reset: 'Reset data',
@@ -1077,7 +1077,7 @@ const en: ShellStrings = {
     importSuccess: 'Your backup was imported successfully.',
     importError: "Couldn't read the file. Make sure it's a valid Qimmah backup.",
     dataLocalNote:
-      'The export is created on your device as a JSON file that you can save or share. Exporting does not change your account sync setting.',
+      'A JSON file made on your device — save or share it. Your sync setting stays as is.',
     exportShared: 'Your data copy was shared.',
     exportDownloaded: 'Your data was downloaded to your device.',
     exportFailed: "Couldn't create the export.",
@@ -1105,7 +1105,7 @@ const en: ShellStrings = {
     calcLink: 'How we calculate your numbers',
     analyticsTitle: 'Anonymous analytics',
     analyticsDesc:
-      "Fully anonymous usage stats (no name, email, or personal data) that help us improve Qimmah. We don't sell your data or track you across apps. You can turn this off any time.",
+      "Usage stats with no name, email, or personal data. We don't sell your data or track you across apps, and you can turn this off any time.",
     analyticsToggle: 'Share anonymous analytics',
   },
   pwa: {
@@ -1115,12 +1115,12 @@ const en: ShellStrings = {
     installBtn: 'Install app',
     installIosTitle: 'Add Qimmah to your Home Screen',
     installIosBody:
-      'On iPhone Safari: tap the Share button, then “Add to Home Screen”. Notifications are limited in the iPhone browser — for the full experience add Qimmah to your Home Screen.',
+      'In Safari: tap Share, then “Add to Home Screen”. Browser notifications are limited; from the Home Screen they work fully.',
     installedTitle: 'Qimmah installed ✓',
     installedBody: 'You’re using Qimmah as an installed app. Enjoy the full experience.',
     notifTitle: 'Reminder notifications',
     notifBody:
-      'Enable notifications for gentle nudges about your workouts and meals. Reminders are local to this browser and may not arrive in the background on some devices — no guarantees.',
+      'Nudges for your workouts and meals. Local to this browser, and may not arrive in the background on some devices — no guarantees.',
     notifEnable: 'Enable notifications',
     notifGranted: 'Notifications enabled ✓',
     notifDenied: 'Notifications are blocked in your browser settings. Turn them on in your site settings.',

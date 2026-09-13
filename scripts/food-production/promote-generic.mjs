@@ -84,16 +84,21 @@ for (const row of catalog) {
   const coveredBy = existingAr.get(normalize(nameAr)) ?? existingEn.get(normalize(nameEn)) ?? null
   const base = { id, nameAr, nameEn, category: row.category, priority: row.priority }
 
-  if (m.resolve === 'mapped') { resolution.push({ ...base, status: 'mapped', to: m.curated }); continue }
-  if (m.resolve === 'recipe') { resolution.push({ ...base, status: 'recipe', why: m.why, coveredBy }); continue }
-  if (m.resolve === 'quarantine' || !e) { resolution.push({ ...base, status: 'quarantine', why: m.why ?? 'بلا دليل' }); continue }
-  if (e.status !== 'matched') { resolution.push({ ...base, status: 'quarantine', why: `USDA ${e.status}`, candidates: e.candidates?.map((c) => c.description) ?? [] }); continue }
+  // الحالات الأربع المعتمدة (تقرير المؤسس): VERIFIED_AND_LOGGABLE · EXISTING_COVERAGE · RECIPE_BASED · QUARANTINED.
+  // الوصفة لا تُعدّ تغطية حيّة: تبقى RECIPE_BASED ولو وُجد طبق منسَّق يغطّيها (يُذكر في loggableVia فقط).
+  if (m.resolve === 'mapped') { resolution.push({ ...base, status: 'EXISTING_COVERAGE', via: 'map', by: m.curated }); continue }
+  if (m.resolve === 'recipe') { resolution.push({ ...base, status: 'RECIPE_BASED', why: m.why, loggableVia: coveredBy }); continue }
+  if (m.resolve === 'quarantine' || !e) { resolution.push({ ...base, status: 'QUARANTINED', why: m.why ?? 'بلا دليل' }); continue }
+  if (e.status !== 'matched') { resolution.push({ ...base, status: 'QUARANTINED', why: `USDA ${e.status}`, candidates: e.candidates?.map((c) => c.description) ?? [] }); continue }
+  // سجلّ أوسع من الصنف المسمّى (بسمتي ⇐ أرز أبيض طويل الحبّة): يُعلَن proxy بملاحظة، لا يُخفى ولا تُخترع فروق.
+  const sourceMatch = m.proxy ? 'proxy' : 'exact'
+  const proxyNote = m.proxy ?? null
   if (coveredBy) {
     // الصنف اليدوي يغطّي الصفّ؛ تُنقل إليه كلمات بحث الصفّ (اسمه وكلماته) فيبلغه
     // استعلام المؤسس («أرز أبيض مطبوخ» ⇒ «رز أبيض») بلا صنف مكرّر.
     const extra = [nameAr, nameEn, ...String(row.search_aliases_ar ?? '').split(/[،,;|]/), ...String(row.search_aliases_en ?? '').split(/[،,;|]/)].map((x) => x.trim()).filter(Boolean)
     coveredKeywords.set(coveredBy, [...new Set([...(coveredKeywords.get(coveredBy) ?? []), ...extra])])
-    resolution.push({ ...base, status: 'covered', by: coveredBy, fdcId: e.fdcId }); continue
+    resolution.push({ ...base, status: 'EXISTING_COVERAGE', via: 'name', by: coveredBy, fdcId: e.fdcId, sourceMatch, proxyNote }); continue
   }
 
   // VALIDATE
@@ -106,7 +111,7 @@ for (const row of catalog) {
   const atwater = 4 * (n.protein ?? 0) + 4 * (n.carbs ?? 0) + 9 * (n.fat ?? 0)
   const kcalRef = n.kcal ?? 0
   if (kcalRef >= 40 && Math.abs(atwater - kcalRef) > 0.25 * Math.max(atwater, kcalRef)) problems.push('atwater_mismatch')
-  if (problems.length) { resolution.push({ ...base, status: 'quarantine', why: problems.join(','), fdcId: e.fdcId, per100g: n }); continue }
+  if (problems.length) { resolution.push({ ...base, status: 'QUARANTINED', why: problems.join(','), fdcId: e.fdcId, per100g: n }); continue }
 
   // NORMALIZE
   const portion = choosePortion(e.description, e.portions ?? [])
@@ -124,8 +129,8 @@ for (const row of catalog) {
     keywords: [...new Set([...String(row.search_aliases_ar ?? '').split(/[،,;|]/), ...String(row.search_aliases_en ?? '').split(/[،,;|]/), nameEn.toLowerCase()].map((s) => s.trim()).filter((s) => s && normalize(s) !== normalize(nameAr)))],
     generic: true,
   }
-  promoted.push({ item, provenance: { fdcId: e.fdcId, dataType: e.dataType, description: e.description, publicationDate: e.publicationDate, per100g: n, portion: portion.usda, portionGrams: g, preparation: row.preparation ?? null, retrieved: evidence.generated_at } })
-  resolution.push({ ...base, status: 'promoted', itemId: item.id, fdcId: e.fdcId, description: e.description })
+  promoted.push({ item, provenance: { fdcId: e.fdcId, dataType: e.dataType, description: e.description, publicationDate: e.publicationDate, per100g: n, portion: portion.usda, portionGrams: g, preparation: row.preparation ?? null, sourceMatch, proxyNote, retrieved: evidence.generated_at } })
+  resolution.push({ ...base, status: 'VERIFIED_AND_LOGGABLE', itemId: item.id, fdcId: e.fdcId, description: e.description, sourceMatch, proxyNote })
 }
 
 // PROMOTE — الملف المولَّد
@@ -136,7 +141,7 @@ const lines = [
   '// والمولِّد scripts/food-production/promote-generic.mjs. كل صنف يحمل fdcId في GENERIC_PROVENANCE.',
   "import type { FoodItem } from './foodItems'",
   '',
-  'export interface GenericProvenance { fdcId: number; dataType: string; description: string; per100g: { kcal: number; protein: number; carbs: number; fat: number; fiber: number | null }; portion: string | null; portionGrams: number; preparation: string | null }',
+  'export interface GenericProvenance { fdcId: number; dataType: string; description: string; per100g: { kcal: number; protein: number; carbs: number; fat: number; fiber: number | null }; portion: string | null; portionGrams: number; preparation: string | null; sourceMatch: "exact" | "proxy"; proxyNote: string | null }',
   '',
   'export const genericFoods: FoodItem[] = [',
 ]
@@ -146,19 +151,21 @@ for (const { item } of promoted) {
 }
 lines.push(']', '')
 lines.push('/** أصناف منسَّقة قائمة غطّت صفًّا من الـ٦٠٠ (نفس الاسم) — تُعامَل كأصناف عامّة في الترتيب بلا تكرار. */')
-lines.push(`export const GENERIC_COVERED_IDS: ReadonlySet<string> = new Set([${[...new Set(resolution.filter((r) => r.status === 'covered').map((r) => r.by))].map((id) => `'${esc(id)}'`).join(', ')}])`, '')
+lines.push(`export const GENERIC_COVERED_IDS: ReadonlySet<string> = new Set([${[...new Set(resolution.filter((r) => r.status === 'EXISTING_COVERAGE' && r.via === 'name').map((r) => r.by))].map((id) => `'${esc(id)}'`).join(', ')}])`, '')
 lines.push('/** كلمات بحث من صفوف الـ٦٠٠ المغطّاة تُضاف إلى الصنف اليدوي الذي يغطّيها. */')
 lines.push('export const GENERIC_COVERED_KEYWORDS: Record<string, readonly string[]> = {')
 for (const [id, kws] of coveredKeywords) lines.push(`  '${esc(id)}': [${kws.map((k) => `'${esc(k)}'`).join(', ')}],`)
 lines.push('}', '')
 lines.push('export const GENERIC_PROVENANCE: Record<string, GenericProvenance> = {')
 for (const { item, provenance: p } of promoted) {
-  lines.push(`  '${item.id}': { fdcId: ${p.fdcId}, dataType: '${esc(p.dataType)}', description: '${esc(p.description)}', per100g: { kcal: ${p.per100g.kcal}, protein: ${p.per100g.protein}, carbs: ${p.per100g.carbs}, fat: ${p.per100g.fat}, fiber: ${typeof p.per100g.fiber === 'number' ? p.per100g.fiber : 'null'} }, portion: ${p.portion ? `'${esc(p.portion)}'` : 'null'}, portionGrams: ${p.portionGrams}, preparation: ${p.preparation ? `'${esc(p.preparation)}'` : 'null'} },`)
+  lines.push(`  '${item.id}': { fdcId: ${p.fdcId}, dataType: '${esc(p.dataType)}', description: '${esc(p.description)}', per100g: { kcal: ${p.per100g.kcal}, protein: ${p.per100g.protein}, carbs: ${p.per100g.carbs}, fat: ${p.per100g.fat}, fiber: ${typeof p.per100g.fiber === 'number' ? p.per100g.fiber : 'null'} }, portion: ${p.portion ? `'${esc(p.portion)}'` : 'null'}, portionGrams: ${p.portionGrams}, preparation: ${p.preparation ? `'${esc(p.preparation)}'` : 'null'}, sourceMatch: '${p.sourceMatch}', proxyNote: ${p.proxyNote ? `'${esc(p.proxyNote)}'` : 'null'} },`)
 }
 lines.push('}', '')
 writeFileSync(resolve(ROOT, 'src/data/genericFoods.generated.ts'), lines.join('\n'))
 
 mkdirSync(resolve(ROOT, 'data/food-production/generic'), { recursive: true })
 const counts = resolution.reduce((a, r) => ((a[r.status] = (a[r.status] ?? 0) + 1), a), {})
+counts.proxy_of_verified = resolution.filter((r) => r.status === 'VERIFIED_AND_LOGGABLE' && r.sourceMatch === 'proxy').length
+counts.recipe_loggable_via_curated = resolution.filter((r) => r.status === 'RECIPE_BASED' && r.loggableVia).length
 writeFileSync(resolve(ROOT, 'data/food-production/generic/resolution.json'), JSON.stringify({ generated_at: evidence.generated_at, counts, rows: resolution }, null, 1) + '\n')
 console.log(JSON.stringify(counts), `· promoted ${promoted.length} · total ${resolution.length}`)

@@ -5,7 +5,9 @@
 //   ٢) القيم المعروضة مشتقّة من أساس ١٠٠غ بوزن الحصّة بلا اختراع: الحصّة من USDA
 //      أو ١٠٠غ معلنة، وأتواتر ضمن ±٢٥٪ (تشخيص)، ولا طاقة > ٩٠٠.
 //   ٣) لا تكرار: اسم عربي مولَّد لا يساوي اسم صنف يدوي، ولا معرّفَين لنفس fdcId+اسم.
-//   ٤) القرار كامل: ٦٠٠/٦٠٠ لكل صفّ حالة (promoted · covered · mapped · recipe · quarantine).
+//   ٤) القرار كامل: ٦٠٠/٦٠٠ لكل صفّ حالة من أربع (VERIFIED_AND_LOGGABLE · EXISTING_COVERAGE ·
+//      RECIPE_BASED · QUARANTINED)، والوصفة لا تُعدّ تغطية حيّة. والسجلّ الأوسع من الصنف المسمّى
+//      (بسمتي ⇐ أرز أبيض) مُعلَن proxy بملاحظة — لا اختراع فروق ولا إخفاء.
 //   ٥) نيّة البحث العامّة: استعلامات المؤسس (صدر دجاج · توست · رز · بيض · حليب…) تعيد
 //      صنفًا عامًّا/أساسيًّا أولًا لا طبق مطعم ولا منتجًا معبّأً، بالعربية والإنجليزية.
 //   ⚔️ محاكيات: نزع NATIVE_TOKEN_SPELLINGS يُسقط «أرز» · نزع علم generic يعيد الطبق أولًا.
@@ -64,10 +66,21 @@ check('كل صنف: القيم = ١٠٠غ × الحصّة · لا مستحيل �
 // ——— ٤) القرار ———
 {
   const c = resolution.counts
-  const total = Object.values(c).reduce((a, b) => a + b, 0)
-  check(`٦٠٠/٦٠٠ صفًّا له قرار (${Object.entries(c).map(([k, v]) => `${k} ${v}`).join(' · ')})`, total === 600 && resolution.rows.length === 600)
-  check('المرقّى في القرار = المولَّد في الملف', c.promoted === items.length)
-  check('كل صفّ محجور يحمل سببًا مسمّى', resolution.rows.filter((r) => r.status === 'quarantine').every((r) => typeof r.why === 'string' && r.why.length > 2))
+  const STATUSES = ['VERIFIED_AND_LOGGABLE', 'EXISTING_COVERAGE', 'RECIPE_BASED', 'QUARANTINED']
+  const total = STATUSES.reduce((a, k) => a + (c[k] ?? 0), 0)
+  check(`٦٠٠/٦٠٠ صفًّا له قرار (${STATUSES.map((k) => `${k} ${c[k] ?? 0}`).join(' · ')})`, total === 600 && resolution.rows.length === 600 && resolution.rows.every((r) => STATUSES.includes(r.status)))
+  check('المُتحقَّق القابل للتسجيل في القرار = المولَّد في الملف', c.VERIFIED_AND_LOGGABLE === items.length)
+  check('كل صفّ محجور يحمل سببًا مسمّى', resolution.rows.filter((r) => r.status === 'QUARANTINED').every((r) => typeof r.why === 'string' && r.why.length > 2))
+  check('الوصفة لا تُعدّ تغطية حيّة: لا صفّ RECIPE_BASED له itemId ولا يدخل GENERIC_COVERED_IDS', resolution.rows.filter((r) => r.status === 'RECIPE_BASED').every((r) => !r.itemId && !(r.loggableVia && gen.GENERIC_COVERED_IDS.has(r.loggableVia) && !resolution.rows.some((x) => x.status === 'EXISTING_COVERAGE' && x.by === r.loggableVia))))
+  // الوكيل (proxy) مُعلَن: كل صنف مولَّد يحمل sourceMatch، والوكيل بملاحظة عربية، والمطابق بلا ملاحظة.
+  const verified = resolution.rows.filter((r) => r.status === 'VERIFIED_AND_LOGGABLE')
+  check(`كل مولَّد يعلن sourceMatch (exact/proxy) — ${c.proxy_of_verified} وكيلًا بملاحظة`, verified.every((r) => (r.sourceMatch === 'exact' && r.proxyNote === null) || (r.sourceMatch === 'proxy' && typeof r.proxyNote === 'string' && r.proxyNote.length > 5)) && items.every((f) => prov[f.id].sourceMatch === verified.find((r) => r.itemId === f.id).sourceMatch))
+  const NAMED_PROXIES = ['QF0103', 'QF0104', 'QF0107', 'QF0014', 'QF0057', 'QF0151', 'QF0243', 'QF0255']
+  check('الأصناف المسمّاة على سجلّ أوسع (بسمتي · ياسمين · ستيك · كفتة · لبن · تفاح أحمر · عنب) مُعلَنة proxy', NAMED_PROXIES.every((id) => resolution.rows.find((r) => r.id === id)?.sourceMatch === 'proxy'))
+  check('لا سجلّ علامة تجارية أو طعام أطفال أو «خالٍ من السكر» يمثّل صنفًا عامًّا (QF0406 · QF0563 · QF0492 محجورة)', ['QF0406', 'QF0563', 'QF0492'].every((id) => resolution.rows.find((r) => r.id === id)?.status === 'QUARANTINED') && verified.every((r) => !/BURGER KING|McDONALD|Babyfood|sugar free/i.test(r.description)))
+  // ⚔️ محاكاة: وكيل بلا ملاحظة يسقط بفحص مسمّى.
+  const forged = verified.map((r) => (r.id === 'QF0103' ? { ...r, proxyNote: null } : r))
+  check('⚔️ محاكاة: وكيل بلا ملاحظة يُرفض', !forged.every((r) => (r.sourceMatch === 'exact' && r.proxyNote === null) || (r.sourceMatch === 'proxy' && typeof r.proxyNote === 'string' && r.proxyNote.length > 5)))
 }
 
 // ——— ٥) نيّة البحث ———

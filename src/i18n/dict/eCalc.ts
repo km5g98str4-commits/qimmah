@@ -640,7 +640,7 @@ function buildArabicStrings(
       'البروتين يحمي عضلك أثناء خسارة الدهون، ويبني عضلًا جديدًا مع التدريب، ويُشبع أكثر من غيره لكل سعرة.',
     proteinSource: `مراجعة بحثية شاملة لتدريب المقاومة وجدت أن الفائدة تستقرّ عند نحو ١٫٦ غ/كجم، مع نطاق ثقة يمتدّ إلى ٢٫٢. رقمنا ${n(formula.proteinPerKg, 1)} يقع داخل هذا النطاق.`,
     proteinLimits:
-      'الرقم مبنيّ على وزن الجسم الكلّي. من لديه نسبة دهون مرتفعة قد يكفيه أقلّ، إذ إن حاجة البروتين ترتبط بالكتلة الخالية من الدهون أكثر من الوزن الكلّي.',
+      'الرقم مبنيّ على وزن الجسم الكلّي. من لديه نسبة دهون مرتفعة قد يكفيه أقلّ، لأن حاجة البروتين ترتبط بالكتلة الخالية من الدهون.',
     fatTitle: 'الدهون',
     fatFormula: `${n(fatPercent)}٪ من سعراتك المستهدفة ÷ ${n(copy.fatKcalPerGram)}`,
     fatExample: `(${n(example.cuttingCalories)} × ${n(formula.fatCalorieRatio, 2)}) ÷ ${n(copy.fatKcalPerGram)} = ${n(sampleFatCalories)} ÷ ${n(copy.fatKcalPerGram)} = ${n(example.fatGrams)} غرامًا يوميًا`,
@@ -661,7 +661,7 @@ function buildArabicStrings(
     waterRange: `ونُبقي النتيجة بين ${n(formula.waterMinLiters, 1)} لتر كحدّ أدنى و${n(formula.waterMaxLiters)} لترات كحدّ أقصى.`,
     waterFloorWhy: `الأرضية ${n(formula.waterMinLiters, 1)} لتر تقع ضمن المراجع الأوروبية والأمريكية لاحتياج البالغين اليومي من الماء.`,
     waterCapWhy: `السقف ${n(formula.waterMaxLiters)} لترات حدّ أمان. قاعدة «${n(waterMlPerKg)} مل/كجم» تعطي أرقامًا غير معقولة عند الأوزان العالية جدًّا — لأن حاجة السوائل لا ترتفع بنفس نسبة ارتفاع كتلة الدهون. ما فوق ${n(formula.waterMaxLiters)} لترات يحتاج تقييمًا فرديًا.`,
-    waterHonesty: `قاعدة ${n(waterMlPerKg)} مل/كجم قاعدة سريرية شائعة لا معيارًا مثبتًا. المراجع الرسمية تبني توصياتها على الجنس والفئة السكّانية لا على وزن الجسم. اخترناها لأنها تعطي رقمًا شخصيًا مفيدًا، ونذكر أنها تقدير عملي.`,
+    waterHonesty: `قاعدة ${n(waterMlPerKg)} مل/كجم قاعدة سريرية شائعة لا معيارًا مثبتًا. المراجع الرسمية تبني توصياتها على الجنس والفئة السكّانية لا على وزن الجسم. اخترناها لأنها تعطي رقمًا شخصيًا مفيدًا.`,
     waterDrinking:
       'هذا الرقم يقدّر ما تشربه فقط. طعامك يوفّر نحو ٢٠٪ إضافية من ماء يومك.',
     waterHeat:
@@ -955,7 +955,7 @@ function buildEnglishStrings(
       'Protein protects your muscle during fat loss, builds new muscle alongside training, and is more filling per calorie than other macros.',
     proteinSource: `A comprehensive resistance-training review found benefits plateau around 1.6 g/kg, with a confidence interval extending to 2.2. Our ${n(formula.proteinPerKg, 1)} sits inside that range.`,
     proteinLimits:
-      'The figure is based on total body weight. Someone with a high body-fat percentage may need less, since protein needs track lean mass more closely than total weight.',
+      'The figure is based on total body weight. Someone with a high body-fat percentage may need less, since protein needs track lean mass.',
     fatTitle: 'Fat',
     fatFormula: `${n(fatPercent)}% of your target calories ÷ ${n(copy.fatKcalPerGram)}`,
     fatExample: `(${n(example.cuttingCalories)} × ${n(formula.fatCalorieRatio, 2)}) ÷ ${n(copy.fatKcalPerGram)} = ${n(sampleFatCalories)} ÷ ${n(copy.fatKcalPerGram)} = ${n(example.fatGrams)} g/day`,
@@ -976,7 +976,7 @@ function buildEnglishStrings(
     waterRange: `And we keep the result between a ${n(formula.waterMinLiters, 1)} L floor and a ${n(formula.waterMaxLiters)} L ceiling.`,
     waterFloorWhy: `The ${n(formula.waterMinLiters, 1)} L floor sits within European and American references for adult daily water needs.`,
     waterCapWhy: `The ${n(formula.waterMaxLiters)} L ceiling is a safety limit. The “${n(waterMlPerKg)} mL/kg” rule produces unreasonable figures at very high body weights, because fluid needs don’t rise in proportion to fat mass. Above ${n(formula.waterMaxLiters)} L needs individual assessment.`,
-    waterHonesty: `The ${n(waterMlPerKg)} mL/kg rule is a common clinical rule of thumb, not an established standard. Official references base their recommendations on sex and population group rather than body weight. We chose it because it gives a useful personal number, and we note that it’s a practical estimate.`,
+    waterHonesty: `The ${n(waterMlPerKg)} mL/kg rule is a common clinical rule of thumb, not an established standard. Official references base their recommendations on sex and population group rather than body weight. We chose it because it gives a useful personal number.`,
     waterDrinking:
       'This figure estimates what you drink only. Your food provides roughly another 20% of your daily water.',
     waterHeat:
