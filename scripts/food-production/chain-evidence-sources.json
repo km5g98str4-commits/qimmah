@@ -16,20 +16,6 @@
    "note": "مسار PDF مرشّح"
   },
   {
-   "slug": "mcd-us-full-menu",
-   "chain": "ماكدونالدز (US)",
-   "url": "https://www.mcdonalds.com/us/en-us/full-menu.html",
-   "render": true,
-   "note": "المنيو الكامل — قد يحجبه جدار الروبوتات"
-  },
-  {
-   "slug": "mcd-arabia",
-   "chain": "ماكدونالدز السعودية (الرياض)",
-   "url": "https://www.mcdonaldsarabia.com/",
-   "render": true,
-   "note": "نطاق مرشّح"
-  },
-  {
    "slug": "kfc-us-guide",
    "chain": "كنتاكي (US)",
    "url": "https://www.kfc.com/full-nutrition-guide",
@@ -233,497 +219,1869 @@
    "note": "نطاق مرشّح"
   },
   {
+   "slug": "hatab-artisan-bread-baguette-french-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/baguette-french-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-baguette-french-bread-bagutte-slices-with-thyme",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/baguette-french-bread/bagutte-slices-with-thyme",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-baguette-french-bread-seeded-baguette",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/baguette-french-bread/seeded-baguette",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-baguette-french-bread-white-baguette",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/baguette-french-bread/white-baguette",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-artisan-bread-country-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-country-bread-al-hatab-walnut-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread/al-hatab-walnut-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-country-bread-sourdough-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread/sourdough-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-country-bread-sourdough-white",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread/sourdough-white",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-country-bread-sourdough-whole-meal",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread/sourdough-whole-meal",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-artisan-bread-speciality-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-al-hatab-multicereal-pain-de-campagne",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-multicereal-pain-de-campagne",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-al-hatab-pain-de-campagne-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-pain-de-campagne-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-al-hatab-rustic-diamond-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-rustic-diamond-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-al-hatab-rustic-olives-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-rustic-olives-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-al-hatab-white-mini-rustic-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-white-mini-rustic-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-alhatab-cristall-bagel-cereal-4pc",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/alhatab-cristall-bagel-cereal-4pc",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-alhatab-cristallino-bagel-4pc",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/alhatab-cristallino-bagel-4pc",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-brown-panini",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/brown-panini",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-hokkaido-japanese-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/hokkaido-japanese-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-italian-ciabatta",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/italian-ciabatta",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-speciality-bread-tomato-ciabatta",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/tomato-ciabatta",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bread-arabic-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/arabic-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-bread-mini-white-arabic-bread-2",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/arabic-bread/mini-white-arabic-bread-2",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-bread-mini-whole-wheat-arabic-bread-2",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/arabic-bread/mini-whole-wheat-arabic-bread-2",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-bread-white-arabic-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/arabic-bread/white-arabic-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bread-buns",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/buns",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-buns-brioche-burger-buns",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/buns/brioche-burger-buns",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-buns-burger-buns-with-sesame-seeds",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/buns/burger-buns-with-sesame-seeds",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bread-fortified-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-fortified-bread-al-tannor-barley-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/al-tannor-barley-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-fortified-bread-al-tannor-natural-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/al-tannor-natural-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-fortified-bread-al-tannor-oat-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/al-tannor-oat-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-fortified-bread-keto-arabic-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/keto-arabic-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-fortified-bread-keto-burger-bun",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/keto-burger-bun",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bread-other-special",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/other-special",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-special-brioche-bread-loaf",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/other-special/brioche-bread-loaf",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-special-cone-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/other-special/cone-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-special-fattoush",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/other-special/fattoush",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bread-p2",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/p2",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bread-sandwich-roll",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/sandwich-roll",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-sandwich-roll-brioche-hot-dog-rolls",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/sandwich-roll/brioche-hot-dog-rolls",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-sandwich-roll-mini-milk-rolls",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/sandwich-roll/mini-milk-rolls",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-sandwich-roll-whole-wheat-sandwich-rolls-with-bran",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/sandwich-roll/whole-wheat-sandwich-rolls-with-bran",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bread-toast",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/toast",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-toast-high-protein-sliced-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/high-protein-sliced-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-toast-keto-sliced-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/keto-sliced-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-toast-milk-sliced-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/milk-sliced-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-toast-multigrain-sliced-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/multigrain-sliced-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-toast-white-sliced-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/white-sliced-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-toast-whole-wheat-sliced-bread",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/whole-wheat-sliced-bread",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-toast-whole-wheat-toast-no-added-sugar",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/whole-wheat-toast-no-added-sugar",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bread-tortilla",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/tortilla",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-tortilla-chilli-tortilla",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/tortilla/chilli-tortilla",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-tortilla-white-tortilla",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread/tortilla/white-tortilla",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-bake-roll",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bake-roll-al-hatab-bake-rolls-bbq",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-bbq",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bake-roll-al-hatab-bake-rolls-cheese",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-cheese",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bake-roll-al-hatab-bake-rolls-chili",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-chili",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bake-roll-al-hatab-bake-rolls-ketchup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-ketchup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-bake-roll-al-hatab-bake-rolls-salt-vinegar",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-salt-vinegar",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-biscuits",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/biscuits",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-biscuits-mini-heart-biscuit",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/biscuits/mini-heart-biscuit",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-biscuits-mini-rolled-biscuit",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/biscuits/mini-rolled-biscuit",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-biscuits-rolled-biscuit-with-choco-decoration",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/biscuits/rolled-biscuit-with-choco-decoration",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-croutons",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/croutons",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-croutons-croutons",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/croutons/croutons",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-grissini",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/grissini",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-grissini-grissini-breadsticks",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/grissini/grissini-breadsticks",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-grissini-grissini-breadsticks-whole-wheat-bran",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/grissini/grissini-breadsticks-whole-wheat-bran",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-grissini-grissini-breadsticks-whole-wheat-bran-sugar-free",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/grissini/grissini-breadsticks-whole-wheat-bran-sugar-free",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-kaak",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kaak",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-kaak-alhatab-kaak-with-dates",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kaak/alhatab-kaak-with-dates",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-kaak-alhatab-kaak-with-pistachio",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kaak/alhatab-kaak-with-pistachio",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-kaak-alhatab-kaak-with-walnut",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kaak/alhatab-kaak-with-walnut",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-kilija",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kilija",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-kilija-al-hatab-fteet-tin",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kilija/al-hatab-fteet-tin",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-kilija-kilija",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kilija/kilija",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-maamoul",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/maamoul",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-maamoul-chocolate-coconut-maamoul",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/maamoul/chocolate-coconut-maamoul",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-maamoul-large-maamoul-2",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/maamoul/large-maamoul-2",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-maamoul-whole-wheat-maamoul-3",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/maamoul/whole-wheat-maamoul-3",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-p2",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/p2",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-p3",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/p3",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dry-baked-biscuits-rusk",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-rusk-alhatab-rusk-hand-made-box-1500gm",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/alhatab-rusk-hand-made-box-1500gm",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-rusk-olive-rusk",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/olive-rusk",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-rusk-rusk-kuwaiti",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/rusk-kuwaiti",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-rusk-rusk-whole-wheat-hand-made-box",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/rusk-whole-wheat-hand-made-box",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-rusk-whole-wheat-hand-made-rusk",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/whole-wheat-hand-made-rusk",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pastry-cakes-oriental-pastry",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/oriental-pastry",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-oriental-pastry-kunafa-dough",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/oriental-pastry/kunafa-dough",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-oriental-pastry-whole-wheat-basbousa",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/oriental-pastry/whole-wheat-basbousa",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-oriental-pastry-whole-wheat-basboussa-no-added-sugar",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/oriental-pastry/whole-wheat-basboussa-no-added-sugar",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pastry-cakes-other-cakes",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-alhatab-browines-cake-50gm",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/alhatab-browines-cake-50gm",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-alhatab-muffin-cake-50gm",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/alhatab-muffin-cake-50gm",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-english-cake-chocolate",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/english-cake-chocolate",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-english-cake-marbled",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/english-cake-marbled",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-english-cake-vanilla",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/english-cake-vanilla",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-kors-aqeeli-no-added-sugar",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/kors-aqeeli-no-added-sugar",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-muffin-chocolate",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/muffin-chocolate",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-muffin-vanilla",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/muffin-vanilla",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-raspberry-madeleine",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/raspberry-madeleine",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-signature-cake",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/signature-cake",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-cakes-vanilla-madeleine",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/vanilla-madeleine",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pastry-cakes-other-viennoise",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-choco-mini-waffle",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/choco-mini-waffle",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-chocolate-mini-macaroons",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/chocolate-mini-macaroons",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-cream-puffs-with-chocolate-flavoured-coating",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/cream-puffs-with-chocolate-flavoured-coating",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-cream-puffs-with-salted-caramel",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/cream-puffs-with-salted-caramel",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-labnah-honey-danish",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/labnah-honey-danish",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-mini-macaroons",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/mini-macaroons",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-mini-waffles",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/mini-waffles",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-strawberry-danish",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/strawberry-danish",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-viennoise-zaatar-labneh-danish",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/zaatar-labneh-danish",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pastry-cakes-p2",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/p2",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pastry-cakes-single-served-cakes",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/single-served-cakes",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-single-served-cakes-large-eclairs",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/single-served-cakes/large-eclairs",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pastry-cakes-sweet-pies",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/sweet-pies",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-sweet-pies-apple-crumble-danish",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/sweet-pies/apple-crumble-danish",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dips-classic-dips-pp",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-classic-dips-pp-baba-ganoush",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/baba-ganoush",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-classic-dips-pp-garlic-sauce",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/garlic-sauce",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-classic-dips-pp-mafrouka",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/mafrouka",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-classic-dips-pp-muhamarra",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/muhamarra",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-classic-dips-pp-spicy-mafrouka",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/spicy-mafrouka",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-classic-dips-pp-tahini-sauce",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/tahini-sauce",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dips-hummus-pp",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-beetroot-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/beetroot-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-caramelized-onion-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/caramelized-onion-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-classic-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/classic-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-eggplant-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/eggplant-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-extra-virgin-olive-oil-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/extra-virgin-olive-oil-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-roasted-red-pepper-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/roasted-red-pepper-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-spicy-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/spicy-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-sundried-tomato-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/sundried-tomato-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-hummus-pp-truffle-hummus",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/truffle-hummus",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-dips-labneh-cream-dips-pp",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-labneh-cream-dips-pp-beetroot-labneh",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/beetroot-labneh",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-labneh-cream-dips-pp-honey-cream",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/honey-cream",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-labneh-cream-dips-pp-labneh-light",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/labneh-light",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-labneh-cream-dips-pp-labneh-pesto",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/labneh-pesto",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-labneh-cream-dips-pp-labneh-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/labneh-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-labneh-cream-dips-pp-labneh-spicy",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/labneh-spicy",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-labneh-cream-dips-pp-local-labneh",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/local-labneh",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-labneh-cream-dips-pp-special-labneh-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/special-labneh-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-mezze-cheese-pp",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-cheese-with-thyme-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/cheese-with-thyme-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-egyptian-mesh",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/egyptian-mesh",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-halloumi-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/halloumi-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-jalapeno-cheese-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/jalapeno-cheese-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-mexican-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/mexican-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-pepper-cheese-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/pepper-cheese-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-rayaheen-cheese-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/rayaheen-cheese-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-special-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/special-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-special-spicy-cheese-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/special-spicy-cheese-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-cheese-pp-spicy-cheese-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/spicy-cheese-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-mezze-protien-pp",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-protien-pp",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-protien-pp-chicken-mortadella-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-protien-pp/chicken-mortadella-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-protien-pp-special-mortadella-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-protien-pp/special-mortadella-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-mezze-tuna-pp",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-tuna-pp",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-tuna-pp-tuna-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-tuna-pp/tuna-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-mezze-veg-pp",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-veg-pp-cheese-makdous-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp/cheese-makdous-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-veg-pp-makdous-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp/makdous-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-veg-pp-syrian-style-makdous",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp/syrian-style-makdous",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-mezze-veg-pp-turkish-style-labneh-makdous",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp/turkish-style-labneh-makdous",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pulse-grain-salad-couscous-feta-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/accomp-salad/pulse-grain-salad/couscous-feta-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pulse-grain-salad-lentil-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/accomp-salad/pulse-grain-salad/lentil-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-breakfast-egg-shakshuka",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-breakfast/egg-shakshuka",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-breakfast-saudi-style-foul",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-breakfast/saudi-style-foul",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-main-chicken-majbous",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/chicken-majbous",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-main-chicken-mandi",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/chicken-mandi",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-main-chicken-molokhia-with-rice",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/chicken-molokhia-with-rice",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-main-dawood-basha-with-rice",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/dawood-basha-with-rice",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-main-fish-sayadieh",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/fish-sayadieh",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-main-kushari",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/kushari",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-arabic-main-saudi-chicken-kabsa",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/saudi-chicken-kabsa",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-healthy-main-chicken-quinoa",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/healthy-main/chicken-quinoa",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-healthy-main-quinoa-vegetable",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/healthy-main/quinoa-vegetable",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-indian-main-chicken-biryani",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/indian-main/chicken-biryani",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-indian-main-chicken-tikka-masala-and-pilau-rice",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/indian-main/chicken-tikka-masala-and-pilau-rice",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-juices-cold-pressed-greens-500",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/juices/cold-pressed-greens-500",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-juices-pomegranate",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/juices/pomegranate",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-juices-pomegranate-2",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/juices/pomegranate-2",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-meal-salad-chickpea-and-quinoa-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/chickpea-and-quinoa-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-meal-salad-fish-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/fish-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-fish-salad-tuna-nicoise-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/fish-salad/tuna-nicoise-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-meal-salad-greek-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/greek-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-meal-salad-other-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/other-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-salad-italian-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/other-salad/italian-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-meal-salad-pasta-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-salad-feta-slow-roast-tomato-pasta",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad/feta-slow-roast-tomato-pasta",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-salad-mediterranean-orzo-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad/mediterranean-orzo-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-salad-pesto-pasta",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad/pesto-pasta",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-salad-tuna-sweetcorn-pasta-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad/tuna-sweetcorn-pasta-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-meal-salad-protein-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/protein-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-protein-salad-chicken-caesar-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/protein-salad/chicken-caesar-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-protein-salad-katsu-chicken-salad-2",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/protein-salad/katsu-chicken-salad-2",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-meal-salad-roasted-cauliflower-feta-tahini",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/roasted-cauliflower-feta-tahini",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-noodles-beef-bechamel-pasta",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/beef-bechamel-pasta",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-noodles-beef-lasagne",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/beef-lasagne",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-noodles-chicken-alfredo-pasta",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/chicken-alfredo-pasta",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-noodles-macaroni-cheese",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/macaroni-cheese",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-noodles-mushroom-fettuccine",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/mushroom-fettuccine",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-pasta-noodles-penne-arrabbiata",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/penne-arrabbiata",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-sandwiches-club-sandwiches",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-club-sandwiches-cajun-chicken",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/cajun-chicken",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-club-sandwiches-cheddar-caramelized-onion",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/cheddar-caramelized-onion",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-club-sandwiches-chicken-avocado",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/chicken-avocado",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-club-sandwiches-grilled-halloumi-focaccia",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/grilled-halloumi-focaccia",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-club-sandwiches-roasted-pesto-vegetable-cheddar-focaccia",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/roasted-pesto-vegetable-cheddar-focaccia",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-club-sandwiches-turkey-cheese",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/turkey-cheese",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-sandwiches-other-sandwiches",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-sandwiches-egg-mayo",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches/egg-mayo",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-sandwiches-katsu-chicken-salad",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches/katsu-chicken-salad",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-sandwiches-tuna-corn",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches/tuna-corn",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-other-sandwiches-tuna-salad-sub",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches/tuna-salad-sub",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-sandwiches-wraps",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/wraps",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-wraps-buffalo-chicken",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/wraps/buffalo-chicken",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-wraps-chicken-caesar",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/wraps/chicken-caesar",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-wraps-feta-rocca",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/wraps/feta-rocca",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-soup-chicken-noodle-soup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/chicken-noodle-soup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-soup-harrira-with-lamb-soup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/harrira-with-lamb-soup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-soup-lentil-soup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/lentil-soup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-soup-minestrone-soup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/minestrone-soup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-soup-mushroom-soup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/mushroom-soup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-soup-sweetcorn-soup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/sweetcorn-soup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-soup-tomato-basil-soup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/tomato-basil-soup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  },
+  {
+   "slug": "hatab-soup-vegetable-soup",
+   "chain": "الحطب فودز — صفحة منتج",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/vegetable-soup",
+   "render": false,
+   "note": "صفحة منتج رسمية (خام) — قد تحمل القيم الغذائية للعبوة"
+  }
+ ],
+ "_round": "round 2 — مسارات مرشّحة بعد قراءة الجولة الأولى (دومينوز وشاورمر مقروءان ومستوردان؛ لا يُعاد جلبهما).",
+ "_retired": [
+  {
+   "slug": "mcd-us-full-menu",
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
+  },
+  {
+   "slug": "mcd-arabia",
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
+  },
+  {
    "slug": "mcd-sa-root",
-   "chain": "ماكدونالدز السعودية (الوسطى/الشرقية)",
-   "url": "https://www.mcdonalds.com.sa/",
-   "render": true,
-   "note": "الموقع الرسمي — بحث عن حاسبة التغذية"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-sa-menu",
-   "chain": "ماكدونالدز السعودية — المنيو",
-   "url": "https://www.mcdonalds.com.sa/menu",
-   "render": true,
-   "note": "مسار مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-sa-nutrition",
-   "chain": "ماكدونالدز السعودية — التغذية",
-   "url": "https://www.mcdonalds.com.sa/nutrition",
-   "render": true,
-   "note": "مسار مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-arabia-en",
-   "chain": "ماكدونالدز الغربية (mcdonaldsarabia)",
-   "url": "https://mcdonaldsarabia.com/",
-   "render": true,
-   "note": "بلا www — الأولى رُفض اتصالها"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-arabia-menu",
-   "chain": "ماكدونالدز الغربية — المنيو",
-   "url": "https://www.mcdonaldsarabia.com/en/menu",
-   "render": true,
-   "note": "مسار مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-us-dna-burgers",
-   "chain": "ماكدونالدز (US) واجهة المنيو — برجر",
-   "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=100",
-   "render": false,
-   "note": "JSON رسمي لصفحة المنيو الأمريكية — قد يحتاج ترويسات"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-us-dna-chicken",
-   "chain": "ماكدونالدز (US) واجهة المنيو — دجاج",
-   "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=101",
-   "render": false,
-   "note": "JSON رسمي"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-us-dna-breakfast",
-   "chain": "ماكدونالدز (US) واجهة المنيو — فطور",
-   "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=102",
-   "render": false,
-   "note": "JSON رسمي"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-us-dna-item",
-   "chain": "ماكدونالدز (US) واجهة المنيو — صنف",
-   "url": "https://www.mcdonalds.com/dnaapp/itemDetails?country=US&language=en&showLiveData=true&item=200",
-   "render": false,
-   "note": "JSON صنف واحد (بيج ماك) لاختبار الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-us-nutrition-calc",
-   "chain": "ماكدونالدز (US) حاسبة التغذية",
-   "url": "https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html",
-   "render": true,
-   "note": "الصفحة الرسمية"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gb-menu",
-   "chain": "ماكدونالدز (UK) المنيو",
-   "url": "https://www.mcdonalds.com/gb/en-gb/menu.html",
-   "render": true,
-   "note": "دليل رسمي أجنبي بديل إن حُجب الأمريكي"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "search-mcd-sa-ar",
-   "chain": "بحث: ماكدونالدز السعودية السعرات",
-   "url": "https://html.duckduckgo.com/html/?q=%D9%85%D8%A7%D9%83%D8%AF%D9%88%D9%86%D8%A7%D9%84%D8%AF%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D8%B1%D8%A7%D8%B1%D9%8A%D8%A9",
-   "render": false,
-   "note": "اكتشاف روابط لا مصدر تغذية"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "search-mcd-sa-en",
-   "chain": "بحث: McDonald's Saudi nutrition",
-   "url": "https://html.duckduckgo.com/html/?q=McDonald%27s+Saudi+Arabia+nutrition+calculator",
-   "render": false,
-   "note": "اكتشاف روابط"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "afran-com",
-   "chain": "أفران الحطب — نطاق مرشّح",
-   "url": "https://afranalhatab.com/",
-   "render": true,
-   "note": "نطاق مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "afran-com-sa",
-   "chain": "أفران الحطب — نطاق مرشّح ٢",
-   "url": "https://www.afranalhatab.com.sa/",
-   "render": true,
-   "note": "نطاق مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "afran-hatab-sa",
-   "chain": "أفران الحطب — نطاق مرشّح ٣",
-   "url": "https://hatab.sa/",
-   "render": true,
-   "note": "نطاق مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "afran-alhatab-sa",
-   "chain": "أفران الحطب — نطاق مرشّح ٤",
-   "url": "https://alhatab.sa/",
-   "render": true,
-   "note": "نطاق مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "search-afran-ar",
-   "chain": "بحث: أفران الحطب منيو",
-   "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D9%85%D9%86%D9%8A%D9%88",
-   "render": false,
-   "note": "اكتشاف روابط"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "search-afran-ar-2",
-   "chain": "بحث: أفران الحطب السعرات",
-   "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA",
-   "render": false,
-   "note": "اكتشاف روابط"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "search-afran-en",
-   "chain": "بحث: Afran Al Hatab menu",
-   "url": "https://html.duckduckgo.com/html/?q=Afran+Al+Hatab+bakery+Riyadh+menu",
-   "render": false,
-   "note": "اكتشاف روابط"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "search-afran-bing",
-   "chain": "بحث Bing: أفران الحطب منيو",
-   "url": "https://www.bing.com/search?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D9%85%D9%86%D9%8A%D9%88",
-   "render": true,
-   "note": "اكتشاف روابط (بديل)"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "search-mcd-bing",
-   "chain": "بحث Bing: ماكدونالدز السعودية السعرات",
-   "url": "https://www.bing.com/search?q=%D9%85%D8%A7%D9%83%D8%AF%D9%88%D9%86%D8%A7%D9%84%D8%AF%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D8%B1%D8%A7%D8%B1%D9%8A%D8%A9",
-   "render": true,
-   "note": "اكتشاف روابط (بديل)"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "shawarmer-menu-ar-full",
-   "chain": "شاورمر (المنيو الكامل بالعربية)",
-   "url": "https://shawarmer.com/ar/menu",
-   "render": true,
-   "note": "إعادة التقاط الجذر — ٥٦ سطر سعرات في اللقطة السابقة مقابل ٣٩ مستوردًا"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-sa-calc-ar",
-   "chain": "ماكدونالدز السعودية — حاسبة القيمة الغذائية (الرياض)",
-   "url": "https://www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "الصفحة الرسمية المكتشفة بالبحث؛ HTTP/1.1 + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-sa-calc-en",
-   "chain": "McDonald's KSA — Nutrition Calculator (Riyadh)",
-   "url": "https://www.mcdonalds.com/sa/en-sa/riyadh/about-our-food/nutrition-calculator.html",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "النسخة الإنجليزية للأسماء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-sa-menu-ar",
-   "chain": "ماكدونالدز السعودية — المنيو الكامل",
-   "url": "https://www.mcdonalds.com/sa/ar-sa/riyadh/full-menu.html",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "قد يحمل السعرات على البطاقات"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-sa-dna-ar",
-   "chain": "ماكدونالدز السعودية — واجهة المنيو JSON",
-   "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=SA&language=ar&showLiveData=true&category=100",
-   "render": false,
-   "browserLike": true,
-   "note": "نفس واجهة الموقع الرسمي بسوق SA — مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-products-ar",
-   "chain": "الحطب فودز (أفران الحطب) — منتجاتنا",
-   "url": "https://alhatab.com.sa/our-products",
-   "render": true,
-   "note": "الموقع الرسمي المكتشف بالبحث"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-bakery-en",
-   "chain": "Al Hatab Foods — Bakery",
-   "url": "https://alhatab.com.sa/en/our-products/bakery",
-   "render": true,
-   "note": "فئة المخبوزات"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-ready-en",
-   "chain": "Al Hatab Foods — Ready meals",
-   "url": "https://alhatab.com.sa/en/our-products/ready-to-eat",
-   "render": true,
-   "note": "مسار مرشّح للوجبات الجاهزة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-ready-ar",
-   "chain": "الحطب فودز — وجبات جاهزة",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat",
-   "render": true,
-   "note": "مسار مرشّح"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-root-ar",
-   "chain": "الحطب فودز — الرئيسية",
-   "url": "https://alhatab.com.sa/",
-   "render": true,
-   "note": "لاكتشاف روابط الفئات"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "hs-alhatab-rawdah-en",
-   "chain": "أفران الحطب — منيو هنقرستيشن (الروضة)",
-   "url": "https://hungerstation.com/sa-en/restaurant/alhatab-bakery/riyadh/al-rawdah/13031",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "منيو المتجر بسعراته المعلَنة (لائحة SFDA) عبر منصّة التوصيل"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "hs-alhatab-rawdah-ar",
-   "chain": "أفران الحطب — منيو هنقرستيشن (عربي)",
-   "url": "https://hungerstation.com/sa-ar/restaurant/alhatab-bakery/riyadh/al-rawdah/13031",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "الأسماء العربية"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "hs-alhatab-14305",
-   "chain": "أفران الحطب — منيو هنقرستيشن (فرع ٢)",
-   "url": "https://hungerstation.com/sa-ar/restaurant/riyadh/riyadh/14305",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "فرع ثانٍ للمقارنة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "ninja-alhatab-en",
-   "chain": "أفران الحطب — منيو نينجا",
-   "url": "https://ananinja.com/sa/en/restaurants/al-hatab-bakery-30642",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "منصّة ثانية للتقاطع"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-bread",
-   "chain": "الحطب فودز — خبز",
-   "url": "https://alhatab.com.sa/our-products/bakery/bread",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-artisan",
-   "chain": "الحطب فودز — خبز فاخر",
-   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-pastry",
-   "chain": "الحطب فودز — معجنات وكيك",
-   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-biscuits",
-   "chain": "الحطب فودز — مخبوزات جافة وبسكويت",
-   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-arabic-main",
-   "chain": "الحطب فودز — أطباق عربية رئيسية",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-indian-main",
-   "chain": "الحطب فودز — أطباق هندية رئيسية",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat/indian-main",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-arabic-breakfast",
-   "chain": "الحطب فودز — فطور عربي",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-breakfast",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-healthy-main",
-   "chain": "الحطب فودز — أطباق صحية رئيسية",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat/healthy-main",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-pasta",
-   "chain": "الحطب فودز — باستا ونودلز",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-sandwiches",
-   "chain": "الحطب فودز — سندويتشات",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-soup",
-   "chain": "الحطب فودز — شوربة",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-meal-salad",
-   "chain": "الحطب فودز — وجبات السلطات",
-   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-high-protein",
-   "chain": "الحطب فودز — عالي البروتين",
-   "url": "https://alhatab.com.sa/our-products/high-protein",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-keto",
-   "chain": "الحطب فودز — كيتو",
-   "url": "https://alhatab.com.sa/our-products/keto",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-dips",
-   "chain": "الحطب فودز — تغميسات",
-   "url": "https://alhatab.com.sa/our-products/dips-salads/dips",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-mezze",
-   "chain": "الحطب فودز — مقبلات",
-   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "alhatab-bread-en",
-   "chain": "Al Hatab Foods — Bread (EN names)",
-   "url": "https://alhatab.com.sa/en/our-products/bakery/bread",
-   "render": true,
-   "captureJson": true,
-   "waitMs": 8000,
-   "note": "الأسماء الإنجليزية"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gcc-ae",
-   "chain": "ماكدونالدز الخليج (ae)",
-   "url": "https://www.mcdonalds.ae/",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gcc-ae-menu",
-   "chain": "ماكدونالدز الخليج (ae-menu)",
-   "url": "https://www.mcdonalds.ae/menu",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gcc-kw",
-   "chain": "ماكدونالدز الخليج (kw)",
-   "url": "https://www.mcdonalds.com.kw/",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gcc-qa",
-   "chain": "ماكدونالدز الخليج (qa)",
-   "url": "https://www.mcdonalds.qa/",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gcc-bh",
-   "chain": "ماكدونالدز الخليج (bh)",
-   "url": "https://www.mcdonalds.com.bh/",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gcc-om",
-   "chain": "ماكدونالدز الخليج (om)",
-   "url": "https://www.mcdonalds.om/",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gcc-eg",
-   "chain": "ماكدونالدز الخليج (eg)",
-   "url": "https://www.mcdonalds.eg/",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   },
   {
    "slug": "mcd-gcc-sa-app",
-   "chain": "ماكدونالدز الخليج (sa-app)",
-   "url": "https://www.mcdonalds.com.sa/en/nutrition-calculator",
-   "render": true,
-   "browserLike": true,
-   "captureJson": true,
-   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+   "why": "[FOOD-UX-001] جولة 4–6: محجوب/غير حيّ/أُنجز غرضه — أُزيل ليقصر زمن الجلب؛ أدلّته باقية في data/food-production/chain-evidence/"
   }
- ],
- "_round": "round 2 — مسارات مرشّحة بعد قراءة الجولة الأولى (دومينوز وشاورمر مقروءان ومستوردان؛ لا يُعاد جلبهما)."
+ ]
 }
