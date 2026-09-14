@@ -1243,6 +1243,359 @@
     "fndds",
     "foundation"
    ]
+  },
+  {
+   "id": "CH088",
+   "chain": "mcdonalds",
+   "nameAr": "ماك دبل",
+   "nameEn": "McDouble",
+   "q": "mcdonald's mcdouble",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, McDOUBLE"
+  },
+  {
+   "id": "CH089",
+   "chain": "mcdonalds",
+   "nameAr": "بيج تيستي",
+   "nameEn": "Big Tasty",
+   "q": "mcdonald's big n' tasty",
+   "type": "burger",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, BIG N' TASTY"
+  },
+  {
+   "id": "CH090",
+   "chain": "mcdonalds",
+   "nameAr": "ماك تشيكن حار",
+   "nameEn": "Hot 'n Spicy McChicken",
+   "q": "mcdonald's hot n spicy mcchicken",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Hot 'n Spicy McCHICKEN"
+  },
+  {
+   "id": "CH091",
+   "chain": "mcdonalds",
+   "nameAr": "ساندويتش دجاج مشوي بريميوم",
+   "nameEn": "Premium Grilled Chicken Classic Sandwich",
+   "q": "mcdonald's premium grilled chicken classic sandwich",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Premium Grilled Chicken Classic Sandwich"
+  },
+  {
+   "id": "CH092",
+   "chain": "mcdonalds",
+   "nameAr": "ساندويتش دجاج مقرمش بريميوم",
+   "nameEn": "Premium Crispy Chicken Classic Sandwich",
+   "q": "mcdonald's premium crispy chicken classic sandwich",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Premium Crispy Chicken Classic Sandwich"
+  },
+  {
+   "id": "CH093",
+   "chain": "mcdonalds",
+   "nameAr": "ساندويتش دجاج ساذرن",
+   "nameEn": "Southern Style Chicken Sandwich",
+   "q": "mcdonald's southern style chicken sandwich",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Southern Style Chicken Sandwich"
+  },
+  {
+   "id": "CH094",
+   "chain": "mcdonalds",
+   "nameAr": "تشيكن سيلكتس (٣ قطع)",
+   "nameEn": "Chicken Selects Premium Breast Strips (3 pc)",
+   "q": "mcdonald's chicken selects premium breast strips",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Chicken SELECTS Premium Breast Strips"
+  },
+  {
+   "id": "CH095",
+   "chain": "mcdonalds",
+   "nameAr": "سناك راب دجاج مشوي",
+   "nameEn": "Ranch Snack Wrap (Grilled)",
+   "q": "mcdonald's ranch snack wrap grilled",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Ranch Snack Wrap (Grilled)"
+  },
+  {
+   "id": "CH096",
+   "chain": "mcdonalds",
+   "nameAr": "سناك راب دجاج مقرمش",
+   "nameEn": "Ranch Snack Wrap (Crispy)",
+   "q": "mcdonald's ranch snack wrap crispy",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Ranch Snack Wrap (Crispy)"
+  },
+  {
+   "id": "CH097",
+   "chain": "mcdonalds",
+   "nameAr": "بطاطس مقلية (صغير)",
+   "nameEn": "French Fries (small)",
+   "q": "mcdonald's french fries",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, french fries",
+   "portionHint": "small"
+  },
+  {
+   "id": "CH098",
+   "chain": "mcdonalds",
+   "nameAr": "سلطة جانبية",
+   "nameEn": "Side Salad",
+   "q": "mcdonald's side salad",
+   "type": "salad",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Side Salad"
+  },
+  {
+   "id": "CH099",
+   "chain": "mcdonalds",
+   "nameAr": "شرائح تفاح",
+   "nameEn": "Apple Dippers",
+   "q": "mcdonald's apple dippers",
+   "type": "side",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Apple Dippers"
+  },
+  {
+   "id": "CH100",
+   "chain": "mcdonalds",
+   "nameAr": "بارفيه فواكه وزبادي",
+   "nameEn": "Fruit 'n Yogurt Parfait",
+   "q": "mcdonald's fruit n yogurt parfait",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Fruit 'n Yogurt Parfait (without granola)"
+  },
+  {
+   "id": "CH101",
+   "chain": "mcdonalds",
+   "nameAr": "آيس كريم كون فانيلا",
+   "nameEn": "Vanilla Reduced Fat Ice Cream Cone",
+   "q": "mcdonald's vanilla reduced fat ice cream cone",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Vanilla Reduced Fat Ice Cream Cone"
+  },
+  {
+   "id": "CH102",
+   "chain": "mcdonalds",
+   "nameAr": "ساندي شوكولاتة ساخنة",
+   "nameEn": "Hot Fudge Sundae",
+   "q": "mcdonald's hot fudge sundae",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Hot Fudge Sundae"
+  },
+  {
+   "id": "CH103",
+   "chain": "mcdonalds",
+   "nameAr": "ساندي فراولة",
+   "nameEn": "Strawberry Sundae",
+   "q": "mcdonald's strawberry sundae",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Strawberry Sundae"
+  },
+  {
+   "id": "CH104",
+   "chain": "mcdonalds",
+   "nameAr": "ماك فلوري أوريو",
+   "nameEn": "McFlurry with Oreo cookies",
+   "q": "mcdonald's mcflurry oreo",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, McFLURRY with OREO cookies"
+  },
+  {
+   "id": "CH105",
+   "chain": "mcdonalds",
+   "nameAr": "ماك فلوري M&M",
+   "nameEn": "McFlurry with M&M's",
+   "q": "mcdonald's mcflurry m&m",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, McFLURRY with M&M'S CANDIES"
+  },
+  {
+   "id": "CH106",
+   "chain": "mcdonalds",
+   "nameAr": "شيك شوكولاتة",
+   "nameEn": "Chocolate Triple Thick Shake",
+   "q": "mcdonald's chocolate triple thick shake",
+   "type": "drink",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Chocolate Triple Thick Shake"
+  },
+  {
+   "id": "CH107",
+   "chain": "mcdonalds",
+   "nameAr": "شيك فانيلا",
+   "nameEn": "Vanilla Triple Thick Shake",
+   "q": "mcdonald's vanilla triple thick shake",
+   "type": "drink",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Vanilla Triple Thick Shake"
+  },
+  {
+   "id": "CH108",
+   "chain": "mcdonalds",
+   "nameAr": "شيك فراولة",
+   "nameEn": "Strawberry Triple Thick Shake",
+   "q": "mcdonald's strawberry triple thick shake",
+   "type": "drink",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Strawberry Triple Thick Shake"
+  },
+  {
+   "id": "CH109",
+   "chain": "mcdonalds",
+   "nameAr": "سينامون ميلتس",
+   "nameEn": "Cinnamon Melts",
+   "q": "mcdonald's cinnamon melts",
+   "type": "dessert",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Cinnamon Melts"
+  },
+  {
+   "id": "CH110",
+   "chain": "mcdonalds",
+   "nameAr": "بيض مخفوق",
+   "nameEn": "Scrambled Eggs",
+   "q": "mcdonald's scrambled eggs",
+   "type": "breakfast",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Scrambled Eggs"
+  },
+  {
+   "id": "CH111",
+   "chain": "mcdonalds",
+   "nameAr": "تشيكن ماك ناجتس (٤ قطع)",
+   "nameEn": "Chicken McNuggets (4 pc)",
+   "q": "mcdonald's chicken mcnuggets",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Chicken McNUGGETS",
+   "portionPieces": 4
+  },
+  {
+   "id": "CH112",
+   "chain": "mcdonalds",
+   "nameAr": "تشيكن ماك ناجتس (١٠ قطع)",
+   "nameEn": "Chicken McNuggets (10 pc)",
+   "q": "mcdonald's chicken mcnuggets",
+   "type": "chicken",
+   "prefer": [
+    "sr",
+    "fndds",
+    "foundation"
+   ],
+   "pick": "McDONALD'S, Chicken McNUGGETS",
+   "portionPieces": 10
   }
  ]
 }

@@ -498,6 +498,231 @@
    "browserLike": true,
    "captureJson": true,
    "note": "منصّة ثانية للتقاطع"
+  },
+  {
+   "slug": "alhatab-bread",
+   "chain": "الحطب فودز — خبز",
+   "url": "https://alhatab.com.sa/our-products/bakery/bread",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-artisan",
+   "chain": "الحطب فودز — خبز فاخر",
+   "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-pastry",
+   "chain": "الحطب فودز — معجنات وكيك",
+   "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-biscuits",
+   "chain": "الحطب فودز — مخبوزات جافة وبسكويت",
+   "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-arabic-main",
+   "chain": "الحطب فودز — أطباق عربية رئيسية",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-indian-main",
+   "chain": "الحطب فودز — أطباق هندية رئيسية",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/indian-main",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-arabic-breakfast",
+   "chain": "الحطب فودز — فطور عربي",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-breakfast",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-healthy-main",
+   "chain": "الحطب فودز — أطباق صحية رئيسية",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/healthy-main",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-pasta",
+   "chain": "الحطب فودز — باستا ونودلز",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-sandwiches",
+   "chain": "الحطب فودز — سندويتشات",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-soup",
+   "chain": "الحطب فودز — شوربة",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-meal-salad",
+   "chain": "الحطب فودز — وجبات السلطات",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-high-protein",
+   "chain": "الحطب فودز — عالي البروتين",
+   "url": "https://alhatab.com.sa/our-products/high-protein",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-keto",
+   "chain": "الحطب فودز — كيتو",
+   "url": "https://alhatab.com.sa/our-products/keto",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-dips",
+   "chain": "الحطب فودز — تغميسات",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/dips",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-mezze",
+   "chain": "الحطب فودز — مقبلات",
+   "url": "https://alhatab.com.sa/our-products/dips-salads/mezze",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "قائمة المنتجات تُحمَّل بعد الهدوء الشبكي — انتظار أطول + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "alhatab-bread-en",
+   "chain": "Al Hatab Foods — Bread (EN names)",
+   "url": "https://alhatab.com.sa/en/our-products/bakery/bread",
+   "render": true,
+   "captureJson": true,
+   "waitMs": 8000,
+   "note": "الأسماء الإنجليزية"
+  },
+  {
+   "slug": "mcd-gcc-ae",
+   "chain": "ماكدونالدز الخليج (ae)",
+   "url": "https://www.mcdonalds.ae/",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+  },
+  {
+   "slug": "mcd-gcc-ae-menu",
+   "chain": "ماكدونالدز الخليج (ae-menu)",
+   "url": "https://www.mcdonalds.ae/menu",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+  },
+  {
+   "slug": "mcd-gcc-kw",
+   "chain": "ماكدونالدز الخليج (kw)",
+   "url": "https://www.mcdonalds.com.kw/",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+  },
+  {
+   "slug": "mcd-gcc-qa",
+   "chain": "ماكدونالدز الخليج (qa)",
+   "url": "https://www.mcdonalds.qa/",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+  },
+  {
+   "slug": "mcd-gcc-bh",
+   "chain": "ماكدونالدز الخليج (bh)",
+   "url": "https://www.mcdonalds.com.bh/",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+  },
+  {
+   "slug": "mcd-gcc-om",
+   "chain": "ماكدونالدز الخليج (om)",
+   "url": "https://www.mcdonalds.om/",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+  },
+  {
+   "slug": "mcd-gcc-eg",
+   "chain": "ماكدونالدز الخليج (eg)",
+   "url": "https://www.mcdonalds.eg/",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
+  },
+  {
+   "slug": "mcd-gcc-sa-app",
+   "chain": "ماكدونالدز الخليج (sa-app)",
+   "url": "https://www.mcdonalds.com.sa/en/nutrition-calculator",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "سوق خليجي بوصفة أقرب للسعودية — بديل رسمي حين يحجب mcdonalds.com العدّاء"
   }
  ],
  "_round": "round 2 — مسارات مرشّحة بعد قراءة الجولة الأولى (دومينوز وشاورمر مقروءان ومستوردان؛ لا يُعاد جلبهما)."
