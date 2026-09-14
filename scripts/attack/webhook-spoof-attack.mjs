@@ -40,7 +40,7 @@ const ENV = {
   SALLA_EXPECTED_AMOUNT_MINOR: '1999',
   SALLA_EXPECTED_CURRENCY: 'SAR',
   SALLA_PAID_STATUS_SLUGS: 'completed',
-  SALLA_EXPECTED_PRODUCT_IDS: '1181109938',
+  SALLA_EXPECTED_PRODUCT_IDS: '2106415557',
 }
 const POL = readPolicy(ENV)
 if (!POL.ok) throw new Error(`FAIL: تهيئة الاختبار مرفوضة — ${POL.reason}`)
@@ -60,7 +60,7 @@ const payload = (over = {}) => JSON.stringify({
       is_pending_payment: over.pendingPayment,
       customer: { email: over.email ?? 'Buyer@Example.COM' },
       amounts: { total: { amount: over.amount ?? 19.99, currency: over.currency ?? 'SAR' } },
-      items: [{ product: { id: over.productId ?? 1181109938 }, sku: over.sku ?? 'QIMMAH-PREMIUM' }],
+      items: [{ product: { id: over.productId ?? 2106415557 }, sku: over.sku ?? 'QIMMAH-PREMIUM' }],
     },
   },
 })

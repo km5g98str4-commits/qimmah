@@ -852,10 +852,10 @@ for (const role of ['anon', 'authenticated']) {
 
 // ── [CTO-SALLA-002] §D — الربط بالمنتج المعتمد الحقيقي ─────────────────────
 // معرّفات حقيقية من متجر `Qimmahsa` (المعرّف 1460504714)، لا أسماء وهمية:
-//   1181109938 = «تطبيق قمة»            ← Premium المعتمد وحده
+//   2106415557 = «قِمّة Premium»            ← Premium المعتمد وحده
 //   1084925309 = «تطبيق قمة تجربة مجانية» ← **ممنوع أن يمنح شيئًا**
-console.log('\n— [SALLA-002] ربط المنتج المعتمد 1181109938')
-const PREMIUM_ID = '1181109938'
+console.log('\n— [SALLA-002] ربط المنتج المعتمد 2106415557')
+const PREMIUM_ID = '2106415557'
 const TRIAL_ID = '1084925309'
 const PROD_ENV = { ...ENV, SALLA_EXPECTED_PRODUCT_IDS: PREMIUM_ID }
 
@@ -863,7 +863,7 @@ await makeUser(db, 'realbuy@example.com')
 let rp = sallaPayload({ orderId: 'ORD-REAL-1', productId: PREMIUM_ID,
   email: 'realbuy@example.com', createdAt: '2026-08-15T01:00:00Z' })
 res = await simulateWebhook(db, { headers: await signedHeaders(rp), rawBody: rp, env: PROD_ENV })
-check('المنتج المعتمد 1181109938 ⇒ منحة', res.outcome === 'processed', res.outcome)
+check('المنتج المعتمد 2106415557 ⇒ منحة', res.outcome === 'processed', res.outcome)
 await asRole(db, 'authenticated', (await q(`select id from auth.users where email='realbuy@example.com'`)).rows[0].id)
 st = await db.query(`select state, source, no_expiry, expires_at from public.my_entitlement()`)
 await asRole(db, null)

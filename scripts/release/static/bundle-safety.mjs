@@ -103,7 +103,7 @@ export async function run({ artifactDir }) {
   // read as a real commercial gap: the artifact allegedly carried only the store
   // root. It did not. The artifact has always shipped the full product URL —
   //
-  //   https://salla.sa/Qimmahsa/%D8%AA%D8%B7%D8%A8%D9%8A%D9%82-%D9%82%D9%85%D8%A9/p1181109938
+  //   https://salla.sa/Qimmahsa/%D9%82%D9%90%D9%85%D9%91%D8%A9-Premium/p2106415557
   //
   // — and `src/config/product.ts:44` is its single source. The defect was HERE:
   // the extraction class `[A-Za-z0-9_\-/?=&.]` has no `%`, so the match stopped
@@ -141,7 +141,7 @@ export async function run({ artifactDir }) {
   rec.check('counter-proof: a genuinely root-only artifact STILL fails the product-binding check',
     rootMatches.length === 1 && !rootMatches.some(isProductUrl),
     `extracted: ${rootMatches.join(', ')} — if this passed, the check would accept any store URL`)
-  const ENCODED = 'a="https://salla.sa/Qimmahsa/%D8%AA%D8%B7%D8%A8%D9%8A%D9%82-%D9%82%D9%85%D8%A9/p1181109938";'
+  const ENCODED = 'a="https://salla.sa/Qimmahsa/%D9%82%D9%90%D9%85%D9%91%D8%A9-Premium/p2106415557";'
   const encodedMatch = [...ENCODED.matchAll(SALLA_URL)].map((m) => m[0])
   rec.check('counter-proof: the alphabet now survives percent-encoding, and the OLD one did not',
     encodedMatch.length === 1 && isProductUrl(encodedMatch[0])
