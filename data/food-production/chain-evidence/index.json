@@ -1,6 +1,6 @@
 {
   "_readme": "دليل جلب CI لمصادر السلاسل الرسمية — يقرؤه بشر/موجة استيراد، لا مستورد آلي.",
-  "fetchedAt": "2026-09-14T09:48:11.069Z",
+  "fetchedAt": "2026-09-14T10:24:30.385Z",
   "results": [
     {
       "slug": "bk-us-explorer",
@@ -13,13 +13,13 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 315487,
+        "bytes": 315643,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 9092
+        "bytes": 9166
       }
     },
     {
@@ -30,30 +30,6 @@
         "error": "fetch failed"
       },
       "rendered": null,
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-us-full-menu",
-      "chain": "ماكدونالدز (US)",
-      "url": "https://www.mcdonalds.com/us/en-us/full-menu.html",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com/us/en-us/full-menu.html\nCall log:\n  - navigating to \"https://www.mcdonalds.com/us/en-us/full-menu.html\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-arabia",
-      "chain": "ماكدونالدز السعودية (الرياض)",
-      "url": "https://www.mcdonaldsarabia.com/",
-      "raw": {
-        "error": "fetch failed"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://www.mcdonaldsarabia.com/\nCall log:\n  - navigating to \"https://www.mcdonaldsarabia.com/\", waiting until \"domcontentloaded\"\n"
-      },
       "screenshot": null
     },
     {
@@ -73,20 +49,12 @@
       "chain": "كنتاكي السعودية (أمريكانا)",
       "url": "https://www.kfc-arabia.com/en-sa/menu",
       "raw": {
-        "status": 404,
-        "contentType": "text/html; charset=iso-8859-1",
-        "bytes": 320,
-        "file": "raw.html"
+        "error": "The operation was aborted due to timeout"
       },
       "rendered": {
-        "bytes": 746,
-        "truncated": false
+        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.kfc-arabia.com/en-sa/menu\", waiting until \"domcontentloaded\"\n"
       },
-      "screenshot": "shot.png",
-      "text": {
-        "from": "rendered",
-        "bytes": 131
-      }
+      "screenshot": null
     },
     {
       "slug": "hardees-us-menu-nutrition",
@@ -119,13 +87,13 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 165862,
+        "bytes": 174063,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 2818
+        "bytes": 2414
       }
     },
     {
@@ -297,7 +265,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 193484,
+        "bytes": 193394,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -349,7 +317,7 @@
       "raw": {
         "status": 200,
         "contentType": "text/html",
-        "bytes": 20773,
+        "bytes": 20771,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -434,7 +402,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 617748,
+        "bytes": 617750,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -454,7 +422,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 23580,
+        "bytes": 27752,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -502,17 +470,17 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 667079,
+        "bytes": 667070,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 678557,
+        "bytes": 678549,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 1023
+        "bytes": 1024
       }
     },
     {
@@ -548,1084 +516,3914 @@
       }
     },
     {
-      "slug": "mcd-sa-root",
-      "chain": "ماكدونالدز السعودية (الوسطى/الشرقية)",
-      "url": "https://www.mcdonalds.com.sa/",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com.sa/\nCall log:\n  - navigating to \"https://www.mcdonalds.com.sa/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-sa-menu",
-      "chain": "ماكدونالدز السعودية — المنيو",
-      "url": "https://www.mcdonalds.com.sa/menu",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com.sa/menu\nCall log:\n  - navigating to \"https://www.mcdonalds.com.sa/menu\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-sa-nutrition",
-      "chain": "ماكدونالدز السعودية — التغذية",
-      "url": "https://www.mcdonalds.com.sa/nutrition",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com.sa/nutrition\nCall log:\n  - navigating to \"https://www.mcdonalds.com.sa/nutrition\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-arabia-en",
-      "chain": "ماكدونالدز الغربية (mcdonaldsarabia)",
-      "url": "https://mcdonaldsarabia.com/",
-      "raw": {
-        "error": "fetch failed"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://mcdonaldsarabia.com/\nCall log:\n  - navigating to \"https://mcdonaldsarabia.com/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-arabia-menu",
-      "chain": "ماكدونالدز الغربية — المنيو",
-      "url": "https://www.mcdonaldsarabia.com/en/menu",
-      "raw": {
-        "error": "fetch failed"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://www.mcdonaldsarabia.com/en/menu\nCall log:\n  - navigating to \"https://www.mcdonaldsarabia.com/en/menu\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-us-dna-burgers",
-      "chain": "ماكدونالدز (US) واجهة المنيو — برجر",
-      "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=100",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": null,
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-us-dna-chicken",
-      "chain": "ماكدونالدز (US) واجهة المنيو — دجاج",
-      "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=101",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": null,
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-us-dna-breakfast",
-      "chain": "ماكدونالدز (US) واجهة المنيو — فطور",
-      "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=102",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": null,
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-us-dna-item",
-      "chain": "ماكدونالدز (US) واجهة المنيو — صنف",
-      "url": "https://www.mcdonalds.com/dnaapp/itemDetails?country=US&language=en&showLiveData=true&item=200",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": null,
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-us-nutrition-calc",
-      "chain": "ماكدونالدز (US) حاسبة التغذية",
-      "url": "https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html\nCall log:\n  - navigating to \"https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-gb-menu",
-      "chain": "ماكدونالدز (UK) المنيو",
-      "url": "https://www.mcdonalds.com/gb/en-gb/menu.html",
-      "raw": {
-        "error": "The operation was aborted due to timeout"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com/gb/en-gb/menu.html\nCall log:\n  - navigating to \"https://www.mcdonalds.com/gb/en-gb/menu.html\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "search-mcd-sa-ar",
-      "chain": "بحث: ماكدونالدز السعودية السعرات",
-      "url": "https://html.duckduckgo.com/html/?q=%D9%85%D8%A7%D9%83%D8%AF%D9%88%D9%86%D8%A7%D9%84%D8%AF%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D8%B1%D8%A7%D8%B1%D9%8A%D8%A9",
+      "slug": "hatab-artisan-bread-baguette-french-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/baguette-french-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 39413,
+        "bytes": 117902,
         "file": "raw.html"
       },
       "rendered": null,
       "screenshot": null,
       "text": {
         "from": "raw",
-        "bytes": 5203
+        "bytes": 9448
       }
     },
     {
-      "slug": "search-mcd-sa-en",
-      "chain": "بحث: McDonald's Saudi nutrition",
-      "url": "https://html.duckduckgo.com/html/?q=McDonald%27s+Saudi+Arabia+nutrition+calculator",
+      "slug": "hatab-baguette-french-bread-bagutte-slices-with-thyme",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/baguette-french-bread/bagutte-slices-with-thyme",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 34106,
+        "bytes": 123220,
         "file": "raw.html"
       },
       "rendered": null,
       "screenshot": null,
       "text": {
         "from": "raw",
-        "bytes": 3946
+        "bytes": 8600
       }
     },
     {
-      "slug": "afran-com",
-      "chain": "أفران الحطب — نطاق مرشّح",
-      "url": "https://afranalhatab.com/",
-      "raw": {
-        "error": "fetch failed"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://afranalhatab.com/\nCall log:\n  - navigating to \"https://afranalhatab.com/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "afran-com-sa",
-      "chain": "أفران الحطب — نطاق مرشّح ٢",
-      "url": "https://www.afranalhatab.com.sa/",
-      "raw": {
-        "error": "fetch failed"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.afranalhatab.com.sa/\nCall log:\n  - navigating to \"https://www.afranalhatab.com.sa/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "afran-hatab-sa",
-      "chain": "أفران الحطب — نطاق مرشّح ٣",
-      "url": "https://hatab.sa/",
-      "raw": {
-        "error": "fetch failed"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://hatab.sa/\nCall log:\n  - navigating to \"https://hatab.sa/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "afran-alhatab-sa",
-      "chain": "أفران الحطب — نطاق مرشّح ٤",
-      "url": "https://alhatab.sa/",
-      "raw": {
-        "error": "fetch failed"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://alhatab.sa/\nCall log:\n  - navigating to \"https://alhatab.sa/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "search-afran-ar",
-      "chain": "بحث: أفران الحطب منيو",
-      "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D9%85%D9%86%D9%8A%D9%88",
+      "slug": "hatab-baguette-french-bread-seeded-baguette",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/baguette-french-bread/seeded-baguette",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 37478,
+        "bytes": 123085,
         "file": "raw.html"
       },
       "rendered": null,
       "screenshot": null,
       "text": {
         "from": "raw",
-        "bytes": 5183
+        "bytes": 8569
       }
     },
     {
-      "slug": "search-afran-ar-2",
-      "chain": "بحث: أفران الحطب السعرات",
-      "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA",
+      "slug": "hatab-baguette-french-bread-white-baguette",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/baguette-french-bread/white-baguette",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 37240,
+        "bytes": 123040,
         "file": "raw.html"
       },
       "rendered": null,
       "screenshot": null,
       "text": {
         "from": "raw",
-        "bytes": 5597
+        "bytes": 8562
       }
     },
     {
-      "slug": "search-afran-en",
-      "chain": "بحث: Afran Al Hatab menu",
-      "url": "https://html.duckduckgo.com/html/?q=Afran+Al+Hatab+bakery+Riyadh+menu",
+      "slug": "hatab-artisan-bread-country-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 32291,
+        "bytes": 136028,
         "file": "raw.html"
       },
       "rendered": null,
       "screenshot": null,
       "text": {
         "from": "raw",
-        "bytes": 3877
+        "bytes": 10104
       }
     },
     {
-      "slug": "search-afran-bing",
-      "chain": "بحث Bing: أفران الحطب منيو",
-      "url": "https://www.bing.com/search?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D9%85%D9%86%D9%8A%D9%88",
+      "slug": "hatab-country-bread-al-hatab-walnut-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread/al-hatab-walnut-bread",
       "raw": {
         "status": 200,
-        "contentType": "text/html; charset=utf-8",
-        "bytes": 119798,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 123266,
         "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 279910,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
-      "text": {
-        "from": "rendered",
-        "bytes": 4122
-      }
-    },
-    {
-      "slug": "search-mcd-bing",
-      "chain": "بحث Bing: ماكدونالدز السعودية السعرات",
-      "url": "https://www.bing.com/search?q=%D9%85%D8%A7%D9%83%D8%AF%D9%88%D9%86%D8%A7%D9%84%D8%AF%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D8%B1%D8%A7%D8%B1%D9%8A%D8%A9",
-      "raw": {
-        "status": 200,
-        "contentType": "text/html; charset=utf-8",
-        "bytes": 123549,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 284815,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
-      "text": {
-        "from": "rendered",
-        "bytes": 4435
-      }
-    },
-    {
-      "slug": "shawarmer-menu-ar-full",
-      "chain": "شاورمر (المنيو الكامل بالعربية)",
-      "url": "https://shawarmer.com/ar/menu",
-      "raw": {
-        "status": 200,
-        "contentType": "text/html; charset=utf-8",
-        "bytes": 26991,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 43418,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
-      "text": {
-        "from": "rendered",
-        "bytes": 399
-      }
-    },
-    {
-      "slug": "mcd-sa-calc-ar",
-      "chain": "ماكدونالدز السعودية — حاسبة القيمة الغذائية (الرياض)",
-      "url": "https://www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html\ncurl: (28) Operation timed out after 60002 milliseconds with 0 bytes received\n"
-      },
-      "rendered": {
-        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-sa-calc-en",
-      "chain": "McDonald's KSA — Nutrition Calculator (Riyadh)",
-      "url": "https://www.mcdonalds.com/sa/en-sa/riyadh/about-our-food/nutrition-calculator.html",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com/sa/en-sa/riyadh/about-our-food/nutrition-calculator.html\ncurl: (28) Operation timed out after 60002 milliseconds with 0 bytes received\n"
-      },
-      "rendered": {
-        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.mcdonalds.com/sa/en-sa/riyadh/about-our-food/nutrition-calculator.html\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-sa-menu-ar",
-      "chain": "ماكدونالدز السعودية — المنيو الكامل",
-      "url": "https://www.mcdonalds.com/sa/ar-sa/riyadh/full-menu.html",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com/sa/ar-sa/riyadh/full-menu.html\ncurl: (28) Operation timed out after 60002 milliseconds with 0 bytes received\n"
-      },
-      "rendered": {
-        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.mcdonalds.com/sa/ar-sa/riyadh/full-menu.html\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-sa-dna-ar",
-      "chain": "ماكدونالدز السعودية — واجهة المنيو JSON",
-      "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=SA&language=ar&showLiveData=true&category=100",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com/dnaapp/itemsByCategory?country=SA&language=ar&showLiveData=true&category=100\ncurl: (28) Operation timed out after 60002 milliseconds with 0 bytes received\n"
       },
       "rendered": null,
-      "screenshot": null
-    },
-    {
-      "slug": "alhatab-products-ar",
-      "chain": "الحطب فودز (أفران الحطب) — منتجاتنا",
-      "url": "https://alhatab.com.sa/our-products",
-      "raw": {
-        "status": 200,
-        "contentType": "text/html; charset=UTF-8",
-        "bytes": 150475,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 156346,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4342
+        "from": "raw",
+        "bytes": 8734
       }
     },
     {
-      "slug": "alhatab-bakery-en",
-      "chain": "Al Hatab Foods — Bakery",
-      "url": "https://alhatab.com.sa/en/our-products/bakery",
+      "slug": "hatab-country-bread-sourdough-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread/sourdough-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 282635,
+        "bytes": 156754,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 351062,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 5097
+        "from": "raw",
+        "bytes": 10151
       }
     },
     {
-      "slug": "alhatab-ready-en",
-      "chain": "Al Hatab Foods — Ready meals",
-      "url": "https://alhatab.com.sa/en/our-products/ready-to-eat",
+      "slug": "hatab-country-bread-sourdough-white",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread/sourdough-white",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 256206,
+        "bytes": 134659,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 307588,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4280
+        "from": "raw",
+        "bytes": 10617
       }
     },
     {
-      "slug": "alhatab-ready-ar",
-      "chain": "الحطب فودز — وجبات جاهزة",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat",
+      "slug": "hatab-country-bread-sourdough-whole-meal",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/country-bread/sourdough-whole-meal",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 262921,
+        "bytes": 134633,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 316207,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 7863
+        "from": "raw",
+        "bytes": 10617
       }
     },
     {
-      "slug": "alhatab-root-ar",
-      "chain": "الحطب فودز — الرئيسية",
-      "url": "https://alhatab.com.sa/",
+      "slug": "hatab-artisan-bread-speciality-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 162166,
+        "bytes": 168152,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 293401,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 21460
+        "from": "raw",
+        "bytes": 11002
       }
     },
     {
-      "slug": "hs-alhatab-rawdah-en",
-      "chain": "أفران الحطب — منيو هنقرستيشن (الروضة)",
-      "url": "https://hungerstation.com/sa-en/restaurant/alhatab-bakery/riyadh/al-rawdah/13031",
-      "raw": {
-        "status": 403,
-        "contentType": "text/html; charset=UTF-8",
-        "bytes": 5491,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 5415,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
-      "text": {
-        "from": "rendered",
-        "bytes": 765
-      },
-      "xhr": []
-    },
-    {
-      "slug": "hs-alhatab-rawdah-ar",
-      "chain": "أفران الحطب — منيو هنقرستيشن (عربي)",
-      "url": "https://hungerstation.com/sa-ar/restaurant/alhatab-bakery/riyadh/al-rawdah/13031",
-      "raw": {
-        "status": 403,
-        "contentType": "text/html; charset=UTF-8",
-        "bytes": 5491,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 5415,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
-      "text": {
-        "from": "rendered",
-        "bytes": 765
-      },
-      "xhr": []
-    },
-    {
-      "slug": "hs-alhatab-14305",
-      "chain": "أفران الحطب — منيو هنقرستيشن (فرع ٢)",
-      "url": "https://hungerstation.com/sa-ar/restaurant/riyadh/riyadh/14305",
-      "raw": {
-        "status": 403,
-        "contentType": "text/html; charset=UTF-8",
-        "bytes": 5491,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 5415,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
-      "text": {
-        "from": "rendered",
-        "bytes": 765
-      },
-      "xhr": []
-    },
-    {
-      "slug": "ninja-alhatab-en",
-      "chain": "أفران الحطب — منيو نينجا",
-      "url": "https://ananinja.com/sa/en/restaurants/al-hatab-bakery-30642",
-      "raw": {
-        "status": 200,
-        "contentType": "text/html; charset=utf-8",
-        "bytes": 876371,
-        "file": "raw.html"
-      },
-      "rendered": {
-        "bytes": 1080833,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
-      "text": {
-        "from": "rendered",
-        "bytes": 64649
-      },
-      "xhr": [
-        {
-          "url": "https://graphql.ananinja.com/graphql",
-          "status": 200,
-          "bytes": 178
-        },
-        {
-          "url": "https://graphql.ananinja.com/graphql",
-          "status": 200,
-          "bytes": 34
-        },
-        {
-          "url": "https://eu.app.unleash-hosted.com/euee0008/api/frontend?sessionId=404735558&appName=ninja-website&environment=default",
-          "status": 200,
-          "bytes": 17321
-        },
-        {
-          "url": "https://graphql.ananinja.com/graphql",
-          "status": 200,
-          "bytes": 82474
-        },
-        {
-          "url": "https://api64.ipify.org/?format=json",
-          "status": 200,
-          "bytes": 23
-        },
-        {
-          "url": "https://api.ipify.org/?format=json",
-          "status": 200,
-          "bytes": 23
-        },
-        {
-          "url": "https://www.googleadservices.com/pagead/conversion/10847159812/?random=1789380595665&cv=11&fst=1789380595665&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6992v9179767286z8866774466za20gzb866774466zd866774466xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938465~115938469~117776795~118897920~118897930~120213116~120385422~120469145~120469153~120474862~120912439&u_w=1280&u_h=2000&url=https%3A%2F%2Fananinja.com%2Fsa%2Fen%2Frestaurants%2Fal-hatab-bakery-30642&rcb=18&label=BDtwCKbH2LgZEISMqrQo&capi=1&frm=0&tiba=Order%20from%20H130%20-%20Al%20Hatab%20Bakery%20-%20Riyadh%20-%20Al%20Aqiq%20Online%20in%20Saudi%20Arabia%20%7C%20Ninja&bttype=purchase&value=0&hn=www.googleadservices.com&npa=0&pscdl=noapi&auid=1615943094.1789380595&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0&uaw=0&ec_mode=a&oid=297669672.1789380596&oidsrc=3&ecsid2=1686931104.1789380596&_tu=CBA&gcl_ctr=1~0~0~0&category=acrcp_v1_512&em=tv.1&emd=tvd.1&ept=5",
-          "status": 200,
-          "bytes": 3644
-        },
-        {
-          "url": "https://ct.pinterest.com/user/?tid=2613964999201&cb=1789380596102&dep=2%2CPAGE_LOAD",
-          "status": 200,
-          "bytes": 433
-        },
-        {
-          "url": "https://bzrcdn.openai.com/pixel-config/v1/XPJZz1yTkpKzw6uamB4rXW.json",
-          "status": 200,
-          "bytes": 44
-        },
-        {
-          "url": "https://app.adjust.com/session",
-          "status": 200,
-          "bytes": 84
-        },
-        {
-          "url": "https://www.googleadservices.com/pagead/conversion/10847159812/?random=1789380596819&cv=11&fst=1789380596819&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be6992v9179767286z8866774466za20gzb866774466zd866774466xeaxf1&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938465~115938469~117776795~118897920~118897930~120213116~120385422~120469145~120469153~120474862~120912439&u_w=1280&u_h=2000&url=https%3A%2F%2Fananinja.com%2Fsa%2Fen%2Frestaurants%2Fal-hatab-bakery-30642&rcb=18&label=BDtwCKbH2LgZEISMqrQo&capi=1&frm=0&tiba=Order%20from%20H130%20-%20Al%20Hatab%20Bakery%20-%20Riyadh%20-%20Al%20Aqiq%20Online%20in%20Saudi%20Arabia%20%7C%20Ninja&bttype=purchase&value=0&hn=www.googleadservices.com&npa=0&pscdl=noapi&auid=1615943094.1789380595&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0&uaw=0&ec_mode=a&oid=1769361158.1789380597&oidsrc=3&ecsid2=1686931104.1789380596&_tu=CBA&gcl_ctr=2~0~0~0&category=acrcp_v1_512&em=tv.1&emd=tvd.1&ept=5",
-          "status": 200,
-          "bytes": 3672
-        },
-        {
-          "url": "https://graphql.ananinja.com/graphql",
-          "status": 200,
-          "bytes": 1277
-        },
-        {
-          "url": "https://app.adjust.com/event",
-          "status": 200,
-          "bytes": 70
-        },
-        {
-          "url": "https://app.adjust.com/attribution?app_token=b6oj3bkl2m80&environment=production&created_at=2026-09-14T10%3A09%3A57.088Z%2B0000&sent_at=2026-09-14T10%3A09%3A59.089Z%2B0000&web_uuid=5ad882ab-d5f5-436c-bd50-52a743f81964&platform=web&language=ar&country=sa&machine_type=Linux%20x86_64&queue_size=0&attempts=1&initiated_by=backend&time_spent=0&session_length=0&session_count=1&last_interval=0",
-          "status": 200,
-          "bytes": 334
-        }
-      ]
-    },
-    {
-      "slug": "alhatab-bread",
-      "chain": "الحطب فودز — خبز",
-      "url": "https://alhatab.com.sa/our-products/bakery/bread",
+      "slug": "hatab-speciality-bread-al-hatab-multicereal-pain-de-campagne",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-multicereal-pain-de-campagne",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 250404,
+        "bytes": 123679,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 301629,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 7819
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 8902
+      }
     },
     {
-      "slug": "alhatab-artisan",
-      "chain": "الحطب فودز — خبز فاخر",
-      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread",
+      "slug": "hatab-speciality-bread-al-hatab-pain-de-campagne-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-pain-de-campagne-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 187843,
+        "bytes": 123294,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 216552,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 6088
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 8792
+      }
     },
     {
-      "slug": "alhatab-pastry",
-      "chain": "الحطب فودز — معجنات وكيك",
-      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes",
+      "slug": "hatab-speciality-bread-al-hatab-rustic-diamond-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-rustic-diamond-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 181538,
+        "bytes": 123254,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 198179,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 5396
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 8752
+      }
     },
     {
-      "slug": "alhatab-biscuits",
-      "chain": "الحطب فودز — مخبوزات جافة وبسكويت",
-      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits",
+      "slug": "hatab-speciality-bread-al-hatab-rustic-olives-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-rustic-olives-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 189411,
+        "bytes": 123209,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 208520,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 5508
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 8724
+      }
     },
     {
-      "slug": "alhatab-arabic-main",
-      "chain": "الحطب فودز — أطباق عربية رئيسية",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main",
+      "slug": "hatab-speciality-bread-al-hatab-white-mini-rustic-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/al-hatab-white-mini-rustic-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 146525,
+        "bytes": 123564,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 165578,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4515
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 8817
+      }
     },
     {
-      "slug": "alhatab-indian-main",
-      "chain": "الحطب فودز — أطباق هندية رئيسية",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat/indian-main",
+      "slug": "hatab-speciality-bread-alhatab-cristall-bagel-cereal-4pc",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/alhatab-cristall-bagel-cereal-4pc",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 131116,
+        "bytes": 123907,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 147013,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4076
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 8964
+      }
     },
     {
-      "slug": "alhatab-arabic-breakfast",
-      "chain": "الحطب فودز — فطور عربي",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-breakfast",
+      "slug": "hatab-speciality-bread-alhatab-cristallino-bagel-4pc",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/alhatab-cristallino-bagel-4pc",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 130330,
+        "bytes": 125165,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 145633,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 3962
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 8962
+      }
     },
     {
-      "slug": "alhatab-healthy-main",
-      "chain": "الحطب فودز — أطباق صحية رئيسية",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat/healthy-main",
+      "slug": "hatab-speciality-bread-brown-panini",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/brown-panini",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 115119,
+        "bytes": 166080,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 123550,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 3556
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 10426
+      }
     },
     {
-      "slug": "alhatab-pasta",
-      "chain": "الحطب فودز — باستا ونودلز",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles",
+      "slug": "hatab-speciality-bread-hokkaido-japanese-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/hokkaido-japanese-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 151177,
+        "bytes": 145531,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 173527,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4697
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 10504
+      }
     },
     {
-      "slug": "alhatab-sandwiches",
-      "chain": "الحطب فودز — سندويتشات",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches",
+      "slug": "hatab-speciality-bread-italian-ciabatta",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/italian-ciabatta",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 192445,
+        "bytes": 179072,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 227871,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 5847
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 10153
+      }
     },
     {
-      "slug": "alhatab-soup",
-      "chain": "الحطب فودز — شوربة",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup",
+      "slug": "hatab-speciality-bread-tomato-ciabatta",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/artisan-bread/speciality-bread/tomato-ciabatta",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 151553,
+        "bytes": 183475,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 172442,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4584
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 10503
+      }
     },
     {
-      "slug": "alhatab-meal-salad",
-      "chain": "الحطب فودز — وجبات السلطات",
-      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad",
+      "slug": "hatab-bread-arabic-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/arabic-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 166839,
+        "bytes": 152329,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 190397,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 5192
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 10269
+      }
     },
     {
-      "slug": "alhatab-high-protein",
-      "chain": "الحطب فودز — عالي البروتين",
-      "url": "https://alhatab.com.sa/our-products/high-protein",
+      "slug": "hatab-arabic-bread-mini-white-arabic-bread-2",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/arabic-bread/mini-white-arabic-bread-2",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 147058,
+        "bytes": 132119,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 156305,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4575
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 9815
+      }
     },
     {
-      "slug": "alhatab-keto",
-      "chain": "الحطب فودز — كيتو",
-      "url": "https://alhatab.com.sa/our-products/keto",
+      "slug": "hatab-arabic-bread-mini-whole-wheat-arabic-bread-2",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/arabic-bread/mini-whole-wheat-arabic-bread-2",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 122342,
+        "bytes": 132269,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 131631,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 3512
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 9945
+      }
     },
     {
-      "slug": "alhatab-dips",
-      "chain": "الحطب فودز — تغميسات",
-      "url": "https://alhatab.com.sa/our-products/dips-salads/dips",
+      "slug": "hatab-arabic-bread-white-arabic-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/arabic-bread/white-arabic-bread",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 165373,
+        "bytes": 151649,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 178139,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4753
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 9778
+      }
     },
     {
-      "slug": "alhatab-mezze",
-      "chain": "الحطب فودز — مقبلات",
-      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze",
+      "slug": "hatab-bread-buns",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/buns",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 173113,
+        "bytes": 135380,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 194797,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 5383
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 9916
+      }
     },
     {
-      "slug": "alhatab-bread-en",
-      "chain": "Al Hatab Foods — Bread (EN names)",
-      "url": "https://alhatab.com.sa/en/our-products/bakery/bread",
+      "slug": "hatab-buns-brioche-burger-buns",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/buns/brioche-burger-buns",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 242420,
+        "bytes": 148626,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 290832,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 4303
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 10557
+      }
     },
     {
-      "slug": "mcd-gcc-ae",
-      "chain": "ماكدونالدز الخليج (ae)",
-      "url": "https://www.mcdonalds.ae/",
+      "slug": "hatab-buns-burger-buns-with-sesame-seeds",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/buns/burger-buns-with-sesame-seeds",
       "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.ae/\ncurl: (7) Failed to connect to www.mcdonalds.ae port 443 after 790 ms: Couldn't connect to server\n"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://www.mcdonalds.ae/\nCall log:\n  - navigating to \"https://www.mcdonalds.ae/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-gcc-ae-menu",
-      "chain": "ماكدونالدز الخليج (ae-menu)",
-      "url": "https://www.mcdonalds.ae/menu",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.ae/menu\ncurl: (7) Failed to connect to www.mcdonalds.ae port 443 after 948 ms: Couldn't connect to server\n"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://www.mcdonalds.ae/menu\nCall log:\n  - navigating to \"https://www.mcdonalds.ae/menu\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-gcc-kw",
-      "chain": "ماكدونالدز الخليج (kw)",
-      "url": "https://www.mcdonalds.com.kw/",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com.kw/\ncurl: (28) Connection timed out after 60002 milliseconds\n"
-      },
-      "rendered": {
-        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.mcdonalds.com.kw/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-gcc-qa",
-      "chain": "ماكدونالدز الخليج (qa)",
-      "url": "https://www.mcdonalds.qa/",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.qa/\ncurl: (6) Could not resolve host: www.mcdonalds.qa\n"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.mcdonalds.qa/\nCall log:\n  - navigating to \"https://www.mcdonalds.qa/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-gcc-bh",
-      "chain": "ماكدونالدز الخليج (bh)",
-      "url": "https://www.mcdonalds.com.bh/",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com.bh/\ncurl: (6) Could not resolve host: www.mcdonalds.com.bh\n"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.mcdonalds.com.bh/\nCall log:\n  - navigating to \"https://www.mcdonalds.com.bh/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-gcc-om",
-      "chain": "ماكدونالدز الخليج (om)",
-      "url": "https://www.mcdonalds.om/",
-      "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.om/\ncurl: (6) Could not resolve host: www.mcdonalds.om\n"
-      },
-      "rendered": {
-        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.mcdonalds.om/\nCall log:\n  - navigating to \"https://www.mcdonalds.om/\", waiting until \"domcontentloaded\"\n"
-      },
-      "screenshot": null
-    },
-    {
-      "slug": "mcd-gcc-eg",
-      "chain": "ماكدونالدز الخليج (eg)",
-      "url": "https://www.mcdonalds.eg/",
-      "raw": {
-        "status": 403,
-        "contentType": "text/html",
-        "bytes": 370,
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 148512,
         "file": "raw.html"
       },
-      "rendered": {
-        "bytes": 294,
-        "truncated": false
-      },
-      "screenshot": "shot.png",
+      "rendered": null,
+      "screenshot": null,
       "text": {
-        "from": "rendered",
-        "bytes": 210
-      },
-      "xhr": []
+        "from": "raw",
+        "bytes": 10326
+      }
     },
     {
-      "slug": "mcd-gcc-sa-app",
-      "chain": "ماكدونالدز الخليج (sa-app)",
-      "url": "https://www.mcdonalds.com.sa/en/nutrition-calculator",
+      "slug": "hatab-bread-fortified-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread",
       "raw": {
-        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com.sa/en/nutrition-calculator\ncurl: (28) Operation timed out after 59769 milliseconds with 0 bytes received\n"
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 166106,
+        "file": "raw.html"
       },
-      "rendered": {
-        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.mcdonalds.com.sa/en/nutrition-calculator\", waiting until \"domcontentloaded\"\n"
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10758
+      }
+    },
+    {
+      "slug": "hatab-fortified-bread-al-tannor-barley-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/al-tannor-barley-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 743518,
+        "file": "raw.html"
       },
-      "screenshot": null
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9655
+      }
+    },
+    {
+      "slug": "hatab-fortified-bread-al-tannor-natural-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/al-tannor-natural-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 743633,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9670
+      }
+    },
+    {
+      "slug": "hatab-fortified-bread-al-tannor-oat-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/al-tannor-oat-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 743583,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9674
+      }
+    },
+    {
+      "slug": "hatab-fortified-bread-keto-arabic-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/keto-arabic-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 175451,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10468
+      }
+    },
+    {
+      "slug": "hatab-fortified-bread-keto-burger-bun",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/fortified-bread/keto-burger-bun",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 175543,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10417
+      }
+    },
+    {
+      "slug": "hatab-bread-other-special",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/other-special",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 117591,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9428
+      }
+    },
+    {
+      "slug": "hatab-other-special-brioche-bread-loaf",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/other-special/brioche-bread-loaf",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133410,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9787
+      }
+    },
+    {
+      "slug": "hatab-other-special-cone-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/other-special/cone-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 126386,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9422
+      }
+    },
+    {
+      "slug": "hatab-other-special-fattoush",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/other-special/fattoush",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 125242,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9011
+      }
+    },
+    {
+      "slug": "hatab-bread-p2",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/p2",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 231171,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 12418
+      }
+    },
+    {
+      "slug": "hatab-bread-sandwich-roll",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/sandwich-roll",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 122971,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9593
+      }
+    },
+    {
+      "slug": "hatab-sandwich-roll-brioche-hot-dog-rolls",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/sandwich-roll/brioche-hot-dog-rolls",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 128598,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10253
+      }
+    },
+    {
+      "slug": "hatab-sandwich-roll-mini-milk-rolls",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/sandwich-roll/mini-milk-rolls",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 128772,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10402
+      }
+    },
+    {
+      "slug": "hatab-sandwich-roll-whole-wheat-sandwich-rolls-with-bran",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/sandwich-roll/whole-wheat-sandwich-rolls-with-bran",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 129346,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10740
+      }
+    },
+    {
+      "slug": "hatab-bread-toast",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/toast",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 158899,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10527
+      }
+    },
+    {
+      "slug": "hatab-toast-high-protein-sliced-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/high-protein-sliced-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135572,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10567
+      }
+    },
+    {
+      "slug": "hatab-toast-keto-sliced-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/keto-sliced-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 141754,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10888
+      }
+    },
+    {
+      "slug": "hatab-toast-milk-sliced-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/milk-sliced-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 130278,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10302
+      }
+    },
+    {
+      "slug": "hatab-toast-multigrain-sliced-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/multigrain-sliced-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 130542,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10555
+      }
+    },
+    {
+      "slug": "hatab-toast-white-sliced-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/white-sliced-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 129889,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9989
+      }
+    },
+    {
+      "slug": "hatab-toast-whole-wheat-sliced-bread",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/whole-wheat-sliced-bread",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 130096,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10119
+      }
+    },
+    {
+      "slug": "hatab-toast-whole-wheat-toast-no-added-sugar",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/toast/whole-wheat-toast-no-added-sugar",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 137804,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10511
+      }
+    },
+    {
+      "slug": "hatab-bread-tortilla",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/tortilla",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 128343,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9728
+      }
+    },
+    {
+      "slug": "hatab-tortilla-chilli-tortilla",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/tortilla/chilli-tortilla",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 220983,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9064
+      }
+    },
+    {
+      "slug": "hatab-tortilla-white-tortilla",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/bread/tortilla/white-tortilla",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 222906,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9058
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-bake-roll",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 121429,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9583
+      }
+    },
+    {
+      "slug": "hatab-bake-roll-al-hatab-bake-rolls-bbq",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-bbq",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 126888,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10043
+      }
+    },
+    {
+      "slug": "hatab-bake-roll-al-hatab-bake-rolls-cheese",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-cheese",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 126841,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10020
+      }
+    },
+    {
+      "slug": "hatab-bake-roll-al-hatab-bake-rolls-chili",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-chili",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 126939,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10048
+      }
+    },
+    {
+      "slug": "hatab-bake-roll-al-hatab-bake-rolls-ketchup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-ketchup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 126915,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10048
+      }
+    },
+    {
+      "slug": "hatab-bake-roll-al-hatab-bake-rolls-salt-vinegar",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/bake-roll/al-hatab-bake-rolls-salt-vinegar",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 127128,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10092
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-biscuits",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/biscuits",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 123176,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9736
+      }
+    },
+    {
+      "slug": "hatab-biscuits-mini-heart-biscuit",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/biscuits/mini-heart-biscuit",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135176,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9970
+      }
+    },
+    {
+      "slug": "hatab-biscuits-mini-rolled-biscuit",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/biscuits/mini-rolled-biscuit",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133248,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9662
+      }
+    },
+    {
+      "slug": "hatab-biscuits-rolled-biscuit-with-choco-decoration",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/biscuits/rolled-biscuit-with-choco-decoration",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134662,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10238
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-croutons",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/croutons",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 114198,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9368
+      }
+    },
+    {
+      "slug": "hatab-croutons-croutons",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/croutons/croutons",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133990,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10174
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-grissini",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/grissini",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134964,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10081
+      }
+    },
+    {
+      "slug": "hatab-grissini-grissini-breadsticks",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/grissini/grissini-breadsticks",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133485,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10613
+      }
+    },
+    {
+      "slug": "hatab-grissini-grissini-breadsticks-whole-wheat-bran",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/grissini/grissini-breadsticks-whole-wheat-bran",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133754,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10882
+      }
+    },
+    {
+      "slug": "hatab-grissini-grissini-breadsticks-whole-wheat-bran-sugar-free",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/grissini/grissini-breadsticks-whole-wheat-bran-sugar-free",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 140511,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10660
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-kaak",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kaak",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 117643,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9420
+      }
+    },
+    {
+      "slug": "hatab-kaak-alhatab-kaak-with-dates",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kaak/alhatab-kaak-with-dates",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134139,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10119
+      }
+    },
+    {
+      "slug": "hatab-kaak-alhatab-kaak-with-pistachio",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kaak/alhatab-kaak-with-pistachio",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134404,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10214
+      }
+    },
+    {
+      "slug": "hatab-kaak-alhatab-kaak-with-walnut",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kaak/alhatab-kaak-with-walnut",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134222,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10189
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-kilija",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kilija",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 119391,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9428
+      }
+    },
+    {
+      "slug": "hatab-kilija-al-hatab-fteet-tin",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kilija/al-hatab-fteet-tin",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 122858,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8553
+      }
+    },
+    {
+      "slug": "hatab-kilija-kilija",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/kilija/kilija",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 122967,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8583
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-maamoul",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/maamoul",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 146981,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10128
+      }
+    },
+    {
+      "slug": "hatab-maamoul-chocolate-coconut-maamoul",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/maamoul/chocolate-coconut-maamoul",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135282,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10338
+      }
+    },
+    {
+      "slug": "hatab-maamoul-large-maamoul-2",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/maamoul/large-maamoul-2",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134380,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10198
+      }
+    },
+    {
+      "slug": "hatab-maamoul-whole-wheat-maamoul-3",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/maamoul/whole-wheat-maamoul-3",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 168937,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10535
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-p2",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/p2",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 189505,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11342
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-p3",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/p3",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 148504,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10352
+      }
+    },
+    {
+      "slug": "hatab-dry-baked-biscuits-rusk",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 140714,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9967
+      }
+    },
+    {
+      "slug": "hatab-rusk-alhatab-rusk-hand-made-box-1500gm",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/alhatab-rusk-hand-made-box-1500gm",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 123307,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8722
+      }
+    },
+    {
+      "slug": "hatab-rusk-olive-rusk",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/olive-rusk",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134072,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9929
+      }
+    },
+    {
+      "slug": "hatab-rusk-rusk-kuwaiti",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/rusk-kuwaiti",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 122933,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8664
+      }
+    },
+    {
+      "slug": "hatab-rusk-rusk-whole-wheat-hand-made-box",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/rusk-whole-wheat-hand-made-box",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 123570,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8799
+      }
+    },
+    {
+      "slug": "hatab-rusk-whole-wheat-hand-made-rusk",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/dry-baked-biscuits/rusk/whole-wheat-hand-made-rusk",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135187,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10779
+      }
+    },
+    {
+      "slug": "hatab-pastry-cakes-oriental-pastry",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/oriental-pastry",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 128114,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9822
+      }
+    },
+    {
+      "slug": "hatab-oriental-pastry-kunafa-dough",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/oriental-pastry/kunafa-dough",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132083,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9617
+      }
+    },
+    {
+      "slug": "hatab-oriental-pastry-whole-wheat-basbousa",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/oriental-pastry/whole-wheat-basbousa",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135084,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9696
+      }
+    },
+    {
+      "slug": "hatab-oriental-pastry-whole-wheat-basboussa-no-added-sugar",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/oriental-pastry/whole-wheat-basboussa-no-added-sugar",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 141309,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10237
+      }
+    },
+    {
+      "slug": "hatab-pastry-cakes-other-cakes",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 151505,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10257
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-alhatab-browines-cake-50gm",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/alhatab-browines-cake-50gm",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 744000,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9779
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-alhatab-muffin-cake-50gm",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/alhatab-muffin-cake-50gm",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 744287,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9828
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-english-cake-chocolate",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/english-cake-chocolate",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135902,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10868
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-english-cake-marbled",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/english-cake-marbled",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135286,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10846
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-english-cake-vanilla",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/english-cake-vanilla",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135484,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10768
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-kors-aqeeli-no-added-sugar",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/kors-aqeeli-no-added-sugar",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134321,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10279
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-muffin-chocolate",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/muffin-chocolate",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134049,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10128
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-muffin-vanilla",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/muffin-vanilla",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133915,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10110
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-raspberry-madeleine",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/raspberry-madeleine",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134709,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10404
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-signature-cake",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/signature-cake",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135309,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10541
+      }
+    },
+    {
+      "slug": "hatab-other-cakes-vanilla-madeleine",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-cakes/vanilla-madeleine",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134751,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10413
+      }
+    },
+    {
+      "slug": "hatab-pastry-cakes-other-viennoise",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 136414,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10121
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-choco-mini-waffle",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/choco-mini-waffle",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 136063,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10626
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-chocolate-mini-macaroons",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/chocolate-mini-macaroons",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135690,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10195
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-cream-puffs-with-chocolate-flavoured-coating",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/cream-puffs-with-chocolate-flavoured-coating",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135555,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10729
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-cream-puffs-with-salted-caramel",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/cream-puffs-with-salted-caramel",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135541,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10870
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-labnah-honey-danish",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/labnah-honey-danish",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 123390,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8790
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-mini-macaroons",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/mini-macaroons",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133926,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9851
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-mini-waffles",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/mini-waffles",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134176,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10097
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-strawberry-danish",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/strawberry-danish",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 123360,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8824
+      }
+    },
+    {
+      "slug": "hatab-other-viennoise-zaatar-labneh-danish",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/other-viennoise/zaatar-labneh-danish",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 123545,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8843
+      }
+    },
+    {
+      "slug": "hatab-pastry-cakes-p2",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/p2",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 153172,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10512
+      }
+    },
+    {
+      "slug": "hatab-pastry-cakes-single-served-cakes",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/single-served-cakes",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 114264,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9369
+      }
+    },
+    {
+      "slug": "hatab-single-served-cakes-large-eclairs",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/single-served-cakes/large-eclairs",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134591,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10513
+      }
+    },
+    {
+      "slug": "hatab-pastry-cakes-sweet-pies",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/sweet-pies",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 114153,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9378
+      }
+    },
+    {
+      "slug": "hatab-sweet-pies-apple-crumble-danish",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/bakery/pastry-cakes/sweet-pies/apple-crumble-danish",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 123521,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 8781
+      }
+    },
+    {
+      "slug": "hatab-dips-classic-dips-pp",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 129052,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9843
+      }
+    },
+    {
+      "slug": "hatab-classic-dips-pp-baba-ganoush",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/baba-ganoush",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 139582,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9876
+      }
+    },
+    {
+      "slug": "hatab-classic-dips-pp-garlic-sauce",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/garlic-sauce",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 129148,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10018
+      }
+    },
+    {
+      "slug": "hatab-classic-dips-pp-mafrouka",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/mafrouka",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 128855,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9839
+      }
+    },
+    {
+      "slug": "hatab-classic-dips-pp-muhamarra",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/muhamarra",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 127956,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9843
+      }
+    },
+    {
+      "slug": "hatab-classic-dips-pp-spicy-mafrouka",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/spicy-mafrouka",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 129468,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9964
+      }
+    },
+    {
+      "slug": "hatab-classic-dips-pp-tahini-sauce",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/classic-dips-pp/tahini-sauce",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 129061,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9749
+      }
+    },
+    {
+      "slug": "hatab-dips-hummus-pp",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 138633,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10065
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-beetroot-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/beetroot-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135580,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9968
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-caramelized-onion-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/caramelized-onion-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134883,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10101
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-classic-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/classic-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135559,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9907
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-eggplant-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/eggplant-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135534,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9950
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-extra-virgin-olive-oil-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/extra-virgin-olive-oil-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134860,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10040
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-roasted-red-pepper-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/roasted-red-pepper-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134772,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10048
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-spicy-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/spicy-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135493,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9955
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-sundried-tomato-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/sundried-tomato-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134667,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10085
+      }
+    },
+    {
+      "slug": "hatab-hummus-pp-truffle-hummus",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/hummus-pp/truffle-hummus",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 146605,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10208
+      }
+    },
+    {
+      "slug": "hatab-dips-labneh-cream-dips-pp",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 126809,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9657
+      }
+    },
+    {
+      "slug": "hatab-labneh-cream-dips-pp-beetroot-labneh",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/beetroot-labneh",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132805,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9801
+      }
+    },
+    {
+      "slug": "hatab-labneh-cream-dips-pp-honey-cream",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/honey-cream",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132845,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9947
+      }
+    },
+    {
+      "slug": "hatab-labneh-cream-dips-pp-labneh-light",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/labneh-light",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132212,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9598
+      }
+    },
+    {
+      "slug": "hatab-labneh-cream-dips-pp-labneh-pesto",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/labneh-pesto",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132895,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10015
+      }
+    },
+    {
+      "slug": "hatab-labneh-cream-dips-pp-labneh-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/labneh-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132635,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9813
+      }
+    },
+    {
+      "slug": "hatab-labneh-cream-dips-pp-labneh-spicy",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/labneh-spicy",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132636,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9752
+      }
+    },
+    {
+      "slug": "hatab-labneh-cream-dips-pp-local-labneh",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/local-labneh",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132441,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9631
+      }
+    },
+    {
+      "slug": "hatab-labneh-cream-dips-pp-special-labneh-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/dips/labneh-cream-dips-pp/special-labneh-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133313,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10120
+      }
+    },
+    {
+      "slug": "hatab-mezze-mezze-cheese-pp",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 138020,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10067
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-cheese-with-thyme-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/cheese-with-thyme-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135932,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10002
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-egyptian-mesh",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/egyptian-mesh",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 136440,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10439
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-halloumi-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/halloumi-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134465,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9932
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-jalapeno-cheese-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/jalapeno-cheese-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134554,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9903
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-mexican-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/mexican-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135897,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10225
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-pepper-cheese-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/pepper-cheese-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135083,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10288
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-rayaheen-cheese-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/rayaheen-cheese-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135068,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10310
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-special-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/special-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134588,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9917
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-special-spicy-cheese-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/special-spicy-cheese-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135052,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10047
+      }
+    },
+    {
+      "slug": "hatab-mezze-cheese-pp-spicy-cheese-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-cheese-pp/spicy-cheese-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135101,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10255
+      }
+    },
+    {
+      "slug": "hatab-mezze-mezze-protien-pp",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-protien-pp",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 116114,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9479
+      }
+    },
+    {
+      "slug": "hatab-mezze-protien-pp-chicken-mortadella-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-protien-pp/chicken-mortadella-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 136394,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10244
+      }
+    },
+    {
+      "slug": "hatab-mezze-protien-pp-special-mortadella-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-protien-pp/special-mortadella-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 136528,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10368
+      }
+    },
+    {
+      "slug": "hatab-mezze-mezze-tuna-pp",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-tuna-pp",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 119687,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9617
+      }
+    },
+    {
+      "slug": "hatab-mezze-tuna-pp-tuna-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-tuna-pp/tuna-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 147510,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10020
+      }
+    },
+    {
+      "slug": "hatab-mezze-mezze-veg-pp",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132700,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10027
+      }
+    },
+    {
+      "slug": "hatab-mezze-veg-pp-cheese-makdous-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp/cheese-makdous-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134726,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10058
+      }
+    },
+    {
+      "slug": "hatab-mezze-veg-pp-makdous-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp/makdous-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134667,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10028
+      }
+    },
+    {
+      "slug": "hatab-mezze-veg-pp-syrian-style-makdous",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp/syrian-style-makdous",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 142295,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9928
+      }
+    },
+    {
+      "slug": "hatab-mezze-veg-pp-turkish-style-labneh-makdous",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/dips-salads/mezze/mezze-veg-pp/turkish-style-labneh-makdous",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 147083,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10320
+      }
+    },
+    {
+      "slug": "hatab-pulse-grain-salad-couscous-feta-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/accomp-salad/pulse-grain-salad/couscous-feta-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 140157,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10301
+      }
+    },
+    {
+      "slug": "hatab-pulse-grain-salad-lentil-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/accomp-salad/pulse-grain-salad/lentil-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132131,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9640
+      }
+    },
+    {
+      "slug": "hatab-arabic-breakfast-egg-shakshuka",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-breakfast/egg-shakshuka",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135492,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10892
+      }
+    },
+    {
+      "slug": "hatab-arabic-breakfast-saudi-style-foul",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-breakfast/saudi-style-foul",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 151392,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11660
+      }
+    },
+    {
+      "slug": "hatab-arabic-main-chicken-majbous",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/chicken-majbous",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 155276,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11437
+      }
+    },
+    {
+      "slug": "hatab-arabic-main-chicken-mandi",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/chicken-mandi",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132819,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11421
+      }
+    },
+    {
+      "slug": "hatab-arabic-main-chicken-molokhia-with-rice",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/chicken-molokhia-with-rice",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133982,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11239
+      }
+    },
+    {
+      "slug": "hatab-arabic-main-dawood-basha-with-rice",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/dawood-basha-with-rice",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 132516,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11335
+      }
+    },
+    {
+      "slug": "hatab-arabic-main-fish-sayadieh",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/fish-sayadieh",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133172,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11624
+      }
+    },
+    {
+      "slug": "hatab-arabic-main-kushari",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/kushari",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133965,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11638
+      }
+    },
+    {
+      "slug": "hatab-arabic-main-saudi-chicken-kabsa",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/arabic-main/saudi-chicken-kabsa",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133782,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11399
+      }
+    },
+    {
+      "slug": "hatab-healthy-main-chicken-quinoa",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/healthy-main/chicken-quinoa",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 137459,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11440
+      }
+    },
+    {
+      "slug": "hatab-healthy-main-quinoa-vegetable",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/healthy-main/quinoa-vegetable",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 137379,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11468
+      }
+    },
+    {
+      "slug": "hatab-indian-main-chicken-biryani",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/indian-main/chicken-biryani",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 152487,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 12100
+      }
+    },
+    {
+      "slug": "hatab-indian-main-chicken-tikka-masala-and-pilau-rice",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/indian-main/chicken-tikka-masala-and-pilau-rice",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 173730,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 12835
+      }
+    },
+    {
+      "slug": "hatab-juices-cold-pressed-greens-500",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/juices/cold-pressed-greens-500",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 141919,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10417
+      }
+    },
+    {
+      "slug": "hatab-juices-pomegranate",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/juices/pomegranate",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134772,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10242
+      }
+    },
+    {
+      "slug": "hatab-juices-pomegranate-2",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/juices/pomegranate-2",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134794,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10242
+      }
+    },
+    {
+      "slug": "hatab-meal-salad-chickpea-and-quinoa-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/chickpea-and-quinoa-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133881,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10142
+      }
+    },
+    {
+      "slug": "hatab-meal-salad-fish-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/fish-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 131991,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9851
+      }
+    },
+    {
+      "slug": "hatab-fish-salad-tuna-nicoise-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/fish-salad/tuna-nicoise-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 146944,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10429
+      }
+    },
+    {
+      "slug": "hatab-meal-salad-greek-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/greek-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 133516,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10058
+      }
+    },
+    {
+      "slug": "hatab-meal-salad-other-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/other-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 124533,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9742
+      }
+    },
+    {
+      "slug": "hatab-other-salad-italian-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/other-salad/italian-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 139372,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10020
+      }
+    },
+    {
+      "slug": "hatab-meal-salad-pasta-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 119656,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9552
+      }
+    },
+    {
+      "slug": "hatab-pasta-salad-feta-slow-roast-tomato-pasta",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad/feta-slow-roast-tomato-pasta",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135604,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10597
+      }
+    },
+    {
+      "slug": "hatab-pasta-salad-mediterranean-orzo-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad/mediterranean-orzo-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135153,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10293
+      }
+    },
+    {
+      "slug": "hatab-pasta-salad-pesto-pasta",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad/pesto-pasta",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135014,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10259
+      }
+    },
+    {
+      "slug": "hatab-pasta-salad-tuna-sweetcorn-pasta-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/pasta-salad/tuna-sweetcorn-pasta-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135089,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10318
+      }
+    },
+    {
+      "slug": "hatab-meal-salad-protein-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/protein-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 131500,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9889
+      }
+    },
+    {
+      "slug": "hatab-protein-salad-chicken-caesar-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/protein-salad/chicken-caesar-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 141536,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9887
+      }
+    },
+    {
+      "slug": "hatab-protein-salad-katsu-chicken-salad-2",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/protein-salad/katsu-chicken-salad-2",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135436,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10657
+      }
+    },
+    {
+      "slug": "hatab-meal-salad-roasted-cauliflower-feta-tahini",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/meal-salad/roasted-cauliflower-feta-tahini",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134290,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10290
+      }
+    },
+    {
+      "slug": "hatab-pasta-noodles-beef-bechamel-pasta",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/beef-bechamel-pasta",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 165201,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11128
+      }
+    },
+    {
+      "slug": "hatab-pasta-noodles-beef-lasagne",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/beef-lasagne",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 151443,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11659
+      }
+    },
+    {
+      "slug": "hatab-pasta-noodles-chicken-alfredo-pasta",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/chicken-alfredo-pasta",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 130957,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11185
+      }
+    },
+    {
+      "slug": "hatab-pasta-noodles-macaroni-cheese",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/macaroni-cheese",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 131000,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11395
+      }
+    },
+    {
+      "slug": "hatab-pasta-noodles-mushroom-fettuccine",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/mushroom-fettuccine",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 130856,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11273
+      }
+    },
+    {
+      "slug": "hatab-pasta-noodles-penne-arrabbiata",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/pasta-noodles/penne-arrabbiata",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 151768,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11285
+      }
+    },
+    {
+      "slug": "hatab-sandwiches-club-sandwiches",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 149809,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10487
+      }
+    },
+    {
+      "slug": "hatab-club-sandwiches-cajun-chicken",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/cajun-chicken",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135238,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10756
+      }
+    },
+    {
+      "slug": "hatab-club-sandwiches-cheddar-caramelized-onion",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/cheddar-caramelized-onion",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 150228,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10112
+      }
+    },
+    {
+      "slug": "hatab-club-sandwiches-chicken-avocado",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/chicken-avocado",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 147178,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10449
+      }
+    },
+    {
+      "slug": "hatab-club-sandwiches-grilled-halloumi-focaccia",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/grilled-halloumi-focaccia",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134763,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10053
+      }
+    },
+    {
+      "slug": "hatab-club-sandwiches-roasted-pesto-vegetable-cheddar-focaccia",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/roasted-pesto-vegetable-cheddar-focaccia",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135670,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10468
+      }
+    },
+    {
+      "slug": "hatab-club-sandwiches-turkey-cheese",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/club-sandwiches/turkey-cheese",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 148025,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10331
+      }
+    },
+    {
+      "slug": "hatab-sandwiches-other-sandwiches",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 172245,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10804
+      }
+    },
+    {
+      "slug": "hatab-other-sandwiches-egg-mayo",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches/egg-mayo",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 149503,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9891
+      }
+    },
+    {
+      "slug": "hatab-other-sandwiches-katsu-chicken-salad",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches/katsu-chicken-salad",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 147426,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10747
+      }
+    },
+    {
+      "slug": "hatab-other-sandwiches-tuna-corn",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches/tuna-corn",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 155416,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10015
+      }
+    },
+    {
+      "slug": "hatab-other-sandwiches-tuna-salad-sub",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/other-sandwiches/tuna-salad-sub",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 143094,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10460
+      }
+    },
+    {
+      "slug": "hatab-sandwiches-wraps",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/wraps",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135856,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 9923
+      }
+    },
+    {
+      "slug": "hatab-wraps-buffalo-chicken",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/wraps/buffalo-chicken",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 151969,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10513
+      }
+    },
+    {
+      "slug": "hatab-wraps-chicken-caesar",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/wraps/chicken-caesar",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134760,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10211
+      }
+    },
+    {
+      "slug": "hatab-wraps-feta-rocca",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/sandwiches/wraps/feta-rocca",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 145759,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 10090
+      }
+    },
+    {
+      "slug": "hatab-soup-chicken-noodle-soup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/chicken-noodle-soup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 159514,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11974
+      }
+    },
+    {
+      "slug": "hatab-soup-harrira-with-lamb-soup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/harrira-with-lamb-soup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 145050,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 12118
+      }
+    },
+    {
+      "slug": "hatab-soup-lentil-soup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/lentil-soup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134437,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11775
+      }
+    },
+    {
+      "slug": "hatab-soup-minestrone-soup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/minestrone-soup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135001,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11995
+      }
+    },
+    {
+      "slug": "hatab-soup-mushroom-soup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/mushroom-soup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134432,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11650
+      }
+    },
+    {
+      "slug": "hatab-soup-sweetcorn-soup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/sweetcorn-soup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134553,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11735
+      }
+    },
+    {
+      "slug": "hatab-soup-tomato-basil-soup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/tomato-basil-soup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 135155,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 12040
+      }
+    },
+    {
+      "slug": "hatab-soup-vegetable-soup",
+      "chain": "الحطب فودز — صفحة منتج",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat/soup/vegetable-soup",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 134640,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 11898
+      }
     }
   ]
 }
