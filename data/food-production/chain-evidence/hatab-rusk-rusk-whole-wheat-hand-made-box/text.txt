@@ -1,0 +1,308 @@
+كرتون شابورة يدوي بر | الحطب فودز
+isOpen)) {
+document.body.style.overflow = '';
+}
+},
+flyoutMenus: {
+'food-catalog': false,
+categories: false,
+brands: false,
+user: false,
+language: false,
+cart: false
+},
+resetMenu() {
+this.currentMenu = 'main';
+this.selectedBrand = null;
+this.selectedCategory = null;
+this.mobileMenuOpen = false;
+},
+updateHeaderHeight() {
+const header = document.querySelector('[data-header]');
+if (header) {
+const height = Math.round(header.getBoundingClientRect().height);
+this.headerHeight = height;
+if (Alpine.store('header')) {
+Alpine.store('header').headerHeight = height;
+}
+document.documentElement.style.setProperty('--header-height', `${height}px`);// For sticky elements: if safe area exists (PWA), use full height, otherwise subtract notification/topbar
+const safeAreaTop = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top')) || 0;
+const stickyHeaderHeight = safeAreaTop > 0 ? height : (height - this.notificationHeight - this.topBarHeight);
+document.documentElement.style.setProperty('--sticky-header-height', `${stickyHeaderHeight}px`);
+} else {
+// Header is hidden, set heights to 0
+this.headerHeight = 0;
+if (Alpine.store('header')) {
+Alpine.store('header').headerHeight = 0;
+}
+document.documentElement.style.setProperty('--header-height', '0px');
+document.documentElement.style.setProperty('--sticky-header-height', '0px');
+}
+},
+updateBarHeights() {
+const notification = document.querySelector('[data-notification]');
+const topBar = document.querySelector('[data-top-bar]');
+this.notificationHeight = notification ? notification.offsetHeight : 0;
+this.topBarHeight = topBar ? topBar.offsetHeight : 0;
+},
+updateBreadcrumbHeight() {
+const breadcrumb = document.querySelector('[data-breadcrumb]');
+const height = breadcrumb ? Math.round(breadcrumb.getBoundingClientRect().height) : 0;
+this.breadcrumbHeight = height;
+document.documentElement.style.setProperty('--breadcrumb-height', height + 'px');
+},
+init() {
+// Check if safe area is supported (PWA mode) - check multiple times to ensure it's loaded
+const checkSafeArea = () => {
+const safeAreaValue = getComputedStyle(document.documentElement).getPropertyValue('--safe-area-inset-top');
+this.hasSafeArea = safeAreaValue && parseInt(safeAreaValue) > 0;
+};
+checkSafeArea();
+setTimeout(checkSafeArea, 100);
+setTimeout(checkSafeArea, 500);// Initialize the store first
+Alpine.store('header', {
+headerHeight: 0,
+headerVisible: true,
+hasStickySection: false
+});// Initialize language store
+Alpine.store('app', {
+lang: 'ar'
+});// Wait for next tick to ensure DOM is ready
+setTimeout(() => {
+this.updateHeaderHeight();
+this.updateBarHeights();
+this.updateBreadcrumbHeight();
+}, 100);const header = document.querySelector('[data-header]');
+if (header) {
+const mutationObserver = new MutationObserver(() => {
+this.updateHeaderHeight();
+});
+mutationObserver.observe(header, {
+childList: true,
+subtree: true,
+attributes: true
+});const resizeObserver = new ResizeObserver(() => {
+this.updateHeaderHeight();
+});
+resizeObserver.observe(header);
+}// Set up resize observer for notification and top bar
+const notification = document.querySelector('[data-notification]');
+const topBar = document.querySelector('[data-top-bar]');
+const barResizeObserver = new ResizeObserver(() => {
+this.updateBarHeights();
+});
+if (notification) barResizeObserver.observe(notification);
+if (topBar) barResizeObserver.observe(topBar);window.addEventListener('resize', () => {
+this.updateHeaderHeight();
+this.updateBarHeights();
+this.updateBreadcrumbHeight();
+});window.addEventListener('orientationchange', () => {
+setTimeout(() => {
+this.updateHeaderHeight();
+this.updateBarHeights();
+this.updateBreadcrumbHeight();
+}, 100);
+});this.scrollPos = window.pageYOffset;// Force initial scroll handling
+const handleScroll = () => {
+const currentScroll = window.pageYOffset;
+// If safe area exists (PWA mode), always keep header visible
+if (this.hasSafeArea) {
+this.headerVisible = true;
+} else {
+this.headerVisible = this.scrollPos > currentScroll || currentScroll
+{
+const mmPage = document.querySelector('.mm-page');
+const mmWrapper = document.querySelector('.mm-wrapper');
+if (mmPage) {
+mmPage.addEventListener('scroll', handleScroll, { passive: true });
+}
+if (mmWrapper) {
+mmWrapper.addEventListener('scroll', handleScroll, { passive: true });
+}
+}, 500);
+}
+}" x-init="$watch('mobileMenuOpen', value => {
+if (value) {
+document.body.classList.add('overflow-hidden');
+document.addEventListener('keydown', e => {
+if (e.key === 'Escape') {
+resetMenu();
+}
+});
+} else {
+document.body.classList.remove('overflow-hidden');
+}
+}); init()" class="relative">
+الرئيسية
+نبذة عنّا
+فروعنا
+مبيعات الشركات
+انضم إلينا
+منتجاتنا
+جميع الفئات
+المقاضي
+اللحوم والدواجن
+الوجبات الجاهزة
+المقبلات والسلطات
+الأجبان
+المخبوزات
+من المزرعة
+الحلويات
+التسالي
+السلطات والمقبلات
+عالي البروتين
+كيتو
+اطلب الآن
+المكافآت
+تواصل معنا
+0 && !$store.header.hasStickySection }" :style="!hasSafeArea && !headerVisible ? `transform: translateY(-${notificationHeight + topBarHeight}px)` : ''">
+Open menu
+الرئيسية
+الشركة
+نبذة عنّا
+فروعنا
+تواصل معنا
+مبيعات الشركات
+انضم إلينا
+منتجاتنا
+جميع الفئات
+عالي البروتين
+كيتو
+الوجبات الجاهزة
+عصائر
+شوت
+سموثي
+سندويتشات
+وجبات السلطات
+سلطة مرافقة
+شوربة
+صلصة
+أطباق عربية رئيسية
+باستا ونودلز
+فطور عربي
+أطباق صحية رئيسية
+أطباق هندية رئيسية
+المخبوزات
+خبز
+مخبوزات جافة و بسكويت
+معجنات و كيك
+خبز فاخر
+المقبلات والسلطات
+تغميسات
+مقبلات
+مقبلات إيطالية
+زيتون
+الحلويات
+حلويات الشوكولاتة
+بسكويت
+التسالي
+مقرمشات
+شرائح البطاطس
+فشار
+الأجبان
+أجبان من حول العالم
+شرائح جبن طبيعي
+جبن مبشور
+جبن أبيض
+اللحوم والدواجن
+لحم العجل
+لحم ضأن
+لحم حاشي
+أحشاء
+من المزرعة
+الفواكة
+المكسرات والفواكه المجففة
+الخضار
+خضروات مُجهزة
+المقاضي
+أسماك معلبة
+الحبوب
+مكونات الطهي
+الصلصات والخل
+عسل
+مربى
+زيت الزيتون
+الزيتون والمخللات
+باستا
+فلفل وتوابل
+صلصات
+شاي
+إكسسوارات
+اطلب الآن
+المكافآت
+English
+EN
+الرئيسية
+منتجاتنا
+المخبوزات
+مخبوزات جافة و بسكويت
+شابورة
+كرتون شابورة يدوي بر
+الرئيسية
+منتجاتنا
+المخبوزات
+مخبوزات جافة و بسكويت
+شابورة
+كرتون شابورة يدوي بر
+كرتون شابورة يدوي بر
+كرتون شابورة يدوي بر
+1500جم
+الوصف
+ul]:ps-0 [&>ol]:ps-0 [&>ul>li]:ps-0 [&>ol>li]:ps-0 [&>ul]:list-inside [&>ol]:list-inside [&_ul_ul]:ps-6 [&_ul_ol]:ps-6 [&_ol_ul]:ps-6 [&_ol_ol]:ps-6 [&_ul.checkmark-list]:list-none [&_ul.checkmark-list_li:before]:content-['✓'] [&_ul.checkmark-list_li:before]:text-lg [&_ul.checkmark-list_li:before]:me-2 [&_ul.checkmark-list_li:before]:text-current" style="--tw-prose-bullets: currentColor; --tw-prose-counters: currentColor; --tw-prose-bold: currentColor;">
+شابورة بر شغل يدوي، بقوام غني ومقرمش ونكهة أصيلة. مثالية مع الشاي أو القهوة كوجبة خفيفة تقليدية. جربها الآن!
+قد تكون مهتمًا أيضًا بـ
+شابورة حلوة تنك
+1450جم
+شابورة صفراء
+1100جم
+شابورة صفراء خالٍ من السكر
+245جم
+شابورة صفراء خالٍ من السكر
+230جم
+شابورةمربعة
+290جم
+شابورة مربعة بر
+290جم
+شابورةعريضة
+290جم
+شابورة عريضة بر
+290جم
+كرتون شابورة يدوي بر
+1500جم
+اطلب الآن
+الشركة
+نبذة عنّا
+فروعنا
+تواصل معنا
+انضم إلينا
+مبيعات الشركات
+بيان سياسة سلامة الغذاء
+الشركة
+نبذة عنّا
+فروعنا
+تواصل معنا
+انضم إلينا
+مبيعات الشركات
+بيان سياسة سلامة الغذاء
+استكشف
+منتجاتنا
+المكافآت
+استكشف
+منتجاتنا
+المكافآت
+اطلب
+اطلب الآن
+اطلب
+اطلب الآن
+Facebook
+Instagram
+Snapchat
+X
+Youtube
+TikTok
+LinkedIn
+WhatsApp
+حقوق الطبع والنشر
+&copy;
+الحطب.
+جميع الحقوق محفوظة.
