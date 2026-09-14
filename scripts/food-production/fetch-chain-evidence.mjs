@@ -120,7 +120,7 @@ for (const s of sources) {
       await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => { /* صفحات لا تهدأ شبكتها — نلتقط ما استقرّ */ })
       // تمرير حتى الأسفل: قوائم كثيرة تحمّل أصنافها كسولًا عند الظهور.
       await page.evaluate(async () => { for (let y = 0; y < document.body.scrollHeight && y < 40000; y += 800) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)) } window.scrollTo(0, 0) }).catch(() => {})
-      await page.waitForTimeout(1500)
+      await page.waitForTimeout(s.waitMs ?? 1500) // `waitMs` للمتاجر التي تحمّل منتجاتها بعد الهدوء الشبكي
       let html = await page.content()
       const truncated = Buffer.byteLength(html) > RENDER_CAP_BYTES
       if (truncated) html = html.slice(0, RENDER_CAP_BYTES)
