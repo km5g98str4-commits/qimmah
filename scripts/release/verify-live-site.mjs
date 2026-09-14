@@ -35,6 +35,30 @@ const report = { site: SITE, expectSha: EXPECT || null, checkout: CHECKOUT || nu
 let failed = 0
 const check = (label, ok, detail = '') => { report.checks.push({ label, ok, detail }); if (!ok) failed++; console.log(`  ${ok ? '✓' : '✗'} ${label}${detail ? ` — ${detail}` : ''}`) }
 
+// ⓪ **أوّل طلب شبكي في التشغيل كلّه**: صفحة المنتج المعتمد بالرابط المباشر.
+// السبب مقيس: حين جاء هذا الفحص بعد قراءات أخرى، حوّلت سلة إلى جذر المتجر ٣/٣،
+// وحين كان الطلب الأوّل (٢٠:٣٠) أعاد صفحة المنتج بزرّ شراء و١٩٫٩٩. فترتيب الطلب
+// نفسه متغيّر — والفصل بين «مخفيّ» و«محدود بالمعدّل» يبدأ بجعله الأوّل.
+const probeCanonical = async (tag) => {
+  try {
+    const r = await get(CHECKOUT)
+    const text = r.text.replace(/<script[\s\S]*?<\/script>/g, ' ')
+    const redirectedToRoot = /\/Qimmahsa\/?$/.test(r.url)
+    return {
+      tag, status: r.status, finalUrl: r.url, redirectedToRoot,
+      onProductPage: r.status === 200 && !redirectedToRoot,
+      has1999: /19[.,٫]99|١٩[.,٫]٩٩/.test(text),
+      hasPremium: /Premium/.test(text),
+      buyable: /أضف إلى السلة|اشترِ الآن|Add to cart/.test(text),
+      annualWording: /سنويًا|سنوياً|شهريًا|شهرياً/.test(text),
+      renewalWording: /تجديد تلقائي|auto.?renew/i.test(text),
+      strikethroughPrice: /89[.,٫]99|٨٩[.,٫]٩٩/.test(text),
+    }
+  } catch (e) { return { tag, error: String(e?.message ?? e) } }
+}
+const coldProbe = CHECKOUT ? await probeCanonical('cold-first-request') : null
+if (coldProbe) { report.coldProbe = coldProbe; console.log(`  · cold probe: ${coldProbe.onProductPage ? 'product page' : coldProbe.redirectedToRoot ? 'redirected to store root' : coldProbe.error ?? `status ${coldProbe.status}`}`) }
+
 // ① انتظار النشر: البصمة في index.html
 let index = null, deployedSha = null
 const t0 = Date.now()
@@ -120,24 +144,10 @@ check('no retired product appears in the public catalog', retiredInCatalog.lengt
 // المتكرّرة. فالمحاولات تُسجَّل كلّها ولا يُعلَن حكم من قياس واحد.
 const sallaPages = {}
 if (CHECKOUT) {
-  const attempts = []
+  const attempts = [coldProbe].filter(Boolean)
   for (let i = 0; i < 3; i++) {
-    if (i) await new Promise((r) => setTimeout(r, 6000))
-    try {
-      const r = await get(CHECKOUT)
-      const text = r.text.replace(/<script[\s\S]*?<\/script>/g, ' ')
-      const redirectedToRoot = /\/Qimmahsa\/?$/.test(r.url)
-      attempts.push({
-        status: r.status, finalUrl: r.url, redirectedToRoot,
-        onProductPage: r.status === 200 && !redirectedToRoot,
-        has1999: /19[.,٫]99|١٩[.,٫]٩٩/.test(text),
-        hasPremium: /Premium/.test(text),
-        buyable: /أضف إلى السلة|اشترِ الآن|Add to cart/.test(text),
-        annualWording: /سنويًا|سنوياً|شهريًا|شهرياً/.test(text),
-        renewalWording: /تجديد تلقائي|auto.?renew/i.test(text),
-        strikethroughPrice: /89[.,٫]99|٨٩[.,٫]٩٩/.test(text),
-      })
-    } catch (e) { attempts.push({ error: String(e?.message ?? e) }) }
+    await new Promise((r) => setTimeout(r, 6000))
+    attempts.push(await probeCanonical(`warm-${i + 1}`))
   }
   sallaPages.attempts = attempts
   const onProduct = attempts.filter((a) => a.onProductPage)
