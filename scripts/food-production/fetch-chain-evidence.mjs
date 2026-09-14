@@ -52,6 +52,17 @@ const pdfText = (file) => {
 
 const index = { _readme: 'دليل جلب CI لمصادر السلاسل الرسمية — يقرؤه بشر/موجة استيراد، لا مستورد آلي.', fetchedAt: new Date().toISOString(), results: [] }
 const browser = chromium ? await chromium.launch() : null
+// [FOOD-UX-001] بعض المضيفين الرسميين (mcdonalds.com) يقطعون HTTP/2 على العدّاء ويرفضون وكيلًا غير متصفّح.
+// `browserLike: true` في السجلّ ⇒ جلب خام عبر curl بـHTTP/1.1 وهوية كروم، ورسم بمتصفّح ثانٍ بلا HTTP/2.
+// الهوية معلَنة في السجلّ لا مخفيّة، والغرض قراءة صفحة تغذية عامّة لا تجاوز حماية.
+const CHROME_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+const browserH1 = chromium && sources.some((s) => s.browserLike) ? await chromium.launch({ args: ['--disable-http2'] }) : null
+const curlRaw = (url) => {
+  const out = execFileSync('curl', ['-sS', '-L', '--http1.1', '--max-time', '60', '-A', CHROME_UA, '-H', 'accept-language: ar,en;q=0.8', '-w', '\n__QIMMAH_STATUS__%{http_code}__%{content_type}', url], { maxBuffer: 64 * 1024 * 1024 })
+  const text = out.toString('utf8')
+  const m = /\n__QIMMAH_STATUS__(\d+)__(.*)$/.exec(text)
+  return { status: m ? Number(m[1]) : 0, type: m ? m[2] : '', buf: Buffer.from(m ? text.slice(0, m.index) : text, 'utf8') }
+}
 
 for (const s of sources) {
   const dir = resolve(OUT, s.slug)
@@ -60,9 +71,14 @@ for (const s of sources) {
 
   // ① الجلب الخام — يوثّق ما يعيده الخادم بلا JS (وPDF يُحفظ كما هو).
   try {
-    const res = await fetch(s.url, { headers: { 'user-agent': UA }, redirect: 'follow', signal: AbortSignal.timeout(45000) })
-    const type = res.headers.get('content-type') ?? ''
-    const buf = Buffer.from(await res.arrayBuffer())
+    let status, type, buf
+    if (s.browserLike) {
+      ;({ status, type, buf } = curlRaw(s.url))
+    } else {
+      const res = await fetch(s.url, { headers: { 'user-agent': UA }, redirect: 'follow', signal: AbortSignal.timeout(45000) })
+      status = res.status; type = res.headers.get('content-type') ?? ''; buf = Buffer.from(await res.arrayBuffer())
+    }
+    const res = { status }
     const isPdf = type.includes('pdf') || s.url.endsWith('.pdf')
     const file = isPdf ? 'raw.pdf' : 'raw.html'
     writeFileSync(resolve(dir, file), buf)
@@ -81,9 +97,25 @@ for (const s of sources) {
   }
 
   // ② الصفحة بعد JS + لقطة — للقوائم المرسومة عميلًا (سعرات الأصناف تظهر هنا).
-  if (s.render && browser) {
+  const renderer = s.browserLike ? browserH1 : browser
+  if (s.render && renderer) {
     try {
-      const page = await browser.newPage({ userAgent: UA, viewport: { width: 1280, height: 2000 } })
+      const page = await renderer.newPage({ userAgent: s.browserLike ? CHROME_UA : UA, viewport: { width: 1280, height: 2000 }, locale: 'ar-SA' })
+      // `captureJson: true` ⇒ استجابات JSON التي تحمّلها الصفحة (واجهات المنيو/التغذية) تُحفظ كما هي في xhr/.
+      const captured = []
+      if (s.captureJson) {
+        page.on('response', async (r) => {
+          try {
+            const ct = r.headers()['content-type'] || ''
+            if (!/json/i.test(ct)) return
+            const body = await r.text()
+            if (!body || body.length > 8 * 1024 * 1024) return
+            captured.push({ url: r.url(), status: r.status(), bytes: body.length })
+            mkdirSync(resolve(dir, 'xhr'), { recursive: true })
+            writeFileSync(resolve(dir, 'xhr', `${String(captured.length).padStart(2, '0')}.json`), body)
+          } catch { /* استجابة لم تُقرأ — تُهمَل معلَنةً بالعدّ */ }
+        })
+      }
       await page.goto(s.url, { waitUntil: 'domcontentloaded', timeout: 60000 })
       await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => { /* صفحات لا تهدأ شبكتها — نلتقط ما استقرّ */ })
       // تمرير حتى الأسفل: قوائم كثيرة تحمّل أصنافها كسولًا عند الظهور.
@@ -98,6 +130,7 @@ for (const s of sources) {
       await page.screenshot({ path: resolve(dir, 'shot.png'), fullPage: false })
       row.rendered = { bytes: Buffer.byteLength(html), truncated }
       row.screenshot = 'shot.png'
+      if (s.captureJson) { row.xhr = captured; writeFileSync(resolve(dir, 'xhr-index.json'), JSON.stringify(captured, null, 2) + '\n') }
       await page.close()
       console.log(`  ${' '.repeat(26)} rendered ${row.rendered.bytes}b${truncated ? ' (مقتطعة معلَنة)' : ''} + لقطة`)
     } catch (err) {
@@ -112,6 +145,7 @@ for (const s of sources) {
 }
 
 if (browser) await browser.close()
+if (browserH1) await browserH1.close()
 mkdirSync(OUT, { recursive: true })
 writeFileSync(resolve(OUT, 'index.json'), JSON.stringify(index, null, 2) + '\n')
 
