@@ -1249,7 +1249,7 @@
    "chain": "mcdonalds",
    "nameAr": "ماك دبل",
    "nameEn": "McDouble",
-   "q": "mcdonald's mcdouble",
+   "q": "mcdonald's double",
    "type": "burger",
    "prefer": [
     "sr",
@@ -1263,7 +1263,7 @@
    "chain": "mcdonalds",
    "nameAr": "بيج تيستي",
    "nameEn": "Big Tasty",
-   "q": "mcdonald's big n' tasty",
+   "q": "mcdonald's tasty",
    "type": "burger",
    "prefer": [
     "sr",
@@ -1277,7 +1277,7 @@
    "chain": "mcdonalds",
    "nameAr": "ماك تشيكن حار",
    "nameEn": "Hot 'n Spicy McChicken",
-   "q": "mcdonald's hot n spicy mcchicken",
+   "q": "mcdonald's spicy",
    "type": "chicken",
    "prefer": [
     "sr",
@@ -1291,7 +1291,7 @@
    "chain": "mcdonalds",
    "nameAr": "ساندويتش دجاج مشوي بريميوم",
    "nameEn": "Premium Grilled Chicken Classic Sandwich",
-   "q": "mcdonald's premium grilled chicken classic sandwich",
+   "q": "mcdonald's premium grilled",
    "type": "chicken",
    "prefer": [
     "sr",
@@ -1305,7 +1305,7 @@
    "chain": "mcdonalds",
    "nameAr": "ساندويتش دجاج مقرمش بريميوم",
    "nameEn": "Premium Crispy Chicken Classic Sandwich",
-   "q": "mcdonald's premium crispy chicken classic sandwich",
+   "q": "mcdonald's premium crispy",
    "type": "chicken",
    "prefer": [
     "sr",
@@ -1319,7 +1319,7 @@
    "chain": "mcdonalds",
    "nameAr": "ساندويتش دجاج ساذرن",
    "nameEn": "Southern Style Chicken Sandwich",
-   "q": "mcdonald's southern style chicken sandwich",
+   "q": "mcdonald's southern",
    "type": "chicken",
    "prefer": [
     "sr",
@@ -1333,7 +1333,7 @@
    "chain": "mcdonalds",
    "nameAr": "تشيكن سيلكتس (٣ قطع)",
    "nameEn": "Chicken Selects Premium Breast Strips (3 pc)",
-   "q": "mcdonald's chicken selects premium breast strips",
+   "q": "mcdonald's selects",
    "type": "chicken",
    "prefer": [
     "sr",
@@ -1403,7 +1403,7 @@
    "chain": "mcdonalds",
    "nameAr": "شرائح تفاح",
    "nameEn": "Apple Dippers",
-   "q": "mcdonald's apple dippers",
+   "q": "mcdonald's apple",
    "type": "side",
    "prefer": [
     "sr",
@@ -1501,7 +1501,7 @@
    "chain": "mcdonalds",
    "nameAr": "شيك شوكولاتة",
    "nameEn": "Chocolate Triple Thick Shake",
-   "q": "mcdonald's chocolate triple thick shake",
+   "q": "mcdonald's chocolate shake",
    "type": "drink",
    "prefer": [
     "sr",
@@ -1515,7 +1515,7 @@
    "chain": "mcdonalds",
    "nameAr": "شيك فانيلا",
    "nameEn": "Vanilla Triple Thick Shake",
-   "q": "mcdonald's vanilla triple thick shake",
+   "q": "mcdonald's vanilla shake",
    "type": "drink",
    "prefer": [
     "sr",
@@ -1529,7 +1529,7 @@
    "chain": "mcdonalds",
    "nameAr": "شيك فراولة",
    "nameEn": "Strawberry Triple Thick Shake",
-   "q": "mcdonald's strawberry triple thick shake",
+   "q": "mcdonald's strawberry shake",
    "type": "drink",
    "prefer": [
     "sr",
@@ -1543,7 +1543,7 @@
    "chain": "mcdonalds",
    "nameAr": "سينامون ميلتس",
    "nameEn": "Cinnamon Melts",
-   "q": "mcdonald's cinnamon melts",
+   "q": "mcdonald's cinnamon",
    "type": "dessert",
    "prefer": [
     "sr",
@@ -1557,7 +1557,7 @@
    "chain": "mcdonalds",
    "nameAr": "بيض مخفوق",
    "nameEn": "Scrambled Eggs",
-   "q": "mcdonald's scrambled eggs",
+   "q": "mcdonald's egg",
    "type": "breakfast",
    "prefer": [
     "sr",
