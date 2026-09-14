@@ -1,0 +1,44 @@
+# تحقّق الموقع الحيّ بعد نشر main — [SALLA-CLOSURE-001]
+# يقرأ الإنتاج المنشور على Cloudflare Pages (لا المصدر) ويؤكّد أن وجهة الشراء المشحونة
+# هي المنتج المعتمد وحده، ويفحص صفحات سلة قراءةً فقط. بيئة الوكلاء تحجب pages.dev وsalla.sa،
+# فالقراءة تجري هنا. لا كود ولا سرّ ولا كتابة إلى سلة. التقرير في سجلّ الخطوة + أرتيفاكت.
+name: Live site verify (checkout destination)
+
+on:
+  workflow_dispatch:
+    inputs:
+      expect_sha:
+        description: 'البصمة القصيرة (7) للالتزام المتوقَّع منشورًا — فارغة = الحالي'
+        required: false
+        default: ''
+  push:
+    branches: [main, claude/qimmah-production-readiness-13cyt7]
+    paths:
+      - src/config/product.ts
+      - scripts/release/verify-live-site.mjs
+      - .github/workflows/live-verify.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify the deployed site ships the canonical checkout (waits for the deploy)
+        run: |
+          SHA="${{ github.event.inputs.expect_sha }}"
+          # على main: ننتظر أن ينشر Cloudflare هذا الالتزام بعينه. على فرع المراجعة: تقرير عمّا هو منشور الآن.
+          if [ -z "$SHA" ] && [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref_name }}" = "main" ]; then SHA="$(git rev-parse --short=7 HEAD)"; fi
+          CHECKOUT="$(grep -o "https://salla.sa/Qimmahsa/[^']*p2106415557" src/config/product.ts | head -1)"
+          node scripts/release/verify-live-site.mjs --url https://qimmah-8qp.pages.dev ${SHA:+--expect-sha $SHA} --checkout "$CHECKOUT" --out live-verify.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-verify
+          path: live-verify.json
