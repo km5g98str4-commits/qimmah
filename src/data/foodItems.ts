@@ -2799,27 +2799,7 @@ const foodItemsSource: FoodItem[] = [
     notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
   },
 
-  // --- ماكدونالدز ---
-  {
-    id: 'mcd-fries-medium',
-    nameAr: 'ماكدونالدز - بطاطس',
-    nameEn: "McDonald's - French fries",
-    category: 'مطاعم',
-    servingLabelAr: 'وسط (117غ)',
-    servingGrams: 117,
-    calories: 340,
-    protein: 4,
-    carbs: 44,
-    fat: 16,
-    fiber: 4,
-    keywords: ['mcdonalds', 'mac', 'ماك', 'مكدونالدز', 'fries'],
-    sizes: [
-      { id: 'mcd-fries-s', labelAr: 'صغير', labelEn: 'Small', servingLabelAr: 'صغير (71غ)', servingGrams: 71, calories: 220, protein: 3, carbs: 29, fat: 10 },
-      { id: 'mcd-fries-m', labelAr: 'وسط', labelEn: 'Medium', servingLabelAr: 'وسط (117غ)', servingGrams: 117, calories: 340, protein: 4, carbs: 44, fat: 16 },
-      { id: 'mcd-fries-l', labelAr: 'كبير', labelEn: 'Large', servingLabelAr: 'كبير (154غ)', servingGrams: 154, calories: 480, protein: 6, carbs: 63, fat: 23 },
-    ],
-    notesAr: 'تقديري · تختلف القيم حسب الفرع والحجم وطريقة التحضير.',
-  },
+  // --- ماكدونالدز --- [FOOD-UX-001] البطاطس اليدوية حلّ محلّها سجلّ USDA بثلاثة أحجام (rst-mcdonalds-french-fries-*).
 
   // --- برجر كنج ---
   {

@@ -178,7 +178,9 @@ const PARSERS = {
       byChain[row.chain] ??= []
       if (!e || e.status !== 'matched') { byChain[row.chain].push({ id: slugify(row.nameEn), nameAr: row.nameAr, nameEn: row.nameEn, sourceName: null, kcal: null, type: row.type, quarantine: e ? `USDA ${e.status}` : 'بلا دليل', candidates: e?.candidates?.map((c) => c.description) ?? [] }); continue }
       const portions = (e.portions ?? []).filter((p) => p.grams >= 10 && p.grams <= 900)
-      const hint = row.serving ? portions.find((p) => new RegExp(row.serving, 'i').test(String(p.modifier ?? p.unit ?? p.description ?? ''))) : null
+      // [FOOD-UX-001] التلميح يُطابق «العدد + الوصف» أيضًا («4 pieces» يختار حصة الأربع قطع لا أوّل حصة «pieces»).
+      const portionText = (p) => `${typeof p.amount === 'number' ? p.amount : ''} ${p.modifier ?? p.unit ?? p.description ?? ''}`.trim()
+      const hint = row.serving ? (portions.find((p) => new RegExp(`^${row.serving}$`, 'i').test(portionText(p))) ?? portions.find((p) => new RegExp(row.serving, 'i').test(portionText(p)))) : null
       const pick = hint ?? portions.find((p) => PORTION_PICK.test(String(p.modifier ?? p.unit ?? p.description ?? ''))) ?? portions[0] ?? null
       const g = pick ? Math.round(pick.grams) : 100
       const unit = pick ? String(pick.modifier ?? pick.unit ?? pick.description ?? '') : ''
