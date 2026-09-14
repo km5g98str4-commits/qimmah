@@ -850,13 +850,12 @@ function Field({ label, value, onChange, placeholder, max }: { label: string; va
   return (
     <label className="block text-xs text-ink-500">
       {label}
-      {/* [FOOD-UX-001] عشري: لوحة مفاتيح عشرية على الجوال + step="any" فلا يرفض المتصفّح 27.5 + تعقيم يقبل النقطة والفاصلة و«٫». */}
+      {/* [FOOD-UX-001] عشري: `type="text"` + `inputMode="decimal"` عمدًا — تعقيم HTML لـ`type=number`
+          يُفرِّغ «٢٧٫٥» و«27,5» قبل أن تصل React؛ النصّي يمرّر ما كُتب والتعقيم هنا يطويه إلى 27.5. */}
       <input
-        type="number"
+        type="text"
         inputMode="decimal"
-        min="0"
-        max={max}
-        step="any"
+        autoComplete="off"
         value={value}
         onChange={(e) => onChange(sanitizeNumericInput(e.target.value, { max, decimal: true }))}
         placeholder={placeholder}
@@ -900,11 +899,9 @@ function PersonalPortionPanel({ food, servings, onServings, portion, onAdd, onEd
         <label htmlFor="qml-personal-servings" className="text-xs text-ink-500">{d.servingsLabel}</label>
         <input
           id="qml-personal-servings"
-          type="number"
+          type="text"
           inputMode="decimal"
-          min={0.25}
-          max={20}
-          step="any"
+          autoComplete="off"
           value={servings}
           onChange={(e) => onServings(sanitizeNumericInput(e.target.value, { max: 20, decimal: true }))}
           className="min-h-[44px] w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-base text-ink-900 outline-none focus:border-primary-c"

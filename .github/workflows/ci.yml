@@ -172,6 +172,10 @@ jobs:
       - name: Nutrition write-path (entitled) — live browser
         run: node scripts/e2e/nutrition-reliability.mjs
 
+      # [FOOD-UX-001] «أكلاتي»: وجبة مخصّصة بكسور تُحفظ وتُوجد في يوم جديد وتُسجَّل وتُعدَّل وتُحذف.
+      - name: Personal foods journey (entitled) — live browser
+        run: node scripts/e2e/personal-foods.mjs
+
       - name: Progress & measurements write-path (entitled) — live browser
         run: node scripts/e2e/progress-reliability.mjs
 

@@ -243,6 +243,7 @@
     "test:error-boundary": "node scripts/run-error-boundary-proof.mjs",
     "test:e2e:navigation": "npm run build && node scripts/e2e/navigation-history.mjs",
     "test:e2e:exercises": "npm run build && node scripts/e2e/exercise-library-reliability.mjs",
+    "test:e2e:personal-foods": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/personal-foods.mjs",
     "test:e2e:nutrition": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/nutrition-reliability.mjs",
     "test:e2e:workout": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/workout-reliability.mjs",
     "test:e2e:progress": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/progress-reliability.mjs",
