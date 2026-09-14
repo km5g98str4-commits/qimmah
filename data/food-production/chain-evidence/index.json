@@ -1,6 +1,6 @@
 {
   "_readme": "دليل جلب CI لمصادر السلاسل الرسمية — يقرؤه بشر/موجة استيراد، لا مستورد آلي.",
-  "fetchedAt": "2026-09-14T09:03:38.948Z",
+  "fetchedAt": "2026-09-14T09:21:44.471Z",
   "results": [
     {
       "slug": "bk-us-explorer",
@@ -13,7 +13,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 315565,
+        "bytes": 315525,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -119,7 +119,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 174027,
+        "bytes": 174121,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -225,7 +225,7 @@
       "raw": {
         "status": 403,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 4564,
+        "bytes": 4566,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -241,7 +241,7 @@
       "raw": {
         "status": 403,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 22623,
+        "bytes": 22644,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -297,7 +297,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 182956,
+        "bytes": 193546,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -313,7 +313,7 @@
       "raw": {
         "status": 403,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 4548,
+        "bytes": 4550,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -329,17 +329,17 @@
       "raw": {
         "status": 403,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 864524,
+        "bytes": 864526,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 864080,
+        "bytes": 864082,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 228
+        "bytes": 230
       }
     },
     {
@@ -349,7 +349,7 @@
       "raw": {
         "status": 200,
         "contentType": "text/html",
-        "bytes": 20772,
+        "bytes": 20774,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -414,7 +414,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 8896,
+        "bytes": 8908,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -434,13 +434,13 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 610528,
+        "bytes": 617750,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 11340
+        "bytes": 17164
       }
     },
     {
@@ -474,7 +474,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 393402,
+        "bytes": 392433,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -502,11 +502,11 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 666946,
+        "bytes": 667070,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 678424,
+        "bytes": 678548,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -532,19 +532,19 @@
       "chain": "جان برجر (www)",
       "url": "https://www.janburger.com/",
       "raw": {
-        "status": 403,
+        "status": 200,
         "contentType": "text/html",
-        "bytes": 21,
+        "bytes": 1385,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 60,
+        "bytes": 1800,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 20
+        "bytes": 202
       }
     },
     {
@@ -678,14 +678,14 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 40347,
+        "bytes": 40080,
         "file": "raw.html"
       },
       "rendered": null,
       "screenshot": null,
       "text": {
         "from": "raw",
-        "bytes": 5386
+        "bytes": 5140
       }
     },
     {
@@ -760,24 +760,7 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 38089,
-        "file": "raw.html"
-      },
-      "rendered": null,
-      "screenshot": null,
-      "text": {
-        "from": "raw",
-        "bytes": 5607
-      }
-    },
-    {
-      "slug": "search-afran-ar-2",
-      "chain": "بحث: أفران الحطب السعرات",
-      "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA",
-      "raw": {
-        "status": 200,
-        "contentType": "text/html; charset=UTF-8",
-        "bytes": 37304,
+        "bytes": 38443,
         "file": "raw.html"
       },
       "rendered": null,
@@ -788,20 +771,37 @@
       }
     },
     {
-      "slug": "search-afran-en",
-      "chain": "بحث: Afran Al Hatab menu",
-      "url": "https://html.duckduckgo.com/html/?q=Afran+Al+Hatab+bakery+Riyadh+menu",
+      "slug": "search-afran-ar-2",
+      "chain": "بحث: أفران الحطب السعرات",
+      "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA",
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 32468,
+        "bytes": 37550,
         "file": "raw.html"
       },
       "rendered": null,
       "screenshot": null,
       "text": {
         "from": "raw",
-        "bytes": 4311
+        "bytes": 5554
+      }
+    },
+    {
+      "slug": "search-afran-en",
+      "chain": "بحث: Afran Al Hatab menu",
+      "url": "https://html.duckduckgo.com/html/?q=Afran+Al+Hatab+bakery+Riyadh+menu",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 32025,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 3894
       }
     },
     {
@@ -811,17 +811,17 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=utf-8",
-        "bytes": 120382,
+        "bytes": 119744,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 268637,
+        "bytes": 283894,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 2987
+        "bytes": 4680
       }
     },
     {
@@ -831,17 +831,17 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=utf-8",
-        "bytes": 120202,
+        "bytes": 124065,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 278315,
+        "bytes": 285406,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 3611
+        "bytes": 4427
       }
     },
     {
@@ -851,11 +851,11 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=utf-8",
-        "bytes": 26992,
+        "bytes": 26988,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 43400,
+        "bytes": 43375,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -863,6 +863,307 @@
         "from": "rendered",
         "bytes": 399
       }
+    },
+    {
+      "slug": "mcd-sa-calc-ar",
+      "chain": "ماكدونالدز السعودية — حاسبة القيمة الغذائية (الرياض)",
+      "url": "https://www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html",
+      "raw": {
+        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html\ncurl: (28) Operation timed out after 60001 milliseconds with 0 bytes received\n"
+      },
+      "rendered": {
+        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-sa-calc-en",
+      "chain": "McDonald's KSA — Nutrition Calculator (Riyadh)",
+      "url": "https://www.mcdonalds.com/sa/en-sa/riyadh/about-our-food/nutrition-calculator.html",
+      "raw": {
+        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com/sa/en-sa/riyadh/about-our-food/nutrition-calculator.html\ncurl: (28) Operation timed out after 60002 milliseconds with 0 bytes received\n"
+      },
+      "rendered": {
+        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.mcdonalds.com/sa/en-sa/riyadh/about-our-food/nutrition-calculator.html\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-sa-menu-ar",
+      "chain": "ماكدونالدز السعودية — المنيو الكامل",
+      "url": "https://www.mcdonalds.com/sa/ar-sa/riyadh/full-menu.html",
+      "raw": {
+        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com/sa/ar-sa/riyadh/full-menu.html\ncurl: (28) Operation timed out after 60002 milliseconds with 0 bytes received\n"
+      },
+      "rendered": {
+        "error": "page.goto: Timeout 60000ms exceeded.\nCall log:\n  - navigating to \"https://www.mcdonalds.com/sa/ar-sa/riyadh/full-menu.html\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-sa-dna-ar",
+      "chain": "ماكدونالدز السعودية — واجهة المنيو JSON",
+      "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=SA&language=ar&showLiveData=true&category=100",
+      "raw": {
+        "error": "Command failed: curl -sS -L --http1.1 --max-time 60 -A Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36 -H accept-language: ar,en;q=0.8 -w \n__QIMMAH_STATUS__%{http_code}__%{content_type} https://www.mcdonalds.com/dnaapp/itemsByCategory?country=SA&language=ar&showLiveData=true&category=100\ncurl: (28) Operation timed out after 60001 milliseconds with 0 bytes received\n"
+      },
+      "rendered": null,
+      "screenshot": null
+    },
+    {
+      "slug": "alhatab-products-ar",
+      "chain": "الحطب فودز (أفران الحطب) — منتجاتنا",
+      "url": "https://alhatab.com.sa/our-products",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 150475,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 156346,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 4342
+      }
+    },
+    {
+      "slug": "alhatab-bakery-en",
+      "chain": "Al Hatab Foods — Bakery",
+      "url": "https://alhatab.com.sa/en/our-products/bakery",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 282635,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 351062,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 5097
+      }
+    },
+    {
+      "slug": "alhatab-ready-en",
+      "chain": "Al Hatab Foods — Ready meals",
+      "url": "https://alhatab.com.sa/en/our-products/ready-to-eat",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 256206,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 307588,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 4280
+      }
+    },
+    {
+      "slug": "alhatab-ready-ar",
+      "chain": "الحطب فودز — وجبات جاهزة",
+      "url": "https://alhatab.com.sa/our-products/ready-to-eat",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 262921,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 316207,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 7863
+      }
+    },
+    {
+      "slug": "alhatab-root-ar",
+      "chain": "الحطب فودز — الرئيسية",
+      "url": "https://alhatab.com.sa/",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 162166,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 293401,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 21460
+      }
+    },
+    {
+      "slug": "hs-alhatab-rawdah-en",
+      "chain": "أفران الحطب — منيو هنقرستيشن (الروضة)",
+      "url": "https://hungerstation.com/sa-en/restaurant/alhatab-bakery/riyadh/al-rawdah/13031",
+      "raw": {
+        "status": 403,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 5492,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 5416,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 766
+      },
+      "xhr": []
+    },
+    {
+      "slug": "hs-alhatab-rawdah-ar",
+      "chain": "أفران الحطب — منيو هنقرستيشن (عربي)",
+      "url": "https://hungerstation.com/sa-ar/restaurant/alhatab-bakery/riyadh/al-rawdah/13031",
+      "raw": {
+        "status": 403,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 5492,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 5416,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 766
+      },
+      "xhr": []
+    },
+    {
+      "slug": "hs-alhatab-14305",
+      "chain": "أفران الحطب — منيو هنقرستيشن (فرع ٢)",
+      "url": "https://hungerstation.com/sa-ar/restaurant/riyadh/riyadh/14305",
+      "raw": {
+        "status": 403,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 5492,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 5416,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 766
+      },
+      "xhr": []
+    },
+    {
+      "slug": "ninja-alhatab-en",
+      "chain": "أفران الحطب — منيو نينجا",
+      "url": "https://ananinja.com/sa/en/restaurants/al-hatab-bakery-30642",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 876693,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 1081434,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 64649
+      },
+      "xhr": [
+        {
+          "url": "https://graphql.ananinja.com/graphql",
+          "status": 200,
+          "bytes": 178
+        },
+        {
+          "url": "https://api.ipify.org/?format=json",
+          "status": 200,
+          "bytes": 24
+        },
+        {
+          "url": "https://graphql.ananinja.com/graphql",
+          "status": 200,
+          "bytes": 34
+        },
+        {
+          "url": "https://eu.app.unleash-hosted.com/euee0008/api/frontend?sessionId=278006601&appName=ninja-website&environment=default",
+          "status": 200,
+          "bytes": 17145
+        },
+        {
+          "url": "https://api64.ipify.org/?format=json",
+          "status": 200,
+          "bytes": 24
+        },
+        {
+          "url": "https://graphql.ananinja.com/graphql",
+          "status": 200,
+          "bytes": 82474
+        },
+        {
+          "url": "https://www.googleadservices.com/pagead/conversion/10847159812/?random=1789379016918&cv=11&fst=1789379016918&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be69a0h2v9179767286z8866774466za20gzb866774466zd866774466xea&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938468~118897920~118897930~120213116~120385423~120469145~120469153~120912438&u_w=1280&u_h=2000&url=https%3A%2F%2Fananinja.com%2Fsa%2Fen%2Frestaurants%2Fal-hatab-bakery-30642&rcb=8&label=BDtwCKbH2LgZEISMqrQo&capi=1&frm=0&tiba=Order%20from%20H130%20-%20Al%20Hatab%20Bakery%20-%20Riyadh%20-%20Al%20Aqiq%20Online%20in%20Saudi%20Arabia%20%7C%20Ninja&bttype=purchase&value=0&hn=www.googleadservices.com&npa=0&pscdl=noapi&auid=413049657.1789379017&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0&uaw=0&ec_mode=a&oid=751499872.1789379017&oidsrc=3&ecsid2=1598501735.1789379017&_tu=CBA&gcl_ctr=1~0~0~0&category=acrcp_v1_512&em=tv.1&emd=tvd.1&ept=5",
+          "status": 200,
+          "bytes": 3672
+        },
+        {
+          "url": "https://bzrcdn.openai.com/pixel-config/v1/XPJZz1yTkpKzw6uamB4rXW.json",
+          "status": 200,
+          "bytes": 44
+        },
+        {
+          "url": "https://ct.pinterest.com/user/?tid=2613964999201&cb=1789379017617&dep=2%2CPAGE_LOAD",
+          "status": 200,
+          "bytes": 433
+        },
+        {
+          "url": "https://www.googleadservices.com/pagead/conversion/10847159812/?random=1789379018281&cv=11&fst=1789379018281&fmt=7&bg=ffffff&guid=ON&async=1&en=conversion&gtm=45be69a0h2v9179767286z8866774466za20gzb866774466zd866774466xea&gcd=13l3l3l3l1l1&dma=0&tag_exp=115938466~115938468~118897920~118897930~120213116~120385423~120469145~120469153~120912438&u_w=1280&u_h=2000&url=https%3A%2F%2Fananinja.com%2Fsa%2Fen%2Frestaurants%2Fal-hatab-bakery-30642&rcb=8&label=BDtwCKbH2LgZEISMqrQo&capi=1&frm=0&tiba=Order%20from%20H130%20-%20Al%20Hatab%20Bakery%20-%20Riyadh%20-%20Al%20Aqiq%20Online%20in%20Saudi%20Arabia%20%7C%20Ninja&bttype=purchase&value=0&hn=www.googleadservices.com&npa=0&pscdl=noapi&auid=413049657.1789379017&uaa=x86&uab=64&uafvl=HeadlessChrome%3B149.0.7827.55%7CChromium%3B149.0.7827.55%7CNot)A%253BBrand%3B24.0.0.0&uamb=0&uam=&uap=Windows&uapv=10.0&uaw=0&ec_mode=a&oid=1149512545.1789379018&oidsrc=3&ecsid2=1598501735.1789379017&_tu=CBA&gcl_ctr=2~0~0~0&category=acrcp_v1_512&em=tv.1&emd=tvd.1&ept=5",
+          "status": 200,
+          "bytes": 3652
+        },
+        {
+          "url": "https://graphql.ananinja.com/graphql",
+          "status": 200,
+          "bytes": 1277
+        },
+        {
+          "url": "https://app.adjust.com/session",
+          "status": 200,
+          "bytes": 84
+        },
+        {
+          "url": "https://app.adjust.com/event",
+          "status": 200,
+          "bytes": 70
+        },
+        {
+          "url": "https://app.adjust.com/attribution?app_token=b6oj3bkl2m80&environment=production&created_at=2026-09-14T09%3A43%3A39.082Z%2B0000&sent_at=2026-09-14T09%3A43%3A41.083Z%2B0000&web_uuid=7b97e55a-687d-4aad-013c-1d24ac637632&platform=web&language=ar&country=sa&machine_type=Linux%20x86_64&queue_size=0&attempts=1&initiated_by=backend&time_spent=0&session_length=0&session_count=1&last_interval=0",
+          "status": 200,
+          "bytes": 334
+        }
+      ]
     }
   ]
 }
