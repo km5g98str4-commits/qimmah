@@ -1,6 +1,6 @@
 {
   "_readme": "دليل جلب CI لمصادر السلاسل الرسمية — يقرؤه بشر/موجة استيراد، لا مستورد آلي.",
-  "fetchedAt": "2026-09-13T10:54:32.196Z",
+  "fetchedAt": "2026-09-14T09:03:38.948Z",
   "results": [
     {
       "slug": "bk-us-explorer",
@@ -13,13 +13,13 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 315588,
+        "bytes": 315565,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 9236
+        "bytes": 9092
       }
     },
     {
@@ -119,7 +119,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 174044,
+        "bytes": 174027,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -135,7 +135,7 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=utf-8",
-        "bytes": 15984,
+        "bytes": 15996,
         "file": "raw.html"
       },
       "rendered": null,
@@ -152,7 +152,7 @@
       "raw": {
         "status": 404,
         "contentType": "text/html; charset=utf-8",
-        "bytes": 2971,
+        "bytes": 2983,
         "file": "raw.html"
       },
       "rendered": {
@@ -225,7 +225,7 @@
       "raw": {
         "status": 403,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 4565,
+        "bytes": 4564,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -241,7 +241,7 @@
       "raw": {
         "status": 403,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 22644,
+        "bytes": 22623,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -297,7 +297,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 193503,
+        "bytes": 182956,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -313,7 +313,7 @@
       "raw": {
         "status": 403,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 4549,
+        "bytes": 4548,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -329,17 +329,17 @@
       "raw": {
         "status": 403,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 864525,
+        "bytes": 864524,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 864081,
+        "bytes": 864080,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 229
+        "bytes": 228
       }
     },
     {
@@ -349,7 +349,7 @@
       "raw": {
         "status": 200,
         "contentType": "text/html",
-        "bytes": 20778,
+        "bytes": 20772,
         "file": "raw.pdf"
       },
       "rendered": null,
@@ -365,7 +365,7 @@
       "raw": {
         "status": 404,
         "contentType": "text/html;charset=UTF-8",
-        "bytes": 13134,
+        "bytes": 13127,
         "file": "raw.html"
       },
       "rendered": null,
@@ -434,7 +434,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 609127,
+        "bytes": 610528,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -454,7 +454,7 @@
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 23575,
+        "bytes": 23576,
         "truncated": false
       },
       "screenshot": "shot.png",
@@ -502,17 +502,17 @@
       "raw": {
         "status": 200,
         "contentType": "text/html; charset=UTF-8",
-        "bytes": 667070,
+        "bytes": 666946,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 678551,
+        "bytes": 678424,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 1024
+        "bytes": 1023
       }
     },
     {
@@ -532,19 +532,336 @@
       "chain": "جان برجر (www)",
       "url": "https://www.janburger.com/",
       "raw": {
-        "status": 200,
+        "status": 403,
         "contentType": "text/html",
-        "bytes": 1385,
+        "bytes": 21,
         "file": "raw.html"
       },
       "rendered": {
-        "bytes": 1800,
+        "bytes": 60,
         "truncated": false
       },
       "screenshot": "shot.png",
       "text": {
         "from": "rendered",
-        "bytes": 202
+        "bytes": 20
+      }
+    },
+    {
+      "slug": "mcd-sa-root",
+      "chain": "ماكدونالدز السعودية (الوسطى/الشرقية)",
+      "url": "https://www.mcdonalds.com.sa/",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com.sa/\nCall log:\n  - navigating to \"https://www.mcdonalds.com.sa/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-sa-menu",
+      "chain": "ماكدونالدز السعودية — المنيو",
+      "url": "https://www.mcdonalds.com.sa/menu",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com.sa/menu\nCall log:\n  - navigating to \"https://www.mcdonalds.com.sa/menu\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-sa-nutrition",
+      "chain": "ماكدونالدز السعودية — التغذية",
+      "url": "https://www.mcdonalds.com.sa/nutrition",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com.sa/nutrition\nCall log:\n  - navigating to \"https://www.mcdonalds.com.sa/nutrition\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-arabia-en",
+      "chain": "ماكدونالدز الغربية (mcdonaldsarabia)",
+      "url": "https://mcdonaldsarabia.com/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://mcdonaldsarabia.com/\nCall log:\n  - navigating to \"https://mcdonaldsarabia.com/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-arabia-menu",
+      "chain": "ماكدونالدز الغربية — المنيو",
+      "url": "https://www.mcdonaldsarabia.com/en/menu",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_CONNECTION_REFUSED at https://www.mcdonaldsarabia.com/en/menu\nCall log:\n  - navigating to \"https://www.mcdonaldsarabia.com/en/menu\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-us-dna-burgers",
+      "chain": "ماكدونالدز (US) واجهة المنيو — برجر",
+      "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=100",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": null,
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-us-dna-chicken",
+      "chain": "ماكدونالدز (US) واجهة المنيو — دجاج",
+      "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=101",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": null,
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-us-dna-breakfast",
+      "chain": "ماكدونالدز (US) واجهة المنيو — فطور",
+      "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=102",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": null,
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-us-dna-item",
+      "chain": "ماكدونالدز (US) واجهة المنيو — صنف",
+      "url": "https://www.mcdonalds.com/dnaapp/itemDetails?country=US&language=en&showLiveData=true&item=200",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": null,
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-us-nutrition-calc",
+      "chain": "ماكدونالدز (US) حاسبة التغذية",
+      "url": "https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html\nCall log:\n  - navigating to \"https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "mcd-gb-menu",
+      "chain": "ماكدونالدز (UK) المنيو",
+      "url": "https://www.mcdonalds.com/gb/en-gb/menu.html",
+      "raw": {
+        "error": "The operation was aborted due to timeout"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_HTTP2_PROTOCOL_ERROR at https://www.mcdonalds.com/gb/en-gb/menu.html\nCall log:\n  - navigating to \"https://www.mcdonalds.com/gb/en-gb/menu.html\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "search-mcd-sa-ar",
+      "chain": "بحث: ماكدونالدز السعودية السعرات",
+      "url": "https://html.duckduckgo.com/html/?q=%D9%85%D8%A7%D9%83%D8%AF%D9%88%D9%86%D8%A7%D9%84%D8%AF%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D8%B1%D8%A7%D8%B1%D9%8A%D8%A9",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 40347,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 5386
+      }
+    },
+    {
+      "slug": "search-mcd-sa-en",
+      "chain": "بحث: McDonald's Saudi nutrition",
+      "url": "https://html.duckduckgo.com/html/?q=McDonald%27s+Saudi+Arabia+nutrition+calculator",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 34106,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 3946
+      }
+    },
+    {
+      "slug": "afran-com",
+      "chain": "أفران الحطب — نطاق مرشّح",
+      "url": "https://afranalhatab.com/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://afranalhatab.com/\nCall log:\n  - navigating to \"https://afranalhatab.com/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "afran-com-sa",
+      "chain": "أفران الحطب — نطاق مرشّح ٢",
+      "url": "https://www.afranalhatab.com.sa/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://www.afranalhatab.com.sa/\nCall log:\n  - navigating to \"https://www.afranalhatab.com.sa/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "afran-hatab-sa",
+      "chain": "أفران الحطب — نطاق مرشّح ٣",
+      "url": "https://hatab.sa/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://hatab.sa/\nCall log:\n  - navigating to \"https://hatab.sa/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "afran-alhatab-sa",
+      "chain": "أفران الحطب — نطاق مرشّح ٤",
+      "url": "https://alhatab.sa/",
+      "raw": {
+        "error": "fetch failed"
+      },
+      "rendered": {
+        "error": "page.goto: net::ERR_NAME_NOT_RESOLVED at https://alhatab.sa/\nCall log:\n  - navigating to \"https://alhatab.sa/\", waiting until \"domcontentloaded\"\n"
+      },
+      "screenshot": null
+    },
+    {
+      "slug": "search-afran-ar",
+      "chain": "بحث: أفران الحطب منيو",
+      "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D9%85%D9%86%D9%8A%D9%88",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 38089,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 5607
+      }
+    },
+    {
+      "slug": "search-afran-ar-2",
+      "chain": "بحث: أفران الحطب السعرات",
+      "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 37304,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 5604
+      }
+    },
+    {
+      "slug": "search-afran-en",
+      "chain": "بحث: Afran Al Hatab menu",
+      "url": "https://html.duckduckgo.com/html/?q=Afran+Al+Hatab+bakery+Riyadh+menu",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=UTF-8",
+        "bytes": 32468,
+        "file": "raw.html"
+      },
+      "rendered": null,
+      "screenshot": null,
+      "text": {
+        "from": "raw",
+        "bytes": 4311
+      }
+    },
+    {
+      "slug": "search-afran-bing",
+      "chain": "بحث Bing: أفران الحطب منيو",
+      "url": "https://www.bing.com/search?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D9%85%D9%86%D9%8A%D9%88",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 120382,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 268637,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 2987
+      }
+    },
+    {
+      "slug": "search-mcd-bing",
+      "chain": "بحث Bing: ماكدونالدز السعودية السعرات",
+      "url": "https://www.bing.com/search?q=%D9%85%D8%A7%D9%83%D8%AF%D9%88%D9%86%D8%A7%D9%84%D8%AF%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D8%B1%D8%A7%D8%B1%D9%8A%D8%A9",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 120202,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 278315,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 3611
+      }
+    },
+    {
+      "slug": "shawarmer-menu-ar-full",
+      "chain": "شاورمر (المنيو الكامل بالعربية)",
+      "url": "https://shawarmer.com/ar/menu",
+      "raw": {
+        "status": 200,
+        "contentType": "text/html; charset=utf-8",
+        "bytes": 26992,
+        "file": "raw.html"
+      },
+      "rendered": {
+        "bytes": 43400,
+        "truncated": false
+      },
+      "screenshot": "shot.png",
+      "text": {
+        "from": "rendered",
+        "bytes": 399
       }
     }
   ]
