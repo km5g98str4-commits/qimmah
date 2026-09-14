@@ -103,11 +103,12 @@ for (const old of ['1181109938', '1751698501', '973212497']) check(`no reference
 // الاشتراك/التجديد: **النفي مطلوب والإثبات ممنوع.** أوّل صيغة لهذا الفحص رفعت علمًا على
 // «بلا اشتراك ولا تجديد تلقائي» و«not a monthly or auto-renewing subscription» — وهما النصّان
 // الصحيحان بعينهما. فالكلمة وحدها ليست مخالفة؛ المخالفة أن تَرِد **مثبَتة**.
-const NEGATORS = /(بلا|بدون|ولا|لا|ليس|ليست|غير|no|not|never|without)\s*$/i
+// النافي قد يبعد عن الكلمة بعدّة كلمات: «not a monthly or auto-renewing subscription» — فالبحث في نافذة لا عن ملاصقة.
+const NEGATORS = /\b(بلا|بدون|ولا|ليس|ليست|غير|no|not|never|without)\b/i
 const affirmativeClaims = []
 for (const [path, txt] of fetched) {
   for (const m of txt.matchAll(/سنويًا|سنوياً|تجديد تلقائي|auto.?renew(?:ing|al)?|yearly subscription|monthly subscription/gi)) {
-    const before = txt.slice(Math.max(0, m.index - 40), m.index)
+    const before = txt.slice(Math.max(0, m.index - 70), m.index)
     if (!NEGATORS.test(before)) affirmativeClaims.push(`${path}: …${before.slice(-30)}[${m[0]}]…`)
   }
 }
