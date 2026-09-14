@@ -22,6 +22,8 @@ import { getDayStamp } from '@/lib/today'
 import { getDataOwner, runMigration } from '@/lib/dataOwnership'
 import { enqueueSyncDelete, enqueueSyncOperation, getSyncRuntime } from '@/lib/syncQueue'
 import { getNutritionLog, saveNutritionLog } from '@/lib/historyStore'
+import { writeJson, type WriteResult } from '@/lib/safeStorage'
+import { foldArabic, foldArabicDigits } from '@/lib/text/foodNormalize'
 import {
   NUTRITION_V2_KEY,
   addFoodToDay,
@@ -637,17 +639,27 @@ export interface ManualFoodInput {
   meal?: MealSlot
 }
 
-/** طعام شخصي محفوظ (أساسه الجرامات المدخلة — إعادة التسجيل تُقاس نسبيًا عليها). */
+/**
+ * طعام شخصي محفوظ — «أكلاتي». [FOOD-UX-001]
+ *
+ * أساسه **حصة واحدة** كما أدخلها المستخدم: القيم مطلقة لتلك الحصة، وإعادة التسجيل
+ * تُقاس عليها بمضاعف (١ · ١٫٥ · ٢). `grams` اختيارية: من كتبها يحصل على تحويل
+ * الغرامات، ومن لم يكتبها يبقى على الحصص — لا نخترع وزنًا لوجبة لا نعرف وزنها.
+ * `carbs`/`fat` اختياريتان بنفس منطق [PARTIAL-NUTRITION-001]: الفارغ غير معروف لا صفر.
+ */
 export interface PersonalFood {
   id: string
   nameAr: string
   nameEn?: string
-  grams: number
+  grams?: number
   calories: number
   protein: number
-  carbs: number
-  fat: number
+  carbs?: number
+  fat?: number
   createdAt: string
+  updatedAt?: string
+  lastUsedAt?: string
+  useCount?: number
 }
 
 type PersonalFoodsRecord = Record<string, PersonalFood[]>
@@ -665,23 +677,40 @@ function readPersonalFoods(): PersonalFoodsRecord {
   }
 }
 
+/**
+ * الكاتب الواحد للأطعمة الشخصية — عبر `safeStorage` بنتيجة مسمّاة (الميثاق §5):
+ * فشل الكتابة يعود للمستدعي ولا يُبتلع، فلا شاشة نجاح على حفظ لم يحدث.
+ */
+function writePersonalFoods(reg: PersonalFoodsRecord): WriteResult {
+  return writeJson(PERSONAL_FOODS_KEY, reg)
+}
+
 function normalizePersonalFood(raw: unknown): PersonalFood | null {
   if (!raw || typeof raw !== 'object') return null
   const f = raw as Partial<PersonalFood>
   if (typeof f.id !== 'string' || !f.id) return null
   if (typeof f.nameAr !== 'string' || !f.nameAr.trim()) return null
-  if (typeof f.grams !== 'number' || !Number.isFinite(f.grams) || f.grams <= 0) return null
-  const num = (n: unknown): number => (typeof n === 'number' && Number.isFinite(n) && n >= 0 ? n : 0)
+  const optNum = (n: unknown): number | undefined => (typeof n === 'number' && Number.isFinite(n) && n >= 0 ? n : undefined)
+  const grams = optNum(f.grams)
+  const calories = optNum(f.calories)
+  const protein = optNum(f.protein)
+  // سجلّ بلا سعرات ولا بروتين لا يحمل معلومة — يُسقَط لا يُصفَّر.
+  if (calories === undefined && protein === undefined) return null
+  const carbs = optNum(f.carbs)
+  const fat = optNum(f.fat)
   return {
     id: f.id,
     nameAr: f.nameAr,
     ...(typeof f.nameEn === 'string' && f.nameEn.trim() ? { nameEn: f.nameEn } : {}),
-    grams: f.grams,
-    calories: num(f.calories),
-    protein: num(f.protein),
-    carbs: num(f.carbs),
-    fat: num(f.fat),
+    ...(grams !== undefined && grams > 0 ? { grams } : {}),
+    calories: calories ?? 0,
+    protein: protein ?? 0,
+    ...(carbs !== undefined ? { carbs } : {}),
+    ...(fat !== undefined ? { fat } : {}),
     createdAt: typeof f.createdAt === 'string' ? f.createdAt : '',
+    ...(typeof f.updatedAt === 'string' ? { updatedAt: f.updatedAt } : {}),
+    ...(typeof f.lastUsedAt === 'string' ? { lastUsedAt: f.lastUsedAt } : {}),
+    ...(typeof f.useCount === 'number' && Number.isFinite(f.useCount) && f.useCount > 0 ? { useCount: Math.floor(f.useCount) } : {}),
   }
 }
 
@@ -693,7 +722,13 @@ export function listPersonalFoods(userId?: string | null): PersonalFood[] {
   return list.map(normalizePersonalFood).filter((f): f is PersonalFood => f !== null)
 }
 
-/** يحذف طعامًا شخصيًا للمالك الحالي. يعيد true إن وُجد وحُذف. */
+/** الأحدث استعمالًا أولًا، ثم الأحدث إنشاءً — ما يعود إليه المستخدم يظهر فوق. */
+export function listPersonalFoodsByRecency(userId?: string | null): PersonalFood[] {
+  const stamp = (f: PersonalFood) => f.lastUsedAt ?? f.updatedAt ?? f.createdAt
+  return [...listPersonalFoods(userId)].sort((a, b) => (stamp(b) > stamp(a) ? 1 : stamp(b) < stamp(a) ? -1 : 0))
+}
+
+/** يحذف طعامًا شخصيًا للمالك الحالي. true إن وُجد **وكُتب الحذف فعلًا**. */
 export function deletePersonalFood(id: string): boolean {
   const reg = readPersonalFoods()
   const owner = currentOwner()
@@ -702,12 +737,136 @@ export function deletePersonalFood(id: string): boolean {
   if (next.length === list.length) return false
   if (next.length) reg[owner] = next
   else delete reg[owner]
-  try {
-    ls()?.setItem(PERSONAL_FOODS_KEY, JSON.stringify(reg))
-  } catch {
-    /* لا نرمي */
+  return writePersonalFoods(reg) === 'ok'
+}
+
+function nextPersonalFoodId(existing: PersonalFood[]): string {
+  const maxN = existing.reduce((m, f) => {
+    const match = /^pf-(\d+)$/.exec(f.id)
+    return match ? Math.max(m, Number(match[1])) : m
+  }, 0)
+  return `pf-${maxN + 1}`
+}
+
+/** مفتاح مطابقة الاسم: طيّ عربي + أرقام — «كبسة الدجاج» ≡ «كبسه الدجاج». */
+export function personalFoodNameKey(name: string): string {
+  return foldArabic(foldArabicDigits(name))
+}
+
+export interface PersonalFoodInput {
+  nameAr: string
+  nameEn?: string
+  /** وزن الحصة إن عُرف — اختياري. */
+  grams?: number
+  calories: number
+  protein: number
+  carbs?: number
+  fat?: number
+}
+
+export type PersonalFoodSaveResult =
+  | { status: 'ok'; food: PersonalFood; replaced: boolean }
+  | { status: 'rejected'; errors: HistoryError[] }
+  | { status: 'storage'; result: WriteResult }
+
+/**
+ * يحفظ طعامًا شخصيًا (إنشاء أو تعديل بمعرّف). قواعد الصدق:
+ *   • الاسم إلزامي؛ سعرات أو بروتين > ٠؛ كل رقم منتهٍ وغير سالب؛ الفارغ يبقى غائبًا.
+ *   • اسم موجود (بعد الطيّ) بلا معرّف ⇒ **يحدَّث الموجود** لا يُكرَّر — «وجبة الدجاج»
+ *     الواحدة تبقى واحدة ولو حُفظت من جديد كل يوم.
+ *   • السقف MAX_PERSONAL_FOODS يُرفض بخطأ مسمّى لا بإسقاط صامت للأقدم.
+ *   • الكتابة عبر safeStorage: الفشل يعود `storage` لا `ok`.
+ */
+export function savePersonalFood(input: PersonalFoodInput, id?: string): PersonalFoodSaveResult {
+  ensureNutritionHistoryInit()
+  const nameAr = typeof input.nameAr === 'string' ? input.nameAr.trim() : ''
+  const errors: HistoryError[] = []
+  if (!nameAr) errors.push(err('invalid-manual-food', 'اسم الطعام لا يمكن أن يكون فارغًا.', 'Food name cannot be empty.'))
+  const finiteOrAbsent = (v: unknown): boolean => v === undefined || (typeof v === 'number' && Number.isFinite(v) && v >= 0)
+  for (const [label, value] of [['السعرات', input.calories], ['البروتين', input.protein]] as const) {
+    if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) {
+      errors.push(err('invalid-manual-food', `${label} يجب أن تكون رقمًا ≥ صفر.`, 'Calories and protein must be numbers ≥ zero.'))
+    }
   }
-  return true
+  if (!finiteOrAbsent(input.carbs) || !finiteOrAbsent(input.fat)) {
+    errors.push(err('invalid-manual-food', 'الكارب والدهون إمّا رقم ≥ صفر أو تُترك فارغة.', 'Carbs and fat must be numbers ≥ zero or left empty.'))
+  }
+  if (input.grams !== undefined && (typeof input.grams !== 'number' || !Number.isFinite(input.grams) || input.grams <= 0)) {
+    errors.push(err('invalid-manual-food', 'الجرامات يجب أن تكون رقمًا أكبر من صفر.', 'Grams must be a number greater than zero.'))
+  }
+  if (!errors.length && !(input.calories > 0 || input.protein > 0)) {
+    errors.push(err('invalid-manual-food', 'اكتب سعرات أو بروتين أكبر من صفر.', 'Enter calories or protein greater than zero.'))
+  }
+  if (errors.length) return { status: 'rejected', errors }
+
+  const existing = listPersonalFoods()
+  const key = personalFoodNameKey(nameAr)
+  const target = id ? existing.find((f) => f.id === id) : existing.find((f) => personalFoodNameKey(f.nameAr) === key)
+  if (id && !target) return { status: 'rejected', errors: [err('invalid-manual-food', 'الطعام المطلوب تعديله غير موجود.', 'The food you are editing no longer exists.')] }
+  if (!target && existing.length >= MAX_PERSONAL_FOODS) {
+    return { status: 'rejected', errors: [err('invalid-manual-food', `وصلت الحدّ (${MAX_PERSONAL_FOODS}) — احذف أكلة قديمة أوّلًا.`, `You reached the limit (${MAX_PERSONAL_FOODS}) — delete an old food first.`)] }
+  }
+  // عند التعديل بمعرّف: منع اصطدام الاسم مع أكلة أخرى — اسمان لأكلتين لا أكلتان باسم.
+  if (target && id && existing.some((f) => f.id !== id && personalFoodNameKey(f.nameAr) === key)) {
+    return { status: 'rejected', errors: [err('invalid-manual-food', 'فيه أكلة ثانية بنفس الاسم.', 'Another saved food already has this name.')] }
+  }
+  const now = new Date().toISOString()
+  const food: PersonalFood = {
+    id: target?.id ?? nextPersonalFoodId(existing),
+    nameAr,
+    ...(input.nameEn?.trim() ? { nameEn: input.nameEn.trim() } : {}),
+    ...(input.grams !== undefined ? { grams: round1(input.grams) } : {}),
+    calories: round1(input.calories),
+    protein: round1(input.protein),
+    ...(input.carbs !== undefined ? { carbs: round1(input.carbs) } : {}),
+    ...(input.fat !== undefined ? { fat: round1(input.fat) } : {}),
+    createdAt: target?.createdAt || now,
+    ...(target ? { updatedAt: now } : {}),
+    ...(target?.lastUsedAt ? { lastUsedAt: target.lastUsedAt } : {}),
+    ...(target?.useCount ? { useCount: target.useCount } : {}),
+  }
+  const reg = readPersonalFoods()
+  reg[currentOwner()] = target ? existing.map((f) => (f.id === food.id ? food : f)) : [...existing, food]
+  const result = writePersonalFoods(reg)
+  if (result !== 'ok') return { status: 'storage', result }
+  return { status: 'ok', food, replaced: !!target }
+}
+
+/** يختم آخر استعمال (لترتيب «أكلاتي»). أفضل جهد: فشل الختم لا يُفشل التسجيل. */
+export function markPersonalFoodUsed(id: string): void {
+  const existing = listPersonalFoods()
+  if (!existing.some((f) => f.id === id)) return
+  const now = new Date().toISOString()
+  const reg = readPersonalFoods()
+  reg[currentOwner()] = existing.map((f) => (f.id === id ? { ...f, lastUsedAt: now, useCount: (f.useCount ?? 0) + 1 } : f))
+  writePersonalFoods(reg)
+}
+
+/**
+ * بحث «أكلاتي» بالاستعلام نفسه الذي يكتبه المستخدم في مربّع البحث — كل كلمة من
+ * الاستعلام (بعد الطيّ) يجب أن تظهر في الاسم. ترتيب: الأحدث استعمالًا.
+ */
+export function searchPersonalFoods(query: string, userId?: string | null): PersonalFood[] {
+  const q = personalFoodNameKey(query)
+  if (!q) return []
+  const words = q.split(' ').filter(Boolean)
+  return listPersonalFoodsByRecency(userId).filter((f) => {
+    const hay = `${personalFoodNameKey(f.nameAr)} ${f.nameEn ? personalFoodNameKey(f.nameEn) : ''}`
+    return words.every((w) => hay.includes(w))
+  })
+}
+
+/** حصة مضاعَفة من طعام شخصي — نقطة تحويل واحدة؛ الواجهة لا تضرب أرقامًا بنفسها. */
+export function personalFoodPortion(food: PersonalFood, servings: number): { servings: number; calories: number; protein: number; carbs?: number; fat?: number; grams?: number } {
+  const k = Number.isFinite(servings) && servings > 0 ? servings : 1
+  return {
+    servings: round2(k),
+    calories: round1(food.calories * k),
+    protein: round1(food.protein * k),
+    ...(typeof food.carbs === 'number' ? { carbs: round1(food.carbs * k) } : {}),
+    ...(typeof food.fat === 'number' ? { fat: round1(food.fat * k) } : {}),
+    ...(typeof food.grams === 'number' ? { grams: round1(food.grams * k) } : {}),
+  }
 }
 
 export type ManualFoodResult =
@@ -751,31 +910,8 @@ export function createManualFood(input: ManualFoodInput, options: { saveToPerson
 
   let personal: PersonalFood | undefined
   if (options.saveToPersonal !== false) {
-    const existing = listPersonalFoods()
-    if (existing.length < MAX_PERSONAL_FOODS) {
-      const maxN = existing.reduce((m, f) => {
-        const match = /^pf-(\d+)$/.exec(f.id)
-        return match ? Math.max(m, Number(match[1])) : m
-      }, 0)
-      personal = {
-        id: `pf-${maxN + 1}`,
-        nameAr,
-        ...(input.nameEn?.trim() ? { nameEn: input.nameEn.trim() } : {}),
-        grams: round1(input.grams),
-        calories: Math.round(input.calories),
-        protein: round1(input.protein),
-        carbs: round1(input.carbs),
-        fat: round1(input.fat),
-        createdAt: new Date().toISOString(),
-      }
-      const reg = readPersonalFoods()
-      reg[currentOwner()] = [...existing, personal]
-      try {
-        ls()?.setItem(PERSONAL_FOODS_KEY, JSON.stringify(reg))
-      } catch {
-        /* لا نرمي */
-      }
-    }
+    const saved = savePersonalFood({ nameAr, nameEn: input.nameEn, grams: input.grams, calories: input.calories, protein: input.protein, carbs: input.carbs, fat: input.fat })
+    if (saved.status === 'ok') personal = saved.food
   }
   return { status: 'ok', food, ...(personal ? { personal } : {}) }
 }

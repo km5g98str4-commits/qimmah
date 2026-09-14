@@ -164,14 +164,14 @@
   {
    "id": "alrahiyah",
    "nameAr": "الراهية النسخة المدخنة",
-   "nameEn": "Alrahiyah",
-   "sourceName": "Alrahiyah",
+   "nameEn": "Alrahiyah Smoky Edition",
+   "sourceName": "Alrahiyah Smoky Edition",
    "kcal": 1154,
    "protein": 62,
    "type": "wrap",
    "servingLabelAr": "حبة",
    "keywords": [],
-   "descEn": "Largest chicken shawarma with potato cubes, lettuce, pickles, and mutawam sauce mixed with abu khalta sauce.",
+   "descEn": "Largest chicken shawarma with spicy potato cubes, lettuce, pickles, and modakhan sauce mixed with abu khalta sauce.",
    "priceSar": 29
   },
   {
@@ -524,6 +524,23 @@
    "keywords": [],
    "descEn": "Spicy fries medium",
    "priceSar": 13
+  },
+  {
+   "id": "alrahiyah-classic",
+   "nameAr": "الراهية",
+   "nameEn": "Alrahiyah",
+   "sourceName": "Alrahiyah",
+   "kcal": 1154,
+   "protein": 62,
+   "type": "wrap",
+   "servingLabelAr": "حبة",
+   "keywords": [
+    "الراهيه",
+    "rahiyah",
+    "الرهية"
+   ],
+   "descEn": "Largest chicken shawarma with potato cubes, lettuce, pickles, and mutawam sauce mixed with abu khalta sauce.",
+   "priceSar": 29
   }
  ]
 }

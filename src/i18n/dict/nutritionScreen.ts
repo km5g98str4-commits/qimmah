@@ -79,6 +79,23 @@ export interface NutritionScreenStrings {
   allergyNoticeBodyPrefix: string
   allergyNoticeBodySuffix: string
   allergyNoticeSeparator: string
+  // [FOOD-UX-001] «أكلاتي» — الأطعمة المخصّصة المحفوظة
+  tabMine: string
+  mineBadge: string
+  saveToMine: string
+  saveNeedsName: string
+  mineEmpty: string
+  mineLog: string
+  mineEdit: string
+  mineDelete: string
+  mineConfirmDelete: string
+  mineDeleteFailed: string
+  mineSaved: string
+  mineUpdated: string
+  mineEditing: string
+  perServing: string
+  servingsLabel: string
+  logAndSave: string
 }
 
 const ar: NutritionScreenStrings = {
@@ -149,6 +166,22 @@ const ar: NutritionScreenStrings = {
   allergyNoticeBodySuffix:
     'خطة الوجبات الحالية ما تستبعدها تلقائيًا بعد — تأكّد من مكوّنات أي وجبة قبل ما تنفّذها، وبدّلها إذا لزم.',
   allergyNoticeSeparator: '، ',
+  tabMine: 'أكلاتي',
+  mineBadge: 'من أكلاتي',
+  saveToMine: 'احفظها في أكلاتي',
+  saveNeedsName: 'اكتب اسم عشان تنحفظ في أكلاتي.',
+  mineEmpty: 'ما عندك أكلات محفوظة. سوّ وحدة من «إضافة مخصّصة» وتلقاها هنا كل يوم.',
+  mineLog: 'سجّل',
+  mineEdit: 'تعديل',
+  mineDelete: 'حذف',
+  mineConfirmDelete: 'أكّد الحذف',
+  mineDeleteFailed: 'ما انحذفت. جرّب مرة ثانية.',
+  mineSaved: 'انحفظت في أكلاتي.',
+  mineUpdated: 'اتعدّلت.',
+  mineEditing: 'تعديل أكلة',
+  perServing: 'لكل حصة',
+  servingsLabel: 'عدد الحصص',
+  logAndSave: 'سجّل واحفظ',
 }
 
 const en: NutritionScreenStrings = {
@@ -218,6 +251,22 @@ const en: NutritionScreenStrings = {
   allergyNoticeBodyPrefix: 'You told us you are allergic to:',
   allergyNoticeBodySuffix: 'Your meal plan does not exclude these automatically yet — check the ingredients of any meal before you make it, and swap it if needed.',
   allergyNoticeSeparator: ', ',
+  tabMine: 'My foods',
+  mineBadge: 'Saved',
+  saveToMine: 'Save to my foods',
+  saveNeedsName: 'Add a name to save it to your foods.',
+  mineEmpty: 'No saved foods yet. Create one from “Custom add” and find it here every day.',
+  mineLog: 'Log',
+  mineEdit: 'Edit',
+  mineDelete: 'Delete',
+  mineConfirmDelete: 'Confirm delete',
+  mineDeleteFailed: 'Could not delete. Try again.',
+  mineSaved: 'Saved to your foods.',
+  mineUpdated: 'Updated.',
+  mineEditing: 'Editing food',
+  perServing: 'per serving',
+  servingsLabel: 'Servings',
+  logAndSave: 'Log & save',
 }
 
 export const nutritionScreenStrings: Record<Lang, NutritionScreenStrings> = { ar, en }
