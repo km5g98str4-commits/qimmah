@@ -1376,14 +1376,13 @@
    "nameAr": "بطاطس مقلية (صغير)",
    "nameEn": "French Fries (small)",
    "q": "mcdonald's french fries",
-   "type": "side",
+   "type": "fries",
    "prefer": [
     "sr",
     "fndds",
     "foundation"
    ],
-   "pick": "McDONALD'S, french fries",
-   "portionHint": "small"
+   "serving": "small"
   },
   {
    "id": "CH098",
@@ -1573,14 +1572,13 @@
    "nameAr": "تشيكن ماك ناجتس (٤ قطع)",
    "nameEn": "Chicken McNuggets (4 pc)",
    "q": "mcdonald's chicken mcnuggets",
-   "type": "chicken",
+   "type": "fried_chicken",
    "prefer": [
     "sr",
     "fndds",
     "foundation"
    ],
-   "pick": "McDONALD'S, Chicken McNUGGETS",
-   "portionPieces": 4
+   "serving": "4 pieces"
   },
   {
    "id": "CH112",
@@ -1588,14 +1586,13 @@
    "nameAr": "تشيكن ماك ناجتس (١٠ قطع)",
    "nameEn": "Chicken McNuggets (10 pc)",
    "q": "mcdonald's chicken mcnuggets",
-   "type": "chicken",
+   "type": "fried_chicken",
    "prefer": [
     "sr",
     "fndds",
     "foundation"
    ],
-   "pick": "McDONALD'S, Chicken McNUGGETS",
-   "portionPieces": 10
+   "serving": "10 pieces"
   }
  ]
 }
