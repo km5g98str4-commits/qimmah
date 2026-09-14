@@ -146,7 +146,7 @@ check('⚔️ الوضع غير العشري ما زال يحذف الفاصلة
 console.log('\n⑪ الشاشة موصولة بالمخزن (فحص بنيوي)')
 const src = readFileSync(resolve(__QIMMAH_ROOT__, 'src/components/nutrition/QuickMealLogger.tsx'), 'utf8')
 const fieldBlock = src.slice(src.indexOf('function Field('), src.indexOf('function Stat('))
-check('حقول المخصّص عشرية: inputMode="decimal" + step="any" + decimal:true', /inputMode="decimal"/.test(fieldBlock) && /step="any"/.test(fieldBlock) && /decimal: true/.test(fieldBlock))
+check('حقول المخصّص عشرية: type="text" + inputMode="decimal" + decimal:true (لا type=number يُفرِّغ «٢٧٫٥»)', /type="text"/.test(fieldBlock) && /inputMode="decimal"/.test(fieldBlock) && /decimal: true/.test(fieldBlock) && !/type="number"/.test(fieldBlock))
 check('⚔️ لا inputMode="numeric" باقٍ في حقل المخصّص', !/inputMode="numeric"/.test(fieldBlock))
 check('تبويب «أكلاتي» موجود ويقرأ من المخزن', /testId="tab-mine"/.test(src) && /listPersonalFoodsByRecency\(\)/.test(src))
 check('الحفظ من المخصّص يمرّ بـsavePersonalFood والحذف بـdeletePersonalFood', /savePersonalFood\(input/.test(src) && /deletePersonalFood\(id\)/.test(src))
