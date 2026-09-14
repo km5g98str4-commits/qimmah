@@ -3,9 +3,23 @@
 > **Canonical owner of one fact only: where execution stands right now.**
 > A zero-context session reads `README.md` → `00-GROUND.md` → this file, and can continue.
 
-**Last updated:** 2026-09-14 · **by:** [FOOD-UX-001]
+**Last updated:** 2026-09-14 · **by:** [SALLA-CLOSURE-001]
 
 ---
+
+## 0-ي. إغلاق سلة قبل الشراء المضبوط — [SALLA-CLOSURE-001] (١٤ سبتمبر)
+
+```
+المنتج    : 2106415557 — https://salla.sa/Qimmahsa/قِمّة-Premium/p2106415557 (١٩٫٩٩ · دفعة واحدة · بطاقة رقمية · تسليم آلي · مخفي)
+المخزون   : SALLA-LAUNCH-001 = 500 صادر / 0 مستردّ / 0 معطَّل (مقيس من الإنتاج) · FOUNDER-RESERVE-001 = 1000/1/0 لم يُمسّ
+الإنتاج   : redeem_access_code_v2 → private.redeem_core (قفل صفّ for update · enabled · already · دفتر + سجلّ الاسترداد · منحة دائمة) · ٤٦ هجرة مطبَّقة
+الناقص    : هجرة 20260913120001_salla_batch_exports وحدها (قسم «قناة سلة» في #/admin: تسجيل التصدير · المخزون · بحث الدعم) — لا تمسّ الاسترداد
+```
+- `checkoutUrl` → المنتج المعتمد؛ شاشة العضوية تعرض السعر من `product.premiumPriceSar` (مصدر واحد) بصيغة «دفعة واحدة»
+  و«دائم، بلا اشتراك ولا تجديد تلقائي». إثباتات الحزمة (`test:bundle-safety` · `test:attack-bundle` · `test:release:static`)
+  مثبَّتة على الرابط الجديد؛ `salla-webhook` (غير منشور في الإنتاج) مثبَّت على المعرّف الجديد.
+- **متابعات غير حاجبة:** حماية كلمات المرور المسرّبة (Supabase Auth) معطَّلة — مهمة تصليب مستقلة · تحذيرات
+  SECURITY DEFINER القابلة للتنفيذ من `authenticated` مقصودة (تحرسها `require_founder`/`require_admin`).
 
 ## 0-ط. أكلاتي + تغطية المطاعم — [FOOD-UX-001] (١٤ سبتمبر)
 

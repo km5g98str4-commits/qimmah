@@ -60,6 +60,8 @@ export interface PremiumStrings {
   buyHeading: string
   buyBody: string
   /** [SALLA-PROD-001] الرحلة في سطر: أين الدفع، أين يصل الكود، أين يُكتب. */
+  /** سطر السعر — الرقم يأتي من `product.premiumPriceSar` لا من هنا. */
+  buyPrice: (price: string) => string
   buySteps: string
   buyCta: string
 
@@ -113,7 +115,8 @@ export const premiumStrings: Record<'ar' | 'en', PremiumStrings> = {
     trialCta: 'ابدأ التجربة',
 
     buyHeading: 'قِمّة Premium',
-    buyBody: 'شراء واحد يفتح قِمّة كاملة.',
+    buyBody: 'شراء واحد يفتح قِمّة كاملة على حسابك — دائم، بلا اشتراك ولا تجديد تلقائي.',
+    buyPrice: (price) => `${price} ريال — دفعة واحدة.`,
     buySteps: 'الدفع في سلة ← كود التفعيل يوصلك في صفحة الطلب وبالبريد ← الصقه هنا في «كود التفعيل».',
     buyCta: 'اشترِ Premium',
 
@@ -163,7 +166,8 @@ export const premiumStrings: Record<'ar' | 'en', PremiumStrings> = {
     trialCta: 'Start trial',
 
     buyHeading: 'Qimmah Premium',
-    buyBody: 'One purchase unlocks all of Qimmah.',
+    buyBody: 'One purchase unlocks all of Qimmah on your account — permanent, no subscription, no auto-renewal.',
+    buyPrice: (price) => `SAR ${price} — one-time payment.`,
     buySteps: 'Pay on Salla → your activation code appears on the order page and by email → paste it here under “Activation code”.',
     buyCta: 'Buy Premium',
 

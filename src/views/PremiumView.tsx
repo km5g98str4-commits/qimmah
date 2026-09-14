@@ -22,6 +22,7 @@ import { useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { StandaloneAppScreen } from '@/components/StandaloneAppScreen'
 import { product } from '@/config/product'
+import { formatNumber } from '@/lib/numberFormat'
 import { premiumStrings } from '@/i18n/dict/premium'
 import { accessStrings } from '@/i18n/dict/access'
 import { useAccess } from '@/lib/access/useAccess'
@@ -263,6 +264,7 @@ export function PremiumView({ lang, signedIn, onBack, onSignIn }: PremiumViewPro
             <section className="card mt-3 p-5" data-testid="premium-buy-section">
               <h2 className="text-base font-black text-ink-900">{s.buyHeading}</h2>
               <p className="mt-1 text-sm leading-relaxed text-ink-500">{s.buyBody}</p>
+              <p className="mt-1.5 text-sm font-black text-ink-900" data-testid="premium-buy-price">{s.buyPrice(formatNumber(product.premiumPriceSar, lang))}</p>
               <p className="mt-1.5 text-[0.8rem] font-bold text-primary-c">{s.premiumNote}</p>
               <p className="mt-2 text-[0.78rem] leading-relaxed text-ink-600" data-testid="premium-buy-steps">{s.buySteps}</p>
               <a
