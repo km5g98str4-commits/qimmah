@@ -103,13 +103,17 @@ for (const old of ['1181109938', '1751698501', '973212497']) check(`no reference
 // الاشتراك/التجديد: **النفي مطلوب والإثبات ممنوع.** أوّل صيغة لهذا الفحص رفعت علمًا على
 // «بلا اشتراك ولا تجديد تلقائي» و«not a monthly or auto-renewing subscription» — وهما النصّان
 // الصحيحان بعينهما. فالكلمة وحدها ليست مخالفة؛ المخالفة أن تَرِد **مثبَتة**.
-// النافي قد يبعد عن الكلمة بعدّة كلمات: «not a monthly or auto-renewing subscription» — فالبحث في نافذة لا عن ملاصقة.
-const NEGATORS = /\b(بلا|بدون|ولا|ليس|ليست|غير|no|not|never|without)\b/i
+// النافي قد يبعد عن الكلمة بعدّة كلمات: «not a monthly or auto-renewing subscription» — فالبحث في
+// نافذة لا عن ملاصقة. و**`\b` لا تصلح للعربية**: حدود الكلمة في JS معرَّفة على `[A-Za-z0-9_]`، فالحرف
+// العربي غير «حرف كلمة» ولا تنشأ عنده حدّ — فـ`\bبلا` لا تطابق شيئًا. لذلك نافيان: عربي بلا حدود، ولاتيني بها.
+const NEG_AR = /(بلا|بدون|ولا|ليس|ليست|غير)/
+const NEG_EN = /\b(no|not|never|without)\b/i
+const isNegated = (before) => NEG_AR.test(before) || NEG_EN.test(before)
 const affirmativeClaims = []
 for (const [path, txt] of fetched) {
   for (const m of txt.matchAll(/سنويًا|سنوياً|تجديد تلقائي|auto.?renew(?:ing|al)?|yearly subscription|monthly subscription/gi)) {
     const before = txt.slice(Math.max(0, m.index - 70), m.index)
-    if (!NEGATORS.test(before)) affirmativeClaims.push(`${path}: …${before.slice(-30)}[${m[0]}]…`)
+    if (!isNegated(before)) affirmativeClaims.push(`${path}: …${before.slice(-30)}[${m[0]}]…`)
   }
 }
 check('no AFFIRMATIVE subscription/renewal claim in the shipped bundle (negations are the required copy)',
