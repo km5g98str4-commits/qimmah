@@ -253,7 +253,9 @@ for (const group of SCRIPT_TRANSLITERATIONS) {
   // «على حدّ كلمة»: بداية الاسم أو بعد فاصل، مع السماح بـ«ال» التعريف —
   // فـ«دبس **التمر**» يحمل معنى «تمر»، و«بروتين» لا يحمل معنى «تين».
   // (يقبل الصيغ متعدّدة الكلمات مثل «بان كيك» لأن المطابقة على النصّ لا على الكلمات.)
-  const atWordStart = new RegExp(`(^|[\\s()،/-])(ال)?${canonical.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
+  // [FOOD-UX-001] واللواصق أحادية الحرف (ب · و · ك · ل) قبل «ال» ما زالت حدّ كلمة:
+  // «سلطة **بالتونة**» تحمل معنى «تونة»، بينما «بروتين» لا يحمل «تين» (اللاصقة لا تلتصق بـ«روتين»).
+  const atWordStart = new RegExp(`(^|[\\s()،/-])[بوكل]?(ال)?${canonical.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`)
   const dragged = foodItems.filter(
     (f) => normalizeSearch(f.nameAr).includes(canonical) && !atWordStart.test(normalizeSearch(f.nameAr)),
   )
@@ -283,8 +285,9 @@ check('ولا «سالمو» الناقصة تُكافأ «سلمون»', !searc
 // [FOOD-GENERIC-001] الأصناف العامّة المولَّدة (gen-*) تُضيف نتائج **مسمّاة بمصدرها**
 // (برغل جافّ · تمر مدجول…) — الضابط يقيس المنسَّق اليدوي وحده، فيبقى معناه: لا ضجيج تعميم.
 // [BAKERY-READY-001][RESTAURANT-MENUS-001] وكذلك bakery-* (أفران/وجبات جاهزة بسند USDA) وrst-* (قوائم مطاعم بمصدر رسمي).
+// [FOOD-UX-001] «بطاطس» ١٦ ⇒ ١٥: بطاطس ماكدونالدز اليدوية (mcd-fries-medium) حلّ محلّها سجلّ USDA بثلاثة أحجام (rst-*) — نقصان مسمّى لا ضجيج.
 const hand = (q) => searchFood(q).filter((f) => !/^(gen|bakery|rst)-/.test(f.id))
-for (const [query, expect] of [['برغل', 1], ['فطيرة', 6], ['تمر', 16], ['شوفان', 3], ['بطاطس', 16]]) {
+for (const [query, expect] of [['برغل', 1], ['فطيرة', 6], ['تمر', 16], ['شوفان', 3], ['بطاطس', 15]]) {
   check(`ضابط: «${query}» ما زال يُرجع ${expect} من المنسَّق اليدوي`, hand(query).length === expect, `${hand(query).length}`)
 }
 check('ضابط: «برغل» لا تُكافأ «برجر» (سابقة القائمة المغلقة)', !searchFood('برغل').some((f) => f.nameAr.includes('برجر')))
