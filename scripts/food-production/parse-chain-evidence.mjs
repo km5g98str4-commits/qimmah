@@ -150,6 +150,82 @@ const PARSERS = {
   // سجلّات USDA للسلاسل (SR Legacy «Fast Foods/Restaurant Foods» + FNDDS): منتجات السوق الأمريكي
   // مقيسة مخبريًّا — كاملة الماكروز لكل ١٠٠غ مع حصص. الخريطة docs/data-factory/chains/USDA-MAP.json
   // والدليل data/food-production/chains/usda-evidence.json (جلب CI). يُنتج ملفًا لكل سلسلة.
+  // [FOOD-UX-001] أفران الحطب (الحطب فودز): صفحات المنتجات الرسمية تحمل ملصقًا غذائيًّا كاملًا
+  // «القيم الغذائية (لكل 100جرام)» + وزن العبوة. القيم تُنسخ لكل 100غ ثم تُقاس على العبوة
+  // (تحويل وحدة لا تقدير). صفحة بلا ملصق (فهرس فئة) تُتجاهل؛ ملصق حصّته ≠ 100غ يُحجر مسمًّى.
+  alhatab() {
+    const index = JSON.parse(readFileSync(resolve(ROOT, 'data/food-production/chain-evidence/index.json'), 'utf8'))
+    const CAT = {
+      'bakery/bread': ['أفران', 'bread'], 'bakery/artisan-bread': ['أفران', 'bread'], 'bakery/pastry-cakes': ['أفران', 'pastry'], 'bakery/dry-baked-biscuits': ['أفران', 'biscuit'],
+      'ready-to-eat/arabic-main': ['وجبات جاهزة', 'main'], 'ready-to-eat/indian-main': ['وجبات جاهزة', 'main'], 'ready-to-eat/healthy-main': ['وجبات جاهزة', 'main'],
+      'ready-to-eat/arabic-breakfast': ['وجبات جاهزة', 'breakfast'], 'ready-to-eat/pasta-noodles': ['وجبات جاهزة', 'pasta'], 'ready-to-eat/sandwiches': ['وجبات جاهزة', 'sandwich'],
+      'ready-to-eat/soup': ['وجبات جاهزة', 'soup'], 'ready-to-eat/meal-salad': ['وجبات جاهزة', 'salad'], 'ready-to-eat/accomp-salad': ['وجبات جاهزة', 'salad'], 'ready-to-eat/juices': ['وجبات جاهزة', 'drink'],
+      'dips-salads/dips': ['وجبات جاهزة', 'dip'], 'dips-salads/mezze': ['وجبات جاهزة', 'mezze'],
+    }
+    const num = (t) => { const m = /^([\d.]+)\s*(?:جم|ملجم|مكجم|سعرات|كيلوجول)?/.exec(String(t ?? '').trim()); return m ? Number(m[1]) : null }
+    const items = [], quarantined = []
+    const seen = new Set()
+    for (const r of index.results) {
+      if (!r.slug.startsWith('hatab-') || r.raw?.status !== 200) continue
+      const txt = EV(r.slug)
+      if (!txt || !txt.includes('القيم الغذائية (لكل 100جرام):')) continue
+      const L = txt.split('\n')
+      const path = r.url.split('/our-products/')[1] ?? ''
+      const cat = CAT[path.split('/').slice(0, 2).join('/')]
+      if (!cat) { quarantined.push({ nameEn: r.url, why: `فئة غير مصنَّفة: ${path}` }); continue }
+      // الاسم: السطر الذي يسبق وزن العبوة مباشرةً (نمط الصفحة: الاسم ×٣ ثم «380جم»).
+      const W = /^(\d+(?:\.\d+)?)\s*(جم|مل|كجم|لتر)$/
+      const wIdx = L.findIndex((l, i) => W.test(l) && i > 0 && L[i - 1] === L[i - 2])
+      const wm = wIdx > 0 ? W.exec(L[wIdx]) : null
+      // مل/لتر للعصائر تُقرأ غرامًا مكافئًا (كثافة ≈ ١) — وسم العبوة يبقى بوحدة الملصق.
+      const grams = wm ? Math.round(Number(wm[1]) * (wm[2] === 'كجم' || wm[2] === 'لتر' ? 1000 : 1)) : null
+      const packLabel = wm ? `${wm[1]}${wm[2] === 'كجم' ? 'كغ' : wm[2] === 'جم' ? 'غ' : wm[2]}` : ''
+      const nameAr = wIdx > 0 ? L[wIdx - 1].trim() : null
+      const slug = r.url.split('/').filter(Boolean).pop()
+      const nameEn = slug.replace(/-pp$/, '').replace(/-\d+$/, '').split('-').map((w) => (w.length > 2 ? w[0].toUpperCase() + w.slice(1) : w)).join(' ')
+      const at = (label) => { const i = L.indexOf(label); return i >= 0 ? num(L[i + 1]) : null }
+      const i100 = L.indexOf('القيم الغذائية (لكل 100جرام):')
+      const iServ = L.indexOf('القيم الغذائية (لكل حصة):')
+      const block = L.slice(i100, iServ > i100 ? iServ : i100 + 40)
+      const in100 = (label) => { const i = block.indexOf(label); return i >= 0 ? num(block[i + 1]) : null }
+      const fat100 = in100('إجمالي الدهون') ?? in100('الدهون'), carbs100 = in100('الكربوهيدرات') ?? in100('إجمالي الكربوهيدرات'), protein100 = in100('البروتين'), fiber100 = in100('الألياف الغذائية')
+      const servBlock = iServ >= 0 ? L.slice(iServ, iServ + 12) : []
+      const kcalIdx = servBlock.indexOf('الطاقة')
+      const kcal = kcalIdx >= 0 ? num(servBlock[kcalIdx + 1]) : null
+      const fatServ = (() => { const i = servBlock.indexOf('الدهون'); return i >= 0 ? num(servBlock[i + 1]) : null })()
+      const base = { id: slug, nameAr, nameEn }
+      if (!nameAr || !grams) { quarantined.push({ ...base, why: 'اسم أو وزن عبوة غير مقروء' }); continue }
+      if (seen.has(slug)) continue
+      if ([fat100, carbs100, protein100, kcal].some((v) => typeof v !== 'number')) { quarantined.push({ ...base, why: 'ملصق ناقص (دهون/كارب/بروتين/طاقة)' }); continue }
+      if (fatServ !== null && Math.abs(fatServ - fat100) > 0.05) { quarantined.push({ ...base, why: `حصة الملصق ≠ 100غ (دهون ${fatServ} مقابل ${fat100}) — الطاقة غير منسوبة بيقين` }); continue }
+      seen.add(slug)
+      const k = grams / 100
+      const per = (v) => Math.round(v * k * 10) / 10
+      items.push({
+        id: slug, nameAr, nameEn, sourceName: nameAr, sourceUrl: r.url,
+        kcal: Math.round(kcal * k), protein: per(protein100), carbs: per(carbs100), fat: per(fat100), ...(typeof fiber100 === 'number' ? { fiber: per(fiber100) } : {}),
+        per100g: { kcal, protein: protein100, carbs: carbs100, fat: fat100 },
+        servingGrams: grams, servingLabelAr: `عبوة (${packLabel})`, type: cat[1], category: cat[0], keywords: [],
+      })
+    }
+    // أسماء متطابقة لمنتجين مختلفين (نفس الاسم العربي بعبوتين) ⇒ يُلحق وزن العبوة ليبقى الاسم مفتاحًا فريدًا.
+    const dupAr = new Map(), dupEn = new Map()
+    for (const it of items) { dupAr.set(it.nameAr, (dupAr.get(it.nameAr) ?? 0) + 1); dupEn.set(it.nameEn, (dupEn.get(it.nameEn) ?? 0) + 1) }
+    for (const it of items) {
+      if (dupAr.get(it.nameAr) > 1) {
+        const pack = it.servingLabelAr.replace(/^عبوة /, '').replace(/[()]/g, '')
+        const samePack = items.filter((o) => o.nameAr === it.nameAr && o.servingGrams === it.servingGrams).length > 1
+        it.nameAr = samePack ? `${it.nameAr} (${/no-added-sugar/.test(it.id) ? 'بدون سكر مضاف' : it.nameEn})` : `${it.nameAr} (${pack})`
+      }
+      if (dupEn.get(it.nameEn) > 1) it.nameEn = `${it.nameEn} (${it.servingGrams}g)`
+    }
+    return {
+      chain: { slug: 'alhatab', ar: 'أفران الحطب', en: 'Al Hatab', keywords: ['alhatab', 'al hatab', 'hatab', 'الحطب', 'افران الحطب', 'أفران الحطب', 'الحطب فودز', 'حطب'] },
+      source: { url: 'https://alhatab.com.sa/our-products', kind: 'official-product-label', market: 'SA', accessed: String(index.fetchedAt).slice(0, 10), note: 'ملصقات المنتجات الرسمية على موقع الحطب فودز (لكل 100غ) مقيسة على وزن العبوة المعلَن — ماكروز كاملة.' },
+      items, quarantined,
+    }
+  },
+
   usda() {
     const map = JSON.parse(readFileSync(resolve(ROOT, 'docs/data-factory/chains/USDA-MAP.json'), 'utf8'))
     const evidence = JSON.parse(readFileSync(resolve(ROOT, 'data/food-production/chains/usda-evidence.json'), 'utf8'))
