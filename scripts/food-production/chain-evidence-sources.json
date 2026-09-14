@@ -392,6 +392,112 @@
    "url": "https://shawarmer.com/ar/menu",
    "render": true,
    "note": "إعادة التقاط الجذر — ٥٦ سطر سعرات في اللقطة السابقة مقابل ٣٩ مستوردًا"
+  },
+  {
+   "slug": "mcd-sa-calc-ar",
+   "chain": "ماكدونالدز السعودية — حاسبة القيمة الغذائية (الرياض)",
+   "url": "https://www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "الصفحة الرسمية المكتشفة بالبحث؛ HTTP/1.1 + التقاط JSON الواجهة"
+  },
+  {
+   "slug": "mcd-sa-calc-en",
+   "chain": "McDonald's KSA — Nutrition Calculator (Riyadh)",
+   "url": "https://www.mcdonalds.com/sa/en-sa/riyadh/about-our-food/nutrition-calculator.html",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "النسخة الإنجليزية للأسماء"
+  },
+  {
+   "slug": "mcd-sa-menu-ar",
+   "chain": "ماكدونالدز السعودية — المنيو الكامل",
+   "url": "https://www.mcdonalds.com/sa/ar-sa/riyadh/full-menu.html",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "قد يحمل السعرات على البطاقات"
+  },
+  {
+   "slug": "mcd-sa-dna-ar",
+   "chain": "ماكدونالدز السعودية — واجهة المنيو JSON",
+   "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=SA&language=ar&showLiveData=true&category=100",
+   "render": false,
+   "browserLike": true,
+   "note": "نفس واجهة الموقع الرسمي بسوق SA — مرشّح"
+  },
+  {
+   "slug": "alhatab-products-ar",
+   "chain": "الحطب فودز (أفران الحطب) — منتجاتنا",
+   "url": "https://alhatab.com.sa/our-products",
+   "render": true,
+   "note": "الموقع الرسمي المكتشف بالبحث"
+  },
+  {
+   "slug": "alhatab-bakery-en",
+   "chain": "Al Hatab Foods — Bakery",
+   "url": "https://alhatab.com.sa/en/our-products/bakery",
+   "render": true,
+   "note": "فئة المخبوزات"
+  },
+  {
+   "slug": "alhatab-ready-en",
+   "chain": "Al Hatab Foods — Ready meals",
+   "url": "https://alhatab.com.sa/en/our-products/ready-to-eat",
+   "render": true,
+   "note": "مسار مرشّح للوجبات الجاهزة"
+  },
+  {
+   "slug": "alhatab-ready-ar",
+   "chain": "الحطب فودز — وجبات جاهزة",
+   "url": "https://alhatab.com.sa/our-products/ready-to-eat",
+   "render": true,
+   "note": "مسار مرشّح"
+  },
+  {
+   "slug": "alhatab-root-ar",
+   "chain": "الحطب فودز — الرئيسية",
+   "url": "https://alhatab.com.sa/",
+   "render": true,
+   "note": "لاكتشاف روابط الفئات"
+  },
+  {
+   "slug": "hs-alhatab-rawdah-en",
+   "chain": "أفران الحطب — منيو هنقرستيشن (الروضة)",
+   "url": "https://hungerstation.com/sa-en/restaurant/alhatab-bakery/riyadh/al-rawdah/13031",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "منيو المتجر بسعراته المعلَنة (لائحة SFDA) عبر منصّة التوصيل"
+  },
+  {
+   "slug": "hs-alhatab-rawdah-ar",
+   "chain": "أفران الحطب — منيو هنقرستيشن (عربي)",
+   "url": "https://hungerstation.com/sa-ar/restaurant/alhatab-bakery/riyadh/al-rawdah/13031",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "الأسماء العربية"
+  },
+  {
+   "slug": "hs-alhatab-14305",
+   "chain": "أفران الحطب — منيو هنقرستيشن (فرع ٢)",
+   "url": "https://hungerstation.com/sa-ar/restaurant/riyadh/riyadh/14305",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "فرع ثانٍ للمقارنة"
+  },
+  {
+   "slug": "ninja-alhatab-en",
+   "chain": "أفران الحطب — منيو نينجا",
+   "url": "https://ananinja.com/sa/en/restaurants/al-hatab-bakery-30642",
+   "render": true,
+   "browserLike": true,
+   "captureJson": true,
+   "note": "منصّة ثانية للتقاطع"
   }
  ],
  "_round": "round 2 — مسارات مرشّحة بعد قراءة الجولة الأولى (دومينوز وشاورمر مقروءان ومستوردان؛ لا يُعاد جلبهما)."
