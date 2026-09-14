@@ -1,253 +1,266 @@
 Maestro Pizza اطلبها من التطبيق و توصلك حارة | اطلب مايسترو بيتزا الحين
-Menu
-Promotions
+القائمة
+العروض
 0
-Basket
-My orders
-My maestro
-Help & support
-Discover More
+السلة
+طلباتي
+حسابي
+المساعدة والدعم
+اكتشف المزيد
 ▼
-AR
-العربية
-Login
+EN
+English
+تسجيل دخول
 
 0
-0 Points
-Menu
-Promotions
-My orders
-My maestro
-Contact
-Help & support
-Discover More
+0 نقاط
+القائمة
+العروض
+طلباتي
+حسابي
+تواصل
+المساعدة والدعم
+اكتشف المزيد
 ▼
-العربية
-Login
+EN
+تسجيل دخول
 
 0
-0 Points
-Promos
-Latest
-Pizzas
-Sandwiches
-Appetizers
-Desserts
-Drinks & Dips
+0 نقاط
+العروض
+جديدنا
+بيتزا
+ساندويشات
+طلبات جانبية
+الحلويات
+مشروبات و صلصات
 0
-Latest
-Piano
-Chef´s Selection
-Popular
-The Originals
-Kids Meal
-Sandwiches
-Appetizer Box
-Appetizers
-Lava Cakes
-Can
-Water
-Dip Sauce
-Latest
-Taraab Box
-No need to overthink it—this one’s built for gatherings. Two large pizzas of your choice, plus four favorite sides: chicken wings, crispy wedges, garlic cheesy bread, and...
-Piano
-Piano
-What if one pizza ruled them all? A whole meter of Maestro magic: 36 slices lined with 3 bold flavors, served with ranch and dynamite sauces to seal the deal. One bite in...
-Chef´s Selection
-Roasted Veggies
-What if veggies took the lead again roasted style? Caramelized onions, zucchini, eggplant, sweet potatoes, red, pesto sauce and green peppers, mushrooms, and melty Maestr...
-Olive Oil Pesto
-What if olive oil and pesto teamed up? Grilled chicken, roasted cherry tomatoes, and pesto sauce all brought together under melty Maestro cheese. Fresh, smooth, and full ...
-Meat Lovers
-What if your pizza skipped the greens? Loaded with beef meatballs, pepperoni slices, and seasoned sausage over Maestro's rich tomato sauce and melty cheese. Carnivores, u...
-Supreme Deluxe
-What if your pizza came dressed to impress? Maestro tomato sauce, melting Maestro cheese, pepperoni, beef, black olives, onions, green bell peppers, and fresh mushrooms. ...
-Chicken Fajita
-What if fajitas took the pizza route? Grilled chicken, red and green bell peppers, crispy onions, and fajita powder all sitting under melty Maestro cheese. Mexican flavor...
-Popular
-Fresh Italian Rocca
-What if salad turned into a pizza? parmesan, fresh italian rocca leaves, and a balsamic drizzle over melty Maestro cheese — all on a thin crust. Light. Fresh. Loud in fla...
-Burrata Margherita
-What if classic pizza got the Italian VIP treatment? Maestro sauce, Maestro cheese, creamy burrata, and a fragrant pesto swirl on top. It’s rich, smooth, and seriously el...
-Chicken Tikka
-What happens when Indian flavor takes over a pizza? Marinated chicken tikka, bell pepper, onions, tomatoes, mint-coriander sauce, and melted Maestro cheese wrapping it al...
-Peri Peri
-Want to taste the volcano? Try peri-peri with spicy chicken, onions, peppers, finished with Béarnaise sauce and mozzarella.
-Ranchy BBQ
-What if ranch and BBQ teamed up? Grilled chicken, onions, tangy BBQ sauce, and a ranch finish over melty Maestro cheese. Two bold flavors, one perfect combo.
-Dynamite Chicken
-What happens when the pizza has a fuse? Chicken bites, onions, bell peppers, and a dynamite swirl on Maestro cheese — flavor explodes.
-Ranchy Dynamite
-What if the calm one snapped? Ranch and dynamite sauce meet over chicken and veggies, hitting you with a kick you won’t forget.
-Alfredo Chicken
-What if Alfredo turned into a pizza? Creamy sauce, grilled chicken, Spanish mushrooms, and Maestro cheese melting just right. Warm, rich, and made to calm your cravings.
-The Originals
-Chicken Loumi
-What happens if we squeeze Hassawi loumi over the pizza? We made a pizza with loumi and chicken on tomato sauce, full of mozzarella, and finished with oregano.
-Creamy Chicken Loumi
-What happens if we squeeze Hassawi loumi over the pizza? We made a pizza with ranch, loumi, and chicken, full of mozzarella, and finished with oregano.
-Korean Steak
-What if you booked a ticket to Seoul but opened your eyes in Rome? You’ll see the unexpected! Saucy philly steak, green peppers, melted cheese, all tied together with a K...
-Korean BBQ Chicken
-What if Korean and Italian became neighbors? You get an incredible mix of Korean sauce marinated chicken, onions, jalapenos, and topped with a swirl of Korean sauce to se...
-Korean Chicken Kickers
-What if Italian learned to speak Korean? It would make a powerful statement! Chicken kickers, onions and jalapenos giving the sentence some punch, topped with a swirl of ...
-Pulled BBQ Chicken
-What happens when a chicken hits the salon? It comes out with a brand-new style: seasoned and dipped in BBQ, topped with onions and mozzarella cheese, and finished off wi...
-Pulled Ranch Chicken
-What happens when the ranch works its magic? You get chicken drenched in BBQ sauce, with onions and mozzarella cheese, all topped off with a final BBQ drizzle.
-Hot Honey Pepperoni
-What would happen if sweet and spicy met? A pizza with tomato sauce, mozzarella cheese, loaded with pepperoni, and finished with hot honey.
-Shawarmizza
-What happens when shawarma ditches the wrap and joins pizza? Unexpected bites: oven-roasted shawarma chicken, crunchy pickles, creamy garlic mayo, all on Maestro’s red sa...
-Margherita
-Ever tried simplicity when it’s intentional? Here, everything is deliberate: rich tomato sauce and mozzarella that melts in your mouth. Few ingredients, indescribable fla...
-Buffalo Chicken
-What if pizza had a spicy American accent? Dynamite-style bites, creamy white sauce, and gooey mozzarella collide in one bold, fiery bite. No wings required.
-Vegetarian
-What if veggies had a main-character moment? Maestro mozzarella cheese, fresh mushrooms, onions, tomatoes, green bell peppers, and black olives riding on that Maestro tom...
-Jalapeno Ranchy
-What happens when cool ranch meets hot jalapeño? Creamy white sauce, grilled chicken, Maestro cheese, and that jalapeño kick at the end. Soft start, spicy finish.
-Pepperoni
-What if the classic got a little more crispy? Golden pepperoni slices on bubbling Maestro cheese and our signature tomato sauce.You already know the vibes.
-Original Ranchy
-What if ranch dressing ruled the world? Creamy white pizza sauce, grilled marinated chicken, Maestro cheese, and a rich ranch swirl to keep you hooked.
-Create Your Own
-Ever tried building your own pizza? Pick your crust, your sauce, your toppings — your rules. Be the chef.
-Kids Meal
-Wow Pizza
-What if pizza came kid-sized for big adventures?
-A mini pizza made just for kids — with tomato or ranch sauce, Maestro cheese, and optional pepperoni. Comes with a surpr...
-Sandwiches
-Tikka Sandwich
-Ever seen a sandwich bursting with color and energy? Fiery peri-peri chicken meets the cooling rhythm of mint and coriander mayo, with a fresh green pepper beat. a refres...
-Shawarma Chicken
-What happens when shawarma and garlic take the stage? A masterpiece is born: oven roasted shawarma chicken, crunchy pickles, creamy garlic mayo, wrapping it all together ...
-Classic Peri-Peri
-Ever heard chicken humming a tune? It starts with a melody of grilled peri-peri chicken and fresh green peppers, ending with a smooth finale of peri-peri mayo and onions,...
-Chicken Ranch
-What happens when ranch decides to live inside a sandwich? It turns into a delicious story, starring seasoned grilled chicken and creamy ranch sauce, complemented by the ...
-Burrata Pesto
-What happens when burrata and mozzarella meet? A creamy explosion that melts with rich pesto sauce, while sun dried tomatoes add a perfect sweet and tangy balance. Topped...
-Dijon Pastrami
-Ever tasted a delicious symphony? Imagine the savory notes of pastrami meeting melt in your mouth mozzarella, all tuned with the tang of pickles and the crunch of fresh b...
-BBQ Chicken
-Can you describe the taste of power? A bold sandwich that combines grilled chicken with rich BBQ sauce, topped with caramelized onions for a hint of sweetness, and finish...
-Appetizer Box
-Appetizer Box
-What if appetizers decided to party? Meet the legends: Potato Wedges, Cheesy Garlic Bread, and any 2 sides of your choice & 2 dips to turn up the flavor!
-Appetizers
-Mozzarella Sticks
-Golden, crispy mozzarella sticks filled with gooey melted mozzarella in every bite.
-Chicken Party Box
-What happens when chicken throws a party? It brings together 6 crispy chicken pieces and 6 spicy chicken pieces, and of course, it won’t forget the ranch and dynamite sau...
-Curly Fries
-What happens when fries decide to switch up their style?
-You get curly fries and with every twist, the flavor just gets better.
-Chicken Mega Box
-24 crispy chicken pieces coated in bold, spicy seasoning, served with ranch sauce on the side.
-Pesto Garlic Bread
-What happens when pesto becomes friends with garlic? Garlic flavor blends with pesto sauce on warm, crunchy bread.
-Chicken Wings
-What if your pizza brought a plus-one? Oven-baked wings with ranch on the side. Finger-licking, guaranteed.
-Cheesy Garlic Bread
-What if your side stole the show? 6 pieces of French bread loaded with mozzarella, garlic and mixed herbs. Crunchy. Cheesy. Gone in seconds.
-Loaded Ranchy Wedges
-What happens when wedges become social? They make friends with chicken bites, melted mozzarella, and of course, ranch sauce.
-Chicken Bites
-What happens when chicken gets smaller? You get crispy chicken bites full of spices, served with ranch sauce on the side.
-Chicken Kickers
-What happens when chicken gets smaller?
-You get crispy chicken kickers full of spices, served with ranch sauce on the side.
-Crispilla Chicken
-Have you tried folding it? Taste the shawarma with mozzarella, a tangy pickle kick, and finish it off with ranch sauce.
-Crispilla Pepperoni
-What happens if the pepperoni is folded inside a thin dough with mozzarella and dipped in ranch sauce
-Crispilla Ranchy Chicken
-What happens if ranch decides to invade Mexico? We get Crispilla Ranchy Chicken, dipped in ranch sauce.
-Crispilla Veggies
-What happens if the classic concept changes? Thin dough with your favorite veggies folded over.
-Potato Wedges
-What happens when potatoes level up? They become crispy on the outside, tender on the inside, with a light seasoning.
-Desserts
-Churros
-What if dessert had both crunch and comfort?
-Crispy churros dusted with sugar, soft on the inside, served with rich chocolate sauce for dipping.
-Sweet, simple, unforget...
-Lava Cake
-What if your dessert had a melty surprise inside?
-Warm chocolate cake filled with molten chocolate, soft and gooey with every bite.
-The kind of sweet ending you dream ...
-Choco Cookies
-What happens when cookies become friends with chocolate? You get cookies loaded with chocolate chunks and crunchy at the core.
-Cinnaboo
-What happens when sweetness goes bite-sized but bold? Cinnaboo Donuts are soft, mini treats coated in sweet glaze. Light, addictive, and gone before you know it. One is n...
-Drinks & Dips
-Pepsi Night Edition
-Pepsi Night Edition
-Pepsi
-Pepsi
-Diet Pepsi
-Diet Pepsi
-Pepsi Extra Fizz
-Pepsi Extra Fizz
-Mirinda Orange
-Mirinda Orange
-7 Up Zero
-7 Up Zero
-7 Up
-7 Up
-Mirinda Citrus
-Mirinda Citrus
-Water
-Aquafina
-Aquafina
-Dip Sauce
-Sauce Dip
-Our tasty sauce to dip
-Maestro locations
-Privacy policy
-Terms of Use
-Cookie Settings
-Menu
-Promotions
-Track order
-Contact
-© Maestro Pizza 2026. All rights reserved
+جديدنا
+بيانو
+اختيارات الشيف
+المشهورة
+الأصلية
+وجبة طفل
+ساندويشات
+بوكس المقبلات
+الاطباق الجانبيه
+لافا بالبندق
+مشروبات
+مياه
+الصلصات
+جديدنا
+بوكس الطرب
+ما يحتاج تفكر كثير… خلك جاهز للجمعات. ٢ بيتزا كبيرة من اختيارك، ومعهم ٤ اطباق جانبية تحبها: أجنحة دجاج، ودجز مقرمشة، ،خبز الثوم بالجبنة، وصوصات جانبية تكمل الطاولة. بوكس ...
+بيانو
+بيانو
+قد جربت ٣ نكهات في بيتزا وحدة؟ ليش تحتار بنكهة وحدة، خذ الثلاثة! بيتزا متر تجمع ٣ نكهات لذاذة، ٣٦ قطعة موزعة على مزاجك، ومعاها صوص الرانش وصوص الداينمايت يكملون السالفة. ...
+اختيارات الشيف
+خضار مشويّة
+وش يصير لو البيتزا قررت تكون نباتية… بس بطريقتها؟ بصل مكرمل، خضار مشوية مثل الكوسة، الباذنجان، البطاطا الحلوة، فلفل رومي، ومشروم، و صوص البيستو وجبنة مايسترو تلم الشمل. خ...
+بيستو زيت الزيتون
+وش يصير لو زيت الزيتون والبيستو سووا تحالف؟ دجاج مشوي، طماطم كرزية مشوية، وصوص بيستو يلفّ الطعم… مع جبنة مايسترو تكمّل التجربة. نكهة ناعمة… وتشدك.
+عشاق اللحم
+"وش يصير لو اللحم هو البطل؟ شرائح بيبروني، لحم بقري، وسجق متبل… كلهم فوق صوص مايسترو ومغطّين بجبنة تذوب. كل لقمة فيها نية واضحة: نِكْهَة.
+"
+سوبريم ديلوكس
+"وش يصير لما النكهات تجتمع بكامل أناقتها؟ بيف، بيبروني، مشروم، خضار، زيتون، موزاريلا تذوب، وصوص مايسترو الطماطم يربط كل شي. النتيجة؟ بيتزا مدروسة من كل زاوية.
+"
+فاهيتا الدجاج
+"وش يصير لو الفاهيتا قررت تصير بيتزا؟ دجاج مشوي، فلفل رومي أحمر وأخضر، بصل يقرمش، بودرة فاهيتا تلف الطعم، مع جبنة مايسترو تكمّلها. نكهة مكسيكية… بس بصبغة مايسترو.
+"
+المشهورة
+بيتزا الروكا
+وش يصير لو السلطة قررت تدخل عالم البيتزا؟ بارميزان، الروكا الايطالية الطازجة، ولمسة بلسميك فوق جبنة مايسترو… كلها على عجينة رقيقة تنكّها بهدوء.بيتزا خفيفة… بس فيها حضور.
+مارغريتا بوراتا
+لو الكلاسيك صار بطابع إيطالي فاخر؟ بيصير عندنا بيتزا فيها صوص وجبنة مايسترو مع بوراتا كريمية ولمسة بيستو.
+دجاج تكا
+"وش يصير لما النكهة الهندية تقرر تدخل عالم البيتزا؟ دجاج تكا متبل، فلفل رومي، بصل، طماطم، صوص نعناع وكزبرة، وجبنة مايسترو تذوب وتلف الطعم كله. نكهة جريئة... ومو لأي أحد.
+...
+بيري بيري
+تبي تذوق طعم البركان؟ جرب بيري بيري بدجاجها الحار مع البصل والفلفل مختومة بصوص البيرينيز والموزاريلا.
+رانشي باربكيو
+"وش يصير لو الرانش والباربكيو صاروا فريق واحد؟ دجاج مشوي، بصل، صوص باربكيو، ولمسة رانش على جبنة مايسترو الذايبة. نكهتين مختلفتين… بس يلعبون بتناغم.
+"
+دينمايت دجاج
+وش يصير لو البيتزا كان فيها فتيل؟ بينفجر تشكن بايتس مع البصل والفلفل ودوامة دينامايت على جبنة ذايبة.
+رانشي دينمايت
+وش يصير لو عصب الهادي؟ بيلتقي صوص الرانش مع صوص الديناميت على قطع الدجاج والخضار، معطينك لذعة ما تنساها
+دجاج الفريدو
+وش يصير لو الألفريدو صارت بيتزا؟ بيندمج صوص كريمي مع الدجاج مشوي وفوقها مشروم إسباني وجبنة ذايبة.
+الأصلية
+دجاج لومي
+وش يصير لو عصرنا اللومي الحساوي على البيتزا؟
+سوينها لكم بيتزا باللومي والدجاج على صلصة الطماطم مليانة موزريلا ومختومه بأوريجانو.
+دجاج لومي كريمي
+وش يصير لو عصرنا اللومي الحساوي على البيتزا؟
+سوينها لكم بيتزا بالرانش واللومي والدجاج، مليانة موزريلا ومختومه بأوريجانو.
+كوريان ستيك بيتزا
+وش يصير لو حجزت تذكرة ليسؤول وفتحت عينك بروما؟ بتذوق نكهة ما تتوقعها! شرائح ستيك ملينة صوص، مع فلفل أخضر وجبنة مايسترو وفوقها صوص كوري يربط كل الطعم!
+كوريان باربكيو دجاج
+وش يصير لو الكوري والإيطالي جيران؟ بيطلع لنا ميكس رهيب بدجاج متبل بالصوص الكوري، مع بصل وهالبينو، ومختوم بلفّة صوص كوري يزيدها لذاذة.
+كوريان تشكن كيكرز
+وش يصير لو الإيطالي تعلم يتكلم كوري؟ بيطلع بتعبير قوي! بقطع دجاج كيكرز متبلة مع بصل وهالبينو يحركون الجملة وفوقهم دوامة صوص كوري على جبنة ذايبة تنهي العرض.
+بولد دجاج باربكيو
+وش يصير لو الدجاج راح الصالون؟
+راح يطلع لنا بستايل جديد، متبل ومغمس بالباربكيو، مع بصل وجبنة موزاريلا، ومختوم بصلصة الباربكيو.
+بولد دجاج رانش
+وش يصير إذا الرانش أبهرنا؟ بيطلع لنا دجاج مغمس بالباربكيو، مع بصل وجبنة موزاريلا، ومختوم بصلصة الباربكيو.
+هوت هوني بيبروني
+وش يصير لو اجتمع الحار مع الحلو؟
+بتكون عندنا بيتزا بصلصة الطماطم، مع جبنة الموزاريلا ومليانة ببروني، ويختمها صوص الهوت هوني.
+شاورميزا
+"وش يصير لما الشاورما تترك صحنها… وتدخل عالم البيتزا؟ لقمة ما تتوقعها: دجاج شاورما محمر في الفرن، مخلل يعطيها قرمشة، ومايونيز بالثوم يلفها، وكلها فوق صوصنا الأحمر وموزاري...
+مارغريتا
+"قد جرّبت البساطة لما تكون متعمّدة؟ هنا كل شيء محسوب: صوص طماطم غني، وموزاريلا تذوب بالفم. مكوّنات قليلة… بطعم ما ينوصف.
+"
+دجاج البافلو
+"وش يصير لو البيتزا تكلمت باللهجة أمريكية؟ بايتس بصوص الدايناميت، صوص وايت كريمي، وموزاريلا تشبع مع كل لقمة. حارة، جريئة، وتكفيك عن الأجنحة.
+"
+فيجتيريان
+"وش لو الخضار أخذت دور البطولة؟ بيتزا فيها كل الأدوار: فطر، بصل، طماطم، فلفل رومي، زيتون، وصوص مايسترو… والموزاريلا فوق الكل. نباتية؟ إي، مملة؟ أبدًا.
+"
+هالبينو رانشي
+"وش يصير لو الرانش الهادئ قابل هالبينو حار؟ بيتزا بصوص كريمي، دجاج مشوي، وجبنة مايسترو، وفي الأخير... هالبينو يصحصح الطعم! نعومة تسبق اللذعة.
+"
+بيبروني
+"قد جرّبت الكلاسيك وهو في قمّته؟ شرائح بيبروني مقرمشة، جبن يذوب وصوص مايسترو يكمل المشهد. سهلة… بس ما تمل منها.
+"
+رانشي الأصلية
+"وش لو البيتزا قالت ""خل الرانش يتكلم""؟ صوص وايت كريمي، دجاج مشوي متبل، جبنة مايسترو، ولمسة من صوص الرانش الغني. ونهاية ناعمة ترجعك للبداية.
+"
+بيتزا على ذوقك
+قد جربت تسوي بيتزا بطريقتك؟ اختر العجينة، الصوص، والإضافات اللي تناسب مزاجك… وخلك الشيف.
+وجبة طفل
+بيتزا الأطفال
+وش لو البيتزا صارت بحجم مغامراتهم؟
+بيتزا صغيرة للأطفال بصوص الطماطم أو الرانش، جبنة مايسترو، وشرائح بيبروني إذا يحبونها. ومعاها لعبة مفاجأة تخليها ألذ.
+ساندويشات
+تكا ساندويتش
+شفت ساندوتش مليان ألوان وطاقة ؟ دجاج البيري بيري الحار ومايونيز النعناع والكزبرة والفلفل الأخضر .. ميكس منعش، وجريئ، مو لأي أحد
+شاورما تشيكن ساندويتش
+وش يصير لو الشاورما والثوم غنوا في مسرح ؟ بنشوف ساندويتش عظيم .. دجاج شاورما متكرمل في الفرن، مخلل يعطيها قرمشة، ومايونيز بالثوم يلفها داخل ساندويتش كأنه معزوفة موسيقية ف...
+كلاسيك بيري بيري ساندويتش
+تبي تذوق طعم الحرارة ؟ ساندوتش دجاج البيري بيري المشوي والفلفل الأخضر، وينتهي بقفلة مع مايونيز البيري بيري والبصل، مزيج قوي ويخلي حواسك تصحصح مع كل لقمة.
+تشيكن رانش ساندويتش
+وش يصير لو الرانش قرر يعيش داخل ساندويتش ؟ ببيتحول لقصة لذيذة، بطلها الدجاج المشوي المتبل وصوص الرانش، ويكملها الفلفل البارد بقرمشته، وتختمها رشة الأوريغانو.
+بيستو بوراتا ساندويتش
+وش يصير لو البوراتا والموزاريلا تقابلوا ؟ انفجار كريمي يذوب مع صوص البيستو، وطماطم مجففة تعطي لمسة حامضة وحلوة، وجرجير طازج فوق خبز مقرمش يطربك في كل لقمة.
+بسطرمة ديجون ساندويتش
+عمرك جربت التوازن المثالي؟ تخيل طعم البسطرمة المالح مع موزاريلا تذوب بالفم، تندمج مع حموضة المخلل وقرمشة الخبز الطازج ساندويتش مدروس بالملي.
+باربيكيو تشكن ساندويتش
+تقدر توصف طعم القوة ؟ ساندويتش قوي يجمع بين الدجاج وصوص الباربكيو، وفوقها البصل المكرمل يعطي حلاوة، مع خليط أجبان يختم الطعم بلذاذة.
+بوكس المقبلات
+بوكس المقبلات
+وش يصير لو المقبلات قررت تسوي حفلة؟ بيطلعون لك أساطير اللذاذة ودجز، خبز بالثوم والجبنة، وصنفين من إختيارك، وصوصات جانبية
+طلبات جانبية
+اصابع الموزاريلا
+أصابع موزاريلا ذهبية ومقرمشة، محشوة بجبنة موزاريلا تذوب مع كل لقمة.
+بوكس بارتي الدجاج
+وش يصير لو الدجاج سوا بارتي؟ بيجمع 6 قطع دجاج مقرمشة مع 6 قطع دجاج سبايسي، وماراح ينسى أكيد صوص الرانش وصوص الداينمايت.
+كيرلي بطاطس
+وش يصير لو قررت البطاطس تغير ستايلها؟ بيطلع لنا كيرلي بطاطس مع كل لفة الطعم يحلى.
+تشيكن ميجا بوكس
+24 قطعة دجاج مقرمشة بتتبيلة جريئة ونكهة حارة، تُقدّم مع صوص الرانش الجانبي.
+خبز بالبيستو والثوم
+وش يصير إذا البيستو صادق الثوم؟ راح يجتمعون لذعة الثوم مع صوص البيستو على خبز دافي يقرمش.
+أجنحة الدجاج
+وش يصير لما تجتمع القرمشة والنكهة؟أجنحة دجاج مشوية، تتبيلة تضبطها، وصوص رانش على جنب يكمل التجربة.
+خبز بالثوم والجبنة
+قد جرّبت لقمة جانبية تنافس الوجبة؟خبز بالجبنة والثوم، ست قطع تكفي و تمهد لكل شي.
+لودد رانشي ودجز
+وش يصير لو ودجز صار اجتماعي؟ بيكون صداقة مع قطع الدجاج وجبنة الموزاريلا الذايبة، وأكيد مع صوص الرانش.
+دجاج بايتس
+وش يصير إذا الدجاج صغر؟ بيطلع لنا بايتس دجاج مقرمش ومليان توابل، وبجنبه صوص الرانش
+دجاج كيكرز
+وش يصير إذا الدجاج صغر؟ بيطلع لنا دجاج كيكرز مقرمش ومليان توابل، وبجنبه صوص الرانش
+كرسبلا دجاج
+جربت تطويها؟
+وتذوق طعم الشاورما مع الموزريلا ولذعة المخلل وتختمها بصوص الرانش.
+كرسبلا ببروني
+وش يصير إذا انطوت الببروني داخل عجينة رقيقة وبين جبنة الموزاريلا وتغمسها بصوص الرانش
+.
+كرسبلا رانشي دجاج
+وش يصير إذا قرر الرانش يغزو المكسيك؟ بيطلع لنا كرسبلا رانشي دجاج وتغمسها في صوص الرانش.
+كرسبلا خضار
+وش يصير إذا تغير مفهوم الكلاسك؟ عجينة رقيقة مع الخضار اللي تحبها مطوية على بعضها.
+بطاطس ودجز
+شرائح البطاطا الذهيبة المقرمشة متبلة بالبهارات
+الحلويات
+تشوروز بالشوكولاتة
+وش يصير لما الحلا يكون مقرمش من برّا، وناعم من جوّا؟
+أصابع تشوروز مقلية، مرشوشة سكر، ومقدّمة مع صوص شوكولاتة يغرقها لذاذة.
+نهاية مثالية لأي وجبة.
+لافا كيك
+وش يصير لما تاكل كيك وتلقى الحشوة تنساب؟
+كيك شوكولاتة دافئ، محشي بشوكولاتة ذائبة، قوامه ناعم يذوب في كل لقمة.
+تجربة تحلّي ما تنسى.
+تشوكو كوكيز
+وش يصير لو الكوكيز صادق الشوكولاتة؟ بيطلع لنا كوكيز مليان قطع شوكولاتة ، مقرمشة من القلب.
+سينابو
+وش يصير إذا السينابون غير اللعبة؟ بيطلع لنا بشكل جديد وحجم صغير، حلاوته تذوبك، ومعاه صوص الشوكولاتة.
+مشروبات و صلصات
+بيبسي نسخة الليل
+بيبسي نسخة الليل
+بيبسي
+بيبسي
+بيبسي دايت
+بيبسي دايت
+بيبسي اكسترا فز
+بيبسي اكسترا فز
+ميرندا برتقال
+ميرندا برتقال
+سفن اب دايت
+سفن اب دايت
+سفن اب
+سفن اب
+ميرندا حمضيات
+ميرندا حمضيات
+مياه
+اكوافينا
+الصلصات
+الصلصات
+الصلصات
+مواقعنا
+سياسة الخصوصية
+شروط الاستخدام
+إعدادات ملفات تعريف الارتباط
+القائمة
+العروض
+تتبع الطلب
+تواصل
+© جميع الحقوق محفوظة 2026 لمايسترو بيتزا
 V 4.22.23
-Daily Food Co.
+شركة الغذاء اليومي التجارية
 CR - 1010331972
 VAT - 301047477800003
-Nutrition facts
-Loading...
+الحـقـائـق الـغــذا ـئـيـة
+جاري التحميل...
 
 0
-0 Points
-Menu
-Promotions
-My orders
-My maestro
-Contact
-Help & support
-Discover More
+0 نقاط
+القائمة
+العروض
+طلباتي
+حسابي
+تواصل
+المساعدة والدعم
+اكتشف المزيد
 ▼
-العربية
-Login
+EN
+تسجيل دخول
 
 0
-0 Points
+0 نقاط
 
 0
-Basket
+السلة
 (0
-Products
+المنتجات
 )
 0
-Your basket is empty.
-Start adding pizzas.
-Menu
-Tap to add promotion code
-How do you want your pizza?
-Pick up
-Delivery
+سلتك فاضية. ما اشتقت للبيتزا؟
+القائمة
+اضغط لاضافة كود الخصم
+كيف تبي تأخذ طلبك؟ تستلمها ولا نوصلها لك؟
+إستلام
+توصيل
