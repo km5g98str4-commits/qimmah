@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-14T09:48:29.152Z",
+  "generated_at": "2026-09-14T09:59:05.600Z",
   "source": "USDA FoodData Central (SR Legacy 2018-04 · Foundation Foods · FNDDS 2021-2023) — public domain (CC0)",
   "datasets": [
     {
@@ -16,11 +16,11 @@
     }
   ],
   "stats": {
-    "matched": 64,
+    "matched": 65,
     "exact": 0,
-    "single": 64,
-    "ambiguous": 0,
-    "unmatched": 48,
+    "single": 65,
+    "ambiguous": 2,
+    "unmatched": 45,
     "skipped": 0
   },
   "results": [
@@ -1950,7 +1950,19 @@
     },
     {
       "id": "CH088",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 172065,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Double Cheeseburger"
+        },
+        {
+          "fdcId": 172066,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, DOUBLE QUARTER POUNDER with Cheese"
+        }
+      ]
     },
     {
       "id": "CH089",
@@ -1970,7 +1982,32 @@
     },
     {
       "id": "CH093",
-      "status": "unmatched"
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170776,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Southern Style Chicken Biscuit",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21522,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 304,
+        "protein": 11.9,
+        "carbs": 30.6,
+        "fat": 14.9,
+        "fiber": 1.4,
+        "sugar": 2.62,
+        "sodium": 868,
+        "satFat": 5.71
+      },
+      "portions": [
+        {
+          "grams": 132,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "biscuit regular size biscuit"
+        }
+      ]
     },
     {
       "id": "CH094",
@@ -2318,7 +2355,39 @@
     },
     {
       "id": "CH110",
-      "status": "unmatched"
+      "status": "ambiguous",
+      "candidates": [
+        {
+          "fdcId": 172060,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Sausage, Egg & Cheese McGRIDDLES"
+        },
+        {
+          "fdcId": 172068,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Sausage McMUFFIN with Egg"
+        },
+        {
+          "fdcId": 172069,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Bacon Egg & Cheese Biscuit"
+        },
+        {
+          "fdcId": 172071,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Sausage Biscuit with Egg"
+        },
+        {
+          "fdcId": 173300,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Bacon, Egg & Cheese McGRIDDLES"
+        },
+        {
+          "fdcId": 173307,
+          "dataType": "SR Legacy",
+          "description": "McDONALD'S, Egg McMUFFIN"
+        }
+      ]
     },
     {
       "id": "CH111",
