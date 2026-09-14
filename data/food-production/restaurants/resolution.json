@@ -1,11 +1,11 @@
 {
  "counts": {
   "OFFICIAL_FULL": 111,
-  "OFFICIAL_PARTIAL": 39
+  "OFFICIAL_PARTIAL": 40
  },
  "byChain": {
   "dominos": 59,
-  "shawarmer": 39,
+  "shawarmer": 40,
   "applebees": 3,
   "burgerking": 8,
   "kfc": 10,
@@ -649,7 +649,7 @@
    "id": "rst-shawarmer-alrahiyah",
    "chain": "shawarmer",
    "nameAr": "الراهية النسخة المدخنة",
-   "nameEn": "Alrahiyah",
+   "nameEn": "Alrahiyah Smoky Edition",
    "status": "OFFICIAL_PARTIAL",
    "macros": "partial",
    "class": "OFFICIAL_LOCAL"
@@ -893,6 +893,15 @@
    "chain": "shawarmer",
    "nameAr": "بطاطس مقلية حارة وسط",
    "nameEn": "Spicy Fries Medium",
+   "status": "OFFICIAL_PARTIAL",
+   "macros": "partial",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-shawarmer-alrahiyah-classic",
+   "chain": "shawarmer",
+   "nameAr": "الراهية",
+   "nameEn": "Alrahiyah",
    "status": "OFFICIAL_PARTIAL",
    "macros": "partial",
    "class": "OFFICIAL_LOCAL"

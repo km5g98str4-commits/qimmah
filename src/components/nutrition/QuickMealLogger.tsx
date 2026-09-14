@@ -13,6 +13,15 @@ import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
 import type { Lang } from '@/lib/appPreferences'
 import { trackLocal } from '@/lib/tracking'
 import { reportMissingFood, type MissingFoodOutcome } from '@/lib/missingFoodReport'
+import {
+  deletePersonalFood,
+  listPersonalFoodsByRecency,
+  markPersonalFoodUsed,
+  personalFoodPortion,
+  savePersonalFood,
+  searchPersonalFoods,
+  type PersonalFood,
+} from '@/lib/nutritionHistory'
 
 /**
  * نتيجة البلاغ ⇒ نصّها. **لكل حالة نصّها** — لا رسالة عامّة تُخفي السبب،
@@ -53,7 +62,13 @@ interface QuickMealLoggerProps {
   onLogged?: () => void
 }
 
-type Tab = 'search' | 'custom'
+/** [FOOD-UX-001] «أكلاتي» تبويب ثالث: الأطعمة المخصّصة المحفوظة تُسجَّل وتُعدَّل وتُحذف منه. */
+type Tab = 'search' | 'custom' | 'mine'
+
+/** تقريب حصة المستخدم: خانة عشرية واحدة (300.5 تبقى 300.5 لا 301). */
+function round1(n: number): number {
+  return Math.round(n * 10) / 10
+}
 
 function round(n: number): number {
   return Math.round(n)
@@ -96,6 +111,24 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
   const [cProt, setCProt] = useState('')
   const [cCarb, setCCarb] = useState('')
   const [cFat, setCFat] = useState('')
+  /** [FOOD-UX-001] الحفظ في «أكلاتي» — افتراضيًا نعم: ما يُسجَّل مرّة يُطلب غدًا. */
+  const [saveToMine, setSaveToMine] = useState(true)
+  /** معرّف الأكلة قيد التعديل (من تبويب «أكلاتي») — الحفظ حينها تعديل لا تسجيل. */
+  const [editingId, setEditingId] = useState<string | null>(null)
+  /** نسخة قائمة «أكلاتي» — تُرفع بعد كل كتابة لتُعاد القراءة من المخزن (مصدر واحد). */
+  const [mineVersion, setMineVersion] = useState(0)
+  const [mineMsg, setMineMsg] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  /** أكلة شخصية مختارة للتسجيل بمضاعف حصص. */
+  const [selectedPersonal, setSelectedPersonal] = useState<PersonalFood | null>(null)
+  const [pServings, setPServings] = useState('1')
+  const [mineList, setMineList] = useState<PersonalFood[]>(() => listPersonalFoodsByRecency())
+  /** مطابقات «أكلاتي» لاستعلام البحث نفسه — تظهر فوق نتائج القاعدة بشارة. */
+  const [personalHits, setPersonalHits] = useState<PersonalFood[]>([])
+  useEffect(() => {
+    setMineList(listPersonalFoodsByRecency())
+    setPersonalHits(query.trim().length >= 1 ? searchPersonalFoods(query) : [])
+  }, [query, mineVersion])
 
   /**
    * المصدر المنسَّق (٦٤١ صنفًا: شاورما · كبسة · مندي · برجر بسلاسلها السعودية) —
@@ -233,23 +266,61 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
   })
 
   // سعرات/بروتين الإضافة الحالية (محصورة ضمن الحدود — لا قيم سالبة أو مستحيلة)
-  const cal = parseSafeNumber(cCal, { min: 0, max: NUM_LIMITS.quickCalories.max })
-  const prot = parseSafeNumber(cProt, { min: 0, max: NUM_LIMITS.quickProtein.max })
+  // [FOOD-UX-001] القيم بكسورها: 300.5 سعرة و27.5 غ بروتين تُحفظ كما كُتبت (خانة عشرية).
+  const cal = round1(parseSafeNumber(cCal, { min: 0, max: NUM_LIMITS.quickCalories.max }))
+  const prot = round1(parseSafeNumber(cProt, { min: 0, max: NUM_LIMITS.quickProtein.max }))
+  const carbVal: number | undefined = cCarb.trim() ? round1(parseSafeNumber(cCarb, { min: 0, max: NUM_LIMITS.quickMacro.max })) : undefined
+  const fatVal: number | undefined = cFat.trim() ? round1(parseSafeNumber(cFat, { min: 0, max: NUM_LIMITS.quickMacro.max })) : undefined
   const canAddCustom = cal > 0 || prot > 0
+  const customName = cName.trim()
+
+  const resetCustomForm = () => {
+    setCName('')
+    setCCal('')
+    setCProt('')
+    setCCarb('')
+    setCFat('')
+    setEditingId(null)
+  }
+
+  /** يفتح نموذج المخصّص بقيم أكلة محفوظة — الحفظ بعدها تعديلٌ لا تسجيل. */
+  const startEditPersonal = (f: PersonalFood) => {
+    setCName(f.nameAr)
+    setCCal(String(f.calories))
+    setCProt(String(f.protein))
+    setCCarb(typeof f.carbs === 'number' ? String(f.carbs) : '')
+    setCFat(typeof f.fat === 'number' ? String(f.fat) : '')
+    setEditingId(f.id)
+    setMineMsg(null)
+    setSelectedPersonal(null)
+    setTab('custom')
+  }
 
   const addCustom = guard('nutrition.quickAdd', () => {
     if (!canAddCustom) return
+    const input = { nameAr: customName, calories: cal, protein: prot, ...(carbVal !== undefined ? { carbs: carbVal } : {}), ...(fatVal !== undefined ? { fat: fatVal } : {}) }
+    // وضع التعديل: يُحدَّث السجل الشخصي فقط — لا يُسجَّل لليوم شيء لم يطلبه المستخدم.
+    if (editingId) {
+      const res = savePersonalFood(input, editingId)
+      if (res.status !== 'ok') { setSaveError(true); return }
+      setSaveError(false)
+      setMineVersion((v) => v + 1)
+      setMineMsg(d.mineUpdated)
+      resetCustomForm()
+      setTab('mine')
+      return
+    }
     const saved = addLog({
-      label: cName.trim() || d.quickAddLabel,
+      label: customName || d.quickAddLabel,
       servings: 1,
       unit: 'serving',
-      calories: round(cal),
-      protein: round(prot),
+      calories: cal,
+      protein: prot,
       // الحقلان اختياريان: الفارغ يبقى غير معروف لا صفرًا.
-      ...(cCarb.trim() ? { carbs: round(parseSafeNumber(cCarb, { min: 0, max: NUM_LIMITS.quickMacro.max })) } : {}),
-      ...(cFat.trim() ? { fat: round(parseSafeNumber(cFat, { min: 0, max: NUM_LIMITS.quickMacro.max })) } : {}),
+      ...(carbVal !== undefined ? { carbs: carbVal } : {}),
+      ...(fatVal !== undefined ? { fat: fatVal } : {}),
       meal: defaultMeal,
-      note: cName.trim() || undefined,
+      note: customName || undefined,
     })
     if (!saved) {
       setSaveError(true)
@@ -257,14 +328,54 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
     }
     // نفس الحدث ٩ — الإضافة السريعة/المخصّصة تسجيل وجبة أيضًا، ولو بلا عنصر من القاعدة.
     trackLocal('meal_entry_logged', { slot: defaultMeal ?? 'unspecified' })
-    setCName('')
-    setCCal('')
-    setCProt('')
-    setCCarb('')
-    setCFat('')
+    // الحفظ في «أكلاتي» بعد نجاح التسجيل: اسم موجود ⇒ يُحدَّث لا يُكرَّر. فشل الحفظ
+    // لا يُخفي نجاح التسجيل ولا يدّعي حفظًا — يُعرض كخطأ حفظ مسمّى.
+    if (saveToMine && customName) {
+      const res = savePersonalFood(input)
+      if (res.status === 'ok') { setMineVersion((v) => v + 1); setMineMsg(d.mineSaved) }
+      else if (res.status === 'storage') { setSaveError(true); return }
+    }
+    resetCustomForm()
     setSaveError(false)
     onLogged?.()
   })
+
+  /** تسجيل أكلة شخصية بمضاعف حصص — الحساب في `personalFoodPortion` لا هنا. */
+  const pServingsNum = parseSafeNumber(pServings, { min: 0.25, max: 20, fallback: 1 })
+  const addPersonal = guard('nutrition.addFood', () => {
+    if (!selectedPersonal) return
+    const portion = personalFoodPortion(selectedPersonal, pServingsNum)
+    const saved = addLog({
+      label: selectedPersonal.nameAr,
+      servings: portion.servings,
+      unit: 'serving',
+      foodId: `personal:${selectedPersonal.id}`,
+      calories: portion.calories,
+      protein: portion.protein,
+      ...(portion.carbs !== undefined ? { carbs: portion.carbs } : {}),
+      ...(portion.fat !== undefined ? { fat: portion.fat } : {}),
+      ...(portion.grams !== undefined ? { grams: portion.grams } : {}),
+      meal: defaultMeal,
+    })
+    if (!saved) { setSaveError(true); return }
+    trackLocal('meal_entry_logged', { slot: defaultMeal ?? 'unspecified' })
+    markPersonalFoodUsed(selectedPersonal.id)
+    setMineVersion((v) => v + 1)
+    setSelectedPersonal(null)
+    setPServings('1')
+    setQuery('')
+    setSaveError(false)
+    onLogged?.()
+  })
+
+  const removePersonal = (id: string) => {
+    if (confirmDeleteId !== id) { setConfirmDeleteId(id); return }
+    const ok = deletePersonalFood(id)
+    setConfirmDeleteId(null)
+    setMineMsg(ok ? null : d.mineDeleteFailed)
+    if (ok && editingId === id) resetCustomForm()
+    setMineVersion((v) => v + 1)
+  }
 
   return (
     <div className={embedded ? '' : 'card p-5'}>
@@ -324,6 +435,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
           <div className="mb-3 flex gap-2">
             <TabBtn active={tab === 'search'} onClick={() => setTab('search')} label={t.searchFood} />
             <TabBtn active={tab === 'custom'} onClick={() => setTab('custom')} label={t.customQuickAdd} />
+            <TabBtn active={tab === 'mine'} onClick={() => { setTab('mine'); setMineMsg(null) }} label={d.tabMine} testId="tab-mine" />
           </div>
 
           {tab === 'search' ? (
@@ -335,7 +447,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                     type="text"
                     aria-label={t.searchFood}
                     value={query}
-                    onChange={(e) => { setQuery(e.target.value); setSelected(null); setSizeId(null) }}
+                    onChange={(e) => { setQuery(e.target.value); setSelected(null); setSizeId(null); setSelectedPersonal(null) }}
                     placeholder={t.searchFood}
                     className="min-h-[44px] w-full rounded-lg border border-line bg-surface py-2 ps-9 pe-3 text-base text-ink-900 outline-none focus:border-primary-c"
                   />
@@ -350,8 +462,28 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                 </button>
               </div>
 
-              {!selected && query.trim() && (
+              {!selected && !selectedPersonal && query.trim() && (
                 <ul className="mt-2 max-h-56 divide-y divide-line overflow-y-auto rounded-lg border border-line">
+                  {/* [FOOD-UX-001] أكلات المستخدم المحفوظة أوّلًا — بشارة تميّزها عن القاعدة. */}
+                  {personalHits.map((f) => (
+                    <li key={`pf-${f.id}`}>
+                      <button
+                        type="button"
+                        data-testid="personal-hit"
+                        onClick={() => { setSelectedPersonal(f); setPServings('1') }}
+                        className="flex min-h-[44px] w-full items-center justify-between gap-3 p-3 text-start hover:bg-beige"
+                      >
+                        <span className="min-w-0">
+                          <span className="flex items-center gap-1.5">
+                            <span className="truncate text-sm font-bold text-ink-900"><bdi>{f.nameAr}</bdi></span>
+                            <span className="shrink-0 rounded-full bg-primary-soft px-1.5 py-0.5 text-[9px] font-bold text-primary-c">{d.mineBadge}</span>
+                          </span>
+                          <span className="block text-[11px] text-ink-400">{d.perServing}</span>
+                        </span>
+                        <span className="shrink-0 text-[11px] font-bold text-orange-300">{f.calories} · {f.protein}{t.gramsUnit}</span>
+                      </button>
+                    </li>
+                  ))}
                   {/* ═══ [COMMISSIONING §7] الحلقة الراجعة تبدأ من هنا ═══
                       البحث الفاشل كان يُسجَّل محلّيًا فقط: يعرف به الجهاز ولا
                       يعرفه أحد. فالمستخدم يفقد وجبته، والمؤسس لا يعرف أنّ أحدًا
@@ -360,7 +492,7 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                       ولا يُرسَل إلا **نصّ ما بحث عنه** — لا سعرات ولا تخمين
                       (التكليف: «لا تختلق قيمًا غذائية»). والنصّ لا يَعِد بموعد:
                       «نراجعه ونضيفه لو ضبط» لا «بنضيفه». */}
-                  {results.length === 0 && (
+                  {results.length === 0 && personalHits.length === 0 && (
                     <li className="p-3 text-xs text-ink-400">
                       <span>{d.noResults}</span>
                       {reportState === 'idle' ? (
@@ -428,6 +560,19 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                     </li>
                   )}
                 </ul>
+              )}
+
+              {selectedPersonal && (
+                <PersonalPortionPanel
+                  food={selectedPersonal}
+                  servings={pServings}
+                  onServings={setPServings}
+                  portion={personalFoodPortion(selectedPersonal, pServingsNum)}
+                  onAdd={addPersonal}
+                  onEdit={() => startEditPersonal(selectedPersonal)}
+                  t={t}
+                  d={d}
+                />
               )}
 
               {selected && (
@@ -531,10 +676,16 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
                 </div>
               )}
             </div>
-          ) : (
-            <div className="grid grid-cols-2 gap-3">
+          ) : tab === 'custom' ? (
+            <div className="grid grid-cols-2 gap-3" data-testid="custom-food-form" data-editing={editingId ?? undefined}>
+              {editingId && (
+                <p className="col-span-2 flex items-center justify-between text-xs font-bold text-ink-700">
+                  <span>{d.mineEditing}</span>
+                  <button type="button" onClick={resetCustomForm} className="btn-ghost min-h-[36px] px-2.5 py-1 text-[11px]">{d.cancelEdit}</button>
+                </p>
+              )}
               <div className="col-span-2">
-                <label htmlFor="qml-custom-name" className="text-xs text-ink-500">{t.foodName} — {t.optional}</label>
+                <label htmlFor="qml-custom-name" className="text-xs text-ink-500">{t.foodName}{editingId ? '' : ` — ${t.optional}`}</label>
                 <input
                   id="qml-custom-name"
                   type="text"
@@ -548,12 +699,73 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
               <Field label={`${t.protein} (${t.gramsUnit})`} value={cProt} onChange={setCProt} max={NUM_LIMITS.quickProtein.max} placeholder="0" />
               <Field label={`${t.carbs} (${t.gramsUnit}) — ${t.optional}`} value={cCarb} onChange={setCCarb} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
               <Field label={`${t.fat} (${t.gramsUnit}) — ${t.optional}`} value={cFat} onChange={setCFat} max={NUM_LIMITS.quickMacro.max} placeholder="0" />
-              <button type="button" onClick={addCustom} disabled={!canAddCustom} className="btn-primary col-span-2 min-h-[44px] justify-center py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
-                <Icon name="Plus" className="h-4 w-4" />
-                {t.addToLog}
+              {!editingId && (
+                <label className="col-span-2 flex min-h-[44px] items-center gap-2 text-xs text-ink-700">
+                  <input type="checkbox" data-testid="save-to-mine" checked={saveToMine} onChange={(e) => setSaveToMine(e.target.checked)} className="h-5 w-5 accent-primary" />
+                  {d.saveToMine}
+                </label>
+              )}
+              <button type="button" data-testid="custom-submit" onClick={addCustom} disabled={!canAddCustom || (!!editingId && !customName)} className="btn-primary col-span-2 min-h-[44px] justify-center py-2 text-xs disabled:cursor-not-allowed disabled:opacity-40">
+                <Icon name={editingId ? 'Check' : 'Plus'} className="h-4 w-4" />
+                {editingId ? d.saveEdit : saveToMine && customName ? d.logAndSave : t.addToLog}
               </button>
               {!canAddCustom && (
                 <p className="col-span-2 text-[11px] text-ink-400">{t.quickAddHint}</p>
+              )}
+              {canAddCustom && !editingId && saveToMine && !customName && (
+                <p className="col-span-2 text-[11px] text-ink-400">{d.saveNeedsName}</p>
+              )}
+            </div>
+          ) : (
+            <div data-testid="mine-list">
+              {mineMsg && <p role="status" data-testid="mine-message" className="mb-2 text-xs font-bold text-ink-700">{mineMsg}</p>}
+              {selectedPersonal && (
+                <PersonalPortionPanel
+                  food={selectedPersonal}
+                  servings={pServings}
+                  onServings={setPServings}
+                  portion={personalFoodPortion(selectedPersonal, pServingsNum)}
+                  onAdd={addPersonal}
+                  onEdit={() => startEditPersonal(selectedPersonal)}
+                  t={t}
+                  d={d}
+                />
+              )}
+              {mineList.length === 0 ? (
+                <p className="text-xs text-ink-400" data-testid="mine-empty">{d.mineEmpty}</p>
+              ) : (
+                <ul className="max-h-72 divide-y divide-line overflow-y-auto rounded-lg border border-line">
+                  {mineList.map((f) => (
+                    <li key={f.id} className="flex items-center gap-2 p-2" data-testid="mine-row">
+                      <button
+                        type="button"
+                        onClick={() => { setSelectedPersonal(f); setPServings('1') }}
+                        className="min-h-[44px] min-w-0 flex-1 text-start"
+                        aria-label={`${d.mineLog}: ${f.nameAr}`}
+                      >
+                        <span className="block truncate text-sm font-bold text-ink-900"><bdi>{f.nameAr}</bdi></span>
+                        <span className="block text-[11px] text-ink-400">
+                          {f.calories} {d.caloriesUnit} · {f.protein}{t.gramsUnit} {t.protein}
+                          {typeof f.carbs === 'number' ? ` · ${f.carbs}${t.gramsUnit} ${t.carbs}` : ''}
+                          {typeof f.fat === 'number' ? ` · ${f.fat}${t.gramsUnit} ${t.fat}` : ''}
+                          {' · '}{d.perServing}
+                        </span>
+                      </button>
+                      <button type="button" onClick={() => startEditPersonal(f)} aria-label={`${d.mineEdit}: ${f.nameAr}`} className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg text-ink-400 hover:bg-beige hover:text-ink-900">
+                        <Icon name="Edit3" className="h-4 w-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removePersonal(f.id)}
+                        aria-label={`${confirmDeleteId === f.id ? d.mineConfirmDelete : d.mineDelete}: ${f.nameAr}`}
+                        data-testid={confirmDeleteId === f.id ? 'mine-delete-confirm' : 'mine-delete'}
+                        className={cn('flex h-11 shrink-0 items-center justify-center rounded-lg px-2 text-ink-400 hover:bg-beige hover:text-danger', confirmDeleteId === f.id && 'bg-danger/10 text-danger text-[11px] font-bold')}
+                      >
+                        {confirmDeleteId === f.id ? d.mineConfirmDelete : <Icon name="Trash2" className="h-4 w-4" />}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
           )}
@@ -618,10 +830,12 @@ export function QuickMealLogger({ lang, targetCalories, targetProtein, showTarge
   )
 }
 
-function TabBtn({ active, onClick, label }: { active: boolean; onClick: () => void; label: string }) {
+function TabBtn({ active, onClick, label, testId }: { active: boolean; onClick: () => void; label: string; testId?: string }) {
   return (
     <button
       type="button"
+      data-testid={testId}
+      aria-pressed={active}
       onClick={onClick}
       className={`min-h-[44px] rounded-lg px-3 py-1.5 text-xs font-bold transition-colors ${
         active ? 'bg-primary text-white' : 'bg-beige text-ink-500 hover:text-ink-900'
@@ -636,13 +850,15 @@ function Field({ label, value, onChange, placeholder, max }: { label: string; va
   return (
     <label className="block text-xs text-ink-500">
       {label}
+      {/* [FOOD-UX-001] عشري: لوحة مفاتيح عشرية على الجوال + step="any" فلا يرفض المتصفّح 27.5 + تعقيم يقبل النقطة والفاصلة و«٫». */}
       <input
         type="number"
-        inputMode="numeric"
+        inputMode="decimal"
         min="0"
         max={max}
+        step="any"
         value={value}
-        onChange={(e) => onChange(sanitizeNumericInput(e.target.value, { max }))}
+        onChange={(e) => onChange(sanitizeNumericInput(e.target.value, { max, decimal: true }))}
         placeholder={placeholder}
         className="mt-1 min-h-[44px] w-full rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink-900 outline-none focus:border-primary-c"
       />
@@ -656,5 +872,54 @@ function Stat({ label, value }: { label: string; value: string | number }) {
       <span className="font-bold text-ink-900">{value}</span>
       <span>{label}</span>
     </span>
+  )
+}
+
+/** لوحة تسجيل أكلة شخصية: الحصة × مضاعف — تعرض ما سيُسجَّل فعلًا قبل الضغط. */
+function PersonalPortionPanel({ food, servings, onServings, portion, onAdd, onEdit, t, d }: {
+  food: PersonalFood
+  servings: string
+  onServings: (v: string) => void
+  portion: ReturnType<typeof personalFoodPortion>
+  onAdd: () => void
+  onEdit: () => void
+  t: ReturnType<typeof getStrings>['nutrition']
+  d: (typeof nutritionScreenStrings)['ar']
+}) {
+  return (
+    <div className="mt-3 rounded-lg border border-line bg-surface p-3" data-testid="personal-portion">
+      <div className="flex items-center justify-between gap-2">
+        <p className="min-w-0 truncate text-sm font-bold text-ink-900"><bdi>{food.nameAr}</bdi></p>
+        <button type="button" onClick={onEdit} className="btn-ghost min-h-[36px] shrink-0 px-2.5 py-1 text-[11px]">{d.mineEdit}</button>
+      </div>
+      <p className="mt-1 text-[11px] text-ink-400">
+        {d.perServing}: <span className="font-bold text-ink-600">{food.calories} {t.calories} · {food.protein}{t.gramsUnit} {t.protein}</span>
+        {typeof food.grams === 'number' ? <span> · {food.grams}{t.gramsUnit}</span> : null}
+      </p>
+      <div className="mt-3 flex items-center gap-2">
+        <label htmlFor="qml-personal-servings" className="text-xs text-ink-500">{d.servingsLabel}</label>
+        <input
+          id="qml-personal-servings"
+          type="number"
+          inputMode="decimal"
+          min={0.25}
+          max={20}
+          step="any"
+          value={servings}
+          onChange={(e) => onServings(sanitizeNumericInput(e.target.value, { max: 20, decimal: true }))}
+          className="min-h-[44px] w-24 rounded-lg border border-line bg-page px-2 py-1.5 text-base text-ink-900 outline-none focus:border-primary-c"
+        />
+      </div>
+      <div className="mt-3 flex flex-wrap gap-3 text-xs text-ink-500">
+        <Stat label={t.calories} value={portion.calories} />
+        <Stat label={t.protein} value={`${portion.protein}${t.gramsUnit}`} />
+        <Stat label={t.carbs} value={typeof portion.carbs === 'number' ? `${portion.carbs}${t.gramsUnit}` : t.nutrientUnknown} />
+        <Stat label={t.fat} value={typeof portion.fat === 'number' ? `${portion.fat}${t.gramsUnit}` : t.nutrientUnknown} />
+      </div>
+      <button type="button" data-testid="personal-add" onClick={onAdd} className="btn-primary mt-3 min-h-[44px] w-full justify-center py-2 text-xs">
+        <Icon name="Plus" className="h-4 w-4" />
+        {t.addToLog}
+      </button>
+    </div>
   )
 }

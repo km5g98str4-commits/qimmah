@@ -124,7 +124,9 @@ export function sanitizeNumericInput(
 ): string {
   const { max, decimal = false } = opts
   if (raw === '') return ''
-  const folded = foldDigits(raw)
+  // [FOOD-UX-001] الفاصلة اللاتينية «,» فاصلة عشرية على لوحات مفاتيح كثيرة (والعربية «٫»
+  // تطويها foldDigits) — في الوضع العشري تُقرأ نقطةً بدل أن تُحذف فيصير «27,5» ⇒ «275».
+  const folded = decimal ? foldDigits(raw).replace(/,/g, '.') : foldDigits(raw)
   let cleaned = folded.replace(decimal ? /[^0-9.]/g : /[^0-9]/g, '')
   if (decimal) {
     const parts = cleaned.split('.')

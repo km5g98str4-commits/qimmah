@@ -58,7 +58,7 @@ check('LoggedFood (v1) وLoggedFood (v2) يعلنان carbs?/fat? اختياري
 const qml = read('src/components/nutrition/QuickMealLogger.tsx')
 check('المسجّل السريع: لا `?? 0` للكارب/الدهون، والإضافة تنشر الحقل فقط إن كان معروفًا', !/selected\?\.carbs \?\? 0|selected\?\.fat \?\? 0/.test(qml) && /typeof baseCarb === 'number' \? \{ carbs: round\(baseCarb \* factor\) \}/.test(qml) && !/carbs: round\(baseCarb \* factor\),/.test(qml))
 check('المسجّل السريع يعرض «غير متوفّر» للغائب وسطح إفصاح المصدر', /t\.nutrientUnknown/.test(qml) && /data-testid="food-provenance"/.test(qml) && /provenanceDisclosure\(selected\.provenance, lang\)/.test(qml))
-check('الإضافة المخصّصة: الحقل الفارغ يبقى غير معروف لا صفرًا', /cCarb\.trim\(\) \? \{ carbs:/.test(qml) && /cFat\.trim\(\) \? \{ fat:/.test(qml))
+check('الإضافة المخصّصة: الحقل الفارغ يبقى غير معروف لا صفرًا', /cCarb\.trim\(\) \? round1\(/.test(qml) && /: undefined/.test(qml) && /carbVal !== undefined \? \{ carbs: carbVal \}/.test(qml) && /fatVal !== undefined \? \{ fat: fatVal \}/.test(qml) && !/carbs: round\(parseSafeNumber\(cCarb/.test(qml))
 const nv = read('src/views/NutritionView.tsx')
 check('شاشة التغذية: بطاقتا الكارب والدهون تحملان علامة النقص من totals.unknown', /incomplete=\{totals\.unknown\.carbs\}/.test(nv) && /incomplete=\{totals\.unknown\.fat\}/.test(nv) && /data-testid="macro-incomplete"/.test(nv))
 const today = read('src/views/TodayV2.tsx'); const rings = read('src/components/today/DailyRingsCard.tsx')

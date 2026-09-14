@@ -31,11 +31,11 @@ const checks = [
   // [مهمة الصقل §5] عدّ دقيق لأصناف السلاسل المنسَّقة (فئة «مطاعم» خارج r2):
   // total>=581 أرضية تبتلع الإضافة والحذف الصامتَين، وهذا يعلنهما — كل موجة
   // استيراد معتمدة تحدّث الرقم بندًا مسمًّى في تقريرها (نمط gcc==46 نفسه).
-  // [RESTAURANT-MENUS-001] ١٠٠ يدوية تقديرية (٥ حلّ محلّها سجلّ USDA) + 150 من مصادر رسمية (دومينوز ٥٩ · شاورمر ٣٩ · سجلّات USDA للسلاسل 52) = 250.
-  ['أصناف سلاسل «مطاعم» يدوية = 100 ومن مصادر رسمية = 150', r.restaurantsHand === 100 && r.restaurants === 250, `hand=${r.restaurantsHand} total=${r.restaurants}`],
+  // [RESTAURANT-MENUS-001] ١٠٠ يدوية تقديرية (٥ حلّ محلّها سجلّ USDA) + 151 من مصادر رسمية (دومينوز ٥٩ · شاورمر ٤٠ [FOOD-UX-001: الراهية] · سجلّات USDA للسلاسل 52) = 251.
+  ['أصناف سلاسل «مطاعم» يدوية = 100 ومن مصادر رسمية = 151', r.restaurantsHand === 100 && r.restaurants === 251, `hand=${r.restaurantsHand} total=${r.restaurants}`],
   // نظير «كل Food R2 معلّم تقديري»: قيم السلاسل كلها تقديرية (رأس كتلتها يعلنها)،
   // والوسم صار على الصنف المعروض نفسه — فلا يهبط صنف سلسلة جديد بلا وسمه.
-  ['كل أصناف السلاسل اليدوية معلّمة «تقديري» وكل rst-* مصنَّف provenance رسمي/USDA', r.restaurantsEstimated === 100 && r.restaurantsSourced === 150, `estimated=${r.restaurantsEstimated} sourced=${r.restaurantsSourced}`],
+  ['كل أصناف السلاسل اليدوية معلّمة «تقديري» وكل rst-* مصنَّف provenance رسمي/USDA', r.restaurantsEstimated === 100 && r.restaurantsSourced === 151, `estimated=${r.restaurantsEstimated} sourced=${r.restaurantsSourced}`],
   ['Food R2 = 60 صنف مطاعم', r.r2 === 60, `r2=${r.r2}`],
   ['كل Food R2 معلّم «تقديري»', r.r2Estimated === 60, `estimated=${r.r2Estimated}`],
   ['Food R2 يغطي مطاعم/أطباق/مشروبات/فطور/حلويات', Array.isArray(r.r2Categories) && r.r2Categories.length >= 5, `categories=${r.r2Categories?.length ?? 0}`],
