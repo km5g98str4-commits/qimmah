@@ -231,6 +231,167 @@
    "url": "https://www.janburger.com/",
    "render": true,
    "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "mcd-sa-root",
+   "chain": "ماكدونالدز السعودية (الوسطى/الشرقية)",
+   "url": "https://www.mcdonalds.com.sa/",
+   "render": true,
+   "note": "الموقع الرسمي — بحث عن حاسبة التغذية"
+  },
+  {
+   "slug": "mcd-sa-menu",
+   "chain": "ماكدونالدز السعودية — المنيو",
+   "url": "https://www.mcdonalds.com.sa/menu",
+   "render": true,
+   "note": "مسار مرشّح"
+  },
+  {
+   "slug": "mcd-sa-nutrition",
+   "chain": "ماكدونالدز السعودية — التغذية",
+   "url": "https://www.mcdonalds.com.sa/nutrition",
+   "render": true,
+   "note": "مسار مرشّح"
+  },
+  {
+   "slug": "mcd-arabia-en",
+   "chain": "ماكدونالدز الغربية (mcdonaldsarabia)",
+   "url": "https://mcdonaldsarabia.com/",
+   "render": true,
+   "note": "بلا www — الأولى رُفض اتصالها"
+  },
+  {
+   "slug": "mcd-arabia-menu",
+   "chain": "ماكدونالدز الغربية — المنيو",
+   "url": "https://www.mcdonaldsarabia.com/en/menu",
+   "render": true,
+   "note": "مسار مرشّح"
+  },
+  {
+   "slug": "mcd-us-dna-burgers",
+   "chain": "ماكدونالدز (US) واجهة المنيو — برجر",
+   "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=100",
+   "render": false,
+   "note": "JSON رسمي لصفحة المنيو الأمريكية — قد يحتاج ترويسات"
+  },
+  {
+   "slug": "mcd-us-dna-chicken",
+   "chain": "ماكدونالدز (US) واجهة المنيو — دجاج",
+   "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=101",
+   "render": false,
+   "note": "JSON رسمي"
+  },
+  {
+   "slug": "mcd-us-dna-breakfast",
+   "chain": "ماكدونالدز (US) واجهة المنيو — فطور",
+   "url": "https://www.mcdonalds.com/dnaapp/itemsByCategory?country=US&language=en&showLiveData=true&category=102",
+   "render": false,
+   "note": "JSON رسمي"
+  },
+  {
+   "slug": "mcd-us-dna-item",
+   "chain": "ماكدونالدز (US) واجهة المنيو — صنف",
+   "url": "https://www.mcdonalds.com/dnaapp/itemDetails?country=US&language=en&showLiveData=true&item=200",
+   "render": false,
+   "note": "JSON صنف واحد (بيج ماك) لاختبار الواجهة"
+  },
+  {
+   "slug": "mcd-us-nutrition-calc",
+   "chain": "ماكدونالدز (US) حاسبة التغذية",
+   "url": "https://www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html",
+   "render": true,
+   "note": "الصفحة الرسمية"
+  },
+  {
+   "slug": "mcd-gb-menu",
+   "chain": "ماكدونالدز (UK) المنيو",
+   "url": "https://www.mcdonalds.com/gb/en-gb/menu.html",
+   "render": true,
+   "note": "دليل رسمي أجنبي بديل إن حُجب الأمريكي"
+  },
+  {
+   "slug": "search-mcd-sa-ar",
+   "chain": "بحث: ماكدونالدز السعودية السعرات",
+   "url": "https://html.duckduckgo.com/html/?q=%D9%85%D8%A7%D9%83%D8%AF%D9%88%D9%86%D8%A7%D9%84%D8%AF%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D8%B1%D8%A7%D8%B1%D9%8A%D8%A9",
+   "render": false,
+   "note": "اكتشاف روابط لا مصدر تغذية"
+  },
+  {
+   "slug": "search-mcd-sa-en",
+   "chain": "بحث: McDonald's Saudi nutrition",
+   "url": "https://html.duckduckgo.com/html/?q=McDonald%27s+Saudi+Arabia+nutrition+calculator",
+   "render": false,
+   "note": "اكتشاف روابط"
+  },
+  {
+   "slug": "afran-com",
+   "chain": "أفران الحطب — نطاق مرشّح",
+   "url": "https://afranalhatab.com/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "afran-com-sa",
+   "chain": "أفران الحطب — نطاق مرشّح ٢",
+   "url": "https://www.afranalhatab.com.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "afran-hatab-sa",
+   "chain": "أفران الحطب — نطاق مرشّح ٣",
+   "url": "https://hatab.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "afran-alhatab-sa",
+   "chain": "أفران الحطب — نطاق مرشّح ٤",
+   "url": "https://alhatab.sa/",
+   "render": true,
+   "note": "نطاق مرشّح"
+  },
+  {
+   "slug": "search-afran-ar",
+   "chain": "بحث: أفران الحطب منيو",
+   "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D9%85%D9%86%D9%8A%D9%88",
+   "render": false,
+   "note": "اكتشاف روابط"
+  },
+  {
+   "slug": "search-afran-ar-2",
+   "chain": "بحث: أفران الحطب السعرات",
+   "url": "https://html.duckduckgo.com/html/?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA",
+   "render": false,
+   "note": "اكتشاف روابط"
+  },
+  {
+   "slug": "search-afran-en",
+   "chain": "بحث: Afran Al Hatab menu",
+   "url": "https://html.duckduckgo.com/html/?q=Afran+Al+Hatab+bakery+Riyadh+menu",
+   "render": false,
+   "note": "اكتشاف روابط"
+  },
+  {
+   "slug": "search-afran-bing",
+   "chain": "بحث Bing: أفران الحطب منيو",
+   "url": "https://www.bing.com/search?q=%D8%A3%D9%81%D8%B1%D8%A7%D9%86+%D8%A7%D9%84%D8%AD%D8%B7%D8%A8+%D9%85%D9%86%D9%8A%D9%88",
+   "render": true,
+   "note": "اكتشاف روابط (بديل)"
+  },
+  {
+   "slug": "search-mcd-bing",
+   "chain": "بحث Bing: ماكدونالدز السعودية السعرات",
+   "url": "https://www.bing.com/search?q=%D9%85%D8%A7%D9%83%D8%AF%D9%88%D9%86%D8%A7%D9%84%D8%AF%D8%B2+%D8%A7%D9%84%D8%B3%D8%B9%D9%88%D8%AF%D9%8A%D8%A9+%D8%A7%D9%84%D8%B3%D8%B9%D8%B1%D8%A7%D8%AA+%D8%A7%D9%84%D8%AD%D8%B1%D8%A7%D8%B1%D9%8A%D8%A9",
+   "render": true,
+   "note": "اكتشاف روابط (بديل)"
+  },
+  {
+   "slug": "shawarmer-menu-ar-full",
+   "chain": "شاورمر (المنيو الكامل بالعربية)",
+   "url": "https://shawarmer.com/ar/menu",
+   "render": true,
+   "note": "إعادة التقاط الجذر — ٥٦ سطر سعرات في اللقطة السابقة مقابل ٣٩ مستوردًا"
   }
  ],
  "_round": "round 2 — مسارات مرشّحة بعد قراءة الجولة الأولى (دومينوز وشاورمر مقروءان ومستوردان؛ لا يُعاد جلبهما)."
