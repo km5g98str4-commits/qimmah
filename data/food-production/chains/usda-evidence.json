@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-13T11:07:58.372Z",
+  "generated_at": "2026-09-14T09:47:47.330Z",
   "source": "USDA FoodData Central (SR Legacy 2018-04 · Foundation Foods · FNDDS 2021-2023) — public domain (CC0)",
   "datasets": [
     {
@@ -16,11 +16,11 @@
     }
   ],
   "stats": {
-    "matched": 52,
+    "matched": 64,
     "exact": 0,
-    "single": 52,
+    "single": 64,
     "ambiguous": 0,
-    "unmatched": 35,
+    "unmatched": 48,
     "skipped": 0
   },
   "results": [
@@ -1947,6 +1947,460 @@
     {
       "id": "CH087",
       "status": "unmatched"
+    },
+    {
+      "id": "CH088",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH089",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH090",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH091",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH092",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH093",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH094",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH095",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170778,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, RANCH SNACK WRAP, Grilled",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21524,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 222,
+        "protein": 13.8,
+        "carbs": 18.4,
+        "fat": 10.3,
+        "fiber": 0.9,
+        "sugar": 1.53,
+        "sodium": 577,
+        "satFat": 3.36
+      },
+      "portions": [
+        {
+          "grams": 123,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "wrap"
+        }
+      ]
+    },
+    {
+      "id": "CH096",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170777,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, RANCH SNACK WRAP, Crispy",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21523,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 275,
+        "protein": 11.5,
+        "carbs": 23.2,
+        "fat": 15.1,
+        "fiber": 1.3,
+        "sugar": 2.48,
+        "sodium": 607,
+        "satFat": 3.84
+      },
+      "portions": [
+        {
+          "grams": 133,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "wrap"
+        }
+      ]
+    },
+    {
+      "id": "CH097",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 170721,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, french fries",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21238,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 323,
+        "protein": 3.41,
+        "carbs": 42.6,
+        "fat": 15.5,
+        "fiber": 3.9,
+        "sugar": 0.21,
+        "sodium": 189,
+        "satFat": 2.27
+      },
+      "portions": [
+        {
+          "grams": 154,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large serving"
+        },
+        {
+          "grams": 71,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "small serving"
+        },
+        {
+          "grams": 117,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "medium serving"
+        },
+        {
+          "grams": 31,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "kids serving"
+        }
+      ]
+    },
+    {
+      "id": "CH098",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172074,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Side Salad",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21379,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 20,
+        "protein": 1.03,
+        "carbs": 4.3,
+        "fat": 0.19,
+        "fiber": 1.6,
+        "sugar": 2.24,
+        "sodium": 12,
+        "satFat": 0.02
+      },
+      "portions": [
+        {
+          "grams": 87,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item 3.1 oz"
+        }
+      ]
+    },
+    {
+      "id": "CH099",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH100",
+      "status": "matched",
+      "how": "pick",
+      "fdcId": 173313,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Fruit 'n Yogurt Parfait (without granola)",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21381,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 90,
+        "protein": 2.47,
+        "carbs": 17.7,
+        "fat": 1.13,
+        "fiber": 0.9,
+        "sugar": 11.9,
+        "sodium": 38,
+        "satFat": 0.004
+      },
+      "portions": [
+        {
+          "grams": 142,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item"
+        }
+      ]
+    },
+    {
+      "id": "CH101",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172061,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Vanilla Reduced Fat Ice Cream Cone",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21333,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 162,
+        "protein": 4.24,
+        "carbs": 26.4,
+        "fat": 4.86,
+        "fiber": 0.1,
+        "sugar": 19.5,
+        "sodium": 67,
+        "satFat": 2.41
+      },
+      "portions": [
+        {
+          "grams": 90,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item (3.2 oz)"
+        }
+      ]
+    },
+    {
+      "id": "CH102",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173302,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Hot Fudge Sundae",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21336,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 186,
+        "protein": 4.14,
+        "carbs": 30,
+        "fat": 5.91,
+        "fiber": 0.4,
+        "sugar": 26.9,
+        "sodium": 94,
+        "satFat": 3.59
+      },
+      "portions": [
+        {
+          "grams": 179,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item (6.3 oz)"
+        }
+      ]
+    },
+    {
+      "id": "CH103",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 172062,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Strawberry Sundae",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21334,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 158,
+        "protein": 3.19,
+        "carbs": 28.1,
+        "fat": 3.95,
+        "fiber": 0,
+        "sugar": 25.3,
+        "sodium": 47,
+        "satFat": 2.01
+      },
+      "portions": [
+        {
+          "grams": 178,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "item (6.3 oz)"
+        }
+      ]
+    },
+    {
+      "id": "CH104",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173304,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, McFLURRY with OREO cookies",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21339,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 165,
+        "protein": 3.97,
+        "carbs": 25.6,
+        "fat": 5.66,
+        "fiber": 0.1,
+        "sugar": 21.2,
+        "sodium": 75,
+        "satFat": 2.58
+      },
+      "portions": [
+        {
+          "grams": 487,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large (16 fl oz)"
+        },
+        {
+          "grams": 337,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "regular (12 fl oz)"
+        }
+      ]
+    },
+    {
+      "id": "CH105",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173303,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, McFLURRY with M&M'S CANDIES",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21338,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 177,
+        "protein": 4.02,
+        "carbs": 26.8,
+        "fat": 6.46,
+        "fiber": 0.2,
+        "sugar": 24.4,
+        "sodium": 54,
+        "satFat": 3.4
+      },
+      "portions": [
+        {
+          "grams": 504,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "large (16 fl oz)"
+        },
+        {
+          "grams": 348,
+          "amount": 1,
+          "unit": "undetermined",
+          "modifier": "regular (12 fl oz)"
+        }
+      ]
+    },
+    {
+      "id": "CH106",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH107",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH108",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH109",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH110",
+      "status": "unmatched"
+    },
+    {
+      "id": "CH111",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173297,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Chicken McNUGGETS",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21309,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 302,
+        "protein": 15.8,
+        "carbs": 15.1,
+        "fat": 19.8,
+        "fiber": null,
+        "sugar": 0.08,
+        "sodium": 566,
+        "satFat": 3.26
+      },
+      "portions": [
+        {
+          "grams": 95,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        },
+        {
+          "grams": 64,
+          "amount": 4,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        },
+        {
+          "grams": 159,
+          "amount": 10,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        }
+      ]
+    },
+    {
+      "id": "CH112",
+      "status": "matched",
+      "how": "single",
+      "fdcId": 173297,
+      "dataType": "SR Legacy",
+      "description": "McDONALD'S, Chicken McNUGGETS",
+      "publicationDate": "4/1/2019",
+      "ndbNumber": 21309,
+      "foodCode": null,
+      "per100g": {
+        "kcal": 302,
+        "protein": 15.8,
+        "carbs": 15.1,
+        "fat": 19.8,
+        "fiber": null,
+        "sugar": 0.08,
+        "sodium": 566,
+        "satFat": 3.26
+      },
+      "portions": [
+        {
+          "grams": 95,
+          "amount": 6,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        },
+        {
+          "grams": 64,
+          "amount": 4,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        },
+        {
+          "grams": 159,
+          "amount": 10,
+          "unit": "undetermined",
+          "modifier": "pieces"
+        }
+      ]
     }
   ]
 }
