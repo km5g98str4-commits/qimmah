@@ -31,11 +31,11 @@ const checks = [
   // [مهمة الصقل §5] عدّ دقيق لأصناف السلاسل المنسَّقة (فئة «مطاعم» خارج r2):
   // total>=581 أرضية تبتلع الإضافة والحذف الصامتَين، وهذا يعلنهما — كل موجة
   // استيراد معتمدة تحدّث الرقم بندًا مسمًّى في تقريرها (نمط gcc==46 نفسه).
-  // [RESTAURANT-MENUS-001] ٩٩ يدوية تقديرية (٦ حلّ محلّها سجلّ USDA — [FOOD-UX-001] بطاطس ماكدونالدز) + 164 من مصادر رسمية (دومينوز ٥٩ · شاورمر ٤٠ · سجلّات USDA للسلاسل 65 منها ماكدونالدز 28) = 263.
-  ['أصناف سلاسل «مطاعم» يدوية = 99 ومن مصادر رسمية = 164', r.restaurantsHand === 99 && r.restaurants === 263, `hand=${r.restaurantsHand} total=${r.restaurants}`],
+  // [RESTAURANT-MENUS-001] ٩٩ يدوية تقديرية (٦ حلّ محلّها سجلّ USDA) + 290 من مصادر رسمية (دومينوز ٥٩ · شاورمر ٤٠ · سجلّات USDA للسلاسل 65 · [FOOD-UX-001] أفران الحطب بملصقات المنتجات الرسمية 126) = 389.
+  ['أصناف سلاسل «مطاعم» يدوية = 99 ومن مصادر رسمية = 290', r.restaurantsHand === 99 && r.restaurants === 389, `hand=${r.restaurantsHand} total=${r.restaurants}`],
   // نظير «كل Food R2 معلّم تقديري»: قيم السلاسل كلها تقديرية (رأس كتلتها يعلنها)،
   // والوسم صار على الصنف المعروض نفسه — فلا يهبط صنف سلسلة جديد بلا وسمه.
-  ['كل أصناف السلاسل اليدوية معلّمة «تقديري» وكل rst-* مصنَّف provenance رسمي/USDA', r.restaurantsEstimated === 99 && r.restaurantsSourced === 164, `estimated=${r.restaurantsEstimated} sourced=${r.restaurantsSourced}`],
+  ['كل أصناف السلاسل اليدوية معلّمة «تقديري» وكل rst-* مصنَّف provenance رسمي/USDA', r.restaurantsEstimated === 99 && r.restaurantsSourced === 290, `estimated=${r.restaurantsEstimated} sourced=${r.restaurantsSourced}`],
   ['Food R2 = 60 صنف مطاعم', r.r2 === 60, `r2=${r.r2}`],
   ['كل Food R2 معلّم «تقديري»', r.r2Estimated === 60, `estimated=${r.r2Estimated}`],
   ['Food R2 يغطي مطاعم/أطباق/مشروبات/فطور/حلويات', Array.isArray(r.r2Categories) && r.r2Categories.length >= 5, `categories=${r.r2Categories?.length ?? 0}`],
@@ -46,7 +46,8 @@ const checks = [
   ['تناسق التسمية — لا NAME_SPELL «برغر» (Cycle 5)', c('NAME_SPELL') === 0, `${c('NAME_SPELL')}`],
   ['لا أسماء عربية مكرّرة (Cycle 5)', c('DUP_NAME_AR') === 0, `${c('DUP_NAME_AR')}`],
   ['لا أسماء إنجليزية مكرّرة (Cycle 5)', c('DUP_NAME_EN') === 0, `${c('DUP_NAME_EN')}`],
-  ['لا تباعد سعرات جديد — DIVERGE_KCAL ≤ 4 (المقبولة موثّقة)', c('DIVERGE_KCAL') <= 4, `${c('DIVERGE_KCAL')}`],
+  // [FOOD-UX-001] الخامس مقبول موثَّقًا: «خبز بالخميرة الطبيعية» عند أفران الحطب منتجان بملصقين رسميين مختلفين (540غ: 380 سعرة/100غ · 500غ: 225) — تباعد في المصدر لا في نسخنا.
+  ['لا تباعد سعرات جديد — DIVERGE_KCAL ≤ 5 (المقبولة موثّقة)', c('DIVERGE_KCAL') <= 5, `${c('DIVERGE_KCAL')}`],
   ['لا أسماء سلاسل تجارية في Food R2 — TRADEMARK', c('TRADEMARK') === 0, `${c('TRADEMARK')}`],
   // كثافة السعرات لكل فئة (CATEGORY_KCAL_R2): سقف انحدار لا هدف. القيمة الحالية 5 صفوف
   // بروست معلّقة على قرار المالك (انظر docs/release/RC-v1.2.0.md) — العتبة تمنع أي زيادة

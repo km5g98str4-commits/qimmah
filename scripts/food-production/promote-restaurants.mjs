@@ -24,7 +24,7 @@ import { fileURLToPath } from 'node:url'
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../..')
 const IN = resolve(ROOT, 'docs/data-factory/restaurants')
 
-const KIND_CLASS = { 'official-menu-sfda': 'OFFICIAL_LOCAL', 'official-nutrition-guide': 'OFFICIAL_FOREIGN_MARKET', 'usda-branded-record': 'USDA_MEASURED' }
+const KIND_CLASS = { 'official-menu-sfda': 'OFFICIAL_LOCAL', 'official-product-label': 'OFFICIAL_LOCAL', 'official-nutrition-guide': 'OFFICIAL_FOREIGN_MARKET', 'usda-branded-record': 'USDA_MEASURED' }
 const files = readdirSync(IN).filter((f) => f.endsWith('.json')).sort()
 const items = []
 const prov = {}
@@ -55,11 +55,11 @@ for (const file of files) {
     if (cls !== 'OFFICIAL_LOCAL' && source.market === 'SA') { resolution.push({ ...base, status: 'QUARANTINED', why: 'سجلّ أجنبي/USDA لا يُوسم سعوديًّا' }); continue }
     // الإفصاح للمستخدم سطر واحد (لا فقرة): الأجنبي «بيانات مرجعية»، والمحلّي الناقص يصرّح بالنقص.
     const notesAr = cls === 'OFFICIAL_LOCAL'
-      ? (macros === 'official' ? 'القيم من مصدر السلسلة الرسمي.' : 'السعرات والبروتين من المنيو الرسمي · الكارب والدهون غير متوفّرة.')
+      ? (source.kind === 'official-product-label' ? 'القيم من ملصق المنتج الرسمي — لكل عبوة.' : macros === 'official' ? 'القيم من مصدر السلسلة الرسمي.' : 'السعرات والبروتين من المنيو الرسمي · الكارب والدهون غير متوفّرة.')
       : cls === 'OFFICIAL_FOREIGN_MARKET' ? 'بيانات مرجعية للسوق الأمريكي.' : 'بيانات USDA مرجعية للسوق الأمريكي.'
-    const provenance = { class: cls, market: source.market, ref: row.fdcId ? `fdcId:${row.fdcId}` : source.url }
+    const provenance = { class: cls, market: source.market, ref: row.fdcId ? `fdcId:${row.fdcId}` : (row.sourceUrl ?? source.url) }
     const item = {
-      id, nameAr: `${chain.ar} - ${row.nameAr}`, nameEn: `${chain.en} - ${row.nameEn}`, category: 'مطاعم',
+      id, nameAr: `${chain.ar} - ${row.nameAr}`, nameEn: `${chain.en} - ${row.nameEn}`, category: row.category ?? 'مطاعم',
       servingLabelAr: row.servingLabelAr ?? 'حصة', ...(typeof row.servingGrams === 'number' ? { servingGrams: row.servingGrams } : {}),
       calories: Math.round(row.kcal), protein: row.protein, ...(full ? { carbs: row.carbs, fat: row.fat } : {}), ...(typeof row.fiber === 'number' ? { fiber: row.fiber } : {}),
       keywords: [...new Set([...(chain.keywords ?? []), ...(row.keywords ?? []), row.nameEn.toLowerCase()])], notesAr, provenance,

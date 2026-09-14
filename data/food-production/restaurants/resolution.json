@@ -1,9 +1,11 @@
 {
  "counts": {
-  "OFFICIAL_FULL": 124,
+  "OFFICIAL_FULL": 250,
+  "QUARANTINED": 3,
   "OFFICIAL_PARTIAL": 40
  },
  "byChain": {
+  "alhatab": 126,
   "dominos": 59,
   "shawarmer": 40,
   "applebees": 3,
@@ -15,6 +17,1164 @@
   "subway": 6
  },
  "rows": [
+  {
+   "id": "rst-alhatab-sourdough-bread",
+   "chain": "alhatab",
+   "nameAr": "خبز بالخميرة الطبيعية (540غ)",
+   "nameEn": "Sourdough Bread",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-sourdough-white",
+   "chain": "alhatab",
+   "nameAr": "خبز بالخميرة الطبيعية (500غ)",
+   "nameEn": "Sourdough White",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-sourdough-whole-meal",
+   "chain": "alhatab",
+   "nameAr": "خبز بالخميرة الطبيعية بر",
+   "nameEn": "Sourdough Whole Meal",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-hokkaido-japanese-bread",
+   "chain": "alhatab",
+   "nameAr": "خبز توست الياباني",
+   "nameEn": "Hokkaido Japanese Bread",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mini-white-arabic-bread-2",
+   "chain": "alhatab",
+   "nameAr": "خبز مفرود أبيض لقمة",
+   "nameEn": "Mini White Arabic Bread",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mini-whole-wheat-arabic-bread-2",
+   "chain": "alhatab",
+   "nameAr": "خبز مفرود بر لقمة",
+   "nameEn": "Mini Whole Wheat Arabic Bread",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-al-tannor-barley-bread",
+   "chain": "alhatab",
+   "nameAr": "خبز التنور بالشعير",
+   "nameEn": "al Tannor Barley Bread",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-al-tannor-natural-bread",
+   "chain": "alhatab",
+   "nameAr": "خبز التنور العادي",
+   "nameEn": "al Tannor Natural Bread",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-al-tannor-oat-bread",
+   "chain": "alhatab",
+   "nameAr": "خبز التنور الشوفان",
+   "nameEn": "al Tannor Oat Bread",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-brioche-bread-loaf",
+   "chain": "alhatab",
+   "nameAr": "خبز البريوش",
+   "nameEn": "Brioche Bread Loaf",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-multigrain-sliced-bread",
+   "chain": "alhatab",
+   "nameAr": "خبز توست حبوب",
+   "nameEn": "Multigrain Sliced Bread",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-al-hatab-bake-rolls-bbq",
+   "chain": "alhatab",
+   "nameAr": "بيك رولز الحطب (شواء)",
+   "nameEn": "al Hatab Bake Rolls Bbq",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-al-hatab-bake-rolls-cheese",
+   "chain": "alhatab",
+   "nameAr": "بيك رولز الحطب (جبن)",
+   "nameEn": "al Hatab Bake Rolls Cheese",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-al-hatab-bake-rolls-chili",
+   "chain": "alhatab",
+   "nameAr": "بيك رولز الحطب (حار)",
+   "nameEn": "al Hatab Bake Rolls Chili",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-al-hatab-bake-rolls-ketchup",
+   "chain": "alhatab",
+   "nameAr": "بيك رولز الحطب (كاتشب)",
+   "nameEn": "al Hatab Bake Rolls Ketchup",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-al-hatab-bake-rolls-salt-vinegar",
+   "chain": "alhatab",
+   "nameAr": "بيك رولز الحطب (ملح وخل)",
+   "nameEn": "al Hatab Bake Rolls Salt Vinegar",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mini-heart-biscuit",
+   "chain": "alhatab",
+   "nameAr": "بسكويـت قلوب ميني",
+   "nameEn": "Mini Heart Biscuit",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-rolled-biscuit-with-choco-decoration",
+   "chain": "alhatab",
+   "nameAr": "بسكويت ملفوف مزين بالشوكولاتة",
+   "nameEn": "Rolled Biscuit With Choco Decoration",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-croutons",
+   "chain": "alhatab",
+   "nameAr": "خبز محمص",
+   "nameEn": "Croutons",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-grissini-breadsticks",
+   "chain": "alhatab",
+   "nameAr": "شابورة أصابع",
+   "nameEn": "Grissini Breadsticks",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-grissini-breadsticks-whole-wheat-bran",
+   "chain": "alhatab",
+   "nameAr": "شابورة أصابع بر ونخاله",
+   "nameEn": "Grissini Breadsticks Whole Wheat Bran",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-grissini-breadsticks-whole-wheat-bran-sugar-free",
+   "chain": "alhatab",
+   "nameAr": "شابورة أصابع بر",
+   "nameEn": "Grissini Breadsticks Whole Wheat Bran Sugar Free",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-alhatab-kaak-with-dates",
+   "chain": "alhatab",
+   "nameAr": "علبة كعك بالتمر",
+   "nameEn": "Alhatab Kaak With Dates",
+   "status": "QUARANTINED",
+   "why": "أتواتر خارج ±٣٠٪ (926 مقابل 421)"
+  },
+  {
+   "id": "rst-alhatab-alhatab-kaak-with-pistachio",
+   "chain": "alhatab",
+   "nameAr": "علبة كعك بالفستق",
+   "nameEn": "Alhatab Kaak With Pistachio",
+   "status": "QUARANTINED",
+   "why": "أتواتر خارج ±٣٠٪ (974 مقابل 483)"
+  },
+  {
+   "id": "rst-alhatab-alhatab-kaak-with-walnut",
+   "chain": "alhatab",
+   "nameAr": "علبة كعك بعين الجمل",
+   "nameEn": "Alhatab Kaak With Walnut",
+   "status": "QUARANTINED",
+   "why": "أتواتر خارج ±٣٠٪ (984 مقابل 511)"
+  },
+  {
+   "id": "rst-alhatab-chocolate-coconut-maamoul",
+   "chain": "alhatab",
+   "nameAr": "معمول الشوكولا وجوز الهند",
+   "nameEn": "Chocolate Coconut Maamoul",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-large-maamoul-2",
+   "chain": "alhatab",
+   "nameAr": "معمول كبير",
+   "nameEn": "Large Maamoul",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-whole-wheat-maamoul-3",
+   "chain": "alhatab",
+   "nameAr": "معمول بر",
+   "nameEn": "Whole Wheat Maamoul",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-olive-rusk",
+   "chain": "alhatab",
+   "nameAr": "شابورة الزيتون",
+   "nameEn": "Olive Rusk",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-whole-wheat-hand-made-rusk",
+   "chain": "alhatab",
+   "nameAr": "شابورة يدوي بر",
+   "nameEn": "Whole Wheat Hand Made Rusk",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-whole-wheat-basbousa",
+   "chain": "alhatab",
+   "nameAr": "بسبوسة بر (Whole Wheat Basbousa)",
+   "nameEn": "Whole Wheat Basbousa",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-whole-wheat-basboussa-no-added-sugar",
+   "chain": "alhatab",
+   "nameAr": "بسبوسة بر (75غ)",
+   "nameEn": "Whole Wheat Basboussa no Added Sugar",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-alhatab-browines-cake-50gm",
+   "chain": "alhatab",
+   "nameAr": "كيك البراونيز",
+   "nameEn": "Alhatab Browines Cake 50gm",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-alhatab-muffin-cake-50gm",
+   "chain": "alhatab",
+   "nameAr": "كيك المافن",
+   "nameEn": "Alhatab Muffin Cake 50gm",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-english-cake-chocolate",
+   "chain": "alhatab",
+   "nameAr": "كيك انجليزي شوكولاتة",
+   "nameEn": "English Cake Chocolate",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-english-cake-marbled",
+   "chain": "alhatab",
+   "nameAr": "كيك انجليزي ماربلد",
+   "nameEn": "English Cake Marbled",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-english-cake-vanilla",
+   "chain": "alhatab",
+   "nameAr": "كيك انجليزي فانيلا",
+   "nameEn": "English Cake Vanilla",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-kors-aqeeli-no-added-sugar",
+   "chain": "alhatab",
+   "nameAr": "قرص عقيلي بدون سكر مضاف",
+   "nameEn": "Kors Aqeeli no Added Sugar",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-muffin-chocolate",
+   "chain": "alhatab",
+   "nameAr": "مافن شوكولاته",
+   "nameEn": "Muffin Chocolate",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-muffin-vanilla",
+   "chain": "alhatab",
+   "nameAr": "مافن فانيلا",
+   "nameEn": "Muffin Vanilla",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-raspberry-madeleine",
+   "chain": "alhatab",
+   "nameAr": "مادلين بالتوت",
+   "nameEn": "Raspberry Madeleine",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-signature-cake",
+   "chain": "alhatab",
+   "nameAr": "كيك الحطب",
+   "nameEn": "Signature Cake",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-vanilla-madeleine",
+   "chain": "alhatab",
+   "nameAr": "مادلين بالفانيلا",
+   "nameEn": "Vanilla Madeleine",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-choco-mini-waffle",
+   "chain": "alhatab",
+   "nameAr": "ميني وافل بالشوكولاتة",
+   "nameEn": "Choco Mini Waffle",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chocolate-mini-macaroons",
+   "chain": "alhatab",
+   "nameAr": "ميني ماكرون بالشوكولاتة",
+   "nameEn": "Chocolate Mini Macaroons",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-cream-puffs-with-chocolate-flavoured-coating",
+   "chain": "alhatab",
+   "nameAr": "بـف الكريمة مغطاة بنكهة الشوكولاتة",
+   "nameEn": "Cream Puffs With Chocolate Flavoured Coating",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-cream-puffs-with-salted-caramel",
+   "chain": "alhatab",
+   "nameAr": "بف الكـريمة بالكـراميل المملح",
+   "nameEn": "Cream Puffs With Salted Caramel",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mini-macaroons",
+   "chain": "alhatab",
+   "nameAr": "ميني ماكرون",
+   "nameEn": "Mini Macaroons",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mini-waffles",
+   "chain": "alhatab",
+   "nameAr": "ميني وافل",
+   "nameEn": "Mini Waffles",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-large-eclairs",
+   "chain": "alhatab",
+   "nameAr": "إكلير لارج",
+   "nameEn": "Large Eclairs",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-baba-ganoush",
+   "chain": "alhatab",
+   "nameAr": "باباغنوج",
+   "nameEn": "Baba Ganoush",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-garlic-sauce",
+   "chain": "alhatab",
+   "nameAr": "الثوميه",
+   "nameEn": "Garlic Sauce",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mafrouka",
+   "chain": "alhatab",
+   "nameAr": "مفروكة",
+   "nameEn": "Mafrouka",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-spicy-mafrouka",
+   "chain": "alhatab",
+   "nameAr": "مفروكة حار",
+   "nameEn": "Spicy Mafrouka",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-tahini-sauce",
+   "chain": "alhatab",
+   "nameAr": "صلصة الطحينة",
+   "nameEn": "Tahini Sauce",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-beetroot-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص شمندر",
+   "nameEn": "Beetroot Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-caramelized-onion-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص بالبصل المكرمل",
+   "nameEn": "Caramelized Onion Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-classic-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص كلاسيك",
+   "nameEn": "Classic Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-eggplant-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص باذنجان",
+   "nameEn": "Eggplant Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-extra-virgin-olive-oil-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص بزيت الزيتون البكر الممتاز",
+   "nameEn": "Extra Virgin Olive Oil Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-roasted-red-pepper-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص بالفلفل الأحمرالمحمص",
+   "nameEn": "Roasted Red Pepper Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-spicy-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص حار",
+   "nameEn": "Spicy Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-sundried-tomato-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص بالطماطم المجففة",
+   "nameEn": "Sundried Tomato Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-truffle-hummus",
+   "chain": "alhatab",
+   "nameAr": "حمص الترفل",
+   "nameEn": "Truffle Hummus",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-beetroot-labneh",
+   "chain": "alhatab",
+   "nameAr": "لبنه شمندر",
+   "nameEn": "Beetroot Labneh",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-honey-cream",
+   "chain": "alhatab",
+   "nameAr": "كريمة العسل",
+   "nameEn": "Honey Cream",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-labneh-light",
+   "chain": "alhatab",
+   "nameAr": "لبنة لايت",
+   "nameEn": "Labneh Light",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-labneh-pesto",
+   "chain": "alhatab",
+   "nameAr": "لبنة ببيستو",
+   "nameEn": "Labneh Pesto",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-labneh-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة لبنة",
+   "nameEn": "Labneh Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-labneh-spicy",
+   "chain": "alhatab",
+   "nameAr": "لبنة حار",
+   "nameEn": "Labneh Spicy",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-local-labneh",
+   "chain": "alhatab",
+   "nameAr": "لبنة بلدي",
+   "nameEn": "Local Labneh",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-special-labneh-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة لبنة سبيشل",
+   "nameEn": "Special Labneh Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-cheese-with-thyme-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة الجبن مع زعتر",
+   "nameEn": "Cheese With Thyme Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-egyptian-mesh",
+   "chain": "alhatab",
+   "nameAr": "مش مصري",
+   "nameEn": "Egyptian Mesh",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-halloumi-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة حلومي",
+   "nameEn": "Halloumi Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-jalapeno-cheese-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة جبنة هالابينو",
+   "nameEn": "Jalapeno Cheese Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mexican-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة مكسيكية",
+   "nameEn": "Mexican Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-pepper-cheese-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة الجبن بالفلفل",
+   "nameEn": "Pepper Cheese Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-rayaheen-cheese-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة الجبن رياحين",
+   "nameEn": "Rayaheen Cheese Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-special-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة سبيشل",
+   "nameEn": "Special Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-special-spicy-cheese-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة جبن سبيشل حاره",
+   "nameEn": "Special Spicy Cheese Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-spicy-cheese-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة الجبن الحاره",
+   "nameEn": "Spicy Cheese Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-mortadella-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة مرتديلا دجاج",
+   "nameEn": "Chicken Mortadella Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-special-mortadella-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة المرتديلا سبيشل",
+   "nameEn": "Special Mortadella Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-tuna-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة تونة",
+   "nameEn": "Tuna Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-cheese-makdous-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة جبن مكدوس",
+   "nameEn": "Cheese Makdous Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-makdous-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة مكدوس",
+   "nameEn": "Makdous Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-syrian-style-makdous",
+   "chain": "alhatab",
+   "nameAr": "مكدوس سوري",
+   "nameEn": "Syrian Style Makdous",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-turkish-style-labneh-makdous",
+   "chain": "alhatab",
+   "nameAr": "لبنة على الطريقة التركية و مكدوس",
+   "nameEn": "Turkish Style Labneh Makdous",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-egg-shakshuka",
+   "chain": "alhatab",
+   "nameAr": "شكشوكة",
+   "nameEn": "Egg Shakshuka",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-saudi-style-foul",
+   "chain": "alhatab",
+   "nameAr": "فول على الطريقة السعودية",
+   "nameEn": "Saudi Style Foul",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-majbous",
+   "chain": "alhatab",
+   "nameAr": "مجبوس دجاج",
+   "nameEn": "Chicken Majbous",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-mandi",
+   "chain": "alhatab",
+   "nameAr": "مندي دجاج",
+   "nameEn": "Chicken Mandi",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-molokhia-with-rice",
+   "chain": "alhatab",
+   "nameAr": "ملوخية بالدجاج مع الارز",
+   "nameEn": "Chicken Molokhia With Rice",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-fish-sayadieh",
+   "chain": "alhatab",
+   "nameAr": "سمك الصيادية",
+   "nameEn": "Fish Sayadieh",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-kushari",
+   "chain": "alhatab",
+   "nameAr": "كشري",
+   "nameEn": "Kushari",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-saudi-chicken-kabsa",
+   "chain": "alhatab",
+   "nameAr": "كبسة دجاج",
+   "nameEn": "Saudi Chicken Kabsa",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-quinoa",
+   "chain": "alhatab",
+   "nameAr": "كينوا مع دجاج",
+   "nameEn": "Chicken Quinoa",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-biryani",
+   "chain": "alhatab",
+   "nameAr": "برياني دجاج",
+   "nameEn": "Chicken Biryani",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-tikka-masala-and-pilau-rice",
+   "chain": "alhatab",
+   "nameAr": "دجاج تيكا ماسالا مع الارز",
+   "nameEn": "Chicken Tikka Masala And Pilau Rice",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-tuna-nicoise-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة تونا نيسواز",
+   "nameEn": "Tuna Nicoise Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-greek-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة يونانية",
+   "nameEn": "Greek Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-italian-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة إيطالية",
+   "nameEn": "Italian Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-feta-slow-roast-tomato-pasta",
+   "chain": "alhatab",
+   "nameAr": "مكرونة فيتا والطماطم المحمصة",
+   "nameEn": "Feta Slow Roast Tomato Pasta",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mediterranean-orzo-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة أورزو متوسطية",
+   "nameEn": "Mediterranean Orzo Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-pesto-pasta",
+   "chain": "alhatab",
+   "nameAr": "بيستو باستا",
+   "nameEn": "Pesto Pasta",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-tuna-sweetcorn-pasta-salad",
+   "chain": "alhatab",
+   "nameAr": "سلطة مكرونة بالتونة والذرة",
+   "nameEn": "Tuna Sweetcorn Pasta Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-katsu-chicken-salad-2",
+   "chain": "alhatab",
+   "nameAr": "سلطة دجاج كاتسو",
+   "nameEn": "Katsu Chicken Salad (250g)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-roasted-cauliflower-feta-tahini",
+   "chain": "alhatab",
+   "nameAr": "قرنبيط محمص، فيتا وطحينة",
+   "nameEn": "Roasted Cauliflower Feta Tahini",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-beef-bechamel-pasta",
+   "chain": "alhatab",
+   "nameAr": "مكرونة بشاميل باللحم",
+   "nameEn": "Beef Bechamel Pasta",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-beef-lasagne",
+   "chain": "alhatab",
+   "nameAr": "لازانيا باللحم",
+   "nameEn": "Beef Lasagne",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-macaroni-cheese",
+   "chain": "alhatab",
+   "nameAr": "باستا بالجبن",
+   "nameEn": "Macaroni Cheese",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mushroom-fettuccine",
+   "chain": "alhatab",
+   "nameAr": "فيتوتشيني مشروم",
+   "nameEn": "Mushroom Fettuccine",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-penne-arrabbiata",
+   "chain": "alhatab",
+   "nameAr": "بنا ارابياتا",
+   "nameEn": "Penne Arrabbiata",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-cajun-chicken",
+   "chain": "alhatab",
+   "nameAr": "دجاج الكاجون",
+   "nameEn": "Cajun Chicken",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-avocado",
+   "chain": "alhatab",
+   "nameAr": "دجاج بالأفوكادو",
+   "nameEn": "Chicken Avocado",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-roasted-pesto-vegetable-cheddar-focaccia",
+   "chain": "alhatab",
+   "nameAr": "فوكاشيا بالخضار المشوية والبستو وجبن الشيدر",
+   "nameEn": "Roasted Pesto Vegetable Cheddar Focaccia",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-katsu-chicken-salad",
+   "chain": "alhatab",
+   "nameAr": "دجاج الكاتسو",
+   "nameEn": "Katsu Chicken Salad (190g)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-tuna-salad-sub",
+   "chain": "alhatab",
+   "nameAr": "ساندوتش سلطة التونة",
+   "nameEn": "Tuna Salad Sub",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-buffalo-chicken",
+   "chain": "alhatab",
+   "nameAr": "دجاج بوفالو",
+   "nameEn": "Buffalo Chicken",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-caesar",
+   "chain": "alhatab",
+   "nameAr": "دجاج سيزر",
+   "nameEn": "Chicken Caesar",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-feta-rocca",
+   "chain": "alhatab",
+   "nameAr": "فيتا وجرجير",
+   "nameEn": "Feta Rocca",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-chicken-noodle-soup",
+   "chain": "alhatab",
+   "nameAr": "شوربة نودلز بالدجاج",
+   "nameEn": "Chicken Noodle Soup",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-lentil-soup",
+   "chain": "alhatab",
+   "nameAr": "شوربة العدس",
+   "nameEn": "Lentil Soup",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-minestrone-soup",
+   "chain": "alhatab",
+   "nameAr": "شوربة المينستروني",
+   "nameEn": "Minestrone Soup",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-mushroom-soup",
+   "chain": "alhatab",
+   "nameAr": "شوربة المشروم",
+   "nameEn": "Mushroom Soup",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-sweetcorn-soup",
+   "chain": "alhatab",
+   "nameAr": "شوربة الذرة الحلوة",
+   "nameEn": "Sweetcorn Soup",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-tomato-basil-soup",
+   "chain": "alhatab",
+   "nameAr": "شوربة الطماطم والريحان",
+   "nameEn": "Tomato Basil Soup",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
+  {
+   "id": "rst-alhatab-vegetable-soup",
+   "chain": "alhatab",
+   "nameAr": "شوربة الخضار",
+   "nameEn": "Vegetable Soup",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "OFFICIAL_LOCAL"
+  },
   {
    "id": "rst-dominos-buffalo-chicken-m-1-5-pizza",
    "chain": "dominos",
