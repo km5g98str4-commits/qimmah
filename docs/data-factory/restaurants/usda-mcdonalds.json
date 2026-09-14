@@ -289,6 +289,24 @@
    "usdaPortion": "item (6.4 oz)"
   },
   {
+   "id": "southern-style-chicken-sandwich",
+   "nameAr": "ساندويتش دجاج ساذرن",
+   "nameEn": "Southern Style Chicken Sandwich",
+   "sourceName": "McDONALD'S, Southern Style Chicken Biscuit",
+   "fdcId": 170776,
+   "dataType": "SR Legacy",
+   "servingGrams": 132,
+   "servingLabelAr": "حبة (132غ)",
+   "kcal": 401,
+   "protein": 15.7,
+   "carbs": 40.4,
+   "fat": 19.7,
+   "fiber": 1.8,
+   "type": "chicken",
+   "keywords": [],
+   "usdaPortion": "biscuit regular size biscuit"
+  },
+  {
    "id": "ranch-snack-wrap-grilled",
    "nameAr": "سناك راب دجاج مشوي",
    "nameEn": "Ranch Snack Wrap (Grilled)",
@@ -511,8 +529,11 @@
   },
   {
    "nameEn": "McDouble",
-   "why": "USDA unmatched",
-   "candidates": []
+   "why": "USDA ambiguous",
+   "candidates": [
+    "McDONALD'S, Double Cheeseburger",
+    "McDONALD'S, DOUBLE QUARTER POUNDER with Cheese"
+   ]
   },
   {
    "nameEn": "Big Tasty",
@@ -531,11 +552,6 @@
   },
   {
    "nameEn": "Premium Crispy Chicken Classic Sandwich",
-   "why": "USDA unmatched",
-   "candidates": []
-  },
-  {
-   "nameEn": "Southern Style Chicken Sandwich",
    "why": "USDA unmatched",
    "candidates": []
   },
@@ -571,8 +587,15 @@
   },
   {
    "nameEn": "Scrambled Eggs",
-   "why": "USDA unmatched",
-   "candidates": []
+   "why": "USDA ambiguous",
+   "candidates": [
+    "McDONALD'S, Sausage, Egg & Cheese McGRIDDLES",
+    "McDONALD'S, Sausage McMUFFIN with Egg",
+    "McDONALD'S, Bacon Egg & Cheese Biscuit",
+    "McDONALD'S, Sausage Biscuit with Egg",
+    "McDONALD'S, Bacon, Egg & Cheese McGRIDDLES",
+    "McDONALD'S, Egg McMUFFIN"
+   ]
   }
  ]
 }

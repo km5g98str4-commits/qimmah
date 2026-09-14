@@ -31,11 +31,11 @@ const checks = [
   // [مهمة الصقل §5] عدّ دقيق لأصناف السلاسل المنسَّقة (فئة «مطاعم» خارج r2):
   // total>=581 أرضية تبتلع الإضافة والحذف الصامتَين، وهذا يعلنهما — كل موجة
   // استيراد معتمدة تحدّث الرقم بندًا مسمًّى في تقريرها (نمط gcc==46 نفسه).
-  // [RESTAURANT-MENUS-001] ٩٩ يدوية تقديرية (٦ حلّ محلّها سجلّ USDA — [FOOD-UX-001] بطاطس ماكدونالدز) + 163 من مصادر رسمية (دومينوز ٥٩ · شاورمر ٤٠ · سجلّات USDA للسلاسل 64 منها ماكدونالدز 27) = 262.
-  ['أصناف سلاسل «مطاعم» يدوية = 99 ومن مصادر رسمية = 163', r.restaurantsHand === 99 && r.restaurants === 262, `hand=${r.restaurantsHand} total=${r.restaurants}`],
+  // [RESTAURANT-MENUS-001] ٩٩ يدوية تقديرية (٦ حلّ محلّها سجلّ USDA — [FOOD-UX-001] بطاطس ماكدونالدز) + 164 من مصادر رسمية (دومينوز ٥٩ · شاورمر ٤٠ · سجلّات USDA للسلاسل 65 منها ماكدونالدز 28) = 263.
+  ['أصناف سلاسل «مطاعم» يدوية = 99 ومن مصادر رسمية = 164', r.restaurantsHand === 99 && r.restaurants === 263, `hand=${r.restaurantsHand} total=${r.restaurants}`],
   // نظير «كل Food R2 معلّم تقديري»: قيم السلاسل كلها تقديرية (رأس كتلتها يعلنها)،
   // والوسم صار على الصنف المعروض نفسه — فلا يهبط صنف سلسلة جديد بلا وسمه.
-  ['كل أصناف السلاسل اليدوية معلّمة «تقديري» وكل rst-* مصنَّف provenance رسمي/USDA', r.restaurantsEstimated === 99 && r.restaurantsSourced === 163, `estimated=${r.restaurantsEstimated} sourced=${r.restaurantsSourced}`],
+  ['كل أصناف السلاسل اليدوية معلّمة «تقديري» وكل rst-* مصنَّف provenance رسمي/USDA', r.restaurantsEstimated === 99 && r.restaurantsSourced === 164, `estimated=${r.restaurantsEstimated} sourced=${r.restaurantsSourced}`],
   ['Food R2 = 60 صنف مطاعم', r.r2 === 60, `r2=${r.r2}`],
   ['كل Food R2 معلّم «تقديري»', r.r2Estimated === 60, `estimated=${r.r2Estimated}`],
   ['Food R2 يغطي مطاعم/أطباق/مشروبات/فطور/حلويات', Array.isArray(r.r2Categories) && r.r2Categories.length >= 5, `categories=${r.r2Categories?.length ?? 0}`],
