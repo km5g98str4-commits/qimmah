@@ -1480,7 +1480,8 @@
     "fndds",
     "foundation"
    ],
-   "pick": "McDONALD'S, McFLURRY with OREO cookies"
+   "pick": "McDONALD'S, McFLURRY with OREO cookies",
+   "serving": "regular"
   },
   {
    "id": "CH105",
@@ -1494,7 +1495,8 @@
     "fndds",
     "foundation"
    ],
-   "pick": "McDONALD'S, McFLURRY with M&M'S CANDIES"
+   "pick": "McDONALD'S, McFLURRY with M&M'S CANDIES",
+   "serving": "regular"
   },
   {
    "id": "CH106",

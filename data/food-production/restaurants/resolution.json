@@ -1,6 +1,6 @@
 {
  "counts": {
-  "OFFICIAL_FULL": 111,
+  "OFFICIAL_FULL": 123,
   "OFFICIAL_PARTIAL": 40
  },
  "byChain": {
@@ -9,7 +9,7 @@
   "applebees": 3,
   "burgerking": 8,
   "kfc": 10,
-  "mcdonalds": 15,
+  "mcdonalds": 27,
   "papajohns": 4,
   "pizzahut": 6,
   "subway": 6
@@ -1226,6 +1226,114 @@
    "chain": "mcdonalds",
    "nameAr": "آيس كريم ساندي كراميل",
    "nameEn": "Caramel Sundae",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-ranch-snack-wrap-grilled",
+   "chain": "mcdonalds",
+   "nameAr": "سناك راب دجاج مشوي",
+   "nameEn": "Ranch Snack Wrap (Grilled)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-ranch-snack-wrap-crispy",
+   "chain": "mcdonalds",
+   "nameAr": "سناك راب دجاج مقرمش",
+   "nameEn": "Ranch Snack Wrap (Crispy)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-french-fries-small",
+   "chain": "mcdonalds",
+   "nameAr": "بطاطس مقلية (صغير)",
+   "nameEn": "French Fries (small)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-side-salad",
+   "chain": "mcdonalds",
+   "nameAr": "سلطة جانبية",
+   "nameEn": "Side Salad",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-fruit-n-yogurt-parfait",
+   "chain": "mcdonalds",
+   "nameAr": "بارفيه فواكه وزبادي",
+   "nameEn": "Fruit 'n Yogurt Parfait",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-vanilla-reduced-fat-ice-cream-cone",
+   "chain": "mcdonalds",
+   "nameAr": "آيس كريم كون فانيلا",
+   "nameEn": "Vanilla Reduced Fat Ice Cream Cone",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-hot-fudge-sundae",
+   "chain": "mcdonalds",
+   "nameAr": "ساندي شوكولاتة ساخنة",
+   "nameEn": "Hot Fudge Sundae",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-strawberry-sundae",
+   "chain": "mcdonalds",
+   "nameAr": "ساندي فراولة",
+   "nameEn": "Strawberry Sundae",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-mcflurry-with-oreo-cookies",
+   "chain": "mcdonalds",
+   "nameAr": "ماك فلوري أوريو",
+   "nameEn": "McFlurry with Oreo cookies",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-mcflurry-with-m-m-s",
+   "chain": "mcdonalds",
+   "nameAr": "ماك فلوري M&M",
+   "nameEn": "McFlurry with M&M's",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-chicken-mcnuggets-4-pc",
+   "chain": "mcdonalds",
+   "nameAr": "تشيكن ماك ناجتس (٤ قطع)",
+   "nameEn": "Chicken McNuggets (4 pc)",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-chicken-mcnuggets-10-pc",
+   "chain": "mcdonalds",
+   "nameAr": "تشيكن ماك ناجتس (١٠ قطع)",
+   "nameEn": "Chicken McNuggets (10 pc)",
    "status": "OFFICIAL_FULL",
    "macros": "official",
    "class": "USDA_MEASURED"

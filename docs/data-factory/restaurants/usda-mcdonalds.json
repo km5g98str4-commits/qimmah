@@ -15,7 +15,7 @@
   "url": "https://fdc.nal.usda.gov/",
   "kind": "usda-branded-record",
   "market": "US",
-  "accessed": "2026-09-13",
+  "accessed": "2026-09-14",
   "note": "سجلّات USDA FoodData Central لمنتجات السلسلة في السوق الأمريكي (قياس مخبري، ملك عامّ) — كاملة الماكروز؛ الوصفة السعودية قد تختلف."
  },
  "items": [
@@ -287,11 +287,290 @@
    "type": "dessert",
    "keywords": [],
    "usdaPortion": "item (6.4 oz)"
+  },
+  {
+   "id": "ranch-snack-wrap-grilled",
+   "nameAr": "سناك راب دجاج مشوي",
+   "nameEn": "Ranch Snack Wrap (Grilled)",
+   "sourceName": "McDONALD'S, RANCH SNACK WRAP, Grilled",
+   "fdcId": 170778,
+   "dataType": "SR Legacy",
+   "servingGrams": 123,
+   "servingLabelAr": "حبة (123غ)",
+   "kcal": 273,
+   "protein": 17,
+   "carbs": 22.6,
+   "fat": 12.7,
+   "fiber": 1.1,
+   "type": "chicken",
+   "keywords": [],
+   "usdaPortion": "wrap"
+  },
+  {
+   "id": "ranch-snack-wrap-crispy",
+   "nameAr": "سناك راب دجاج مقرمش",
+   "nameEn": "Ranch Snack Wrap (Crispy)",
+   "sourceName": "McDONALD'S, RANCH SNACK WRAP, Crispy",
+   "fdcId": 170777,
+   "dataType": "SR Legacy",
+   "servingGrams": 133,
+   "servingLabelAr": "حبة (133غ)",
+   "kcal": 366,
+   "protein": 15.3,
+   "carbs": 30.9,
+   "fat": 20.1,
+   "fiber": 1.7,
+   "type": "chicken",
+   "keywords": [],
+   "usdaPortion": "wrap"
+  },
+  {
+   "id": "french-fries-small",
+   "nameAr": "بطاطس مقلية (صغير)",
+   "nameEn": "French Fries (small)",
+   "sourceName": "McDONALD'S, french fries",
+   "fdcId": 170721,
+   "dataType": "SR Legacy",
+   "servingGrams": 71,
+   "servingLabelAr": "حصة (71غ)",
+   "kcal": 229,
+   "protein": 2.4,
+   "carbs": 30.2,
+   "fat": 11,
+   "fiber": 2.8,
+   "type": "fries",
+   "keywords": [],
+   "usdaPortion": "small serving"
+  },
+  {
+   "id": "side-salad",
+   "nameAr": "سلطة جانبية",
+   "nameEn": "Side Salad",
+   "sourceName": "McDONALD'S, Side Salad",
+   "fdcId": 172074,
+   "dataType": "SR Legacy",
+   "servingGrams": 87,
+   "servingLabelAr": "حبة (87غ)",
+   "kcal": 17,
+   "protein": 0.9,
+   "carbs": 3.7,
+   "fat": 0.2,
+   "fiber": 1.4,
+   "type": "salad",
+   "keywords": [],
+   "usdaPortion": "item 3.1 oz"
+  },
+  {
+   "id": "fruit-n-yogurt-parfait",
+   "nameAr": "بارفيه فواكه وزبادي",
+   "nameEn": "Fruit 'n Yogurt Parfait",
+   "sourceName": "McDONALD'S, Fruit 'n Yogurt Parfait (without granola)",
+   "fdcId": 173313,
+   "dataType": "SR Legacy",
+   "servingGrams": 142,
+   "servingLabelAr": "حبة (142غ)",
+   "kcal": 128,
+   "protein": 3.5,
+   "carbs": 25.1,
+   "fat": 1.6,
+   "fiber": 1.3,
+   "type": "dessert",
+   "keywords": [],
+   "usdaPortion": "item"
+  },
+  {
+   "id": "vanilla-reduced-fat-ice-cream-cone",
+   "nameAr": "آيس كريم كون فانيلا",
+   "nameEn": "Vanilla Reduced Fat Ice Cream Cone",
+   "sourceName": "McDONALD'S, Vanilla Reduced Fat Ice Cream Cone",
+   "fdcId": 172061,
+   "dataType": "SR Legacy",
+   "servingGrams": 90,
+   "servingLabelAr": "حبة (90غ)",
+   "kcal": 146,
+   "protein": 3.8,
+   "carbs": 23.8,
+   "fat": 4.4,
+   "fiber": 0.1,
+   "type": "dessert",
+   "keywords": [],
+   "usdaPortion": "item (3.2 oz)"
+  },
+  {
+   "id": "hot-fudge-sundae",
+   "nameAr": "ساندي شوكولاتة ساخنة",
+   "nameEn": "Hot Fudge Sundae",
+   "sourceName": "McDONALD'S, Hot Fudge Sundae",
+   "fdcId": 173302,
+   "dataType": "SR Legacy",
+   "servingGrams": 179,
+   "servingLabelAr": "حبة (179غ)",
+   "kcal": 333,
+   "protein": 7.4,
+   "carbs": 53.7,
+   "fat": 10.6,
+   "fiber": 0.7,
+   "type": "dessert",
+   "keywords": [],
+   "usdaPortion": "item (6.3 oz)"
+  },
+  {
+   "id": "strawberry-sundae",
+   "nameAr": "ساندي فراولة",
+   "nameEn": "Strawberry Sundae",
+   "sourceName": "McDONALD'S, Strawberry Sundae",
+   "fdcId": 172062,
+   "dataType": "SR Legacy",
+   "servingGrams": 178,
+   "servingLabelAr": "حبة (178غ)",
+   "kcal": 281,
+   "protein": 5.7,
+   "carbs": 50,
+   "fat": 7,
+   "fiber": 0,
+   "type": "dessert",
+   "keywords": [],
+   "usdaPortion": "item (6.3 oz)"
+  },
+  {
+   "id": "mcflurry-with-oreo-cookies",
+   "nameAr": "ماك فلوري أوريو",
+   "nameEn": "McFlurry with Oreo cookies",
+   "sourceName": "McDONALD'S, McFLURRY with OREO cookies",
+   "fdcId": 173304,
+   "dataType": "SR Legacy",
+   "servingGrams": 337,
+   "servingLabelAr": "حبة (337غ)",
+   "kcal": 556,
+   "protein": 13.4,
+   "carbs": 86.3,
+   "fat": 19.1,
+   "fiber": 0.3,
+   "type": "dessert",
+   "keywords": [],
+   "usdaPortion": "regular (12 fl oz)"
+  },
+  {
+   "id": "mcflurry-with-m-m-s",
+   "nameAr": "ماك فلوري M&M",
+   "nameEn": "McFlurry with M&M's",
+   "sourceName": "McDONALD'S, McFLURRY with M&M'S CANDIES",
+   "fdcId": 173303,
+   "dataType": "SR Legacy",
+   "servingGrams": 348,
+   "servingLabelAr": "حبة (348غ)",
+   "kcal": 616,
+   "protein": 14,
+   "carbs": 93.3,
+   "fat": 22.5,
+   "fiber": 0.7,
+   "type": "dessert",
+   "keywords": [],
+   "usdaPortion": "regular (12 fl oz)"
+  },
+  {
+   "id": "chicken-mcnuggets-4-pc",
+   "nameAr": "تشيكن ماك ناجتس (٤ قطع)",
+   "nameEn": "Chicken McNuggets (4 pc)",
+   "sourceName": "McDONALD'S, Chicken McNUGGETS",
+   "fdcId": 173297,
+   "dataType": "SR Legacy",
+   "servingGrams": 64,
+   "servingLabelAr": "4 قطع (64غ)",
+   "kcal": 193,
+   "protein": 10.1,
+   "carbs": 9.7,
+   "fat": 12.7,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "pieces"
+  },
+  {
+   "id": "chicken-mcnuggets-10-pc",
+   "nameAr": "تشيكن ماك ناجتس (١٠ قطع)",
+   "nameEn": "Chicken McNuggets (10 pc)",
+   "sourceName": "McDONALD'S, Chicken McNUGGETS",
+   "fdcId": 173297,
+   "dataType": "SR Legacy",
+   "servingGrams": 159,
+   "servingLabelAr": "10 قطع (159غ)",
+   "kcal": 480,
+   "protein": 25.1,
+   "carbs": 24,
+   "fat": 31.5,
+   "type": "fried_chicken",
+   "keywords": [],
+   "usdaPortion": "pieces"
   }
  ],
  "quarantined": [
   {
    "nameEn": "Baked Apple Pie",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "McDouble",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Big Tasty",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Hot 'n Spicy McChicken",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Premium Grilled Chicken Classic Sandwich",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Premium Crispy Chicken Classic Sandwich",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Southern Style Chicken Sandwich",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Chicken Selects Premium Breast Strips (3 pc)",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Apple Dippers",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Chocolate Triple Thick Shake",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Vanilla Triple Thick Shake",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Strawberry Triple Thick Shake",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Cinnamon Melts",
+   "why": "USDA unmatched",
+   "candidates": []
+  },
+  {
+   "nameEn": "Scrambled Eggs",
    "why": "USDA unmatched",
    "candidates": []
   }
