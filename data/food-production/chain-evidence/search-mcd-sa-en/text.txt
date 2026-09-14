@@ -100,20 +100,16 @@ calculator
 is another in a series of initiatives by
 McDonald&#x27;s
 in the GCC aiming at nutritional transparency that began in 2003. The initiatives also include communicating product ...
-McDonald&#x27;s Nutrition Calculator
-fastfoodnutrition.org/mcdonalds/calculator
-The
-McDonald&#x27;s
-nutrition
-calculator
-lets you add up the
-nutrition
-facts, calories & weight watchers points for your
-McDonald&#x27;s
-meal.
 حاسبة القيمة الغذائية - McDonald&#x27;s
 www.mcdonalds.com/sa/ar-sa/riyadh/about-our-food/nutrition-calculator.html
 *تعتمد القيمة الغذائية اليومية (DV) على حمية غذائية تحتوي على 2,000 سعرة حرارية *قد يختلف معدل حرق السعرات الحرارية اثناء ممارسة رياضة المشي من شخص الى آخر، تبعا لعوامل مختلفة كالعمر والجنس والوزن وسرعة المشي ومستوى ...
+Nutrition Calculator - McDonald&#x27;s
+www.mcdonalds.com/ae/en-ae/about-our-food/nutrition-calculator.html
+Important Note:
+Nutrition
+values are based on average figures and on standard product formulation. Actual serving size and nutrient values may vary. Ingredients are subject to seasonal and other variations.
+Nutrition
+values and serving size do not apply to special customer orders. This information is current as of 2017.
 Nutrition Calculator: Macros, Calorie Tracker & More | McDonald&#x27;s
 www.mcdonalds.com/us/en-us/about-our-food/nutrition-calculator.html
 Looking for
@@ -127,13 +123,6 @@ nutrition
 facts for
 McDonald&#x27;s
 menu items.
-Nutrition Calculator - McDonald&#x27;s
-www.mcdonalds.com/ae/en-ae/about-our-food/nutrition-calculator.html
-Important Note:
-Nutrition
-values are based on average figures and on standard product formulation. Actual serving size and nutrient values may vary. Ingredients are subject to seasonal and other variations.
-Nutrition
-values and serving size do not apply to special customer orders. This information is current as of 2017.
 About our Food - McDonald&#x27;s Food Facts | McDonald&#x27;s Riyadh
 www.mcdonalds.com/sa/en-sa/riyadh/about-our-food.html
 McDonald&#x27;s
@@ -144,4 +133,15 @@ nutrition
 . Read more information about
 McDonald&#x27;s
 here.
+McDonald&#x27;s Nutrition Calculator
+fastfoodnutrition.org/mcdonalds/calculator
+The
+McDonald&#x27;s
+nutrition
+calculator
+lets you add up the
+nutrition
+facts, calories & weight watchers points for your
+McDonald&#x27;s
+meal.
 Feedback

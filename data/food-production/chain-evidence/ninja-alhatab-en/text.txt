@@ -121,39 +121,36 @@ Whole wheat flatbread with a thin texture and rich flavor. Great for everyday me
 ALHATAB PROTEIN ARABIC BREAD 280G
 High-protein flatbread with great texture. A perfect choice for those who care about nutrition. Try it now!
 ‏٦٫٩٥ ر.س.‏
-ALHATAB CLASSIC HUMMUS 250G
-Classic Hummus rich and delicious that pairs perfectly with your daily meals or as a standout dip on your table – authentic flavor everyone loves. Enjoy it now!
-‏١٢٫٥ ر.س.‏
 ALHATAB HUMMOUS
 Product Size: 350 g/ Smooth and creamy hummus made from premium chickpeas, a nutritious choice for any meal. Get it now.
 ‏١٧٫٥ ر.س.‏
 ALHATAB MILK SANDWICH ROLLS MINI 150G
 Mini milk sandwich bread with rich flavor perfect for quick bites. Try it now!
 ‏٢٫٩ ر.س.‏
-ALHATAB MAFROUKA 200G
-Mafrouka a delicious dish of soft cheese and vegetables with a rich refreshing taste a good source of protein perfect as an appetizer Try it now!
-‏١٢٫٩٥ ر.س.‏
-ALHATAB HIGH PROTEIN MAMMOUL 55G/PC
-ALHATAB HIGH PROTEIN MAMMOUL BOX 550G-
-‏٣٩٫٩٥ ر.س.‏
-ALHATAB SPECIAL SALAD 250G
-Special Salad is rich and tasty, featuring a mix of cheese, mixed peppers, and olives, delivering a distinctive flavor perfect for any time. Try it now!
-‏١٤٫٩٥ ر.س.‏
-ALHATAB MAFROUKA
-Product Size: 350 g/ Plain mafroukah dessert with nutty flavor and light sweetness. Buy now.
-‏١٩٫٩٥ ر.س.‏
 ALHATAB SIMIT SESAME RING 130G
 Simit Sesame Ring Traditional sesame ring bread with a crunchy crust and soft center. Enjoy it with cheese or as a snack. Try it now!
 ‏٤٫٥ ر.س.‏
-ALHATAB MEXICAN SALAD 250G
-Mexican salad with a delicious sauce adds a spicy and refreshing touch, full of fiber and perfect for snacks. Try it now!
+ALHATAB MAFROUKA
+Product Size: 350 g/ Plain mafroukah dessert with nutty flavor and light sweetness. Buy now.
 ‏١٩٫٩٥ ر.س.‏
 ALHATAB SYRIAN STYLE MAKDOUS
 Product Size: 350 g/ Traditional Syrian makdous stuffed with walnuts and red peppers. Buy now.
 ‏٢٠٫٩٥ ر.س.‏
+ALHATAB HIGH PROTEIN MAMMOUL 55G/PC
+ALHATAB HIGH PROTEIN MAMMOUL BOX 550G-
+‏٣٩٫٩٥ ر.س.‏
 ALHATAB KETO SLICED BREAD 400G
 ALHATAB KETO SLICED BREAD 400G-
 ‏١٨٫٩٥ ر.س.‏
+ALHATAB SPECIAL SALAD 250G
+Special Salad is rich and tasty, featuring a mix of cheese, mixed peppers, and olives, delivering a distinctive flavor perfect for any time. Try it now!
+‏١٤٫٩٥ ر.س.‏
+ALHATAB MEXICAN SALAD 250G
+Mexican salad with a delicious sauce adds a spicy and refreshing touch, full of fiber and perfect for snacks. Try it now!
+‏١٩٫٩٥ ر.س.‏
+ALHATAB CLASSIC HUMMUS 250G
+Classic Hummus rich and delicious that pairs perfectly with your daily meals or as a standout dip on your table – authentic flavor everyone loves. Enjoy it now!
+‏١٢٫٥ ر.س.‏
 ALHATAB CREAM
 Product Size: 350 g/ Rich Al Hatab cream with soft texture ideal for desserts or cooking. Buy now.
 ‏١٧٫٤٤ ر.س.‏
@@ -166,6 +163,9 @@ Product Size: 350 g/ Al Hatab mutabal with creamy texture and smoked eggplant fl
 ALHATAB TUNA SALAD 250G
 Tuna salad, a fresh mix of tuna and vegetables, perfect as a healthy snack rich in protein and essential nutrients. Try it now!
 ‏١٧٫٩٥ ر.س.‏
+ALHATAB MAFROUKA 200G
+Mafrouka a delicious dish of soft cheese and vegetables with a rich refreshing taste a good source of protein perfect as an appetizer Try it now!
+‏١٢٫٩٥ ر.س.‏
 ALHATAB MEXICAN SALAD
 Product Size: 350 g/ A vibrant mix of vegetables and spices inspired by bold Mexican flavors. Buy now.
 ‏٢٦٫٩٥ ر.س.‏
@@ -200,57 +200,36 @@ Medium white flatbread, soft and versatile. Ideal for breakfast or lunch. Try it
 ALHATAB LOW CARB KETO ARABIC BREAD 125G
 Keto Arabic bread, low in carbs and light on the stomach. Try it now!
 ‏١٠ ر.س.‏
-ALHATAB W.WHEAT ARABIC BREAD MEDIUM 220G
-Whole wheat flatbread with a thin texture and rich flavor. Great for everyday meals. Try it now!
-‏١٫٥ ر.س.‏
 ALHATAB PITTED BLACK OLIVES
 Product Size: 350 g/ Smooth black olives without pits for convenience and bold natural taste. Buy now.
 ‏٢٠٫٩٥ ر.س.‏
+ALHATAB W.WHEAT ARABIC BREAD MEDIUM 220G
+Whole wheat flatbread with a thin texture and rich flavor. Great for everyday meals. Try it now!
+‏١٫٥ ر.س.‏
 ALHATAB PROTEIN ARABIC BREAD 280G
 High-protein flatbread with great texture. A perfect choice for those who care about nutrition. Try it now!
 ‏٦٫٩٥ ر.س.‏
 ALHATAB WHITE SOFT SANDWICH ROLLS 200G
 Soft white sandwich bread that works with every filling. Try it now!
 ‏٢٫٥ ر.س.‏
-ALHATAB CLASSIC HUMMUS 250G
-Classic Hummus rich and delicious that pairs perfectly with your daily meals or as a standout dip on your table – authentic flavor everyone loves. Enjoy it now!
-‏١٢٫٥ ر.س.‏
 ALHATAB MILK SANDWICH ROLLS MINI 150G
 Mini milk sandwich bread with rich flavor perfect for quick bites. Try it now!
 ‏٢٫٩ ر.س.‏
 ALHATAB W.WHEAT SANDWICH ROLLS 200G
 Whole wheat sandwich bread with bran rich in flavor and a nourishing choice. Try it now!
 ‏٣ ر.س.‏
-ALHATAB SLICED BREAD WHITE 600G
-White toast with a light texture and mild taste. Great for sandwiches or breakfast. Try it now!
-‏٦٫٢٥ ر.س.‏
-ALHATAB MAFROUKA 200G
-Mafrouka a delicious dish of soft cheese and vegetables with a rich refreshing taste a good source of protein perfect as an appetizer Try it now!
-‏١٢٫٩٥ ر.س.‏
-ALHATAB SLICED BREAD BROWN 600G
-Whole wheat toast with a soft texture and rich flavor. A wholesome choice for your daily meals. Try it now!
-‏٧٫٢٥ ر.س.‏
-ALHATAB SPECIAL SALAD 250G
-Special Salad is rich and tasty, featuring a mix of cheese, mixed peppers, and olives, delivering a distinctive flavor perfect for any time. Try it now!
-‏١٤٫٩٥ ر.س.‏
 ALHATAB SIMIT SESAME RING 130G
 Simit Sesame Ring Traditional sesame ring bread with a crunchy crust and soft center. Enjoy it with cheese or as a snack. Try it now!
 ‏٤٫٥ ر.س.‏
-ALHATAB MAFROKEH SPICY 200G
-Spicy Mafrouka full of spices and fresh ingredients, this fiery Mafrouka contains peppers and olives, a perfect dish for spicy food lovers delivering bold heat and unforgettable flavor. Try it now!
-‏١٢٫٩٥ ر.س.‏
+ALHATAB SLICED BREAD WHITE 600G
+White toast with a light texture and mild taste. Great for sandwiches or breakfast. Try it now!
+‏٦٫٢٥ ر.س.‏
+ALHATAB SLICED BREAD BROWN 600G
+Whole wheat toast with a soft texture and rich flavor. A wholesome choice for your daily meals. Try it now!
+‏٧٫٢٥ ر.س.‏
 ALHATAB MAFROKEH SPICY
 Product Size: 350 g/ Spicy mafroukah offering a bold, flavorful twist on tradition. Get it now.
 ‏١٩٫٩٥ ر.س.‏
-ALHATAB MEXICAN SALAD 250G
-Mexican salad with a delicious sauce adds a spicy and refreshing touch, full of fiber and perfect for snacks. Try it now!
-‏١٩٫٩٥ ر.س.‏
-ALHATAB MUHAMARRA 200G
-Muhammara is full of flavor and perfect to serve with fresh bread, adding a special and delicious touch to any meal. Try it now!
-‏١٣٫٩٥ ر.س.‏
-ALHATAB SYRIAN STYLE MAKDOUS 275G
-Savory Syrian Makdous crafted with love using olive oil and fresh ingredients a rich flavor you’ll crave every day try it now!
-‏١٦٫٩٥ ر.س.‏
 ALHATAB SYRIAN STYLE MAKDOUS
 Product Size: 350 g/ Traditional Syrian makdous stuffed with walnuts and red peppers. Buy now.
 ‏٢٠٫٩٥ ر.س.‏
@@ -260,30 +239,51 @@ Protein-rich toast gives you the perfect boost to start your day strong. Try it 
 ALHATAB WHITE ARABIC BREAD BITES 175G
 Small white flatbread, easy to use for mini sandwiches or lunchboxes. Try it now!
 ‏٤٫٥ ر.س.‏
+ALHATAB SPECIAL SALAD 250G
+Special Salad is rich and tasty, featuring a mix of cheese, mixed peppers, and olives, delivering a distinctive flavor perfect for any time. Try it now!
+‏١٤٫٩٥ ر.س.‏
+ALHATAB MEXICAN SALAD 250G
+Mexican salad with a delicious sauce adds a spicy and refreshing touch, full of fiber and perfect for snacks. Try it now!
+‏١٩٫٩٥ ر.س.‏
+ALHATAB SYRIAN STYLE MAKDOUS 275G
+Savory Syrian Makdous crafted with love using olive oil and fresh ingredients a rich flavor you’ll crave every day try it now!
+‏١٦٫٩٥ ر.س.‏
 ALHATAB CREAM
 Product Size: 350 g/ Rich Al Hatab cream with soft texture ideal for desserts or cooking. Buy now.
 ‏١٧٫٤٤ ر.س.‏
-ALHATAB RAYAHEEN SALAD 500G
-A refreshing mix of herbs and greens that bring natural aroma and flavor to your table. Buy now.
-‏٣٩٫٩٥ ر.س.‏
-ALHATAB HALLOUMI CHEESE SALAD 500G
-Grilled halloumi cubes with fresh vegetables for a hearty, Mediterranean-inspired salad. Get it now.
-‏٤٣٫٩٥ ر.س.‏
+ALHATAB CLASSIC HUMMUS 250G
+Classic Hummus rich and delicious that pairs perfectly with your daily meals or as a standout dip on your table – authentic flavor everyone loves. Enjoy it now!
+‏١٢٫٥ ر.س.‏
 ALHATAB MUTABLE
 Product Size: 350 g/ Al Hatab mutabal with creamy texture and smoked eggplant flavor. Get it now.
 ‏١٨٫٩٥ ر.س.‏
 ALHATAB CHEESE MAKDOUS SALAD
 Product Size: 350 g/ A delicious pairing of stuffed makdous and smooth cheese for a rich Eastern flavor. Get it now.
 ‏٢١٫٩٥ ر.س.‏
+ALHATAB MAFROUKA 200G
+Mafrouka a delicious dish of soft cheese and vegetables with a rich refreshing taste a good source of protein perfect as an appetizer Try it now!
+‏١٢٫٩٥ ر.س.‏
 ALHATAB TUNA SALAD 250G
 Tuna salad, a fresh mix of tuna and vegetables, perfect as a healthy snack rich in protein and essential nutrients. Try it now!
 ‏١٧٫٩٥ ر.س.‏
-ALHATAB SPECIAL SALAD
-Product Size: 350 g/ A fresh blend of crisp vegetables and signature flavor, perfect for light, energizing meals. Make it part of your day.
-‏٢٠٫٩٥ ر.س.‏
+ALHATAB MAFROKEH SPICY 200G
+Spicy Mafrouka full of spices and fresh ingredients, this fiery Mafrouka contains peppers and olives, a perfect dish for spicy food lovers delivering bold heat and unforgettable flavor. Try it now!
+‏١٢٫٩٥ ر.س.‏
+ALHATAB MUHAMARRA 200G
+Muhammara is full of flavor and perfect to serve with fresh bread, adding a special and delicious touch to any meal. Try it now!
+‏١٣٫٩٥ ر.س.‏
 ALHATAB REGULAR CHEESE SALAD
 Product Size: 350 g/ A creamy cheese salad crafted for smooth taste and flavorful simplicity. Buy now.
 ‏١٨٫٩٥ ر.س.‏
+ALHATAB RAYAHEEN SALAD 500G
+A refreshing mix of herbs and greens that bring natural aroma and flavor to your table. Buy now.
+‏٣٩٫٩٥ ر.س.‏
+ALHATAB HALLOUMI CHEESE SALAD 500G
+Grilled halloumi cubes with fresh vegetables for a hearty, Mediterranean-inspired salad. Get it now.
+‏٤٣٫٩٥ ر.س.‏
+ALHATAB SPECIAL SALAD
+Product Size: 350 g/ A fresh blend of crisp vegetables and signature flavor, perfect for light, energizing meals. Make it part of your day.
+‏٢٠٫٩٥ ر.س.‏
 ALHATAB HALLOUMI CHEESE 250G
 Traditional halloumi cheese with a firm texture and savory taste. Grill or pan-fry to add a delicious touch to your meals. Try it now.
 ‏٢١٫٩٥ ر.س.‏
@@ -333,15 +333,15 @@ Al Hatab baguette adds a flavorful crunch to every bite. Great with butter or yo
 ALHATAB SEEDED BAGUETTE 300G
 Seeded baguette adds a flavorful crunch to every bite. Great with butter or your favorite dish. Try it now!
 ‏٥٫٧٥ ر.س.‏
+ALHATAB SIMIT SESAME RING 130G
+Simit Sesame Ring Traditional sesame ring bread with a crunchy crust and soft center. Enjoy it with cheese or as a snack. Try it now!
+‏٤٫٥ ر.س.‏
 ALHATAB SLICED BREAD WHITE 600G
 White toast with a light texture and mild taste. Great for sandwiches or breakfast. Try it now!
 ‏٦٫٢٥ ر.س.‏
 ALHATAB SLICED BREAD BROWN 600G
 Whole wheat toast with a soft texture and rich flavor. A wholesome choice for your daily meals. Try it now!
 ‏٧٫٢٥ ر.س.‏
-ALHATAB SIMIT SESAME RING 130G
-Simit Sesame Ring Traditional sesame ring bread with a crunchy crust and soft center. Enjoy it with cheese or as a snack. Try it now!
-‏٤٫٥ ر.س.‏
 ALHATAB BRIOCHE BREAD 265G
 Soft brioche bread with a rich texture and light flavor perfect for toast or both sweet and savory sandwiches. Try it now!
 ‏١٣٫٢٥ ر.س.‏
@@ -468,6 +468,9 @@ ALHATAB MADELINE RASPBERRY LARGE 300G
 ALHATAB MADELINE RASPBERRY LARGE 300G-
 ‏٢١٫٩٥ ر.س.‏
 Mezze
+ALHATAB SYRIAN STYLE MAKDOUS
+Product Size: 350 g/ Traditional Syrian makdous stuffed with walnuts and red peppers. Buy now.
+‏٢٠٫٩٥ ر.س.‏
 ALHATAB SPECIAL SALAD 250G
 Special Salad is rich and tasty, featuring a mix of cheese, mixed peppers, and olives, delivering a distinctive flavor perfect for any time. Try it now!
 ‏١٤٫٩٥ ر.س.‏
@@ -477,82 +480,88 @@ Mexican salad with a delicious sauce adds a spicy and refreshing touch, full of 
 ALHATAB SYRIAN STYLE MAKDOUS 275G
 Savory Syrian Makdous crafted with love using olive oil and fresh ingredients a rich flavor you’ll crave every day try it now!
 ‏١٦٫٩٥ ر.س.‏
-ALHATAB SYRIAN STYLE MAKDOUS
-Product Size: 350 g/ Traditional Syrian makdous stuffed with walnuts and red peppers. Buy now.
-‏٢٠٫٩٥ ر.س.‏
 ALHATAB SPECIAL SPICY CHEESE SALAD 250G
 Special spicy cheese salad combines cheese, olive oil, and mixed peppers with a touch of spicy seasoning, ready to deliver a rich and distinctive flavor. Try it now!
 ‏١٥٫٩٥ ر.س.‏
 ALHATAB REGULAR CHEESE SALAD 250G
 Cheese Salad features a tasty mix of fresh cheese with green pepper and olives, delivering a distinctive flavor perfect for breakfast. Try it now!
 ‏١٦٫٩٥ ر.س.‏
+ALHATAB CHEESE MAKDOUS SALAD
+Product Size: 350 g/ A delicious pairing of stuffed makdous and smooth cheese for a rich Eastern flavor. Get it now.
+‏٢١٫٩٥ ر.س.‏
 ALHATAB TURKI STYLE LABNEH MAKDOUS 200G
 Turkish Style Labneh with flavorful Makdous, combining rich taste and spiced stuffed eggplants. Perfect for breakfast or a tasty snack. Try it now!
 ‏١٢٫٥ ر.س.‏
+ALHATAB REGULAR CHEESE SALAD
+Product Size: 350 g/ A creamy cheese salad crafted for smooth taste and flavorful simplicity. Buy now.
+‏١٨٫٩٥ ر.س.‏
 ALHATAB RAYAHEEN SALAD 500G
 A refreshing mix of herbs and greens that bring natural aroma and flavor to your table. Buy now.
 ‏٣٩٫٩٥ ر.س.‏
 ALHATAB HALLOUMI CHEESE SALAD 500G
 Grilled halloumi cubes with fresh vegetables for a hearty, Mediterranean-inspired salad. Get it now.
 ‏٤٣٫٩٥ ر.س.‏
-ALHATAB CHEESE MAKDOUS SALAD
-Product Size: 350 g/ A delicious pairing of stuffed makdous and smooth cheese for a rich Eastern flavor. Get it now.
-‏٢١٫٩٥ ر.س.‏
+ALHATAB CHEESE WITH THYME SALAD
+Product Size: 350 g/ A flavorful blend of creamy cheese and aromatic thyme, made for authentic Mediterranean palettes.
+‏١٨٫٩٥ ر.س.‏
 ALHATAB SPECIAL SALAD
 Product Size: 350 g/ A fresh blend of crisp vegetables and signature flavor, perfect for light, energizing meals. Make it part of your day.
+‏٢٠٫٩٥ ر.س.‏
+ALHATAB LABNEH SALAD
+Product Size: 350 g/ Smooth labneh combined with fresh herbs for a light, balanced salad option. Get it now.
 ‏٢٠٫٩٥ ر.س.‏
 ALHATAB MEXICAN SALAD
 Product Size: 350 g/ A vibrant mix of vegetables and spices inspired by bold Mexican flavors. Buy now.
 ‏٢٦٫٩٥ ر.س.‏
-ALHATAB REGULAR CHEESE SALAD
-Product Size: 350 g/ A creamy cheese salad crafted for smooth taste and flavorful simplicity. Buy now.
-‏١٨٫٩٥ ر.س.‏
+ALHATAB TURKI STYLE LABNEH MAKDOUS
+Product Size: 350 g/ A unique blend of makdous and creamy labneh for a bold, savory experience. Buy now.
+‏٢١٫٨٨ ر.س.‏
 ALHATAB SPECIAL LABNEH SALAD
 Product Size: 350 g/ Creamy labneh meets garden freshness in this wholesome salad, made for simple, delicious moments. Taste the freshness.
 ‏٢١٫٩٥ ر.س.‏
 ALHATAB SPECIAL SPICY CHEESE SALAD
 Product Size: 350 g/ Bold and zesty, this spicy salad adds a vibrant twist to healthy eating. Spice up your plate today.
 ‏٢١٫٩٥ ر.س.‏
-ALHATAB CHEESE WITH THYME SALAD
-Product Size: 350 g/ A flavorful blend of creamy cheese and aromatic thyme, made for authentic Mediterranean palettes.
-‏١٨٫٩٥ ر.س.‏
 ALHATAB CHEESE SALAD WITH JALAPENO 500G
 Creamy cheese salad enhanced with jalapeño for a smooth yet spicy combination. Buy now.
 ‏٣٣٫٩٥ ر.س.‏
-ALHATAB LABNEH SALAD
-Product Size: 350 g/ Smooth labneh combined with fresh herbs for a light, balanced salad option. Get it now.
-‏٢٠٫٩٥ ر.س.‏
-ALHATAB TURKI STYLE LABNEH MAKDOUS
-Product Size: 350 g/ A unique blend of makdous and creamy labneh for a bold, savory experience. Buy now.
-‏٢١٫٨٨ ر.س.‏
-ALHATAB CHEESE SALAD WITH PEPPER 500G
-Classic cheese salad infused with the subtle heat of pepper for an extra layer of flavor. Get it now.
-‏٣٦٫٩٥ ر.س.‏
 ALHATAB EGYPTIAN MISH
 Product Size: 350 g/ Traditional Egyptian mish cheese with savory aged flavor. Get it now.
 ‏١٥٫٩٥ ر.س.‏
+ALHATAB CHEESE SALAD WITH PEPPER 500G
+Classic cheese salad infused with the subtle heat of pepper for an extra layer of flavor. Get it now.
+‏٣٦٫٩٥ ر.س.‏
 Dips
-ALHATAB CLASSIC HUMMUS 250G
-Classic Hummus rich and delicious that pairs perfectly with your daily meals or as a standout dip on your table – authentic flavor everyone loves. Enjoy it now!
-‏١٢٫٥ ر.س.‏
 ALHATAB HUMMOUS
 Product Size: 350 g/ Smooth and creamy hummus made from premium chickpeas, a nutritious choice for any meal. Get it now.
 ‏١٧٫٥ ر.س.‏
-ALHATAB EXT.VIRGIN OLIVE OIL HUMMUS 170G
-Creamy and delicious hummus with extra virgin olive oil, offering a smooth texture and rich flavor. Perfect as a side dish or to enjoy with fresh bread. Try it now!
-‏١٦٫٢٥ ر.س.‏
-ALHATAB MAFROUKA 200G
-Mafrouka a delicious dish of soft cheese and vegetables with a rich refreshing taste a good source of protein perfect as an appetizer Try it now!
-‏١٢٫٩٥ ر.س.‏
 ALHATAB MAFROUKA
 Product Size: 350 g/ Plain mafroukah dessert with nutty flavor and light sweetness. Buy now.
 ‏١٩٫٩٥ ر.س.‏
-ALHATAB MAFROKEH SPICY 200G
-Spicy Mafrouka full of spices and fresh ingredients, this fiery Mafrouka contains peppers and olives, a perfect dish for spicy food lovers delivering bold heat and unforgettable flavor. Try it now!
-‏١٢٫٩٥ ر.س.‏
 ALHATAB MAFROKEH SPICY
 Product Size: 350 g/ Spicy mafroukah offering a bold, flavorful twist on tradition. Get it now.
 ‏١٩٫٩٥ ر.س.‏
+ALHATAB CREAM
+Product Size: 350 g/ Rich Al Hatab cream with soft texture ideal for desserts or cooking. Buy now.
+‏١٧٫٤٤ ر.س.‏
+ALHATAB CLASSIC HUMMUS 250G
+Classic Hummus rich and delicious that pairs perfectly with your daily meals or as a standout dip on your table – authentic flavor everyone loves. Enjoy it now!
+‏١٢٫٥ ر.س.‏
+ALHATAB EXT.VIRGIN OLIVE OIL HUMMUS 170G
+Creamy and delicious hummus with extra virgin olive oil, offering a smooth texture and rich flavor. Perfect as a side dish or to enjoy with fresh bread. Try it now!
+‏١٦٫٢٥ ر.س.‏
+ALHATAB MUTABLE
+Product Size: 350 g/ Al Hatab mutabal with creamy texture and smoked eggplant flavor. Get it now.
+‏١٨٫٩٥ ر.س.‏
+ALHATAB MAFROUKA 200G
+Mafrouka a delicious dish of soft cheese and vegetables with a rich refreshing taste a good source of protein perfect as an appetizer Try it now!
+‏١٢٫٩٥ ر.س.‏
+ALHATAB MAFROKEH SPICY 200G
+Spicy Mafrouka full of spices and fresh ingredients, this fiery Mafrouka contains peppers and olives, a perfect dish for spicy food lovers delivering bold heat and unforgettable flavor. Try it now!
+‏١٢٫٩٥ ر.س.‏
+ALHATAB LABNEH
+Product Size: 350 g/ Smooth labneh with creamy texture and balanced flavor. Buy now.
+‏١٥٫٧٥ ر.س.‏
 ALHATAB MUHAMARRA 200G
 Muhammara is full of flavor and perfect to serve with fresh bread, adding a special and delicious touch to any meal. Try it now!
 ‏١٣٫٩٥ ر.س.‏
@@ -565,54 +574,45 @@ Eggplant Hummus rich flavor blending creamy hummus and roasted eggplant for a un
 ALHATAB HUMMUS RED PEPPER 250G
 Creamy hummus with roasted red pepper, a smoky twist on the classic favorite, full of flavor and great as a side dish. Try it now!
 ‏١٩٫٩٥ ر.س.‏
+ALHATAB LABNEH LITE
+Product Size: 350 g/ Light labneh with reduced fat for a healthy lifestyle. Buy now.
+‏١٧٫٥ ر.س.‏
 ALHATAB TRUFFLE HUMMUS 170G
 Truffle hummus blends creamy chickpeas with the special truffle flavor, a luxurious twist on a classic dish, smooth and rich texture, and a good source of plant protein. Try it now!
 ‏١٧٫٩٥ ر.س.‏
 ALHATAB CARAMELIZED ONION HUMMUS 170G
 Caramelized onion hummus premium blend of creamy hummus and caramelized onions brings warmth and deep flavor with every bite a must-try for flavor lovers. Try it now!
 ‏١٦٫٢٥ ر.س.‏
-ALHATAB CREAM WITH HONEY 200G
-Honey cream with a rich delicious taste and smooth creamy texture perfect to enjoy with breakfast or desserts try it now!
-‏١١٫٢٥ ر.س.‏
-ALHATAB CREAM
-Product Size: 350 g/ Rich Al Hatab cream with soft texture ideal for desserts or cooking. Buy now.
-‏١٧٫٤٤ ر.س.‏
-ALHATAB BABA GANOUSH 200G
-Delicious Baba Ganoush made with roasted eggplant, lemon, and garlic perfect as a starter or dip with bread Try it now!
-‏١٣٫٩٥ ر.س.‏
-ALHATAB MUTABLE
-Product Size: 350 g/ Al Hatab mutabal with creamy texture and smoked eggplant flavor. Get it now.
-‏١٨٫٩٥ ر.س.‏
-ALHATAB LABNEH
-Product Size: 350 g/ Smooth labneh with creamy texture and balanced flavor. Buy now.
-‏١٥٫٧٥ ر.س.‏
-ALHATAB LABNEH LITE 200G
-Light labneh with a creamy and refreshing taste a healthy and delightful choice for any meal enjoy it now!
-‏١١٫٩٥ ر.س.‏
-ALHATAB LABNEH LITE
-Product Size: 350 g/ Light labneh with reduced fat for a healthy lifestyle. Buy now.
-‏١٧٫٥ ر.س.‏
-ALHATAB RED CHILI PASTE 200G
-Hot red chili sauce packed with vibrant heat and rich flavor to boost your favorite dishes try it now!
-‏١٧٫٩٥ ر.س.‏
 ALHATAB LABNEH THYME
 Product Size: 350 g/ Labneh blended with thyme for aromatic Mediterranean flavor. Buy now.
 ‏١٩٫٦٩ ر.س.‏
 ALHATAB BEETROOT LABNEH
 Product Size: 350 g/ Hummus with beetroot for colorful, fresh taste and smooth texture. Buy now.
 ‏٢١٫٩٥ ر.س.‏
+ALHATAB CREAM WITH HONEY 200G
+Honey cream with a rich delicious taste and smooth creamy texture perfect to enjoy with breakfast or desserts try it now!
+‏١١٫٢٥ ر.س.‏
 ALHATAB LABNEH PASTO
 Product Size: 350 g/ Labneh blended with pesto herbs for a Mediterranean twist. Buy now.
 ‏٢٦٫٩٥ ر.س.‏
+ALHATAB BABA GANOUSH 200G
+Delicious Baba Ganoush made with roasted eggplant, lemon, and garlic perfect as a starter or dip with bread Try it now!
+‏١٣٫٩٥ ر.س.‏
 ALHATAB LABNEH SALAD
 Product Size: 350 g/ Creamy labaneyah salad combining tangy and smooth flavors for an authentic taste. Buy now.
 ‏١٨٫٩٥ ر.س.‏
-ALHATAB LABNEH PESTO 200G
-Creamy labneh blended with fresh pesto herbs offering a rich and flavorful taste perfect as a spread or dip try it now!
-‏١٦٫٩٥ ر.س.‏
+ALHATAB LABNEH LITE 200G
+Light labneh with a creamy and refreshing taste a healthy and delightful choice for any meal enjoy it now!
+‏١١٫٩٥ ر.س.‏
+ALHATAB RED CHILI PASTE 200G
+Hot red chili sauce packed with vibrant heat and rich flavor to boost your favorite dishes try it now!
+‏١٧٫٩٥ ر.س.‏
 ALHATAB CREAM WITH HONEY
 Product Size: 350 g/ Cream mixed with honey offering silky sweetness and natural taste. Get it now.
 ‏١٩٫٦٩ ر.س.‏
+ALHATAB LABNEH PESTO 200G
+Creamy labneh blended with fresh pesto herbs offering a rich and flavorful taste perfect as a spread or dip try it now!
+‏١٦٫٩٥ ر.س.‏
 Juices
 ALHATAB RED SHOTS 125ML
 A unique blend of orange lemon and green apple delivers a natural boost of vitamins and vitality. Try it now!
@@ -950,39 +950,21 @@ ALHATAB PREMIUM PTTO OLIVE OIL CHPS 60G
 Potato Sticks with 100% extra virgin olive oil offer a rich taste with a healthier twist Perfect as a midday snack or party treat Try it now
 ‏١١ ر.س.‏
 Pickels & Olives
-ALHATAB MIXED OLIVES 220G
-Mixed olives a perfect choice for a tasty snack ready to enjoy or add to salads and appetizers try it now!
-‏١٧٫٩٥ ر.س.‏
-ALHATAB PITTED BLACK OLIVE 200G
-Enjoy pitted black olives with a distinctive taste perfect for adding to salads or enjoying as a light snack try it now!
-‏١٥٫٩٥ ر.س.‏
-ALHATAB GRILLED GREEN OLIVES 200G
-Grilled green olives with a rich smoky taste perfect as flavorful appetizers rich in healthy fats try them now!
-‏١٩٫٩٥ ر.س.‏
 ALHATAB PITTED BLACK OLIVES
 Product Size: 350 g/ Smooth black olives without pits for convenience and bold natural taste. Buy now.
 ‏٢٠٫٩٥ ر.س.‏
 ALHATAB MIXED LEBANESE PICKLES
 Product Size: 350 g/ A colorful mix of Lebanese pickles offering a crisp and tangy side to your dishes. Get it now.
 ‏٧٫٥٨ ر.س.‏
-ALHATAB SLICED OLIVES CHILI 250G
-Sliced olives with chili for a spicy kick perfect to add bold flavor to your salads appetizers or snacks try them now!
-‏١٣٫٩٥ ر.س.‏
-ALHATAB PRESSED GREEN OLIVES 250G
-Pressed green olives carefully prepared great for snacking or adding extra flavor to your meals try it now!
-‏١٠ ر.س.‏
-ALHATAB STUFFED OLIVES SPICY 250G
-Spicy stuffed olives with a unique flavor and delicious spices perfect as a ready-to-eat appetizer try it now!
-‏١٦٫٩٥ ر.س.‏
 ALHATAB GRILLED GREEN OLIVES
 Product Size: 350 g/ Smoky, grilled green olives packed with Mediterranean aroma, a bold addition to your table. Buy now.
 ‏٢٤٫٩٥ ر.س.‏
-ALHATAB OLIVE BRUSCHETTA 180G
-Olives Bruschetta blends olives red peppers and garlic into a rich spread perfect for sandwiches appetizers or as a dip Enjoy it now
-‏٢٧٫٥ ر.س.‏
-ALHATAB FIG & OLIVE RELISH 230G
-Figs & Olives Relish blends sweet and savory flavors perfect with cheese platters sandwiches or grilled meats Try it now
-‏٣١٫٢٥ ر.س.‏
+ALHATAB MIXED OLIVES 220G
+Mixed olives a perfect choice for a tasty snack ready to enjoy or add to salads and appetizers try it now!
+‏١٧٫٩٥ ر.س.‏
+ALHATAB PITTED BLACK OLIVE 200G
+Enjoy pitted black olives with a distinctive taste perfect for adding to salads or enjoying as a light snack try it now!
+‏١٥٫٩٥ ر.س.‏
 ALHATAB STUFFED GREEN OLIVE
 Product Size: 350 g/ Juicy green olives stuffed for extra flavor and a perfect savory bite anytime. Get it now.
 ‏١٦٫٩٥ ر.س.‏
@@ -992,18 +974,36 @@ Product Size: 350 g/ Crisp cornichon cucumbers adding a tangy touch to meals, gr
 ALHATAB TARSHI HEGAZY
 Product Size: 350 g/ Traditional Hegezy pickles with authentic homemade flavor for every meal. Buy now.
 ‏١٧٫٢١ ر.س.‏
+ALHATAB GRILLED GREEN OLIVES 200G
+Grilled green olives with a rich smoky taste perfect as flavorful appetizers rich in healthy fats try them now!
+‏١٩٫٩٥ ر.س.‏
 ALHATAB MAMMOTH BLACK OLIVES
 Product Size: 350 g/ Large, meaty black olives packed with bold flavor, crafted for true olive lovers. Buy now.
 ‏١٨٫٩٥ ر.س.‏
+ALHATAB SLICED OLIVES CHILI 250G
+Sliced olives with chili for a spicy kick perfect to add bold flavor to your salads appetizers or snacks try them now!
+‏١٣٫٩٥ ر.س.‏
+ALHATAB PRESSED GREEN OLIVES 250G
+Pressed green olives carefully prepared great for snacking or adding extra flavor to your meals try it now!
+‏١٠ ر.س.‏
+ALHATAB STUFFED OLIVES SPICY 250G
+Spicy stuffed olives with a unique flavor and delicious spices perfect as a ready-to-eat appetizer try it now!
+‏١٦٫٩٥ ر.س.‏
 ALHATAB DELUXE BLACK OILVES
 Product Size: 350 g/ Deluxe black olives with deep, rich flavor and silky texture, perfect for elevating your meals. Buy now.
 ‏١٢٫٩٥ ر.س.‏
 ALHATAB STUFFED OLIVES SPICY
 Product Size: 350 g/ Stuffed spicy olives offering bold flavor and balanced heat for adventurous palates. Buy now.
 ‏١٧٫٩٥ ر.س.‏
+ALHATAB OLIVE BRUSCHETTA 180G
+Olives Bruschetta blends olives red peppers and garlic into a rich spread perfect for sandwiches appetizers or as a dip Enjoy it now
+‏٢٧٫٥ ر.س.‏
 ALHATAB PRESSED GREEN OLIVES
 Product Size: 350 g/ Carefully selected green olives with a rich, balanced taste for everyday enjoyment. Get it now.
 ‏١٣٫٩٥ ر.س.‏
+ALHATAB FIG & OLIVE RELISH 230G
+Figs & Olives Relish blends sweet and savory flavors perfect with cheese platters sandwiches or grilled meats Try it now
+‏٣١٫٢٥ ر.س.‏
 ALHATAB MIXED SPICY PICKLES
 Product Size: 350 g/ Mixed spicy pickles adding bold, tangy flavor to your dishes. Buy now.
 ‏١٥٫٩٥ ر.س.‏
@@ -1022,21 +1022,21 @@ Sliced jalapeno peppers adding a spicy kick to your dishes. Perfect for topping,
 ALHATAB MIXED PICKLED 720ML
 Mixed Pickles is a flavorful assortment of fresh pickles, perfect to add to your meals or sandwiches as an extra appetizer. Try it now!
 ‏١٦ ر.س.‏
-ALHATAB PICKLED SWT & SOUR CUCUMBRS 680G
-Sweet and sour gherkins with a perfect balance of tangy and sugary flavors. Great as a snack or side dish. Try it now.
-‏٢٧٫٥ ر.س.‏
-ALHATAB GREEK KALAMATA OLIVE PASTE 190G
-Smooth Kalamata olive tapenade with a deep, rich flavor. Perfect for spreading on toast, pairing with cheese, or adding to appetizers. Try it now.
-‏٢٤٫٩٥ ر.س.‏
 ALHATAB GREEK GREEN OLIVES
 Product Size: 350 g/ Authentic Greek green olives for a natural, fresh taste that enhances every bite. Get it now.
 ‏١٧٫٩٥ ر.س.‏
+ALHATAB PICKLED SWT & SOUR CUCUMBRS 680G
+Sweet and sour gherkins with a perfect balance of tangy and sugary flavors. Great as a snack or side dish. Try it now.
+‏٢٧٫٥ ر.س.‏
 ALHATAB SLICED OLIVES WITH SPICY
 Product Size: 350 g/ Spicy sliced olives for a zesty kick that livens up pizzas and salads. Get it now.
 ‏١٧٫٩٥ ر.س.‏
 ALHATAB GREEK RED OLIVES
 Product Size: 350 g/ Mediterranean red olives with bold flavor and smooth texture, perfect for salads and platters. Buy now.
 ‏١٧٫٩٥ ر.س.‏
+ALHATAB GREEK KALAMATA OLIVE PASTE 190G
+Smooth Kalamata olive tapenade with a deep, rich flavor. Perfect for spreading on toast, pairing with cheese, or adding to appetizers. Try it now.
+‏٢٤٫٩٥ ر.س.‏
 Halawa & Jam
 ALHATAB RASPBERRY JAM 50% FRUIT 250G
 Sweet and flavorful raspberry jam made from ripe raspberries, perfect for spreading on toast, topping desserts, or enhancing your breakfast. Enjoy a burst of natural fruitiness. Try it now.
@@ -1050,30 +1050,30 @@ Organic 4 Fruit Jam blends the taste of organic berries and fruits into a delici
 ALHATAB ORGANIC STRAWBERY JAM 100% 370G
 Organic strawberry jam is sweet and tasty—great on toast or with yogurt in the morning. Try it now!
 ‏٣٢٫٥ ر.س.‏
-ALHATAB CRANBERRY JAM 50% FRUIT 250G
-Sweet and fruity blueberry jam made from real blueberries. Perfect for toast, desserts, or a tasty snack. Try it now.
-‏١٦ ر.س.‏
-ALHATAB APRICOT JAM 50% FRUIT 250G
-Apricot Jam delivers a sweet and fruity flavor perfect for spreading on toast pairing with cheese or adding to desserts Try it now
-‏١٦ ر.س.‏
-ALHATAB STRAWBERRY JAM 50% FRUIT 250G
-Sweet and delicious strawberry jam, perfect for toast, desserts, or adding a fruity touch to your meals. Try it now.
-‏١٦ ر.س.‏
-ALHATAB MOLASSES WITH TAHINA
-Product Size: 350 g/ Sweet molasses blended with creamy tahina for a balanced, traditional flavor. Get it now.
-‏١٧٫٤٤ ر.س.‏
 ALHATAB STRAWBERRY JAM WITH CHUNKS
 Product Size: 350 g/ Chunky strawberry jam bursting with natural flavor and freshness. Get it now.
 ‏١٥٫٩٥ ر.س.‏
+ALHATAB CRANBERRY JAM 50% FRUIT 250G
+Sweet and fruity blueberry jam made from real blueberries. Perfect for toast, desserts, or a tasty snack. Try it now.
+‏١٦ ر.س.‏
 ALHATAB RASPBERRY JAM WITH CHUNKS
 Product Size: 350 g/ Chunky raspbeery jam bursting with natural flavor and freshness. Get it now.
 ‏١٥٫٩٥ ر.س.‏
+ALHATAB APRICOT JAM 50% FRUIT 250G
+Apricot Jam delivers a sweet and fruity flavor perfect for spreading on toast pairing with cheese or adding to desserts Try it now
+‏١٦ ر.س.‏
 ALHATAB PLAIN TAHINI HALAWA
 Product Size: 350 g/ Classic tahini halawa offering natural sweetness and creamy texture, ideal as a snack or dessert. Buy now.
 ‏١٨٫٩٦ ر.س.‏
+ALHATAB STRAWBERRY JAM 50% FRUIT 250G
+Sweet and delicious strawberry jam, perfect for toast, desserts, or adding a fruity touch to your meals. Try it now.
+‏١٦ ر.س.‏
 ALHATAB APRICOT JAM WITH CHUNKS
 Product Size: 350 g/ Chunky apricot jam offering real fruit texture and homemade sweetness. Buy now.
 ‏١٢٫٢٥ ر.س.‏
+ALHATAB MOLASSES WITH TAHINA
+Product Size: 350 g/ Sweet molasses blended with creamy tahina for a balanced, traditional flavor. Get it now.
+‏١٧٫٤٤ ر.س.‏
 Cheese
 ALHATAB HALLOUMI CHEESE 250G
 Traditional halloumi cheese with a firm texture and savory taste. Grill or pan-fry to add a delicious touch to your meals. Try it now.
