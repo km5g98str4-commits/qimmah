@@ -112,29 +112,48 @@ check('public catalog readable (store root / sitemap / search)', reachable.lengt
 check(`canonical product ${CANON_ID} is NOT in the public catalog (HIDDEN=YES)`, !canonicalInCatalog, canonicalInCatalog ? 'appears in a public listing — the product is PUBLISHED' : 'absent from every public listing read')
 check('no retired product appears in the public catalog', retiredInCatalog.length === 0, retiredInCatalog.join(', '))
 
-// الرابط المباشر — يجب أن يعمل (المؤسس يشتري منه) وأن يحمل العقد الصحيح.
+// الرابط المباشر — المؤسس يشتري منه، فيجب أن يفتح ويحمل العقد الصحيح.
+//
+// ⚠️ **يُقاس ثلاث مرّات لا مرّة:** قياسان متتاليان في ١٤ سبتمبر اختلفا — الأوّل
+// أعاد صفحة المنتج (٢٠٠ + زرّ شراء + ١٩٫٩٩)، والثاني **حوّل إلى جذر المتجر**.
+// سببان محتملان لا ثالث معروف: تبدُّل رؤية المنتج، أو حماية سلة من الطلبات
+// المتكرّرة. فالمحاولات تُسجَّل كلّها ولا يُعلَن حكم من قياس واحد.
 const sallaPages = {}
 if (CHECKOUT) {
-  try {
-    const r = await get(CHECKOUT)
-    const text = r.text.replace(/<script[\s\S]*?<\/script>/g, ' ')
-    sallaPages.canonical = {
-      status: r.status, finalUrl: r.url,
-      has1999: /19[.,٫]99|١٩[.,٫]٩٩/.test(text),
-      hasPremium: /Premium/.test(text),
-      buyable: /أضف إلى السلة|اشترِ الآن|Add to cart/.test(text),
-      annualWording: /سنويًا|سنوياً|شهريًا|شهرياً/.test(text),
-      renewalWording: /تجديد تلقائي|auto.?renew/i.test(text),
-      strikethroughPrice: /89[.,٫]99|٨٩[.,٫]٩٩/.test(text),
-    }
-    const c = sallaPages.canonical
-    check('canonical product page opens by direct link (the founder buys here)', c.status === 200, `status ${c.status}`)
-    check('canonical page is buyable by direct link', c.buyable)
-    check('canonical page shows 19.99', c.has1999)
-    check('canonical page carries no annual/monthly wording', !c.annualWording)
-    check('canonical page carries no auto-renewal wording', !c.renewalWording)
-    check('canonical page carries no struck-through 89.99', !c.strikethroughPrice)
-  } catch (e) { sallaPages.canonical = { error: String(e?.message ?? e) }; check('canonical product page reachable', false, sallaPages.canonical.error) }
+  const attempts = []
+  for (let i = 0; i < 3; i++) {
+    if (i) await new Promise((r) => setTimeout(r, 6000))
+    try {
+      const r = await get(CHECKOUT)
+      const text = r.text.replace(/<script[\s\S]*?<\/script>/g, ' ')
+      const redirectedToRoot = /\/Qimmahsa\/?$/.test(r.url)
+      attempts.push({
+        status: r.status, finalUrl: r.url, redirectedToRoot,
+        onProductPage: r.status === 200 && !redirectedToRoot,
+        has1999: /19[.,٫]99|١٩[.,٫]٩٩/.test(text),
+        hasPremium: /Premium/.test(text),
+        buyable: /أضف إلى السلة|اشترِ الآن|Add to cart/.test(text),
+        annualWording: /سنويًا|سنوياً|شهريًا|شهرياً/.test(text),
+        renewalWording: /تجديد تلقائي|auto.?renew/i.test(text),
+        strikethroughPrice: /89[.,٫]99|٨٩[.,٫]٩٩/.test(text),
+      })
+    } catch (e) { attempts.push({ error: String(e?.message ?? e) }) }
+  }
+  sallaPages.attempts = attempts
+  const onProduct = attempts.filter((a) => a.onProductPage)
+  sallaPages.stable = onProduct.length === attempts.length ? 'always-product-page'
+    : onProduct.length === 0 ? 'never-product-page' : 'unstable'
+  check('canonical product page opens by direct link on every attempt (the founder buys here)',
+    sallaPages.stable === 'always-product-page',
+    `${onProduct.length}/${attempts.length} attempts landed on the product page · ${sallaPages.stable}`)
+  // العقد يُحكم عليه من القياسات التي وصلت الصفحة فعلًا — لا من تحويل إلى الجذر.
+  if (onProduct.length) {
+    check('canonical page is buyable', onProduct.every((a) => a.buyable))
+    check('canonical page shows 19.99', onProduct.every((a) => a.has1999))
+    check('canonical page carries no annual/monthly wording', !onProduct.some((a) => a.annualWording))
+    check('canonical page carries no auto-renewal wording', !onProduct.some((a) => a.renewalWording))
+    check('canonical page carries no struck-through 89.99', !onProduct.some((a) => a.strikethroughPrice))
+  }
 }
 report.sallaPages = sallaPages
 
