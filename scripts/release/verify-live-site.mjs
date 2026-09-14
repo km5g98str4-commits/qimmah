@@ -78,24 +78,66 @@ if (CHECKOUT) check('shipped destination = canonical product', sallaRefs.size ==
 for (const old of ['1181109938', '1751698501', '973212497']) check(`no reference to retired product ${old}`, ![...fetched.values()].some((t) => t.includes(old)))
 check('no annual/renewal wording in shipped bundle', ![...fetched.values()].some((t) => /سنويًا|سنوياً|تجديد تلقائي|auto-renew|yearly subscription/.test(t)))
 
-// ③ سلة — قراءة فقط: حالة الصفحة العامة للمنتج المعتمد والمكرَّرة (لا لوحة، لا أكواد)
-const sallaPages = {}
-for (const [name, url] of [['canonical', CHECKOUT], ['dup-1181109938', 'https://salla.sa/Qimmahsa/p1181109938'], ['dup-1751698501', 'https://salla.sa/Qimmahsa/p1751698501'], ['dup-973212497', 'https://salla.sa/Qimmahsa/p973212497']]) {
-  if (!url) continue
+// ③ سلة — قراءة فقط. **الإخفاء يُقاس بالفهرس العامّ لا بالرابط المباشر:** المنتج المخفيّ في سلة
+// يبقى مفتوحًا برابطه (وهذا ما يحتاجه الشراء المضبوط)، والفرق أنه لا يظهر في المتجر ولا خريطة الموقع.
+// وبناء رابط من المعرّف وحده يعيد 410 دائمًا (المقطع العربي إلزامي) — فلا يصلح دليلًا على شيء.
+const CANON_ID = '2106415557'
+const RETIRED_IDS = ['1181109938', '1751698501', '973212497']
+const STORE = 'https://salla.sa/Qimmahsa'
+const catalog = {}
+const catalogText = []
+for (const [name, url] of [
+  ['store-root', STORE],
+  ['sitemap', `${STORE}/sitemap.xml`],
+  ['sitemap-products', 'https://salla.sa/sitemap.xml'],
+  ['search-premium', `${STORE}/search?q=Premium`],
+  ['search-qimmah', `${STORE}/search?q=%D9%82%D9%85%D8%A9`],
+]) {
   try {
     const r = await get(url)
+    catalogText.push(r.text)
+    catalog[name] = {
+      status: r.status,
+      bytes: r.text.length,
+      canonicalListed: r.text.includes(CANON_ID),
+      retiredListed: RETIRED_IDS.filter((id) => r.text.includes(id)),
+    }
+  } catch (e) { catalog[name] = { error: String(e?.message ?? e) } }
+}
+report.sallaCatalog = catalog
+const reachable = Object.values(catalog).filter((c) => c.status === 200)
+const canonicalInCatalog = Object.values(catalog).some((c) => c.canonicalListed)
+const retiredInCatalog = [...new Set(Object.values(catalog).flatMap((c) => c.retiredListed ?? []))]
+check('public catalog readable (store root / sitemap / search)', reachable.length >= 1, `${reachable.length} of ${Object.keys(catalog).length} returned 200`)
+check(`canonical product ${CANON_ID} is NOT in the public catalog (HIDDEN=YES)`, !canonicalInCatalog, canonicalInCatalog ? 'appears in a public listing — the product is PUBLISHED' : 'absent from every public listing read')
+check('no retired product appears in the public catalog', retiredInCatalog.length === 0, retiredInCatalog.join(', '))
+
+// الرابط المباشر — يجب أن يعمل (المؤسس يشتري منه) وأن يحمل العقد الصحيح.
+const sallaPages = {}
+if (CHECKOUT) {
+  try {
+    const r = await get(CHECKOUT)
     const text = r.text.replace(/<script[\s\S]*?<\/script>/g, ' ')
-    sallaPages[name] = { status: r.status, finalUrl: r.url, has1999: /19[.,٫]99|١٩[.,٫]٩٩/.test(text), hasPremium: /Premium/.test(text), addToCart: /أضف إلى السلة|اشترِ الآن|Add to cart/.test(text), annualWording: /سنويًا|سنوياً/.test(text) }
-  } catch (e) { sallaPages[name] = { error: String(e?.message ?? e) } }
+    sallaPages.canonical = {
+      status: r.status, finalUrl: r.url,
+      has1999: /19[.,٫]99|١٩[.,٫]٩٩/.test(text),
+      hasPremium: /Premium/.test(text),
+      buyable: /أضف إلى السلة|اشترِ الآن|Add to cart/.test(text),
+      annualWording: /سنويًا|سنوياً|شهريًا|شهرياً/.test(text),
+      renewalWording: /تجديد تلقائي|auto.?renew/i.test(text),
+      strikethroughPrice: /89[.,٫]99|٨٩[.,٫]٩٩/.test(text),
+    }
+    const c = sallaPages.canonical
+    check('canonical product page opens by direct link (the founder buys here)', c.status === 200, `status ${c.status}`)
+    check('canonical page is buyable by direct link', c.buyable)
+    check('canonical page shows 19.99', c.has1999)
+    check('canonical page carries no annual/monthly wording', !c.annualWording)
+    check('canonical page carries no auto-renewal wording', !c.renewalWording)
+    check('canonical page carries no struck-through 89.99', !c.strikethroughPrice)
+  } catch (e) { sallaPages.canonical = { error: String(e?.message ?? e) }; check('canonical product page reachable', false, sallaPages.canonical.error) }
 }
 report.sallaPages = sallaPages
-const canon = sallaPages.canonical
-if (canon) {
-  // المخفي في سلة لا يُعرض للعموم: أي شيء غير صفحة شراء عامة (404/410 أو صفحة بلا زرّ شراء) يُقرأ «مخفي».
-  const publiclyBuyable = canon.status === 200 && canon.addToCart
-  check('canonical product is NOT publicly buyable yet (HIDDEN=YES expected before the controlled purchase)', !publiclyBuyable, `status ${canon.status ?? canon.error} · addToCart=${canon.addToCart}`)
-  check('canonical page carries no annual wording', !canon.annualWording)
-}
+
 console.log(`\n${failed ? '❌' : '✅'} live verify: ${report.checks.length - failed} passed / ${failed} failed`)
 if (OUT) { mkdirSync(dirname(OUT), { recursive: true }); writeFileSync(OUT, JSON.stringify(report, null, 2) + '\n') }
 console.log(JSON.stringify(report, null, 2))
