@@ -100,7 +100,21 @@ check('at least one Salla checkout URL ships in the bundle', sallaRefs.size >= 1
 check('exactly one Salla destination ships', sallaRefs.size === 1, [...sallaRefs].join(' | '))
 if (CHECKOUT) check('shipped destination = canonical product', sallaRefs.size === 1 && [...sallaRefs][0] === CHECKOUT, [...sallaRefs].join(' | '))
 for (const old of ['1181109938', '1751698501', '973212497']) check(`no reference to retired product ${old}`, ![...fetched.values()].some((t) => t.includes(old)))
-check('no annual/renewal wording in shipped bundle', ![...fetched.values()].some((t) => /سنويًا|سنوياً|تجديد تلقائي|auto-renew|yearly subscription/.test(t)))
+// الاشتراك/التجديد: **النفي مطلوب والإثبات ممنوع.** أوّل صيغة لهذا الفحص رفعت علمًا على
+// «بلا اشتراك ولا تجديد تلقائي» و«not a monthly or auto-renewing subscription» — وهما النصّان
+// الصحيحان بعينهما. فالكلمة وحدها ليست مخالفة؛ المخالفة أن تَرِد **مثبَتة**.
+const NEGATORS = /(بلا|بدون|ولا|لا|ليس|ليست|غير|no|not|never|without)\s*$/i
+const affirmativeClaims = []
+for (const [path, txt] of fetched) {
+  for (const m of txt.matchAll(/سنويًا|سنوياً|تجديد تلقائي|auto.?renew(?:ing|al)?|yearly subscription|monthly subscription/gi)) {
+    const before = txt.slice(Math.max(0, m.index - 40), m.index)
+    if (!NEGATORS.test(before)) affirmativeClaims.push(`${path}: …${before.slice(-30)}[${m[0]}]…`)
+  }
+}
+check('no AFFIRMATIVE subscription/renewal claim in the shipped bundle (negations are the required copy)',
+  affirmativeClaims.length === 0, affirmativeClaims.slice(0, 3).join(' | '))
+check('the shipped bundle states the one-time contract', [...fetched.values()].some((t) => /دفعة واحدة|one-time purchase/.test(t)))
+check('the shipped bundle states the price 19.99', [...fetched.values()].some((t) => /19\.99/.test(t)))
 
 // ③ سلة — قراءة فقط. **الإخفاء يُقاس بالفهرس العامّ لا بالرابط المباشر:** المنتج المخفيّ في سلة
 // يبقى مفتوحًا برابطه (وهذا ما يحتاجه الشراء المضبوط)، والفرق أنه لا يظهر في المتجر ولا خريطة الموقع.
