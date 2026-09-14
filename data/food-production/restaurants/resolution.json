@@ -1,6 +1,6 @@
 {
  "counts": {
-  "OFFICIAL_FULL": 123,
+  "OFFICIAL_FULL": 124,
   "OFFICIAL_PARTIAL": 40
  },
  "byChain": {
@@ -9,7 +9,7 @@
   "applebees": 3,
   "burgerking": 8,
   "kfc": 10,
-  "mcdonalds": 27,
+  "mcdonalds": 28,
   "papajohns": 4,
   "pizzahut": 6,
   "subway": 6
@@ -1226,6 +1226,15 @@
    "chain": "mcdonalds",
    "nameAr": "آيس كريم ساندي كراميل",
    "nameEn": "Caramel Sundae",
+   "status": "OFFICIAL_FULL",
+   "macros": "official",
+   "class": "USDA_MEASURED"
+  },
+  {
+   "id": "rst-mcdonalds-southern-style-chicken-sandwich",
+   "chain": "mcdonalds",
+   "nameAr": "ساندويتش دجاج ساذرن",
+   "nameEn": "Southern Style Chicken Sandwich",
    "status": "OFFICIAL_FULL",
    "macros": "official",
    "class": "USDA_MEASURED"
