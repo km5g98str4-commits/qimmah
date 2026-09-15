@@ -226,7 +226,13 @@ function bmiLabelFor(bmi: number, age: number): string {
   return 'حسب BMI: أعلى من الطبيعي بوضوح'
 }
 
-function calorieFloor(gender: Gender): number {
+/**
+ * الحدّ الأدنى الآمن للسعرات المستهدفة — **مصدر واحد**، مُصدَّر لأن ترحيل فائض
+ * السعرات (`nutritionCarryover`) يخصم من هدف الغد ولا يجوز أن ينزل به تحت نفس
+ * الأرضية التي يعد بها المقدِّر («لا تنزل سعراتك المستهدفة تحت حدّ أدنى مهما كان
+ * هدفك» — `eCalc.caloriesFloor`). قاعدة أمان قائمة تُعاد استخدامها، لا رقم جديد.
+ */
+export function calorieFloor(gender: Gender): number {
   if (gender === 'male') return 1500
   if (gender === 'female') return 1200
   return 1350

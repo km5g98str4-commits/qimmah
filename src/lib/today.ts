@@ -21,6 +21,27 @@ export function getDayStamp(d = new Date()): string {
   return `${y}-${m}-${day}`
 }
 
+/**
+ * ختم اليوم بعد إزاحة أيام — **مصدر واحد لحساب أيام التقويم المحلي**.
+ *
+ * الظهيرة مقصودة: البناء عند منتصف النهار المحلي يجعل الإزاحة تعبر التوقيت
+ * الصيفي بلا أن تقع على ساعة محذوفة/مكرّرة، ثم يطبع `getDayStamp` اليوم المحلي.
+ * لا تحويل UTC في أي خطوة — ولهذا لا ينزلق الطعام بين يومين حول منتصف الليل.
+ */
+export function shiftDayStamp(stamp: string, delta: number): string {
+  const [y, m, d] = stamp.split('-').map(Number)
+  return getDayStamp(new Date(y, (m || 1) - 1, (d || 1) + delta, 12))
+}
+
+/** فرق الأيام بين ختمين (b − a) بحساب التقويم المحلي. */
+export function daysBetweenStamps(a: string, b: string): number {
+  const [ay, am, ad] = a.split('-').map(Number)
+  const [by, bm, bd] = b.split('-').map(Number)
+  const from = new Date(ay, (am || 1) - 1, ad || 1, 12).getTime()
+  const to = new Date(by, (bm || 1) - 1, bd || 1, 12).getTime()
+  return Math.round((to - from) / 86_400_000)
+}
+
 function freshState(): TodayState {
   return { date: getDayStamp(), done: {} }
 }

@@ -60,7 +60,10 @@ check('المسجّل السريع: لا `?? 0` للكارب/الدهون، وا
 check('المسجّل السريع يعرض «غير متوفّر» للغائب وسطح إفصاح المصدر', /t\.nutrientUnknown/.test(qml) && /data-testid="food-provenance"/.test(qml) && /provenanceDisclosure\(selected\.provenance, lang\)/.test(qml))
 check('الإضافة المخصّصة: الحقل الفارغ يبقى غير معروف لا صفرًا', /cCarb\.trim\(\) \? round1\(/.test(qml) && /: undefined/.test(qml) && /carbVal !== undefined \? \{ carbs: carbVal \}/.test(qml) && /fatVal !== undefined \? \{ fat: fatVal \}/.test(qml) && !/carbs: round\(parseSafeNumber\(cCarb/.test(qml))
 const nv = read('src/views/NutritionView.tsx')
-check('شاشة التغذية: بطاقتا الكارب والدهون تحملان علامة النقص من totals.unknown', /incomplete=\{totals\.unknown\.carbs\}/.test(nv) && /incomplete=\{totals\.unknown\.fat\}/.test(nv) && /data-testid="macro-incomplete"/.test(nv))
+// `day.totals` بعد موجة توحيد التغذية: المصدر نفسه (`logTotals`) لكنه صار
+// مربوطًا **باليوم المعروض** لا بـ«اليوم الحالي» ضمنًا — فعلامة النقص تتبع اليوم
+// الذي يقرأه المستخدم. الفحص يبقى بنيويًّا مقترنًا: علامة بلا عدّاد تسقط.
+check('شاشة التغذية: بطاقتا الكارب والدهون تحملان علامة النقص من totals.unknown لليوم المعروض', /incomplete=\{day\.totals\.unknown\.carbs\}/.test(nv) && /incomplete=\{day\.totals\.unknown\.fat\}/.test(nv) && /data-testid="macro-incomplete"/.test(nv))
 const today = read('src/views/TodayV2.tsx'); const rings = read('src/components/today/DailyRingsCard.tsx')
 check('اليوم: حلقات الماكرو تستقبل unknown وتعرض «بلا بيانات لـn صنف»', /unknown: totals\.unknown\.carbs/.test(today) && /unknown: totals\.unknown\.fat/.test(today) && /m\.slice\.unknown \?/.test(rings) && /macroIncomplete/.test(rings))
 const strings = read('src/config/strings.ts')
