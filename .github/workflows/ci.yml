@@ -172,6 +172,13 @@ jobs:
       - name: Nutrition write-path (entitled) — live browser
         run: node scripts/e2e/nutrition-reliability.mjs
 
+      # [NUTRITION-UNIFY-001] التقاء شاشة التغذية: النيّات الثلاث في الإعداد
+      # (خطة/وجبات/أرقام) كانت تنتج **بنيتَي تغذية مختلفتين** — وهو سبب لقطتَي
+      # المؤسس. هذه الرحلة تقود الإعداد بالنيّات الثلاث وتقارن الشاشة الناتجة،
+      # ثم تفحص تصفّح الأيام وترحيل الفائض عند 320/390 بالعربية والإنجليزية.
+      - name: Nutrition canonical convergence + day history + carryover — live browser
+        run: node scripts/e2e/nutrition-canonical-live.mjs
+
       # [FOOD-UX-001] «أكلاتي»: وجبة مخصّصة بكسور تُحفظ وتُوجد في يوم جديد وتُسجَّل وتُعدَّل وتُحذف.
       - name: Personal foods journey (entitled) — live browser
         run: node scripts/e2e/personal-foods.mjs

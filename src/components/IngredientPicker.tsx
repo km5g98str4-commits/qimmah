@@ -14,7 +14,14 @@ interface IngredientPickerProps {
   onClose: () => void
 }
 
-const categoryOptions: { value: IngredientCategory | 'all'; labelKey: keyof NutritionScreenStrings }[] = [
+/**
+ * مفاتيح التسميات **النصّية وحدها**: القاموس صار يحمل صيغًا دالّية
+ * (`carryoverAdjustRow`…)، و`keyof` الواسعة كانت ستمرّر دالّة إلى JSX.
+ * التضييق هنا يجعل أي مفتاح غير نصّي خطأً وقت الترجمة لا فراغًا وقت التشغيل.
+ */
+type TextKey = { [K in keyof NutritionScreenStrings]: NutritionScreenStrings[K] extends string ? K : never }[keyof NutritionScreenStrings]
+
+const categoryOptions: { value: IngredientCategory | 'all'; labelKey: TextKey }[] = [
   { value: 'all', labelKey: 'catAll' },
   { value: 'protein', labelKey: 'catProtein' },
   { value: 'carb', labelKey: 'catCarb' },

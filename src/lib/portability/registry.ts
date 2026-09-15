@@ -36,6 +36,7 @@ import { WORKOUT_CALENDAR_KEY, loadWeeklySchedule } from '@/lib/workoutCalendar'
 import { CUSTOM_PLAN_KEY, loadCustomPlanRecord } from '@/features/customPlan/storage'
 import { PLAN_TEMPLATES_KEY, listTemplates, MAX_TEMPLATES } from '@/features/customPlan/templates'
 import { NUTRITION_HISTORY_KEY, PERSONAL_FOODS_KEY, MAX_PERSONAL_FOODS, loadLedgerDays, listPersonalFoods } from '@/lib/nutritionHistory'
+import { NUTRITION_CARRYOVER_KEY, getCarryoverSettings } from '@/lib/nutritionCarryover'
 import { TODO_KEY_BASE, loadTodos } from '@/features/todo/store'
 import { ACTIVE_SESSION_KEY_BASE } from '@/lib/activeSession'
 import { notificationPrefsKey } from '@/lib/notifications/prefs'
@@ -244,6 +245,20 @@ export const STORE_DEFS: StoreDef[] = [
         ? true
         : { ar: 'شكل الأطعمة الشخصية غير صالح', en: 'The personal foods in this backup are not in the expected format. Nothing was imported.' },
     load: (uid) => listPersonalFoods(uid ?? null), // null صراحةً = 'guest' (undefined عندنا = المالك الحالي)
+  },
+  {
+    id: 'nutritionCarryover', kind: 'ownerMap', key: NUTRITION_CARRYOVER_KEY, labelAr: 'ترحيل فائض السعرات', labelEn: 'Calorie carryover setting',
+    keyFor: () => NUTRITION_CARRYOVER_KEY,
+    // إعداد واحد لا قائمة: «١» حين يكون مشتغلًا فعلًا، وصفر حين لا شيء يُنقل.
+    count: (v) => (isObj(v) && v.enabled === true ? 1 : 0),
+    validate: (v) =>
+      v == null ||
+      (isObj(v) &&
+        (v.enabled === undefined || typeof v.enabled === 'boolean') &&
+        (v.enabledAt === undefined || v.enabledAt === null || typeof v.enabledAt === 'string'))
+        ? true
+        : { ar: 'شكل إعداد ترحيل السعرات غير صالح', en: 'The calorie carryover setting in this backup is not in the expected format. Nothing was imported.' },
+    load: (uid) => getCarryoverSettings(uid ?? null),
   },
 ]
 

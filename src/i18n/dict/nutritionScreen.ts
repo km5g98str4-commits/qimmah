@@ -96,6 +96,42 @@ export interface NutritionScreenStrings {
   perServing: string
   servingsLabel: string
   logAndSave: string
+
+  // ── تصفّح الأيام ────────────────────────────────────────────────────────────
+  /** تسمية اليوم المعروض حين يكون اليوم الحالي/أمس؛ غيرهما يُعرض باسم اليوم وتاريخه. */
+  dayToday: string
+  dayYesterday: string
+  dayPrev: string
+  dayNext: string
+  backToToday: string
+  /** حدّ التصفّح للخلف بلغ أقدم يوم مسجَّل. */
+  dayOldest: string
+  /** يوم ماضٍ بلا أي تسجيل. */
+  dayEmpty: string
+  /**
+   * يوم أقدم من الدفتر المؤرَّخ: عندنا مجاميعه ولا نملك تفصيل أصنافه.
+   * لا نخترع له وجبات — نقول الحقيقة ونعرض ما نملك.
+   */
+  dayTotalsOnly: string
+  dayTotalsOnlyHint: string
+  /** يوم ماضٍ لم يُسجَّل هدفه وقتها — نعرض المستهلَك بلا هدف مخترَع. */
+  dayTargetUnknown: string
+  /** التسجيل يقع على اليوم الحالي وحده — سبب معلَن لا زرّ صامت. */
+  pastDayReadOnly: string
+  dayWater: string
+
+  // ── ترحيل فائض السعرات ──────────────────────────────────────────────────────
+  carryoverTitle: string
+  carryoverHint: string
+  carryoverBaseRow: string
+  carryoverAdjustRow: (day: string) => string
+  carryoverEffectiveRow: string
+  /** الخصم بلغ الأرضية الآمنة فقُصّ عندها — يُعلَن لا يُخفى. */
+  carryoverFloorNote: (floor: string) => string
+  carryoverNoneToday: string
+  carryoverSaveFailed: string
+  carryoverOn: string
+  carryoverOff: string
 }
 
 const ar: NutritionScreenStrings = {
@@ -182,6 +218,28 @@ const ar: NutritionScreenStrings = {
   perServing: 'لكل حصة',
   servingsLabel: 'عدد الحصص',
   logAndSave: 'سجّل واحفظ',
+  dayToday: 'اليوم',
+  dayYesterday: 'أمس',
+  dayPrev: 'اليوم السابق',
+  dayNext: 'اليوم التالي',
+  backToToday: 'رجوع لليوم',
+  dayOldest: 'هذا أقدم يوم عندك.',
+  dayEmpty: 'ما فيه تسجيل في هذا اليوم.',
+  dayTotalsOnly: 'مجاميع بلا تفصيل',
+  dayTotalsOnlyHint: 'هذا اليوم أقدم من دفتر التفاصيل، فعندنا مجاميعه فقط. ما نخترع له أصناف.',
+  dayTargetUnknown: 'ما سجّلنا هدف هذا اليوم وقته، فنعرض اللي أكلته بلا مقارنة بهدف. أهدافك من اليوم ورايح محفوظة مع كل يوم.',
+  pastDayReadOnly: 'التسجيل يكون على اليوم الحالي. تقدر تعدّل كميات هذا اليوم أو تحذف منه.',
+  dayWater: 'الماء',
+  carryoverTitle: 'ترحيل فائض السعرات',
+  carryoverHint: 'تجاوزت هدفك أمس؟ ننزل الفرق من هدف اليوم. هدفك الأساسي ما يتغيّر.',
+  carryoverBaseRow: 'هدفك الأساسي',
+  carryoverAdjustRow: (day) => `ترحيل من ${day}`,
+  carryoverEffectiveRow: 'هدف اليوم المعدّل',
+  carryoverFloorNote: (floor) => `وقفنا الخصم عند ${floor} سعرة — حدّك الأدنى الآمن، وما ننزل تحته مهما كان الفائض.`,
+  carryoverNoneToday: 'ما فيه فائض مُرحَّل اليوم.',
+  carryoverSaveFailed: 'ما قدرنا نحفظ الإعداد. جرّب مرة ثانية.',
+  carryoverOn: 'مشغّل',
+  carryoverOff: 'مطفأ',
 }
 
 const en: NutritionScreenStrings = {
@@ -267,6 +325,28 @@ const en: NutritionScreenStrings = {
   perServing: 'per serving',
   servingsLabel: 'Servings',
   logAndSave: 'Log & save',
+  dayToday: 'Today',
+  dayYesterday: 'Yesterday',
+  dayPrev: 'Previous day',
+  dayNext: 'Next day',
+  backToToday: 'Back to today',
+  dayOldest: 'This is your oldest recorded day.',
+  dayEmpty: 'Nothing was logged on this day.',
+  dayTotalsOnly: 'Totals only',
+  dayTotalsOnlyHint: 'This day is older than the detailed ledger, so we only have its totals. We don’t invent food entries for it.',
+  dayTargetUnknown: 'We didn’t record your target for this day at the time, so we show what you ate without comparing it to one. From today on, each day keeps its own target.',
+  pastDayReadOnly: 'New entries go to today. You can still edit quantities on this day or remove them.',
+  dayWater: 'Water',
+  carryoverTitle: 'Carry over calorie surplus',
+  carryoverHint: 'Went over yesterday? We take the difference off today’s target. Your base target never changes.',
+  carryoverBaseRow: 'Base target',
+  carryoverAdjustRow: (day) => `Carried from ${day}`,
+  carryoverEffectiveRow: 'Adjusted target for today',
+  carryoverFloorNote: (floor) => `We stopped the deduction at ${floor} kcal — your safe minimum. We never go below it, whatever the surplus.`,
+  carryoverNoneToday: 'No surplus carried into today.',
+  carryoverSaveFailed: 'We couldn’t save that setting. Try again.',
+  carryoverOn: 'On',
+  carryoverOff: 'Off',
 }
 
 export const nutritionScreenStrings: Record<Lang, NutritionScreenStrings> = { ar, en }

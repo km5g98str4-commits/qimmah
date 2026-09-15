@@ -1,10 +1,22 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Icon } from '@/components/Icon'
 import { ProgressBar } from '@/components/ProgressBar'
 import { QuickMealLogger } from '@/components/nutrition/QuickMealLogger'
 import { AllergyNotice } from '@/components/AllergyNotice'
 import { useCustomization } from '@/lib/customizationContext'
 import { MEAL_SLOTS, useNutritionToday, type AddWaterFn, type LoggedFood, type MealSlot } from '@/lib/nutritionTracking'
+import { useNutritionDay } from '@/lib/nutritionDay'
+import { earliestNutritionDate, HISTORY_RETENTION_DAYS } from '@/lib/nutritionHistory'
+import { getDayStamp, shiftDayStamp, weekdayName } from '@/lib/today'
+import { useIsDemo } from '@/lib/demoMode'
+import {
+  computeDayTargets,
+  getCarryoverSettings,
+  getDayBaseTarget,
+  recordDayBaseTarget,
+  setCarryoverEnabled,
+  type DayTargetBreakdown,
+} from '@/lib/nutritionCarryover'
 import type { WaterTier } from '@/lib/nutritionV2Model'
 import { waterGuardStrings } from '@/i18n/dict/waterGuard'
 import { inRange, NUM_LIMITS, numLimitMessage, sanitizeNumericInput } from '@/lib/validation'
@@ -16,6 +28,7 @@ import { formatNumber, formatNumeralsIn } from '@/lib/numberFormat'
 import { clearQuickLogIntent, takeQuickLogIntent, type QuickLogIntent } from '@/lib/quickLogIntent'
 import { hasNumericNutritionPrescription } from '@/lib/calculators'
 import { profileChoiceStrings } from '@/i18n/dict/profileChoices'
+import { cn } from '@/lib/cn'
 
 interface NutritionViewProps {
   lang: Lang
@@ -25,7 +38,15 @@ const round = (n: number) => Math.round(n)
 
 // أزرار «نسخ»/«مفضّلة» غير مفعّلة بعد — مخفيّة حتى تُبنى الميزة فعليًا (لا تُربك المستخدم).
 
-/** أقسام الوجبات المعروضة حسب عدد الوجبات من الإعداد (meals_per_day). */
+/**
+ * أقسام الوجبات المعروضة حسب عدد الوجبات من الإعداد (meals_per_day).
+ *
+ * **بنية واحدة لكل مستخدم.** كان `nutritionPlan.style` يبدّل هذه البنية كلّها:
+ * من اختار «أرقامي فقط» في الإعداد كان يفقد أقسام الوجبات ومعها عرض الكمية
+ * وتعديلها، ويهبط على مسجّل واحد مسطّح. وهذا **أوسع بكثير** من وعد السؤال
+ * («بلا اقتراح وجبات» ≠ «بلا تتبّع موزّع على وجبات»)، وهو سبب رؤية مستخدمَين
+ * على نفس النسخة شاشتَي تغذية مختلفتين بنيويًّا. العدد وحده يبقى تفضيلًا.
+ */
 function mealSlotsForCount(count?: number) {
   const ids: MealSlot[] =
     count == null
@@ -50,10 +71,24 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const { customization } = useCustomization()
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
-  const { state, totals, addWater, resetWater, removeLog, updateLogQuantity } = useNutritionToday()
+  const { addWater, resetWater } = useNutritionToday()
   const np = customization.nutritionPlan
   const hasNumericTargets = hasNumericNutritionPrescription(customization.targets)
   const agePolicy = profileChoiceStrings[lang]
+  const demo = useIsDemo()
+
+  /**
+   * اليوم المعروض يُخزَّن **إزاحةً بالأيام لا ختمًا ثابتًا**.
+   *
+   * لو خزّنّا «2026-09-15» وبقي التطبيق مفتوحًا بعد منتصف الليل، لظلّ المستخدم
+   * على يومٍ صار أمسًا وهو يحسبه اليوم — ثم يسجّل عشاءه في اليوم الخطأ. الإزاحة
+   * تجعل «٠» تعني **اليوم الحالي دائمًا**: يتغيّر التقويم فيتبعه المعروض من
+   * تلقائه، بلا مؤقّت ولا مزامنة ساعة.
+   */
+  const [dayOffset, setDayOffset] = useState(0)
+  const todayStamp = getDayStamp()
+  const viewDate = dayOffset === 0 ? todayStamp : shiftDayStamp(todayStamp, -dayOffset)
+  const day = useNutritionDay(viewDate)
 
   /**
    * [QIM-WEB-FOUNDER-UX-004/حزمة ٤] استهلاك نيّة التسجيل السريع — **في المسار الحيّ**.
@@ -78,33 +113,96 @@ export function NutritionView({ lang }: NutritionViewProps) {
    */
   const [focusWater, setFocusWater] = useState(false)
   useEffect(() => {
+    // النيّة تعني «سجّل الآن» — والتسجيل يقع على اليوم الحالي. فإن كان المستخدم
+    // يتصفّح يومًا ماضيًا نُعيده لليوم أوّلًا، وإلّا فتحنا لوحة تسجيل معطَّلة.
     const apply = (intent: QuickLogIntent | null) => {
-      if (intent === 'meal') setAutoOpen('breakfast')
-      else if (intent === 'water') setFocusWater(true)
+      if (intent === 'meal') { setDayOffset(0); setAutoOpen('breakfast') }
+      else if (intent === 'water') { setDayOffset(0); setFocusWater(true) }
     }
     apply(takeQuickLogIntent(['meal', 'water']))
     const onEvent = (e: Event) => {
       const detail = (e as CustomEvent<string>).detail
       clearQuickLogIntent()
-      if (detail === 'meal') setAutoOpen('breakfast')
-      else if (detail === 'water') setFocusWater(true)
+      if (detail === 'meal') { setDayOffset(0); setAutoOpen('breakfast') }
+      else if (detail === 'water') { setDayOffset(0); setFocusWater(true) }
     }
     window.addEventListener('qimmah:quick-log', onEvent)
     return () => window.removeEventListener('qimmah:quick-log', onEvent)
   }, [])
 
-  const targetCalories = hasNumericTargets ? np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000 : 0
+  /** هدف السعرات **الأساسي** من الخطة — لا يمسّه الترحيل أبدًا. */
+  const baseTargetCalories = hasNumericTargets ? np.targetCalories || customization.targets.targetCalories || customization.targets.maintenanceCalories || 2000 : 0
   const targetProtein = hasNumericTargets ? np.targetProtein || customization.targets.proteinGrams || 120 : 0
   const targetCarbs = hasNumericTargets ? np.targetCarbs || customization.targets.carbsGrams || 200 : 0
   const targetFat = hasNumericTargets ? np.targetFat || customization.targets.fatGrams || 70 : 0
   const targetWaterMl = hasNumericTargets ? Math.round((np.targetWaterLiters || customization.targets.waterLiters || 3) * 1000) : 0
 
-  // أسلوب العرض من الإعداد (مصدر الحقيقة). افتراضيًا «اقتراح وجبات» للمستخدمين الحاليين.
-  const style = np.style ?? 'meal_suggestions'
-  // أقسام الوجبات تُبنى حسب عدد الوجبات من الإعداد (meals_per_day) عند اقتراح الوجبات.
+  /**
+   * يسجّل هدف **اليوم الحالي** الأساسي وقت عرضه. بلا هذا السجلّ لا يعرف الترحيل
+   * غدًا ما كان هدف أمس، ولا يجوز أن يفترضه من هدف اليوم: تغيير الخطة بينهما
+   * يجعل الاثنين مختلفين. لا كتابة في وضع العرض التجريبي.
+   */
+  useEffect(() => {
+    if (demo || !hasNumericTargets || baseTargetCalories <= 0) return
+    recordDayBaseTarget(todayStamp, baseTargetCalories)
+  }, [demo, hasNumericTargets, baseTargetCalories, todayStamp])
+
+  // ── إعداد ترحيل فائض السعرات ───────────────────────────────────────────────
+  const [carryoverVersion, setCarryoverVersion] = useState(0)
+  const [carryoverError, setCarryoverError] = useState(false)
+  const carryoverSettings = useMemo(() => {
+    void carryoverVersion
+    return demo ? { enabled: false, enabledAt: null } : getCarryoverSettings()
+  }, [demo, carryoverVersion])
+  const toggleCarryover = () => {
+    const result = setCarryoverEnabled(!carryoverSettings.enabled, todayStamp)
+    if (result === 'ok') {
+      setCarryoverError(false)
+      setCarryoverVersion((v) => v + 1)
+    } else {
+      setCarryoverError(true)
+    }
+  }
+
+  /**
+   * هدف اليوم المعروض — ثلاثة أرقام منفصلة لا رقم واحد مبهم:
+   * الأساسي · تعديل الترحيل · المعدَّل. ويوم ماضٍ لم يُسجَّل هدفه يعود بـ«لا هدف
+   * معروف» بدل أن يُلبَس هدف اليوم (لا رقم يقول عن نفسه ما ليس هو).
+   */
+  const recordedPastBase = day.isToday ? null : getDayBaseTarget(viewDate)
+  const dayBase = day.isToday ? baseTargetCalories : (recordedPastBase ?? 0)
+  const dayTargetKnown = hasNumericTargets && dayBase > 0
+  const targets: DayTargetBreakdown = useMemo(
+    () =>
+      computeDayTargets({
+        base: dayBase,
+        date: viewDate,
+        settings: demo ? { enabled: false, enabledAt: null } : carryoverSettings,
+        gender: customization.profile.gender,
+      }),
+    // `day.totals` ضمن التبعيات عمدًا: تعديل طعام أمس يغيّر خصم اليوم فورًا.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dayBase, viewDate, demo, carryoverSettings, customization.profile.gender, day.totals.calories, carryoverVersion],
+  )
+  const targetCalories = dayTargetKnown ? targets.effective : 0
+
+  // أقسام الوجبات تُبنى حسب عدد الوجبات من الإعداد (meals_per_day) — لكل مستخدم.
   const mealSlots = mealSlotsForCount(np.mealsPerDay)
 
-  const eaten = round(totals.calories)
+  // ── حدود التصفّح ───────────────────────────────────────────────────────────
+  const earliest = useMemo(() => {
+    // `todayStamp` مرجعٌ مقصود: `earliestNutritionDate` تقرأ اليوم بنفسها، فربطها
+    // به يعيد حساب أرضية التصفّح عند عبور منتصف الليل بدل تجميدها على يوم أمس.
+    void todayStamp
+    return demo ? null : earliestNutritionDate()
+  }, [demo, todayStamp])
+  const retentionFloor = shiftDayStamp(todayStamp, -HISTORY_RETENTION_DAYS)
+  const oldestReachable = earliest && earliest > retentionFloor ? earliest : retentionFloor
+  const canGoBack = viewDate > oldestReachable
+  const atOldest = !canGoBack
+
+  const displayTotals = day.legacyTotals ?? day.totals
+  const eaten = round(displayTotals.calories)
   const exerciseCals = 0 // لا نتتبّع السعرات المحروقة بعد — نعرضها 0 بصدق
   const remaining = targetCalories - eaten + exerciseCals
 
@@ -116,6 +214,17 @@ export function NutritionView({ lang }: NutritionViewProps) {
         </span>
         <h1 className="text-lg font-black text-ink-900">{t.tabTitle}</h1>
       </div>
+
+      <DayNav
+        lang={lang}
+        date={viewDate}
+        offset={dayOffset}
+        canGoBack={canGoBack}
+        atOldest={atOldest}
+        onPrev={() => setDayOffset((v) => v + 1)}
+        onNext={() => setDayOffset((v) => Math.max(0, v - 1))}
+        onToday={() => setDayOffset(0)}
+      />
 
       <div className="space-y-0">
         {/*
@@ -135,7 +244,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
             كانت الخانات الأربع بنفس الوزن (`text-lg` لكلٍّ)، فالعين تمسح أربعة
             أرقام لتستنتج الرقم الوحيد الذي جاءت لأجله. صار المتبقّي رقمًا كبيرًا
             مستقلًّا، والمعادلة تحته سطرًا مساندًا يشرح من أين جاء. */}
-        {hasNumericTargets ? <div className="card p-5">
+        {hasNumericTargets ? (dayTargetKnown ? <div className="card p-5" data-testid="nutrition-equation">
           <p className="text-xs font-bold text-ink-500">{t.equationNote}</p>
 
           <div className="mt-3 flex items-baseline gap-2">
@@ -153,7 +262,19 @@ export function NutritionView({ lang }: NutritionViewProps) {
             <Op symbol={d.opPlus} />
             <EqCell label={t.exerciseCals} value={exerciseCals} lang={lang} />
           </div>
+
+          {/* الهدف تغيّر؟ يُشرح سببه — لا رقم ينزل بلا تفسير. */}
+          {targets.carryover < 0 && <CarryoverBreakdown lang={lang} targets={targets} todayStamp={todayStamp} />}
         </div> : (
+          <div className="card p-5" data-testid="nutrition-target-unknown">
+            <p className="text-xs font-bold text-ink-500">{t.foodCals}</p>
+            <div className="mt-2 flex items-baseline gap-2">
+              <span className="text-4xl font-black leading-none text-primary-c">{formatNumber(eaten, lang)}</span>
+              <span className="text-sm font-bold text-ink-500">{d.caloriesUnit}</span>
+            </div>
+            <p className="mt-3 border-t border-line pt-3 text-xs leading-relaxed text-ink-500">{d.dayTargetUnknown}</p>
+          </div>
+        )) : (
           <div className="card p-5" data-testid="nutrition-under18-guidance">
             <h2 className="text-sm font-black text-ink-900">{agePolicy.minorNutritionGuidanceTitle}</h2>
             <p className="mt-2 text-sm leading-relaxed text-ink-600">{agePolicy.minorNutritionGuidanceBody}</p>
@@ -175,49 +296,89 @@ export function NutritionView({ lang }: NutritionViewProps) {
           المتاحة فعلًا لأنه لا يسأل عن غيرها.
         */}
         <div className="mt-4 grid grid-cols-2 gap-3">
-          <MacroCard label={t.protein} eaten={round(totals.protein)} target={hasNumericTargets ? targetProtein : null} unit={d.gramsUnit} color="#22c55e" lang={lang} />
-          <MacroCard label={t.carbs} eaten={round(totals.carbs)} target={hasNumericTargets ? targetCarbs : null} unit={d.gramsUnit} color="#0ea5e9" lang={lang} incomplete={totals.unknown.carbs} incompleteLabel={t.nutrientsIncomplete} />
-          <MacroCard label={t.fat} eaten={round(totals.fat)} target={hasNumericTargets ? targetFat : null} unit={d.gramsUnit} color="#e0941f" lang={lang} incomplete={totals.unknown.fat} incompleteLabel={t.nutrientsIncomplete} />
-          <MacroCard label={t.water} eaten={state.waterMl} target={hasNumericTargets ? targetWaterMl : null} unit={d.mlUnit} color="#F26A21" lang={lang} />
+          <MacroCard label={t.protein} eaten={round(displayTotals.protein)} target={dayTargetKnown ? targetProtein : null} unit={d.gramsUnit} color="#22c55e" lang={lang} />
+          <MacroCard label={t.carbs} eaten={round(displayTotals.carbs)} target={dayTargetKnown ? targetCarbs : null} unit={d.gramsUnit} color="#0ea5e9" lang={lang} incomplete={day.totals.unknown.carbs} incompleteLabel={t.nutrientsIncomplete} />
+          <MacroCard label={t.fat} eaten={round(displayTotals.fat)} target={dayTargetKnown ? targetFat : null} unit={d.gramsUnit} color="#e0941f" lang={lang} incomplete={day.totals.unknown.fat} incompleteLabel={t.nutrientsIncomplete} />
+          <MacroCard label={t.water} eaten={day.waterMl} target={dayTargetKnown ? targetWaterMl : null} unit={d.mlUnit} color="#F26A21" lang={lang} />
         </div>
 
-        {/* حالة فارغة — تحفيز لتسجيل أول وجبة */}
-        {state.log.length === 0 && (
+        {/* يوم أقدم من دفتر التفاصيل: مجاميعه معروفة وأصنافه ليست — يُقال لا يُخفى. */}
+        {day.legacyTotals && (
+          <div data-testid="nutrition-day-totals-only" className="mt-4 card p-4">
+            <p className="text-sm font-black text-ink-900">{d.dayTotalsOnly}</p>
+            <p className="mt-1.5 text-xs leading-relaxed text-ink-500">{d.dayTotalsOnlyHint}</p>
+          </div>
+        )}
+
+        {/* حالة فارغة — اليوم يُحفَّز على التسجيل، والماضي يُقال عنه الصدق. */}
+        {day.log.length === 0 && !day.legacyTotals && (
           <div className="mt-4 card flex flex-col items-center gap-2 p-6 text-center">
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
               <Icon name="Utensils" className="h-5 w-5" />
             </span>
-            <p className="text-sm font-black text-ink-900">{t.emptyStateTitle}</p>
-            <p className="max-w-xs text-xs text-ink-400">{t.emptyStateHint}</p>
+            <p className="text-sm font-black text-ink-900">{day.canAdd ? t.emptyStateTitle : d.dayEmpty}</p>
+            {day.canAdd && <p className="max-w-xs text-xs text-ink-400">{t.emptyStateHint}</p>}
           </div>
         )}
 
-        {/* التسجيل: اقتراح وجبات → أقسام وجبات حسب عدد الوجبات؛ ماكروز فقط → مسجّل موحّد */}
-        {style === 'meal_suggestions' ? (
-          <div className="mt-6 space-y-4">
-            {mealSlots.map((slot) => (
-              <MealCard
-                key={slot.id}
-                lang={lang}
-                slot={slot}
-                autoOpen={autoOpen === slot.id || (autoOpen === 'breakfast' && slot.id === mealSlots[0].id)}
-                onAutoOpenHandled={() => setAutoOpen(null)}
-                items={state.log.filter((e) => slotForEntry(e.meal, mealSlots) === slot.id)}
-                targetCalories={targetCalories}
-                targetProtein={targetProtein}
-                onRemove={removeLog}
-                onUpdateQuantity={updateLogQuantity}
-              />
-            ))}
-          </div>
+        {/*
+          ═══ بنية واحدة لكل مستخدم ═══
+          كان هنا فرعٌ على `nutritionPlan.style`: «اقتراح وجبات» يعطي أقسام
+          الوجبات، وأيّ قيمة أخرى تعطي مسجّلًا واحدًا مسطّحًا بلا كمية ولا تعديل.
+          فمستخدمان على **نفس البناء** كانا يريان بنيتَي تغذية مختلفتين لأن
+          إجابةً في الإعداد بدّلت المعمار لا المحتوى. الفرع أُزيل: التتبّع واحد،
+          والتفضيل يبقى في عدد الأقسام وفي وصف الخطة لا في شكل الشاشة.
+        */}
+        <div className="mt-6 space-y-4" data-testid="nutrition-meal-sections">
+          {!day.canAdd && (
+            <p data-testid="nutrition-past-readonly" className="rounded-xl border border-line bg-surface px-3 py-2.5 text-xs leading-relaxed text-ink-500">
+              {d.pastDayReadOnly}
+            </p>
+          )}
+          {mealSlots.map((slot) => (
+            <MealCard
+              key={slot.id}
+              lang={lang}
+              slot={slot}
+              canAdd={day.canAdd}
+              autoOpen={day.canAdd && (autoOpen === slot.id || (autoOpen === 'breakfast' && slot.id === mealSlots[0].id))}
+              onAutoOpenHandled={() => setAutoOpen(null)}
+              items={day.log.filter((e) => slotForEntry(e.meal, mealSlots) === slot.id)}
+              targetCalories={targetCalories}
+              targetProtein={targetProtein}
+              onRemove={day.removeLog}
+              onUpdateQuantity={day.updateLogQuantity}
+            />
+          ))}
+        </div>
+
+        {/* الماء — تفاعليّ لليوم الحالي، وقراءةً فقط للماضي (لا كاتب ماء للماضي). */}
+        {day.isToday ? (
+          <WaterPanel lang={lang} waterMl={day.waterMl} targetMl={targetWaterMl} onAdd={addWater} onReset={resetWater} focusRequested={focusWater} onFocusHandled={() => setFocusWater(false)} />
         ) : (
-          <div className="mt-6">
-            <QuickMealLogger lang={lang} targetCalories={targetCalories} targetProtein={targetProtein} showTargets={hasNumericTargets} />
+          <div className="mt-4 card p-5" data-testid="nutrition-past-water">
+            <div className="flex items-center justify-between">
+              <span className="flex items-center gap-1.5 text-sm font-bold text-ink-700">
+                <Icon name="Droplets" className="h-4 w-4 text-primary-c" />
+                {d.dayWater}
+              </span>
+              <span className="text-sm font-black text-primary-c">
+                {formatNumber(Number((day.waterMl / 1000).toFixed(2)), lang)} {d.litersUnit}
+              </span>
+            </div>
           </div>
         )}
 
-        {/* الماء */}
-        <WaterPanel lang={lang} waterMl={state.waterMl} targetMl={targetWaterMl} onAdd={addWater} onReset={resetWater} focusRequested={focusWater} onFocusHandled={() => setFocusWater(false)} />
+        {/* إعداد ترحيل الفائض — بجوار الهدف الذي يعدّله، لا مدفونًا في شاشة ثانية. */}
+        {hasNumericTargets && day.isToday && (
+          <CarryoverSetting
+            lang={lang}
+            enabled={carryoverSettings.enabled}
+            onToggle={toggleCarryover}
+            failed={carryoverError}
+            noneToday={carryoverSettings.enabled && targets.carryover === 0}
+          />
+        )}
 
         <p className="mt-6 flex items-start gap-2 text-[11px] text-ink-400">
           <Icon name="Info" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
@@ -230,6 +391,203 @@ export function NutritionView({ lang }: NutritionViewProps) {
 
 function Op({ symbol }: { symbol: string }) {
   return <span className="pb-5 text-base font-black text-ink-300">{symbol}</span>
+}
+
+/** تاريخ اليوم بالتقويم المحلي — يُبنى من الختم نفسه، بلا أي تحويل UTC. */
+function dateFromStamp(stamp: string): Date {
+  const [y, m, dd] = stamp.split('-').map(Number)
+  return new Date(y, (m || 1) - 1, dd || 1, 12)
+}
+
+/** تسمية اليوم المعروض: «اليوم» · «أمس» · ثم اسم اليوم وتاريخه. */
+function dayLabel(stamp: string, offset: number, lang: Lang, d: { dayToday: string; dayYesterday: string }): string {
+  if (offset === 0) return d.dayToday
+  if (offset === 1) return d.dayYesterday
+  return weekdayName(lang, dateFromStamp(stamp))
+}
+
+/**
+ * التاريخ المعروض — **باسم الشهر لا بثلاثة أرقام موصولة بشرطات**.
+ *
+ * السبب مقيس لا تجميلي: `٢٠٢٦-٠٩-١٥` تُعيد ترتيب مجموعاتها الرقمية في سياق
+ * عربي (الأرقام الهندية صنفها AN في خوارزمية الاتجاه)، فتُقرأ على الشاشة
+ * «١٥-٠٩-٢٠٢٦» — تاريخ صحيح الشكل **خاطئ المعنى**، ولا يملك القارئ ما يميّز
+ * أيّهما قُصد. اسم الشهر يثبّت الترتيب بلا اعتماد على الاتجاه أصلًا.
+ *
+ * و`-u-ca-gregory` صريح: `ar-SA` وحدها تعطي التقويم الهجري، وتبديل تقويم
+ * المستخدم من سطر تاريخ **قرار منتج** لا تفصيلة تنسيق.
+ */
+function formatDayDate(stamp: string, lang: Lang): string {
+  const date = dateFromStamp(stamp)
+  try {
+    const locale = lang === 'en' ? 'en-US-u-ca-gregory' : 'ar-u-ca-gregory'
+    const text = new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date)
+    // نظام الأرقام يتبع تفضيل المستخدم لا اللغة وحدها (سياسة الأرقام).
+    return formatNumeralsIn(text, lang)
+  } catch {
+    return formatNumeralsIn(stamp, lang)
+  }
+}
+
+/**
+ * شريط تصفّح الأيام.
+ *
+ * ═══ الاتجاه ═══
+ * الأسهم **منطقية لا ثابتة**: «السابق» يشير للخلف في اتجاه القراءة، فيصير
+ * `ChevronRight` في العربية و`ChevronLeft` في الإنجليزية. الترتيب في الشيفرة
+ * واحد، والمتصفّح يعكسه مع `dir="rtl"`؛ الأيقونة وحدها تحتاج القلب.
+ * والتاريخ الرقمي يُعزل بـ`dir="ltr"` كي لا تتبعثر `2026-09-15` في RTL.
+ */
+function DayNav({
+  lang, date, offset, canGoBack, atOldest, onPrev, onNext, onToday,
+}: {
+  lang: Lang
+  date: string
+  offset: number
+  canGoBack: boolean
+  atOldest: boolean
+  onPrev: () => void
+  onNext: () => void
+  onToday: () => void
+}) {
+  const d = nutritionScreenStrings[lang]
+  const ar = lang !== 'en'
+  const prevIcon = ar ? 'ChevronRight' : 'ChevronLeft'
+  const nextIcon = ar ? 'ChevronLeft' : 'ChevronRight'
+  const isToday = offset === 0
+  return (
+    <div className="mb-4" data-testid="nutrition-day-nav">
+      <div className="card flex items-center gap-2 p-2">
+        <button
+          type="button"
+          onClick={onPrev}
+          disabled={!canGoBack}
+          data-testid="nutrition-day-prev"
+          aria-label={d.dayPrev}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-600 transition-colors hover:bg-beige disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <Icon name={prevIcon} className="h-4 w-4" />
+        </button>
+
+        <div className="min-w-0 flex-1 text-center">
+          <p data-testid="nutrition-day-label" className="truncate text-sm font-black text-ink-900">{dayLabel(date, offset, lang, d)}</p>
+          {/* لا `dir="ltr"` هنا: النصّ صار لغة طبيعية (اسم شهر + رقمان)، فيتبع
+              اتجاه الصفحة صحيحًا. وفرض LTR على نصّ عربي هو ما يقلبه. */}
+          <p data-testid="nutrition-day-date" className="truncate text-[11px] text-ink-400">{formatDayDate(date, lang)}</p>
+        </div>
+
+        <button
+          type="button"
+          onClick={onNext}
+          disabled={isToday}
+          data-testid="nutrition-day-next"
+          aria-label={d.dayNext}
+          className="grid h-11 w-11 shrink-0 place-items-center rounded-xl text-ink-600 transition-colors hover:bg-beige disabled:cursor-not-allowed disabled:opacity-30"
+        >
+          <Icon name={nextIcon} className="h-4 w-4" />
+        </button>
+      </div>
+
+      {!isToday && (
+        <button
+          type="button"
+          onClick={onToday}
+          data-testid="nutrition-day-back-to-today"
+          className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 text-xs font-bold text-primary-c underline-offset-4 hover:underline"
+        >
+          <Icon name="RotateCcw" className="h-3.5 w-3.5" />
+          {d.backToToday}
+        </button>
+      )}
+      {atOldest && <p className="mt-2 text-[11px] text-ink-400">{d.dayOldest}</p>}
+    </div>
+  )
+}
+
+/**
+ * شرح تغيّر الهدف — **ثلاثة أسطر لا رقم واحد**.
+ *
+ * المطلب صريح: ألّا يرى المستخدم «١٨٠٠» بلا سياق. فالأساسي والتعديل والمعدَّل
+ * تُعرض معًا، ومصدر الخصم يُسمّى بيومه. وحين يقصّ الحدّ الأدنى الآمن الخصمَ
+ * يُقال ذلك صراحةً بدل أن يبدو الحساب مكسورًا.
+ */
+function CarryoverBreakdown({ lang, targets, todayStamp }: { lang: Lang; targets: DayTargetBreakdown; todayStamp: string }) {
+  const d = nutritionScreenStrings[lang]
+  const sourceLabel =
+    targets.sourceDate === null
+      ? ''
+      : targets.sourceDate === shiftDayStamp(todayStamp, -1)
+        ? d.dayYesterday
+        : weekdayName(lang, dateFromStamp(targets.sourceDate))
+  return (
+    <div data-testid="carryover-breakdown" className="mt-3.5 space-y-1.5 border-t border-line pt-3">
+      <Row label={d.carryoverBaseRow} value={formatNumber(targets.base, lang)} testId="carryover-base" />
+      <Row label={d.carryoverAdjustRow(sourceLabel)} value={`${d.opMinus}${formatNumber(Math.abs(targets.carryover), lang)}`} testId="carryover-adjust" tone="warn" />
+      <Row label={d.carryoverEffectiveRow} value={formatNumber(targets.effective, lang)} testId="carryover-effective" tone="strong" />
+      {targets.floorApplied && (
+        <p data-testid="carryover-floor-note" className="pt-1 text-[11px] leading-relaxed text-ink-500">
+          {d.carryoverFloorNote(formatNumber(targets.floor, lang))}
+        </p>
+      )}
+    </div>
+  )
+}
+
+function Row({ label, value, testId, tone = 'plain' }: { label: string; value: string; testId?: string; tone?: 'plain' | 'warn' | 'strong' }) {
+  return (
+    <div data-testid={testId} className="flex items-baseline justify-between gap-3">
+      <span className="min-w-0 flex-1 truncate text-xs text-ink-500">{label}</span>
+      <span
+        className={cn(
+          'shrink-0 text-sm tabular-nums',
+          tone === 'strong' ? 'font-black text-ink-900' : tone === 'warn' ? 'font-bold text-amber-600' : 'font-bold text-ink-700',
+        )}
+      >
+        {value}
+      </span>
+    </div>
+  )
+}
+
+/**
+ * مفتاح ترحيل الفائض — **مطفأ افتراضيًا** (لا يُشغَّل نيابةً عن أحد).
+ *
+ * نبرته ملاحظة لا تحذير: يشرح ما يفعله ويعد صراحةً بأن الهدف الأساسي لا يتغيّر،
+ * لأن ذلك بالضبط هو الخوف الذي يمنع المستخدم من تجربته.
+ */
+function CarryoverSetting({
+  lang, enabled, onToggle, failed, noneToday,
+}: {
+  lang: Lang
+  enabled: boolean
+  onToggle: () => void
+  failed: boolean
+  noneToday: boolean
+}) {
+  const d = nutritionScreenStrings[lang]
+  return (
+    <div className="mt-4 card p-4" data-testid="carryover-setting">
+      <button
+        type="button"
+        role="switch"
+        aria-checked={enabled}
+        onClick={onToggle}
+        data-testid="carryover-toggle"
+        className="flex w-full min-h-[44px] items-center justify-between gap-3 text-start"
+      >
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-black text-ink-900">{d.carryoverTitle}</span>
+          <span className="mt-1 block text-[11px] leading-relaxed text-ink-500">{d.carryoverHint}</span>
+        </span>
+        <span className={cn('relative h-6 w-11 shrink-0 rounded-full transition-colors', enabled ? 'bg-primary' : 'bg-line')}>
+          <span className={cn('absolute top-0.5 h-5 w-5 rounded-full bg-surface shadow transition-all', enabled ? 'end-0.5' : 'start-0.5')} />
+        </span>
+      </button>
+      <p className="mt-2 text-[11px] font-bold text-ink-400">{enabled ? d.carryoverOn : d.carryoverOff}</p>
+      {noneToday && <p data-testid="carryover-none" className="mt-1 text-[11px] text-ink-400">{d.carryoverNoneToday}</p>}
+      {failed && <p role="alert" className="v2-error-panel mt-2 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.carryoverSaveFailed}</p>}
+    </div>
+  )
 }
 
 /**
@@ -316,6 +674,7 @@ function MealCard({
   targetProtein,
   onRemove,
   onUpdateQuantity,
+  canAdd = true,
   autoOpen = false,
   onAutoOpenHandled,
 }: {
@@ -326,6 +685,12 @@ function MealCard({
   targetProtein: number
   onRemove: (id: string) => boolean
   onUpdateQuantity: (id: string, value: number, unit: 'g' | 'serving') => boolean
+  /**
+   * الإضافة متاحة على اليوم الحالي وحده. ويومٌ ماضٍ **لا يُعرَض له زرّ مطفأ**:
+   * السبب مكتوب مرّة واحدة أعلى الأقسام، والزرّ يغيب — زرٌّ يُرى ولا يعمل أسوأ
+   * من زرٍّ لا يُرى. التعديل والحذف يبقيان: تصحيح الماضي حقّ لا إضافة إليه.
+   */
+  canAdd?: boolean
   /** نيّة «سجّل وجبة» القادمة من «اليوم» — تُفتح مرّة واحدة ثم تُستهلك. */
   autoOpen?: boolean
   onAutoOpenHandled?: () => void
@@ -392,15 +757,17 @@ function MealCard({
             <p className="mt-1 truncate text-[11px] text-ink-400">{formatNumber(cals, lang)} {d.caloriesUnit} · {formatNumber(prot, lang)}{d.gramsUnit} {d.caloriesDotProteinG}</p>
           </div>
         </div>
-        <button
-          type="button"
-          onClick={toggleAdding}
-          aria-expanded={adding}
-          className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
-        >
-          <Icon name="Plus" className="h-3.5 w-3.5" />
-          {t.addShort}
-        </button>
+        {canAdd && (
+          <button
+            type="button"
+            onClick={toggleAdding}
+            aria-expanded={adding}
+            className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
+          >
+            <Icon name="Plus" className="h-3.5 w-3.5" />
+            {t.addShort}
+          </button>
+        )}
       </div>
 
       {items.length > 0 && (
@@ -474,7 +841,7 @@ function MealCard({
 
       {saveError && <p role="alert" className="v2-error-panel mx-4 mt-3 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
 
-      {adding && (
+      {adding && canAdd && (
         <div className="border-t border-line p-4">
           <QuickMealLogger
             lang={lang}

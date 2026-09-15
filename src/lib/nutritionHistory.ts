@@ -18,11 +18,12 @@
 
 import type { FoodItem } from '@/data/foodItems'
 import { foodItems } from '@/data/foodItems'
-import { getDayStamp } from '@/lib/today'
+import { getDayStamp, shiftDayStamp } from '@/lib/today'
 import { getDataOwner, runMigration } from '@/lib/dataOwnership'
 import { enqueueSyncDelete, enqueueSyncOperation, getSyncRuntime } from '@/lib/syncQueue'
-import { getNutritionLog, saveNutritionLog } from '@/lib/historyStore'
+import { getNutritionLog, getNutritionLogs, saveNutritionLog } from '@/lib/historyStore'
 import { writeJson, type WriteResult } from '@/lib/safeStorage'
+import { assertPaid } from '@/lib/access/guard'
 import { foldArabic, foldArabicDigits } from '@/lib/text/foodNormalize'
 import {
   NUTRITION_V2_KEY,
@@ -120,11 +121,8 @@ function ownerKey(userId: string | null | undefined): string {
 const round1 = (n: number): number => Math.round(n * 10) / 10
 const round2 = (n: number): number => Math.round(n * 100) / 100
 
-/** يضيف أيامًا لختم يوم (YYYY-MM-DD) ويعيد الختم الناتج عبر getDayStamp. */
-function stampAddDays(stamp: string, delta: number): string {
-  const [y, m, d] = stamp.split('-').map(Number)
-  return getDayStamp(new Date(y, (m || 1) - 1, (d || 1) + delta, 12))
-}
+/** يضيف أيامًا لختم يوم — يفوّض إلى `shiftDayStamp` (مصدر حساب الأيام الواحد). */
+const stampAddDays = shiftDayStamp
 
 /** تطبيع قيد واحد — localStorage يُعامل كمدخل معادٍ؛ التالف يُسقط بصمت. */
 function normalizeEntry(raw: unknown): NutritionEntry | null {
@@ -169,12 +167,27 @@ function readLedger(): LedgerRecord {
   }
 }
 
+// ── مشتركو الدفتر ────────────────────────────────────────────────────────────
+// شاشة التغذية تعرض أيامًا ماضية تُقرأ من الدفتر مباشرةً، فتحتاج أن تُشعَر حين
+// يتغيّر — تمامًا كما يُشعر `subscribeNutritionDay` عن متجر اليوم. بلا هذا يبقى
+// يومٌ معروض على شاشة المستخدم يعرض قيدًا حذفه استيرادٌ أو تبويب آخر.
+const ledgerListeners = new Set<() => void>()
+
+/** يشترك في تغيّرات الدفتر؛ يعيد دالّة إلغاء الاشتراك. */
+export function subscribeNutritionLedger(cb: () => void): () => void {
+  ledgerListeners.add(cb)
+  return () => {
+    ledgerListeners.delete(cb)
+  }
+}
+
 function writeLedger(ledger: LedgerRecord): void {
   try {
     ls()?.setItem(NUTRITION_HISTORY_KEY, JSON.stringify(ledger))
   } catch {
     /* امتلاء/حجب التخزين — لا نرمي */
   }
+  ledgerListeners.forEach((l) => l())
 }
 
 /** أيام مالكٍ مطبَّعة (كل قيد تالف يُسقط). */
@@ -371,8 +384,19 @@ function totalsFromEntries(entries: NutritionEntry[]): { calories: number; prote
   }
 }
 
-/** يكتب قيود يومٍ ماضٍ في الدفتر + يحدّث مجاميعه القانونية (saveNutritionLog). */
+/**
+ * يكتب قيود يومٍ ماضٍ في الدفتر + يحدّث مجاميعه القانونية (saveNutritionLog).
+ *
+ * **الحارس هنا** لا في الأزرار: هذا هو الكاتب الواحد لتعديل الماضي، ومستدعياه
+ * (`editEntry`/`removeEntry`) هما بابا تعديل الماضي كلّه. نظيره في متجر اليوم
+ * (`updateFoodInDay`/`removeFoodFromDay`) يحرس بالطريقة نفسها، فلمّا صار الماضي
+ * قابلًا للتعديل من شاشة التغذية وجب أن يُحرَس بالحدّ نفسه لا بحدٍّ أضعف.
+ *
+ * ولا يقع الحارس على `saveNutritionLog` نفسها: تلك كاتب تاريخ **مشترك** مع
+ * الاستيراد والمزامنة، وحجبها يمنع المستخدم من استعادة بياناته.
+ */
 function persistPastDay(date: string, entries: NutritionEntry[]): void {
+  assertPaid('nutrition.addFood')
   const ledger = readLedger()
   const owner = currentOwner()
   const days = ownerDays(ledger, owner)
@@ -928,36 +952,71 @@ export interface DayNutritionStat {
   estimated: boolean
 }
 
+/**
+ * إحصاء يوم واحد — **المصدر الوحيد** لسؤال «ماذا في هذا اليوم؟».
+ *
+ * ترتيب الأولوية ثابت وصادق: تفصيل الدفتر إن وُجد · وإلّا مجاميع
+ * `historyStore` الأقدم من الدفتر **موسومة تقديرية بلا تفصيل مُختلَق** ·
+ * وإلّا «لا بيانات». يستدعيه الأسبوعيّ وشريط تصفّح الأيام معًا، فلا ينحرف
+ * جوابان عن السؤال نفسه.
+ */
+export function getDayNutritionStat(date: string, days?: DayEntriesMap): DayNutritionStat {
+  ensureNutritionHistoryInit()
+  const map = days ?? ownerDays(readLedger(), currentOwner())
+  const entries = map[date] ?? []
+  if (entries.length) {
+    return { date, totals: totalsFromEntries(entries), entryCount: entries.length, source: 'entries', estimated: false }
+  }
+  const legacy = getNutritionLog(date)?.loggedFood
+  if (legacy) {
+    return {
+      date,
+      totals: {
+        calories: Math.round(legacy.calories || 0),
+        protein: Math.round(legacy.protein || 0),
+        carbs: Math.round(legacy.carbs || 0),
+        fat: Math.round(legacy.fat || 0),
+      },
+      entryCount: 0,
+      source: 'totals',
+      estimated: true,
+    }
+  }
+  return { date, totals: { calories: 0, protein: 0, carbs: 0, fat: 0 }, entryCount: 0, source: 'none', estimated: false }
+}
+
 /** إحصاء ٧ أيام تنتهي بـ endDate (الافتراضي اليوم) — الأقدم أولًا. */
 export function getWeeklyNutritionStats(endDate?: string): DayNutritionStat[] {
   ensureNutritionHistoryInit()
   const end = endDate ?? getDayStamp()
   const days = ownerDays(readLedger(), currentOwner())
   const stats: DayNutritionStat[] = []
-  for (let i = 6; i >= 0; i--) {
-    const date = stampAddDays(end, -i)
-    const entries = days[date] ?? []
-    if (entries.length) {
-      stats.push({ date, totals: totalsFromEntries(entries), entryCount: entries.length, source: 'entries', estimated: false })
-      continue
-    }
-    const legacy = getNutritionLog(date)?.loggedFood
-    if (legacy) {
-      stats.push({
-        date,
-        totals: {
-          calories: Math.round(legacy.calories || 0),
-          protein: Math.round(legacy.protein || 0),
-          carbs: Math.round(legacy.carbs || 0),
-          fat: Math.round(legacy.fat || 0),
-        },
-        entryCount: 0,
-        source: 'totals',
-        estimated: true,
-      })
-      continue
-    }
-    stats.push({ date, totals: { calories: 0, protein: 0, carbs: 0, fat: 0 }, entryCount: 0, source: 'none', estimated: false })
-  }
+  for (let i = 6; i >= 0; i--) stats.push(getDayNutritionStat(stampAddDays(end, -i), days))
   return stats
+}
+
+/**
+ * أقدم يوم يملك المستخدم فيه بيانات تغذية — حدّ التصفّح للخلف.
+ *
+ * يجمع مصدري الماضي: تفصيل الدفتر **ومجاميع `historyStore` الأقدم منه**، فلا
+ * يُحجب عن مستخدم قديم يومٌ سجّله فعلًا لمجرّد أن الدفتر لم يكن موجودًا يومها.
+ * وحدّ الاحتفاظ (`HISTORY_RETENTION_DAYS`) أرضية صلبة تحته لا يُنزَل.
+ */
+export function earliestNutritionDate(): string | null {
+  ensureNutritionHistoryInit()
+  const today = getDayStamp()
+  const floor = stampAddDays(today, -HISTORY_RETENTION_DAYS)
+  const candidates: string[] = []
+  for (const [date, entries] of Object.entries(ownerDays(readLedger(), currentOwner()))) {
+    if (entries.length) candidates.push(date)
+  }
+  try {
+    for (const [date, log] of Object.entries(getNutritionLogs())) {
+      if (log?.loggedFood) candidates.push(date)
+    }
+  } catch {
+    /* مجاميع تالفة — الدفتر وحده يكفي للحدّ */
+  }
+  const valid = candidates.filter((d) => d >= floor && d <= today).sort()
+  return valid.length ? valid[0] : null
 }
