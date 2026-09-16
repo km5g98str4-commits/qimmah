@@ -15,6 +15,7 @@
 
 import { readFileSync } from 'node:fs'
 import {
+  addEntryToDay,
   getDayEntries,
   editEntry,
   ensureNutritionHistoryInit,
@@ -30,7 +31,7 @@ import { getDayStamp, shiftDayStamp, daysBetweenStamps } from '@/lib/today'
 import { stampDataOwner } from '@/lib/dataOwnership'
 import { calorieFloor } from '@/lib/calculators'
 import {
-  CARRYOVER_CHAIN_DAYS,
+  CARRYOVER_CHAIN_WINDOW_REMOVED,
   CARRYOVER_DEFICIT_POLICY,
   NUTRITION_CARRYOVER_KEY,
   computeDayTargets,
@@ -391,10 +392,109 @@ console.log('\n⑤ حواف الترحيل')
   const nextDay = computeDayTargets({ base: 2000, date: THU, gender: 'male' })
   check('(هـ) الباقي لا يُدوَّر ليوم ثالث (لا دَين يلاحق المستخدم)', nextDay.carryover === 0 && nextDay.effective === 2000)
 
-  // (و) النافذة محدودة ومعلَنة.
-  check('(و) طول السلسلة ثابت معلَن', CARRYOVER_CHAIN_DAYS === 14)
+  // ═════════════════════════════════════════════════════════════════════════
+  // (و) نافذة الـ١٤ يومًا أُزيلت — والبديل يُقاس بمرجع لا بادّعاء.
+  // ═════════════════════════════════════════════════════════════════════════
+  // المرجع أدناه يمشي **من يوم السريان بلا أيّ حدّ** — أي التعريف الصريح
+  // للترحيل. والمطلوب إثباتُ أمرين معًا:
+  //   ١) التنفيذ يطابق المرجع بالضبط (لا تقريب ولا قصّ).
+  //   ٢) النافذة القديمة **كانت** تخالف المرجع — وإلّا فالإصلاح بلا أثر
+  //      والفحص بلا معنى. لذلك تُحاكى النافذة هنا ويُثبَت اختلافها.
+  check('(و) ثابت النافذة أُزيل ولم يُستبدل برقم آخر', CARRYOVER_CHAIN_WINDOW_REMOVED === true)
+  // الفحص على **الشيفرة** لا على التعليق: التوثيق يذكر الثابت الملغى عمدًا
+  // ليشرح لماذا أُلغي، وفحصٌ يسقط على شرحه فحصٌ يعاقب التوثيق الصادق.
+  const carryoverCode = read('src/lib/nutritionCarryover.ts')
+    .replace(/\/\*[\s\S]*?\*\//g, '')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1')
+  check('(و) ولا يبقى أيّ رقم قصٍّ في الشيفرة', !/CARRYOVER_CHAIN_DAYS/.test(carryoverCode))
+  // تأكيد مضادّ (§4.2): لو عاد القصّ شيفرةً لَسقط الفحص أعلاه بالاسم.
+  check(
+    '(و) ومحاكاة عودة القصّ تُسقط الفحص نفسه',
+    /CARRYOVER_CHAIN_DAYS/.test(`${carryoverCode}\nconst CARRYOVER_CHAIN_DAYS = 14`),
+  )
+
+  /** مرجع مستقلّ: نفس قواعد الترحيل، بمشي غير محدود من يوم السريان. */
+  const referenceCarry = (target: string, enabledAt: string, floor: number): number => {
+    let carry = 0
+    let cursor = enabledAt
+    while (cursor < target) {
+      const b = getDayBaseTarget(cursor)
+      if (b === null) {
+        carry = 0
+      } else {
+        const eff = Math.max(floor, b + carry)
+        const surplus = getDayNutritionStat(cursor).totals.calories - eff
+        carry = surplus > 0 ? -surplus : 0
+      }
+      cursor = shiftDayStamp(cursor, 1)
+    }
+    return carry
+  }
+
+  /** محاكاة النافذة الملغاة — تبدأ قبل الهدف بـ`win` يومًا بدل يوم السريان. */
+  const windowedCarry = (target: string, enabledAt: string, floor: number, win: number): number => {
+    const start = shiftDayStamp(target, -win)
+    return referenceCarry(target, start > enabledAt ? start : enabledAt, floor)
+  }
+
+  // سلسلة ٢٠ يومًا لا تشبع: تجاوزٌ يوميّ صغير (٢٠١٠ مقابل ٢٠٠٠) يجعل الخصم
+  // يتراكم خطّيًّا ولا يبلغ الأرضية — فطول السلسلة **يغيّر الجواب فعلًا**.
+  // (فائض ضخم لا يصلح للفحص: يشبع عند الأرضية خلال أيام فيتساوى الحدّان.)
+  {
+    const CHAIN_START = '2026-02-01'
+    const TARGET = '2026-02-21' // ٢٠ يومًا بعد البداية
+    reset(TARGET)
+    ensureNutritionHistoryInit()
+    setCarryoverEnabled(true, CHAIN_START)
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDayStamp(CHAIN_START, i)
+      setFakeToday(day)
+      recordDayBaseTarget(day, 2000)
+      addFoodToDay({ id: `chain-${i}`, nameAr: 'تجاوز يومي', calories: 2010, protein: 90, meal: 'lunch' })
+    }
+    setFakeToday(TARGET)
+    const floor = calorieFloor('male')
+    const got = computeDayTargets({ base: 2000, date: TARGET, gender: 'male' })
+    const want = referenceCarry(TARGET, CHAIN_START, floor)
+    const oldWindowed = windowedCarry(TARGET, CHAIN_START, floor, 14)
+
+    check('(و) سلسلة ٢٠ يومًا: التنفيذ = المرجع غير المحدود بالضبط', got.carryover === want)
+    check('(و) والخصم تراكمي صادق (−١٠ لكل يوم تجاوز ⇒ −٢٠٠)', got.carryover === -200)
+    check(
+      '(و) والنافذة الملغاة كانت تعطي جوابًا مختلفًا (−١٤٠) — فالإصلاح ذو أثر',
+      oldWindowed === -140 && oldWindowed !== want,
+    )
+    check('(و) ولم ينزل المعدَّل تحت الأرضية', got.effective === Math.max(floor, 2000 - 200))
+  }
+
+  // كاسر السلسلة مقيس: يوم استهلاكه ≤ الأرضية يصفّر الخصم **مهما كان ما قبله**،
+  // وهو بعينه ما يبرّر بدء المشي بعده. يُقاس بمطابقة المرجع لا بالثقة.
+  {
+    const CHAIN_START = '2026-02-01'
+    const TARGET = '2026-02-21'
+    reset(TARGET)
+    ensureNutritionHistoryInit()
+    setCarryoverEnabled(true, CHAIN_START)
+    for (let i = 0; i < 20; i++) {
+      const day = shiftDayStamp(CHAIN_START, i)
+      setFakeToday(day)
+      recordDayBaseTarget(day, 2000)
+      // اليوم رقم ١٧ يوم صيام فعليّ (أقلّ من الأرضية) ⇒ يقطع السلسلة.
+      const cals = i === 17 ? 900 : 2010
+      addFoodToDay({ id: `brk-${i}`, nameAr: 'يوم', calories: cals, protein: 90, meal: 'lunch' })
+    }
+    setFakeToday(TARGET)
+    const floor = calorieFloor('male')
+    const got = computeDayTargets({ base: 2000, date: TARGET, gender: 'male' })
+    check('(و) كاسر السلسلة: التنفيذ = المرجع غير المحدود', got.carryover === referenceCarry(TARGET, CHAIN_START, floor))
+    check('(و) والخصم يُعاد بناؤه من بعد الكاسر فقط (يومان ⇒ −٢٠)', got.carryover === -20)
+  }
+
+  // سريان قديم جدًّا: لا انفجار ولا بطء — الكاسر الأول يوقف المسح للخلف.
+  reset(WED)
+  ensureNutritionHistoryInit()
   const farPast = computeDayTargets({ base: 2000, date: WED, settings: { enabled: true, enabledAt: '2020-01-01' }, gender: 'male' })
-  check('(و) سريان قديم جدًّا لا يفجّر الحساب (يُقصّ عند النافذة)', Number.isFinite(farPast.effective) && farPast.effective > 0)
+  check('(و) سريان قديم جدًّا لا يفجّر الحساب ولا يخترع خصمًا', Number.isFinite(farPast.effective) && farPast.carryover === 0)
 
   // (ز) هدف محجوب (قاصر/بيانات ناقصة) ⇒ لا ترحيل بتاتًا.
   const blocked = computeDayTargets({ base: 0, date: WED, settings: { enabled: true, enabledAt: MON }, gender: 'unspecified' })
@@ -453,6 +553,109 @@ console.log('\n⑦ يوم أقدم من الدفتر: مجاميع موسومة 
   const none = getDayNutritionStat(MON)
   check('ويوم بلا شيء يعود «لا بيانات» لا صفرًا مُدّعى', none.source === 'none' && none.estimated === false)
   check('حدّ التصفّح يشمل الأيام القديمة ذات المجاميع', earliestNutritionDate() === SUN)
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+console.log('\n⑧ الإضافة ليوم ماضٍ: تقع على يومها، بنفس الكاتب القانوني')
+{
+  reset(THU)
+  setSyncRuntime(null)
+  ensureNutritionHistoryInit()
+
+  // اليوم الحالي يحمل صنفًا — ليُقاس أنه **لم يتأثّر** بإضافة الأمس.
+  addFoodToDay({ id: 'thu-live', nameAr: 'عشاء اليوم', calories: 500, protein: 30, meal: 'dinner' })
+
+  const added = addEntryToDay(WED, {
+    id: 'wed-late',
+    nameAr: 'غداء نسيته',
+    calories: 700,
+    protein: 45,
+    carbs: 60,
+    meal: 'lunch',
+    grams: 300,
+    unit: 'g',
+  })
+  check('الإضافة لليوم الماضي نجحت', added.status === 'ok')
+
+  const wed = getDayEntries(WED)
+  check('★ القيد انحفظ على الأربعاء نفسه', wed.length === 1 && wed[0].id === 'wed-late')
+  check('★ ولم يقع على اليوم (الخميس) إطلاقًا', !getDayEntries(THU).some((e) => e.id === 'wed-late'))
+  check('واليوم الحيّ بقي كما هو', loadNutritionDay().foods.length === 1 && loadNutritionDay().foods[0].id === 'thu-live')
+
+  // الكمية والماكروز محفوظتان — لا تسجيل بلا كمية ثم اختراعها عند التعديل.
+  check('الكمية محفوظة بوحدتها', wed[0].quantity.grams === 300 && wed[0].unit === 'g')
+  check('والماكروز محفوظة', wed[0].macros.calories === 700 && wed[0].macros.protein === 45 && wed[0].macros.carbs === 60)
+  check('والفارغ يبقى غير معروف لا صفرًا', wed[0].macros.fat === undefined)
+
+  // مجاميع اليوم القانونية تحدّثت (نفس ما يفعله التعديل/الحذف).
+  check('مجاميع الأربعاء القانونية تحدّثت', getNutritionLog(WED)?.loggedFood?.calories === 700)
+  check('وإحصاء اليوم يقرأ التفصيل لا المجاميع', getDayNutritionStat(WED).source === 'entries')
+
+  // الضلع الثالث يعمل على ما أُضيف: تعديل ثم حذف — على يومه لا على اليوم.
+  const edited = editEntry('wed-late', { quantity: { grams: 600 } })
+  check('تعديل ما أُضيف للماضي يعمل', edited.status === 'ok')
+  check('★ والتعديل ضاعف الماكروز بصدق (٣٠٠غ⇒٦٠٠غ)', getDayEntries(WED)[0].macros.calories === 1400)
+  check('وبقي على الأربعاء', getDayEntries(WED).length === 1 && getDayEntries(THU).every((e) => e.id !== 'wed-late'))
+  check('حذف ما أُضيف للماضي يعمل', removeEntry('wed-late').status === 'ok')
+  check('وبعد الحذف لا يبقى للأربعاء تفصيل', getDayEntries(WED).length === 0)
+  check('واليوم الحيّ ما زال سليمًا بعد كل ذلك', loadNutritionDay().foods.length === 1)
+}
+
+console.log('\n⑨ سلامة تاريخ الإضافة + أثرها على الترحيل')
+{
+  reset(THU)
+  setSyncRuntime(null)
+  ensureNutritionHistoryInit()
+
+  check('يوم في المستقبل مرفوض', addEntryToDay(shiftDayStamp(THU, 1), { nameAr: 'غد', calories: 100, protein: 5, meal: 'snack' }).status === 'rejected')
+  check('ويوم أقدم من حدّ الاحتفاظ مرفوض', addEntryToDay(shiftDayStamp(THU, -400), { nameAr: 'قديم', calories: 100, protein: 5, meal: 'snack' }).status === 'rejected')
+  check('وتاريخ غير صالح مرفوض', addEntryToDay('2026-13-45', { nameAr: 'تالف', calories: 100, protein: 5, meal: 'snack' }).status === 'rejected')
+  check('واليوم الحالي مقبول (نفس الدالة تخدم اليوم)', addEntryToDay(THU, { nameAr: 'اليوم', calories: 100, protein: 5, meal: 'snack' }).status === 'ok')
+
+  // ★ تعديل رجعي يصحّح الترحيل من تلقائه — لأنه مشتقّ لا مخزَّن.
+  reset(WED)
+  ensureNutritionHistoryInit()
+  setCarryoverEnabled(true, MON)
+  setFakeToday(TUE); recordDayBaseTarget(TUE, 2000)
+  addFoodToDay({ id: 'r-tue', nameAr: 'غداء', calories: 1900, protein: 90, meal: 'lunch' })
+  setFakeToday(WED)
+  check('قبل الإضافة الرجعية: لا فائض ⇒ لا خصم', computeDayTargets({ base: 2000, date: WED, gender: 'male' }).carryover === 0)
+
+  const late = addEntryToDay(TUE, { nameAr: 'حلى نسيته', calories: 400, protein: 5, meal: 'snack' })
+  check('الإضافة الرجعية ليوم الثلاثاء نجحت', late.status === 'ok')
+  const afterAdd = computeDayTargets({ base: 2000, date: WED, gender: 'male' })
+  check('★ وهدف اليوم أُعيد حسابه فورًا (٢٣٠٠−٢٠٠٠=٣٠٠)', afterAdd.carryover === -300 && afterAdd.effective === 1700)
+  check('والأساسي لم يُكتب فوقه', afterAdd.base === 2000 && getDayBaseTarget(TUE) === 2000)
+
+  // وحذف ما أُضيف يعيد الحال — الاشتقاق يعمل في الاتجاهين.
+  const lateId = late.status === 'ok' ? late.entry.id : ''
+  removeEntry(lateId)
+  check('★ وحذفه يعيد الخصم إلى صفر (لا دَين عالق)', computeDayTargets({ base: 2000, date: WED, gender: 'male' }).carryover === 0)
+}
+
+console.log('\n⑩ بنيويًّا: الإضافة للماضي ليست تنفيذًا ثانيًا')
+{
+  const view = read('src/views/NutritionView.tsx')
+  const logger = read('src/components/nutrition/QuickMealLogger.tsx')
+  const dayLayer = read('src/lib/nutritionDay.ts')
+  const history = read('src/lib/nutritionHistory.ts')
+
+  check('الشاشة تمرّر كاتب اليوم المعروض لا كاتب اليوم الحالي', /addLog=\{day\.addLog\}/.test(view))
+  check('والمسجّل يستقبله ويستعمله بدل كاتبه الداخلي', /addLog = addLogProp \?\? addToday/.test(logger))
+  check('ولا يبقى في الشاشة ادّعاء أن الماضي للقراءة فقط', !/pastDayReadOnly/.test(view))
+  check('وطبقة اليوم تنادي الكاتب المؤرَّخ الواحد', /addEntryToDay\(date,/.test(dayLayer))
+
+  // ★ لا كاتب ثالث: الماضي يُكتب عبر `persistPastDay` وحدها — نفس باب التعديل/الحذف.
+  const pastWriters = (history.match(/persistPastDay\(/g) ?? []).length
+  check('كاتب الماضي واحد يخدم الإضافة والتعديل والحذف', pastWriters === 4)
+  check('والحارس قائم عليه بالاسم نفسه', /function persistPastDay[\s\S]{0,200}assertPaid\('nutrition\.addFood'\)/.test(history))
+
+  // تأكيد مضادّ (§4.2): تجاوزُ الكاتب بكتابة مباشرة في الدفتر يُسقط الفحص.
+  check(
+    'ومحاكاة كاتب ثانٍ للماضي تُسقط الفحص',
+    (`${history}\nwriteLedger(x) // past add`.match(/persistPastDay\(/g) ?? []).length === 4 &&
+      /writeLedger\(x\) \/\/ past add/.test(`${history}\nwriteLedger(x) // past add`),
+  )
 }
 
 console.log(`\n${fail === 0 ? '✅' : '❌'} توحيد التغذية: ${pass} فحصًا · ${fail} فشلًا`)

@@ -316,8 +316,8 @@ export function NutritionView({ lang }: NutritionViewProps) {
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
               <Icon name="Utensils" className="h-5 w-5" />
             </span>
-            <p className="text-sm font-black text-ink-900">{day.canAdd ? t.emptyStateTitle : d.dayEmpty}</p>
-            {day.canAdd && <p className="max-w-xs text-xs text-ink-400">{t.emptyStateHint}</p>}
+            <p className="text-sm font-black text-ink-900">{day.isToday ? t.emptyStateTitle : d.dayEmpty}</p>
+            {day.isToday && <p className="max-w-xs text-xs text-ink-400">{t.emptyStateHint}</p>}
           </div>
         )}
 
@@ -330,9 +330,14 @@ export function NutritionView({ lang }: NutritionViewProps) {
           والتفضيل يبقى في عدد الأقسام وفي وصف الخطة لا في شكل الشاشة.
         */}
         <div className="mt-6 space-y-4" data-testid="nutrition-meal-sections">
-          {!day.canAdd && (
-            <p data-testid="nutrition-past-readonly" className="rounded-xl border border-line bg-surface px-3 py-2.5 text-xs leading-relaxed text-ink-500">
-              {d.pastDayReadOnly}
+          {/*
+            يومٌ ماضٍ **يُكتب فيه** الآن — والتنبيه يقول أين تقع الكتابة لا أنها
+            ممنوعة. هذا الفارق هو كل الفرق بين مستخدم يسجّل غداء أمس في مكانه،
+            ومستخدمٍ يسجّله على اليوم فيفسد يومين ليصلح واحدًا.
+          */}
+          {!day.isToday && (
+            <p data-testid="nutrition-past-writing" className="rounded-xl border border-line bg-surface px-3 py-2.5 text-xs leading-relaxed text-ink-500">
+              {d.pastDayWriting}
             </p>
           )}
           {mealSlots.map((slot) => (
@@ -340,14 +345,14 @@ export function NutritionView({ lang }: NutritionViewProps) {
               key={slot.id}
               lang={lang}
               slot={slot}
-              canAdd={day.canAdd}
-              autoOpen={day.canAdd && (autoOpen === slot.id || (autoOpen === 'breakfast' && slot.id === mealSlots[0].id))}
+              autoOpen={day.isToday && (autoOpen === slot.id || (autoOpen === 'breakfast' && slot.id === mealSlots[0].id))}
               onAutoOpenHandled={() => setAutoOpen(null)}
               items={day.log.filter((e) => slotForEntry(e.meal, mealSlots) === slot.id)}
               targetCalories={targetCalories}
               targetProtein={targetProtein}
               onRemove={day.removeLog}
               onUpdateQuantity={day.updateLogQuantity}
+              addLog={day.addLog}
             />
           ))}
         </div>
@@ -674,7 +679,7 @@ function MealCard({
   targetProtein,
   onRemove,
   onUpdateQuantity,
-  canAdd = true,
+  addLog,
   autoOpen = false,
   onAutoOpenHandled,
 }: {
@@ -685,12 +690,8 @@ function MealCard({
   targetProtein: number
   onRemove: (id: string) => boolean
   onUpdateQuantity: (id: string, value: number, unit: 'g' | 'serving') => boolean
-  /**
-   * الإضافة متاحة على اليوم الحالي وحده. ويومٌ ماضٍ **لا يُعرَض له زرّ مطفأ**:
-   * السبب مكتوب مرّة واحدة أعلى الأقسام، والزرّ يغيب — زرٌّ يُرى ولا يعمل أسوأ
-   * من زرٍّ لا يُرى. التعديل والحذف يبقيان: تصحيح الماضي حقّ لا إضافة إليه.
-   */
-  canAdd?: boolean
+  /** الكاتب المؤرَّخ لليوم المعروض — يمرّ كما هو إلى `QuickMealLogger`. */
+  addLog: (entry: Omit<LoggedFood, 'id'> & { id?: string }) => boolean
   /** نيّة «سجّل وجبة» القادمة من «اليوم» — تُفتح مرّة واحدة ثم تُستهلك. */
   autoOpen?: boolean
   onAutoOpenHandled?: () => void
@@ -757,17 +758,15 @@ function MealCard({
             <p className="mt-1 truncate text-[11px] text-ink-400">{formatNumber(cals, lang)} {d.caloriesUnit} · {formatNumber(prot, lang)}{d.gramsUnit} {d.caloriesDotProteinG}</p>
           </div>
         </div>
-        {canAdd && (
-          <button
-            type="button"
-            onClick={toggleAdding}
-            aria-expanded={adding}
-            className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
-          >
-            <Icon name="Plus" className="h-3.5 w-3.5" />
-            {t.addShort}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={toggleAdding}
+          aria-expanded={adding}
+          className="flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-xs font-bold text-ink-700 transition-colors hover:bg-beige"
+        >
+          <Icon name="Plus" className="h-3.5 w-3.5" />
+          {t.addShort}
+        </button>
       </div>
 
       {items.length > 0 && (
@@ -841,7 +840,7 @@ function MealCard({
 
       {saveError && <p role="alert" className="v2-error-panel mx-4 mt-3 rounded-xl border px-3 py-2 text-xs font-bold text-ink-900">{d.saveFailed}</p>}
 
-      {adding && canAdd && (
+      {adding && (
         <div className="border-t border-line p-4">
           <QuickMealLogger
             lang={lang}
@@ -849,6 +848,7 @@ function MealCard({
             targetProtein={targetProtein}
             defaultMeal={slot.id}
             embedded
+            addLog={addLog}
             onLogged={() => setAdding(false)}
           />
         </div>

@@ -117,7 +117,8 @@ export interface NutritionScreenStrings {
   /** يوم ماضٍ لم يُسجَّل هدفه وقتها — نعرض المستهلَك بلا هدف مخترَع. */
   dayTargetUnknown: string
   /** التسجيل يقع على اليوم الحالي وحده — سبب معلَن لا زرّ صامت. */
-  pastDayReadOnly: string
+  /** تنبيه يوم ماضٍ — الكتابة تقع على ذلك اليوم لا على اليوم الحالي. */
+  pastDayWriting: string
   dayWater: string
 
   // ── ترحيل فائض السعرات ──────────────────────────────────────────────────────
@@ -228,7 +229,7 @@ const ar: NutritionScreenStrings = {
   dayTotalsOnly: 'مجاميع بلا تفصيل',
   dayTotalsOnlyHint: 'هذا اليوم أقدم من دفتر التفاصيل، فعندنا مجاميعه فقط. ما نخترع له أصناف.',
   dayTargetUnknown: 'ما سجّلنا هدف هذا اليوم وقته، فنعرض اللي أكلته بلا مقارنة بهدف. أهدافك من اليوم ورايح محفوظة مع كل يوم.',
-  pastDayReadOnly: 'التسجيل يكون على اليوم الحالي. تقدر تعدّل كميات هذا اليوم أو تحذف منه.',
+  pastDayWriting: 'أنت تسجّل في يوم مضى — الإضافة والتعديل والحذف كلها تنحفظ على هذا اليوم، مو على اليوم.',
   dayWater: 'الماء',
   carryoverTitle: 'ترحيل فائض السعرات',
   carryoverHint: 'تجاوزت هدفك أمس؟ ننزل الفرق من هدف اليوم. هدفك الأساسي ما يتغيّر.',
@@ -335,7 +336,7 @@ const en: NutritionScreenStrings = {
   dayTotalsOnly: 'Totals only',
   dayTotalsOnlyHint: 'This day is older than the detailed ledger, so we only have its totals. We don’t invent food entries for it.',
   dayTargetUnknown: 'We didn’t record your target for this day at the time, so we show what you ate without comparing it to one. From today on, each day keeps its own target.',
-  pastDayReadOnly: 'New entries go to today. You can still edit quantities on this day or remove them.',
+  pastDayWriting: 'You’re logging on a past day — anything you add, edit or remove is saved to that day, not to today.',
   dayWater: 'Water',
   carryoverTitle: 'Carry over calorie surplus',
   carryoverHint: 'Went over yesterday? We take the difference off today’s target. Your base target never changes.',

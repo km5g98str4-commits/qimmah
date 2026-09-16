@@ -81,6 +81,24 @@ async function onboardWithIntent(page, intent) {
   await settle(page, 2600)
 }
 
+/** يفرغ بوابة الوصول إن ظهرت — سواء عند فتح الشاشة أو عند أول فعل محروس. */
+async function clearGate(page) {
+  const gate = page.locator('[data-testid="premium-gate"]')
+  if (!(await gate.isVisible().catch(() => false))) return false
+  await gate.locator('[data-testid="premium-gate-have-code"]').click({ timeout: 10000 })
+  await gate.locator('[data-testid="activation-code-input"]').fill('QIMMAH-TEST-OK')
+  await gate.locator('[data-testid="activation-code-submit"]').click({ force: true })
+  await settle(page, 1500)
+  if (process.env.DBG) {
+    console.log('DBG-GATE', await page.evaluate(() => document.querySelector('[data-testid="premium-gate"]')?.innerText?.slice(0, 600) ?? 'NO GATE'))
+  }
+  await gate.locator('[data-testid="activation-code-message"]').filter({ hasText: /تمّ التفعيل|activated/i }).waitFor({ timeout: 10000 })
+  await gate.locator('[data-testid="premium-gate-dismiss"]').click({ timeout: 10000 })
+  await gate.waitFor({ state: 'hidden', timeout: 10000 })
+  await settle(page, 1200)
+  return true
+}
+
 async function activate(page) {
   await page.evaluate(() => { location.hash = '/nutrition' })
   await settle(page, 2000)
@@ -112,6 +130,7 @@ const shape = (page) => page.evaluate(() => {
     // فالعدّ العام كان يقول ٥ ويُسقط فحصًا صحيحًا على خطأ في القياس لا في الشاشة.
     addButtons: [...(document.querySelector('[data-testid="nutrition-meal-sections"]')?.querySelectorAll('button') ?? [])]
       .filter((b) => (b.textContent || '').trim() === 'أضف').length,
+    writingNote: !!document.querySelector('[data-testid="nutrition-past-writing"]'),
     readOnlyNote: !!document.querySelector('[data-testid="nutrition-past-readonly"]'),
     overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
   }
@@ -166,7 +185,7 @@ try {
     const today = await shape(page)
     check('شريط تصفّح الأيام معروض', today.dayNav)
     check('اليوم الافتراضي هو «اليوم»', today.dayLabel === 'اليوم', today.dayLabel)
-    check('لا لافتة «قراءة فقط» على اليوم الحالي', !today.readOnlyNote)
+    check('لا لافتة يوم ماضٍ على اليوم الحالي', !today.writingNote && !today.readOnlyNote)
     /**
      * التاريخ يُقرأ باسم شهره لا بثلاثة أرقام موصولة: صيغة `٢٠٢٦-٠٩-١٥` تُقلَب
      * بصريًّا إلى `١٥-٠٩-٢٠٢٦` في السياق العربي (صنف AN في خوارزمية الاتجاه)،
@@ -182,8 +201,10 @@ try {
     await settle(page, 1200)
     const yest = await shape(page)
     check('السهم الخلفي ينتقل إلى «أمس»', yest.dayLabel === 'أمس', yest.dayLabel)
-    check('اليوم الماضي يعلن سبب منع الإضافة', yest.readOnlyNote)
-    check('ولا يعرض أزرار «أضف» (لا زرّ يُرى ولا يعمل)', yest.addButtons === 0, String(yest.addButtons))
+    // ★ الماضي صار يُكتب فيه: اللافتة تقول **أين** تقع الكتابة، والأزرار حاضرة.
+    check('★ اليوم الماضي يعلن أن الكتابة تقع عليه', yest.writingNote)
+    check('★ ولم يبقَ ادّعاء «قراءة فقط» بعد اكتمال النموذج', !yest.readOnlyNote)
+    check('★ وأزرار «أضف» الأربعة حاضرة في اليوم الماضي', yest.addButtons === 4, String(yest.addButtons))
     check('أقسام الوجبات ما زالت معروضة في الماضي (نفس البنية)', yest.mealSections)
     check('بلا فيض أفقي في يوم ماضٍ عند 390', !yest.overflow)
 
@@ -198,6 +219,141 @@ try {
     const back = await shape(page)
     check('«رجوع لليوم» يعيد إلى اليوم الحالي', back.dayLabel === 'اليوم', back.dayLabel)
     check('وتعود أزرار الإضافة الأربعة', back.addButtons === 4, String(back.addButtons))
+    await page.ctx.close()
+  }
+
+  // ═══ ②-ب الإضافة ليوم ماضٍ — الرحلة التي طلبها المؤسس حرفيًّا ═══
+  // «اليوم الخميس · نسيت أسجّل شيئًا من الأربعاء · أرجع للأربعاء · أختار الوجبة ·
+  //  أضيف · أختار الكمية · أحفظ» — والقيد يجب أن يخصّ الأربعاء لا الخميس.
+  console.log('\n②-ب إضافة طعام منسيّ ليوم ماضٍ')
+  {
+    const page = await fresh(390)
+    await onboardWithIntent(page, 'numbers')
+    await activate(page)
+
+    // سجّل على اليوم أولًا — ليُقاس أن الإضافة الرجعية **لم تختلط** به.
+    const beforeToday = await page.evaluate(() => {
+      const d = JSON.parse(localStorage.getItem('qimmah:nutrition:v2') || '{}')
+      return { date: d?.date ?? null, count: (d?.foods ?? []).length }
+    })
+
+    // فعّل من بوابة **اليوم** أولًا (المسار المعروف): الكود يحتاج جلسة، وفتح
+    // البوابة من فعل محروس هو ما يهيّئها.
+    const bfAdd = page.getByText('الفطور', { exact: true })
+      .locator('xpath=ancestor::div[contains(concat(" ", normalize-space(@class), " "), " card ")][1]')
+      .getByRole('button', { name: 'أضف', exact: true })
+    await bfAdd.click({ force: true })
+    await settle(page, 1200)
+    const gatedOnToday = await page.evaluate(() => !!document.querySelector('[data-testid="premium-gate"]'))
+    check('بوابة الوصول تعترض التسجيل قبل التفعيل', gatedOnToday)
+    await clearGate(page)
+    check('وبعد التفعيل اختفت البوابة', !(await page.evaluate(() => !!document.querySelector('[data-testid="premium-gate"]'))))
+    // أغلق لوحة اليوم إن انفتحت — نريد الإضافة على أمس لا على اليوم.
+    await page.evaluate(() => {
+      const open = [...document.querySelectorAll('[aria-expanded="true"]')]
+      open.forEach((b) => b.click())
+    })
+    await settle(page, 600)
+
+    await page.locator('[data-testid="nutrition-day-prev"]').click({ force: true })
+    await settle(page, 1200)
+    const label = await page.evaluate(() => document.querySelector('[data-testid="nutrition-day-label"]')?.textContent?.trim())
+    check('وقفنا على «أمس»', label === 'أمس', String(label))
+
+    // اختر وجبة الغداء وافتح لوحة الإضافة فيها.
+    const opened = await page.evaluate(() => {
+      const sections = document.querySelector('[data-testid="nutrition-meal-sections"]')
+      const cards = [...(sections?.children ?? [])]
+      // القسم الثاني = الغداء في ترتيب الخانات الأربع.
+      const lunch = cards.find((c) => (c.textContent || '').includes('الغداء'))
+      const btn = [...(lunch?.querySelectorAll('button') ?? [])].find((b) => (b.textContent || '').trim() === 'أضف')
+      if (!btn) return false
+      btn.click()
+      return true
+    })
+    check('★ زرّ «أضف» في غداء أمس قابل للنقر فعلًا', opened)
+    await settle(page, 1000)
+
+    // تبويب «مخصّص» ثم الكمية والقيم — أبسط مسار إدخال حقيقي بلا اعتماد على المكتبة.
+    const tabbed = await page.evaluate(() => {
+      const sections = document.querySelector('[data-testid="nutrition-meal-sections"]')
+      const btns = [...(sections?.querySelectorAll('button') ?? [])]
+      const el = btns.find((b) => (b.textContent || '').includes('مخصّص'))
+      if (!el) return { ok: false, seen: btns.map((b) => (b.textContent || '').trim()).slice(0, 12) }
+      el.click()
+      return { ok: true }
+    })
+    check('تبويب «مخصّص» موجود داخل لوحة يوم ماضٍ', tabbed.ok, JSON.stringify(tabbed))
+    await settle(page, 700)
+    const formOk = await page.evaluate(() => !!document.querySelector('[data-testid="custom-food-form"]'))
+    check('نموذج الإدخال المخصّص ظهر داخل يوم ماضٍ', formOk)
+
+    const filled = await page.evaluate(() => {
+      const set = (el, v) => {
+        const proto = Object.getPrototypeOf(el)
+        const desc = Object.getOwnPropertyDescriptor(proto, 'value')
+        desc.set.call(el, v)
+        el.dispatchEvent(new Event('input', { bubbles: true }))
+      }
+      const form = document.querySelector('[data-testid="custom-food-form"]')
+      const name = form.querySelector('#qml-custom-name')
+      const nums = [...form.querySelectorAll('input[inputmode="decimal"]')]
+      if (!name || nums.length < 2) return false
+      set(name, 'غداء الأربعاء المنسيّ')
+      set(nums[0], '640')   // سعرات
+      set(nums[1], '42')    // بروتين
+      return true
+    })
+    check('عبّأنا الاسم والكمية والقيم', filled)
+    await settle(page, 400)
+
+    await page.locator('[data-testid="custom-submit"]').click({ force: true })
+    await settle(page, 1400)
+
+    // ★ الفحص الحاسم: أين انحفظ القيد؟
+    const landed = await page.evaluate(() => {
+      const stamp = (dt) => {
+        const p = (n) => String(n).padStart(2, '0')
+        return `${dt.getFullYear()}-${p(dt.getMonth() + 1)}-${p(dt.getDate())}`
+      }
+      const now = new Date()
+      const today = stamp(now)
+      const yest = stamp(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1))
+      let ledger = {}
+      try { ledger = JSON.parse(localStorage.getItem('qimmah:nutritionHistory:v1') || '{}') } catch { /* تالف */ }
+      const owners = Object.values(ledger)
+      const days = owners.length ? owners[0] : {}
+      const pick = (d) => (days[d] ?? []).filter((e) => (e.nameAr || '').includes('المنسيّ'))
+      const live = JSON.parse(localStorage.getItem('qimmah:nutrition:v2') || '{}')
+      const logs = JSON.parse(localStorage.getItem('qimmah:history:nutritionLogs:v1') || '{}')
+      return {
+        onYesterday: pick(yest).length,
+        onToday: pick(today).length,
+        cals: pick(yest)[0]?.macros?.calories ?? null,
+        prot: pick(yest)[0]?.macros?.protein ?? null,
+        liveFoods: (live?.foods ?? []).filter((f) => (f.nameAr || '').includes('المنسيّ')).length,
+        yestTotal: logs?.[yest]?.loggedFood?.calories ?? null,
+      }
+    })
+    check('★★ القيد انحفظ على أمس', landed.onYesterday === 1, JSON.stringify(landed))
+    check('★★ ولم ينحفظ على اليوم', landed.onToday === 0, JSON.stringify(landed))
+    check('★★ ولم يدخل متجر اليوم الحيّ', landed.liveFoods === 0, JSON.stringify(landed))
+    check('★ والكمية/القيم محفوظة كما أُدخلت', landed.cals === 640 && landed.prot === 42, JSON.stringify(landed))
+    check('★ ومجاميع أمس القانونية تحدّثت', landed.yestTotal === 640, String(landed.yestTotal))
+    check('اليوم الحيّ لم يتغيّر عدده', beforeToday.count === 0, JSON.stringify(beforeToday))
+
+    // الشاشة نفسها تعرض ما أُضيف، وتبقى سليمة بعد إعادة الفتح.
+    const shown = await page.evaluate(() => document.body.innerText.includes('غداء الأربعاء المنسيّ'))
+    check('★ والشاشة تعرض الصنف داخل يوم أمس', shown)
+    await page.reload({ waitUntil: 'domcontentloaded' })
+    await settle(page, 1800)
+    await page.evaluate(() => { location.hash = '/nutrition' })
+    await settle(page, 1500)
+    await page.locator('[data-testid="nutrition-day-prev"]').click({ force: true })
+    await settle(page, 1200)
+    const afterReload = await page.evaluate(() => document.body.innerText.includes('غداء الأربعاء المنسيّ'))
+    check('★ وبعد إعادة الفتح ما زال على أمس (بقاء حقيقي)', afterReload)
+    check('بلا استثناء في رحلة الإضافة الرجعية', page.diag.pageerror.length === 0, page.diag.pageerror.slice(0, 1).join(''))
     await page.ctx.close()
   }
 

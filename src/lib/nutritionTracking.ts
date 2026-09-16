@@ -98,7 +98,12 @@ function storageWrite(run: () => void): boolean {
   }
 }
 
-function toCanonical(item: LoggedFood): CanonicalFood {
+/**
+ * سجلّ الواجهة → الشكل القانوني. مصدَّرة لأنّ `nutritionDay.addLog` تكتب في
+ * الماضي عبر `addEntryToDay` التي تتكلّم القانوني — والتحويل يبقى **واحدًا**
+ * لا نسخة ثانية تشيخ بعيدًا عن هذه (`label→nameAr` و«سناك» الافتراضية معًا).
+ */
+export function toCanonical(item: LoggedFood): CanonicalFood {
   return {
     id: item.id,
     nameAr: item.label,
