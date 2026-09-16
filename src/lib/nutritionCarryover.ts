@@ -19,9 +19,11 @@
 //   ١) الإعداد نفسه (`qimmah:nutritionCarryover:v1`) — مفتاحه المالك، فيه
 //      `enabled` و`enabledAt`. مفتاح مستقلّ عن الخطة عمدًا: تغيير الخطة أو
 //      إعادة توليدها يجب ألّا يطفئ إعداد المستخدم ولا يشغّله.
-//   ٢) هدف كل يوم الأساسي — في `historyStore.NutritionLog.baseTargetCalories`،
-//      يُسجَّل لحظة عرضه على المستخدم. «هل تجاوز أمس هدفه؟» سؤال عن هدف
-//      **الأمس**، وتغيير الخطة يجعله غير هدف اليوم.
+//   ٢) هدفا كل يوم — الأساسي والمعدَّل — في `historyStore.NutritionLog`
+//      (`baseTargetCalories` · `effectiveTargetCalories`)، يُسجَّلان لحظة عرضهما
+//      على المستخدم. «هل تجاوز أمس هدفه؟» سؤال عن هدف **الأمس**، وتغيير الخطة
+//      يجعله غير هدف اليوم. وتسجيل المعدَّل هو ما يجعل النظرة **يومًا واحدًا**
+//      بلا سلسلة ولا نافذة (انظر `CARRYOVER_LOOKBACK_DAYS`).
 //
 // ═══ القواعد الحاكمة (كلّها مقيسة في `test:nutrition-carryover`) ═══
 //   • **مطفأ ⇒ صفر.** لا تعديل، ولا قراءة، ولا أثر. إطفاؤه يعيد الاستهداف
@@ -32,7 +34,8 @@
 //     معزول — انظر `CARRYOVER_DEFICIT_POLICY` أدناه).
 //   • **لا هدف مُختلَق.** يوم بلا `baseTargetCalories` مسجَّل ⇒ لا يُرحَّل منه.
 //   • **الفائض يُقاس على الهدف المعدَّل** لذلك اليوم لا على الأساسي، فلا يتراكم
-//     دَين مرّتين على نفس السعرة.
+//     دَين مرّتين على نفس السعرة. ويُقرأ ذلك المعدَّل **مسجَّلًا** لا مُعادًا
+//     اشتقاقه — فالنظرة يوم واحد `O(1)`، لا سلسلة ولا سقف مصطنع لها.
 //   • **الأرضية قاعدة أمان قائمة لا رقم جديد:** `calorieFloor` من `calculators`
 //     نفسها التي يعد بها المقدِّر المستخدم («لا تنزل سعراتك تحت حدّ أدنى مهما
 //     كان هدفك»). الترحيل لا يخرقها، ومهما كان الفائض لا ينزل الهدف تحتها.
@@ -51,13 +54,29 @@ import { writeJson, type WriteResult } from '@/lib/safeStorage'
 export const NUTRITION_CARRYOVER_KEY = 'qimmah:nutritionCarryover:v1'
 
 /**
- * أقصى عدد أيام تُحسب سلسلة الترحيل عبرها.
+ * ═══ نظرة إلى الخلف: **يوم واحد بالضبط** ═══
  *
- * السلسلة تلزم لأن هدف الأمس المعدَّل يعتمد على أول أمس قبله. والحدّ يجعل
- * الحساب **محدود الكلفة وحتميًّا**: ما قبل النافذة يُعامَل كأنه بلا ترحيل.
- * أثره يتلاشى عمليًّا لأن السلسلة تنكسر عند أوّل يوم لم يُتجاوَز فيه الهدف.
+ * لا نافذة، ولا سلسلة، ولا حدّ أقصى — لأن القاعدة لم تعد تحتاج واحدًا.
+ *
+ * **ما كان:** أوّل تنفيذ قاس الفائض على الهدف المعدَّل لليوم السابق، وذلك
+ * المعدَّل يعتمد على الذي قبله، فصار الحساب سلسلةً تمشي للخلف. ولأن السلسلة
+ * قد تطول بلا حدّ وُضع لها سقف **أربعة عشر يومًا** — رقمٌ لا يستطيع أحد تبريره:
+ * لا المستخدم يراه، ولا أثره ظاهر، ولا يوجد سبب يجعل اليوم الخامس عشر مختلفًا
+ * عن الرابع عشر. سقفٌ يغيّر رقمًا يراه المستخدم بلا أن يعلن نفسه **قاعدة منتج
+ * غير مكتوبة**، وهو ما لا يُترك.
+ *
+ * **ما صار:** هدف اليوم المعدَّل **يُسجَّل يوم سريانه** مع الأساسي
+ * (`NutritionLog.effectiveTargetCalories`). فسؤال «هل تجاوز أمس هدفه؟» يُجاب
+ * من رقمين مقروءين: ما أكله أمس، والهدف الذي كان أمام عينه أمس. لا إعادة
+ * اشتقاق، ولا مشي، ولا سقف — الحساب `O(1)` ومحدّد تمامًا.
+ *
+ * ═══ الأثر السلوكي الوحيد، معلَنًا ═══
+ * تعديل طعام **أمس** يعيد حساب هدف اليوم فورًا (الاستهلاك يُقرأ حيًّا).
+ * وتعديل طعام **أوّل أمس** لا يعيد كتابة هدف أمس المسجَّل — لأن ذلك الهدف
+ * هو ما رآه المستخدم فعلًا وأكل مقابله، وإعادة كتابته بأثر رجعي تغيّر الشرط
+ * الذي حوسِب عليه بعد أن انتهى منه. الهدف يُثبَّت بانقضاء يومه.
  */
-export const CARRYOVER_CHAIN_DAYS = 14
+export const CARRYOVER_LOOKBACK_DAYS = 1
 
 /**
  * ⚠️ **قرار منتج معزول — العجز لا يُرحَّل في هذه النسخة.**
@@ -137,23 +156,41 @@ export function setCarryoverEnabled(enabled: boolean, today: string = getDayStam
 
 // ── هدف اليوم الأساسي المسجَّل ────────────────────────────────────────────────
 
+const posInt = (v: unknown): number | null =>
+  typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.round(v) : null
+
 /** هدف يومٍ الأساسي كما سُجِّل وقتها — null إن لم يُسجَّل (لا يُختلق من هدف اليوم). */
 export function getDayBaseTarget(date: string): number | null {
-  const v = getNutritionLog(date)?.baseTargetCalories
-  return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.round(v) : null
+  return posInt(getNutritionLog(date)?.baseTargetCalories)
 }
 
 /**
- * يسجّل هدف اليوم الأساسي إن تغيّر أو غاب — يُستدعى من شاشة التغذية لليوم
- * الحالي وحده. **لا يكتب للماضي**: هدف يوم مضى لم يُسجَّل يبقى مجهولًا، وهذا
- * بالضبط ما يمنع الترحيل من العمل على رقم مخترَع.
+ * هدف يومٍ **المعدَّل** كما كان أمام المستخدم وقتها — وهو ما يُقاس عليه فائضه.
+ *
+ * يومٌ يحمل أساسيًّا بلا معدَّل (سجلّ أقدم من هذا الحقل) يُقرأ «بلا تعديل» أي
+ * = أساسيّه. وهو الافتراض **الأكثر تحفّظًا**: أي تعديل حقيقي كان سيكون سالبًا،
+ * فالقراءة بالأساسي تعطي فائضًا **أصغر** لا أكبر — لا نخترع دَينًا لم يقع.
  */
-export function recordDayBaseTarget(date: string, baseCalories: number): void {
-  if (!Number.isFinite(baseCalories) || baseCalories <= 0) return
-  const rounded = Math.round(baseCalories)
-  if (getDayBaseTarget(date) === rounded) return
+export function getDayEffectiveTarget(date: string): number | null {
+  const log = getNutritionLog(date)
+  return posInt(log?.effectiveTargetCalories) ?? posInt(log?.baseTargetCalories)
+}
+
+/**
+ * يسجّل هدفَي اليوم (الأساسي والمعدَّل) في كتابة واحدة — يُستدعى من شاشة
+ * التغذية **لليوم الحالي وحده**.
+ *
+ * **لا يكتب للماضي أبدًا**: هدف يوم مضى لم يُسجَّل يبقى مجهولًا، وهذا بالضبط
+ * ما يمنع الترحيل من العمل على رقم مخترَع — ويمنع كذلك إعادة كتابة هدفٍ أكل
+ * المستخدم مقابله فعلًا.
+ */
+export function recordDayTargets(date: string, targets: { base: number; effective: number }): void {
+  const base = posInt(targets.base)
+  const effective = posInt(targets.effective)
+  if (base === null || effective === null) return
+  if (getDayBaseTarget(date) === base && posInt(getNutritionLog(date)?.effectiveTargetCalories) === effective) return
   try {
-    saveNutritionLog(date, { baseTargetCalories: rounded })
+    saveNutritionLog(date, { baseTargetCalories: base, effectiveTargetCalories: effective })
   } catch {
     /* المجاميع best-effort — غيابها يعني «لا ترحيل من هذا اليوم» لا رقمًا خاطئًا */
   }
@@ -181,7 +218,7 @@ export interface DayTargetBreakdown {
   active: boolean
 }
 
-interface ChainOptions {
+interface DayTargetOptions {
   settings?: CarryoverSettings
   gender?: Gender
   /** هدف اليوم المطلوب الأساسي — من الخطة الحيّة. */
@@ -199,11 +236,13 @@ function consumedCalories(date: string): number {
 /**
  * يحسب تفصيل هدف يوم — **الدالة الوحيدة** التي تنتج «هدف اليوم المعدَّل».
  *
- * المسار حتميّ: يمشي للأمام من أوّل يوم داخل النافذة (وبعد `enabledAt`) حتى
- * اليوم المطلوب، ويحمل خصم كل يوم إلى تاليه. لا عشوائية، ولا اعتماد على ترتيب
- * استدعاء، ولا حالة محفوظة بين النداءات.
+ * قراءتان فقط مهما طال تاريخ المستخدم: هدف الأمس المعدَّل المسجَّل، وما أكله
+ * أمس. لا سلسلة تمشي للخلف ولا نافذة تقطعها — انظر `CARRYOVER_LOOKBACK_DAYS`.
+ *
+ * حتميّة كاملة: لا حالة محفوظة بين النداءات، ولا اعتماد على ترتيب الاستدعاء،
+ * ونفس المدخلات تعطي نفس المخرجات دائمًا.
  */
-export function computeDayTargets({ base, date, settings, gender }: ChainOptions): DayTargetBreakdown {
+export function computeDayTargets({ base, date, settings, gender }: DayTargetOptions): DayTargetBreakdown {
   const floor = calorieFloor(gender ?? 'unspecified')
   const baseRounded = roundCals(Math.max(0, base))
   const off: DayTargetBreakdown = {
@@ -224,50 +263,31 @@ export function computeDayTargets({ base, date, settings, gender }: ChainOptions
   // يوم قبل سريان الميزة ⇒ خارج نطاقها.
   if (date < s.enabledAt) return off
 
-  // نقطة البداية: الأبعد بين بداية السريان وحافّة النافذة.
-  const windowStart = shiftDayStamp(date, -CARRYOVER_CHAIN_DAYS)
-  let cursor = s.enabledAt > windowStart ? s.enabledAt : windowStart
+  const active: DayTargetBreakdown = { ...off, active: true }
 
-  // خصم اليوم الجاري في المشي — أوّل يوم في السلسلة يبدأ بلا خصم (لا أثر رجعي).
-  let carry = 0
-  let sourceDate: string | null = null
-  let sourceSurplus: number | null = null
+  const source = shiftDayStamp(date, -CARRYOVER_LOOKBACK_DAYS)
+  // يوم المصدر قبل السريان ⇒ لا أثر رجعي على ما كانت الميزة فيه مطفأة.
+  if (source < s.enabledAt) return active
 
-  while (cursor < date) {
-    // هدف يوم المصدر الأساسي **كما كان وقتها**؛ غيابه يقطع السلسلة بصدق.
-    const sourceBase = getDayBaseTarget(cursor)
-    if (sourceBase === null) {
-      carry = 0
-      sourceDate = null
-      sourceSurplus = null
-      cursor = shiftDayStamp(cursor, 1)
-      continue
-    }
-    const sourceEffective = Math.max(floor, sourceBase + carry)
-    const surplus = consumedCalories(cursor) - sourceEffective
-    if (surplus > 0) {
-      carry = -surplus
-      sourceDate = cursor
-      sourceSurplus = surplus
-    } else {
-      carry = 0
-      sourceDate = null
-      sourceSurplus = null
-    }
-    cursor = shiftDayStamp(cursor, 1)
-  }
+  // الهدف الذي كان أمام المستخدم أمس. غيابه ⇒ لا مقارنة ولا رقم مخترَع.
+  const sourceTarget = getDayEffectiveTarget(source)
+  if (sourceTarget === null) return active
 
-  const raw = baseRounded + carry
+  const surplus = consumedCalories(source) - sourceTarget
+  if (surplus <= 0) return active // الفائض وحده يُرحَّل (CARRYOVER_DEFICIT_POLICY)
+
+  const carryover = -surplus
+  const raw = baseRounded + carryover
   const effective = Math.max(floor, raw)
   return {
     date,
     base: baseRounded,
-    carryover: carry,
+    carryover,
     effective,
     floor,
-    floorApplied: carry < 0 && raw < floor,
-    sourceDate,
-    sourceSurplus,
+    floorApplied: raw < floor,
+    sourceDate: source,
+    sourceSurplus: surplus,
     active: true,
   }
 }

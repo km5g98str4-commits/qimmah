@@ -13,7 +13,7 @@ import {
   computeDayTargets,
   getCarryoverSettings,
   getDayBaseTarget,
-  recordDayBaseTarget,
+  recordDayTargets,
   setCarryoverEnabled,
   type DayTargetBreakdown,
 } from '@/lib/nutritionCarryover'
@@ -137,15 +137,6 @@ export function NutritionView({ lang }: NutritionViewProps) {
   const targetFat = hasNumericTargets ? np.targetFat || customization.targets.fatGrams || 70 : 0
   const targetWaterMl = hasNumericTargets ? Math.round((np.targetWaterLiters || customization.targets.waterLiters || 3) * 1000) : 0
 
-  /**
-   * يسجّل هدف **اليوم الحالي** الأساسي وقت عرضه. بلا هذا السجلّ لا يعرف الترحيل
-   * غدًا ما كان هدف أمس، ولا يجوز أن يفترضه من هدف اليوم: تغيير الخطة بينهما
-   * يجعل الاثنين مختلفين. لا كتابة في وضع العرض التجريبي.
-   */
-  useEffect(() => {
-    if (demo || !hasNumericTargets || baseTargetCalories <= 0) return
-    recordDayBaseTarget(todayStamp, baseTargetCalories)
-  }, [demo, hasNumericTargets, baseTargetCalories, todayStamp])
 
   // ── إعداد ترحيل فائض السعرات ───────────────────────────────────────────────
   const [carryoverVersion, setCarryoverVersion] = useState(0)
@@ -165,14 +156,37 @@ export function NutritionView({ lang }: NutritionViewProps) {
   }
 
   /**
-   * هدف اليوم المعروض — ثلاثة أرقام منفصلة لا رقم واحد مبهم:
-   * الأساسي · تعديل الترحيل · المعدَّل. ويوم ماضٍ لم يُسجَّل هدفه يعود بـ«لا هدف
-   * معروف» بدل أن يُلبَس هدف اليوم (لا رقم يقول عن نفسه ما ليس هو).
+   * هدفا **اليوم الحالي**: الأساسي والمعدَّل. يُحسبان دائمًا ولو كان المعروض
+   * يومًا ماضيًا — فالتصفّح قراءة ولا يجوز أن يغيّر ما يُكتب.
+   *
+   * `day.revision` ضمن التبعيات **ضرورة لا احتياط**: الخصم يُقرأ من استهلاك
+   * أمس، فتعديل طعام أمس من شاشة الأمس يجب أن يحرّك هذا الحساب. وبدونه يبقى
+   * الرقم المعروض والمسجَّل على قيمة بائتة حتى إعادة التحميل.
+   */
+  const todayTargets = useMemo(
+    () =>
+      computeDayTargets({
+        base: baseTargetCalories,
+        date: todayStamp,
+        settings: demo ? { enabled: false, enabledAt: null } : carryoverSettings,
+        gender: customization.profile.gender,
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [baseTargetCalories, todayStamp, demo, carryoverSettings, customization.profile.gender, carryoverVersion, day.revision],
+  )
+
+  /**
+   * هدف اليوم **المعروض** — ثلاثة أرقام منفصلة لا رقم واحد مبهم: الأساسي ·
+   * تعديل الترحيل · المعدَّل. ويوم ماضٍ لم يُسجَّل هدفه يعود بـ«لا هدف معروف»
+   * بدل أن يُلبَس هدف اليوم (لا رقم يقول عن نفسه ما ليس هو).
+   *
+   * وحين يكون المعروض هو اليوم الحالي فهو **نفس الكائن** المسجَّل أدناه لا
+   * حسابٌ ثانٍ موازٍ — فما نكتبه في السجلّ هو حرفيًّا ما عرضناه على المستخدم.
    */
   const recordedPastBase = day.isToday ? null : getDayBaseTarget(viewDate)
   const dayBase = day.isToday ? baseTargetCalories : (recordedPastBase ?? 0)
   const dayTargetKnown = hasNumericTargets && dayBase > 0
-  const targets: DayTargetBreakdown = useMemo(
+  const pastTargets = useMemo(
     () =>
       computeDayTargets({
         base: dayBase,
@@ -180,11 +194,23 @@ export function NutritionView({ lang }: NutritionViewProps) {
         settings: demo ? { enabled: false, enabledAt: null } : carryoverSettings,
         gender: customization.profile.gender,
       }),
-    // `day.totals` ضمن التبعيات عمدًا: تعديل طعام أمس يغيّر خصم اليوم فورًا.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dayBase, viewDate, demo, carryoverSettings, customization.profile.gender, day.totals.calories, carryoverVersion],
+    [dayBase, viewDate, demo, carryoverSettings, customization.profile.gender, carryoverVersion, day.revision],
   )
+  const targets: DayTargetBreakdown = day.isToday ? todayTargets : pastTargets
   const targetCalories = dayTargetKnown ? targets.effective : 0
+
+  /**
+   * تسجيل هدفَي اليوم الحالي وقت عرضهما — الأساسي والمعدَّل معًا.
+   *
+   * تسجيل المعدَّل هو ما يجعل ترحيل الغد ينظر يومًا واحدًا للخلف بلا سلسلة:
+   * غدًا يقرأ «الهدف الذي كان أمام عينه اليوم» رقمًا مسجَّلًا لا مُعادًا اشتقاقه.
+   * ولا كتابة في وضع العرض التجريبي، ولا كتابة لأي يوم غير اليوم الحالي.
+   */
+  useEffect(() => {
+    if (demo || !hasNumericTargets || baseTargetCalories <= 0) return
+    recordDayTargets(todayStamp, { base: baseTargetCalories, effective: todayTargets.effective })
+  }, [demo, hasNumericTargets, baseTargetCalories, todayStamp, todayTargets.effective])
 
   // أقسام الوجبات تُبنى حسب عدد الوجبات من الإعداد (meals_per_day) — لكل مستخدم.
   const mealSlots = mealSlotsForCount(np.mealsPerDay)
@@ -316,8 +342,8 @@ export function NutritionView({ lang }: NutritionViewProps) {
             <span className="grid h-11 w-11 place-items-center rounded-2xl bg-primary-soft text-primary-c">
               <Icon name="Utensils" className="h-5 w-5" />
             </span>
-            <p className="text-sm font-black text-ink-900">{day.canAdd ? t.emptyStateTitle : d.dayEmpty}</p>
-            {day.canAdd && <p className="max-w-xs text-xs text-ink-400">{t.emptyStateHint}</p>}
+            <p className="text-sm font-black text-ink-900">{day.isToday ? t.emptyStateTitle : d.dayEmpty}</p>
+            <p className="max-w-xs text-xs text-ink-400">{t.emptyStateHint}</p>
           </div>
         )}
 
@@ -330,9 +356,10 @@ export function NutritionView({ lang }: NutritionViewProps) {
           والتفضيل يبقى في عدد الأقسام وفي وصف الخطة لا في شكل الشاشة.
         */}
         <div className="mt-6 space-y-4" data-testid="nutrition-meal-sections">
-          {!day.canAdd && (
-            <p data-testid="nutrition-past-readonly" className="rounded-xl border border-line bg-surface px-3 py-2.5 text-xs leading-relaxed text-ink-500">
-              {d.pastDayReadOnly}
+          {/* تسجّل في يوم ماضٍ؟ يُقال صراحةً قبل أن تضغط «أضف» لا بعدها. */}
+          {!day.isToday && (
+            <p data-testid="nutrition-past-logging" className="rounded-xl border border-primary-soft bg-primary-soft px-3 py-2.5 text-xs font-bold leading-relaxed text-primary-c">
+              {d.pastDayLogging(dayLabel(viewDate, dayOffset, lang, d))}
             </p>
           )}
           {mealSlots.map((slot) => (
@@ -341,6 +368,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
               lang={lang}
               slot={slot}
               canAdd={day.canAdd}
+              logDate={viewDate}
               autoOpen={day.canAdd && (autoOpen === slot.id || (autoOpen === 'breakfast' && slot.id === mealSlots[0].id))}
               onAutoOpenHandled={() => setAutoOpen(null)}
               items={day.log.filter((e) => slotForEntry(e.meal, mealSlots) === slot.id)}
@@ -366,6 +394,7 @@ export function NutritionView({ lang }: NutritionViewProps) {
                 {formatNumber(Number((day.waterMl / 1000).toFixed(2)), lang)} {d.litersUnit}
               </span>
             </div>
+            <p className="mt-1.5 text-[11px] text-ink-400">{d.pastDayWaterNote}</p>
           </div>
         )}
 
@@ -675,6 +704,7 @@ function MealCard({
   onRemove,
   onUpdateQuantity,
   canAdd = true,
+  logDate,
   autoOpen = false,
   onAutoOpenHandled,
 }: {
@@ -691,6 +721,8 @@ function MealCard({
    * من زرٍّ لا يُرى. التعديل والحذف يبقيان: تصحيح الماضي حقّ لا إضافة إليه.
    */
   canAdd?: boolean
+  /** اليوم الذي يكتب فيه المسجّل — يُمرَّر صراحةً فلا يفترض «اليوم». */
+  logDate?: string
   /** نيّة «سجّل وجبة» القادمة من «اليوم» — تُفتح مرّة واحدة ثم تُستهلك. */
   autoOpen?: boolean
   onAutoOpenHandled?: () => void
@@ -848,6 +880,7 @@ function MealCard({
             targetCalories={targetCalories}
             targetProtein={targetProtein}
             defaultMeal={slot.id}
+            logDate={logDate}
             embedded
             onLogged={() => setAdding(false)}
           />

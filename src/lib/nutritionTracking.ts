@@ -98,6 +98,15 @@ function storageWrite(run: () => void): boolean {
   }
 }
 
+/**
+ * شكل السجلّ التاريخي → شكل المتجر القانوني. **مصدَّر** لأن كاتب الأيام الماضية
+ * (`nutritionHistory.addEntryToDay`) يحتاج نفس التحويل حرفيًّا — ونسخة ثانية منه
+ * تعني حقلًا يُنسى في أحدهما ثم كمية تضيع في الماضي وحده.
+ */
+export function canonicalFoodFromLogged(item: LoggedFood): CanonicalFood {
+  return toCanonical(item)
+}
+
 function toCanonical(item: LoggedFood): CanonicalFood {
   return {
     id: item.id,

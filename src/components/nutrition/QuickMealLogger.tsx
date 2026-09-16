@@ -6,7 +6,9 @@ import { getAppCatalog, isOffDerived } from '@/lib/food/catalog/appCatalog'
 import type { RankedHit } from '@/lib/food/catalog/rank'
 import { mergeUnified, rankCurated, rankPackaged } from '@/lib/food/unifiedSearch'
 import { dataAttributionStrings } from '@/i18n/dict/dataAttribution'
-import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
+import { type MealSlot } from '@/lib/nutritionTracking'
+import { useNutritionDay } from '@/lib/nutritionDay'
+import { getDayStamp } from '@/lib/today'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
@@ -58,6 +60,8 @@ interface QuickMealLoggerProps {
   defaultMeal?: MealSlot
   /** وضع مضمّن داخل قسم وجبة: يُظهر لوحة الإضافة فقط (بلا تقدّم/سجل/تنويه). */
   embedded?: boolean
+  /** اليوم الذي يُكتب فيه (ختم محلي). غيابه = اليوم الحالي صراحةً. */
+  logDate?: string
   /** يُستدعى بعد إضافة عنصر للسجل (لإغلاق اللوحة في الوضع المضمّن). */
   onLogged?: () => void
 }
@@ -75,10 +79,19 @@ function round(n: number): number {
 }
 
 /** مسجّل وجبات سريع — بحث في قاعدة الأطعمة أو إضافة سعرات/بروتين مخصّصة، مع تقدّم يومي. */
-export function QuickMealLogger({ lang, targetCalories, targetProtein, showTargets = true, defaultMeal, embedded = false, onLogged }: QuickMealLoggerProps) {
+export function QuickMealLogger({ lang, targetCalories, targetProtein, showTargets = true, defaultMeal, embedded = false, logDate, onLogged }: QuickMealLoggerProps) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
-  const { state, totals, addLog, removeLog: rawRemoveLog } = useNutritionToday()
+  /**
+   * المسجّل يكتب في **اليوم الذي فُتح منه**، لا في «اليوم» ضمنًا.
+   *
+   * `logDate` يأتي من بطاقة الوجبة التي تحمل اليوم المعروض. وغيابه يعني اليوم
+   * الحالي صراحةً — لا افتراض مخفيّ. هذا هو الفرق بين «سجّلت في الأربعاء» و
+   * «سجّلت في الأربعاء فظهر في الخميس».
+   */
+  const day = useNutritionDay(logDate ?? getDayStamp())
+  const { totals, addLog, removeLog: rawRemoveLog } = day
+  const state = { log: day.log }
   const { guard } = useAccess()
 
   const [open, setOpen] = useState(embedded)

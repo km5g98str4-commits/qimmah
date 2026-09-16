@@ -10,22 +10,31 @@
 // (سجلّ + مجاميع + ماء + حذف + تعديل كمية) أيًّا كان اليوم. الشاشة لا تعرف —
 // ولا تحتاج أن تعرف — من أين جاء اليوم.
 //
+// ═══ التسجيل في يوم ماضٍ ═══
+// نسيتَ أن تسجّل عشاء الأربعاء؟ ارجع إليه وسجّله فيه. التوجيه كلّه في
+// `nutritionHistory.addEntryToDay` — نقطة واحدة تقرّر «اليوم أم الماضي»، فلا
+// يقدر سطحٌ أن يكتب في الماضي ظانًّا أنه يكتب في اليوم ولا العكس. والحساب واحد
+// في الحالتين: نفس الكمية ونفس الوجبة ونفس الماكروز.
+//
 // ═══ ما لا تفعله هذه الطبقة ═══
-//   • **لا تكتب في الماضي طعامًا جديدًا.** الإضافة تقع على اليوم الحالي وحده،
-//     وهذا معلَن في الشاشة بسبب مكتوب لا بزرّ مطفأ صامت.
 //   • **لا تخترع تفصيلًا ليوم لا تفصيل له.** اليوم الأقدم من الدفتر يعود
 //     بمجاميعه موسومة (`legacyTotals`) وسجلّه فارغ — لا أصناف مُلفَّقة.
+//   • **لا تكتب ماءً في الماضي.** لوحة الماء تبقى لليوم الحالي (لا كاتب ماء
+//     مؤرَّخ بعد)، وهذا معلَن في الشاشة.
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { getDayStamp } from '@/lib/today'
+import { getDayStamp, shiftDayStamp } from '@/lib/today'
 import { getWaterLogs } from '@/lib/historyStore'
 import {
+  canonicalFoodFromLogged,
   logTotals,
   useNutritionToday,
   type LoggedFood,
   type LogTotals,
 } from '@/lib/nutritionTracking'
 import {
+  HISTORY_RETENTION_DAYS,
+  addEntryToDay,
   editEntry,
   getDayEntries,
   getDayNutritionStat,
@@ -53,8 +62,21 @@ export interface NutritionDay {
   legacyTotals: LegacyDayTotals | null
   /** هل لليوم أي بيانات إطلاقًا (تفصيل أو مجاميع أو ماء)؟ */
   hasData: boolean
-  /** الإضافة متاحة على اليوم الحالي وحده. */
+  /**
+   * هل يقبل هذا اليوم كتابة جديدة؟ **ليس ثابتًا مقنّعًا**: يومٌ لم يأتِ أو أقدم
+   * من نافذة حفظ التفاصيل يرفضه الكاتب بسبب مسمّى، فتخفي الشاشة زرّه بدل أن
+   * تعرض زرًّا يفشل عند الضغط.
+   */
   canAdd: boolean
+  /** يضيف صنفًا إلى **هذا اليوم بالذات** — لا إلى اليوم الحالي ضمنًا. */
+  addLog: (entry: Omit<LoggedFood, 'id'> & { id?: string }) => boolean
+  /**
+   * عدّاد يتغيّر مع **أي** كتابة تغذية (اليوم أو الماضي، من هذه الشاشة أو من
+   * استيراد/مزامنة/تبويب آخر). مستهلكوه يعلّقون عليه أي حساب مشتقّ من الدفتر
+   * — كحساب ترحيل الفائض الذي يقرأ استهلاك الأمس. بلا هذا العدّاد يبقى الحساب
+   * معلّقًا على تبعيات لا تتغيّر حين يعدّل المستخدم طعام يوم آخر.
+   */
+  revision: number
   removeLog: (id: string) => boolean
   updateLogQuantity: (id: string, value: number, unit: 'g' | 'serving') => boolean
 }
@@ -93,7 +115,10 @@ function waterForDate(date: string): number {
  */
 export function useNutritionDay(date: string): NutritionDay {
   const today = useNutritionToday()
-  const isToday = date === getDayStamp()
+  const todayStamp = getDayStamp()
+  const isToday = date === todayStamp
+  // نفس حدّي `addEntryToDay` — مصدر واحد للقرار، فلا يعد الزرّ بما يرفضه الكاتب.
+  const writable = date <= todayStamp && date >= shiftDayStamp(todayStamp, -HISTORY_RETENTION_DAYS)
 
   // نسخة تُزاد عند كل كتابة في الماضي — تُجبر إعادة القراءة من الدفتر.
   const [version, setVersion] = useState(0)
@@ -125,6 +150,16 @@ export function useNutritionDay(date: string): NutritionDay {
     [bump],
   )
 
+  const addToThisDay = useCallback(
+    (entry: Omit<LoggedFood, 'id'> & { id?: string }) => {
+      // المعرّف يُترك فارغًا ليولّده كاتب الماضي — مصدر واحد للمعرّفات.
+      const result = addEntryToDay(date, canonicalFoodFromLogged({ ...entry, id: entry.id ?? '' }))
+      if (result.status === 'ok') bump()
+      return result.status === 'ok'
+    },
+    [date, bump],
+  )
+
   const updatePast = useCallback(
     (id: string, value: number, unit: 'g' | 'serving') => {
       if (!Number.isFinite(value) || value <= 0) return false
@@ -145,6 +180,8 @@ export function useNutritionDay(date: string): NutritionDay {
       legacyTotals: null,
       hasData: today.state.log.length > 0 || today.state.waterMl > 0,
       canAdd: true,
+      revision: version,
+      addLog: today.addLog,
       removeLog: today.removeLog,
       updateLogQuantity: today.updateLogQuantity,
     }
@@ -158,7 +195,9 @@ export function useNutritionDay(date: string): NutritionDay {
     waterMl: past.waterMl,
     legacyTotals: past.legacyTotals,
     hasData: past.hasData,
-    canAdd: false,
+    canAdd: writable,
+    revision: version,
+    addLog: addToThisDay,
     removeLog: removePast,
     updateLogQuantity: updatePast,
   }

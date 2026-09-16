@@ -179,6 +179,13 @@ jobs:
       - name: Nutrition canonical convergence + day history + carryover — live browser
         run: node scripts/e2e/nutrition-canonical-live.mjs
 
+      # [NUTRITION-UNIFY-001] قشرة بمواصفات iPhone: مسافات الأمان · تغطية الشريط
+      # السفلي لأهداف اللمس (elementFromPoint) · تسجيل في يوم ماضٍ لا يتسرّب
+      # لليوم · عبور منتصف الليل المحلي. **ليست Safari/WebKit** — WebKit غير
+      # مثبَّت وتنزيله محجوب؛ الحدّ معلَن في رأس السكربت.
+      - name: Nutrition iPhone-shaped shell (Chromium, not Safari) — live browser
+        run: node scripts/e2e/nutrition-ios-shell.mjs
+
       # [FOOD-UX-001] «أكلاتي»: وجبة مخصّصة بكسور تُحفظ وتُوجد في يوم جديد وتُسجَّل وتُعدَّل وتُحذف.
       - name: Personal foods journey (entitled) — live browser
         run: node scripts/e2e/personal-foods.mjs

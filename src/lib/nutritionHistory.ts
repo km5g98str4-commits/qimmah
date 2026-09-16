@@ -87,6 +87,7 @@ export interface HistoryError {
     | 'quantity-unknown'
     | 'invalid-manual-food'
     | 'nothing-to-copy'
+    | 'day-out-of-range'
   messageAr: string
   messageEn: string
 }
@@ -624,6 +625,48 @@ export function removeEntry(id: string): { status: 'ok'; date: string } | { stat
   }
   persistPastDay(date, entries.filter((e) => e.id !== id))
   return { status: 'ok', date }
+}
+
+/**
+ * يضيف صنفًا إلى **يوم مُسمّى** — اليوم الحالي أو يومًا ماضيًا داخل نافذة الحفظ.
+ *
+ * ═══ لماذا يعيش هنا لا في `nutritionV2Model` ═══
+ * `addFoodToDay` هناك كاتب **اليوم الحالي** بتعريفه: يختم كل كتابة بـ
+ * `getDayStamp()`. إعطاؤه تاريخًا اختياريًّا كان سيجعل كاتب اليوم قادرًا على
+ * الكتابة في الماضي، وهو بالضبط الخلط الذي يُنتج «سجّلت في الأربعاء فظهر في
+ * الخميس». فالفصل مقصود: تاريخ اليوم يمرّ بكاتب اليوم، والماضي بكاتب الماضي،
+ * وهذه الدالّة هي **نقطة التوجيه الوحيدة** بينهما.
+ *
+ * والحساب واحد في الحالتين: نفس `LoggedFood` بكميته وماكروزه ووجبته — الفرق
+ * في **أين يُكتب** لا في **كيف يُحسب**.
+ */
+export function addEntryToDay(
+  date: string,
+  food: LoggedFood,
+): { status: 'ok'; date: string; id: string } | { status: 'rejected'; errors: HistoryError[] } {
+  ensureNutritionHistoryInit()
+  const today = getDayStamp()
+
+  // المستقبل ليس تصحيحًا: لا يُكتب طعام ليوم لم يأتِ.
+  if (date > today) {
+    return rejected(err('day-out-of-range', 'ما نقدر نسجّل في يوم ما جاء بعد.', 'We can’t log food into a day that hasn’t happened yet.'))
+  }
+  // خارج نافذة الحفظ: الكتابة هناك تُشذَّب عند أوّل كتابة تالية — فنرفضها
+  // مسمّاةً بدل أن نعد بحفظ يختفي بصمت.
+  if (date < stampAddDays(today, -HISTORY_RETENTION_DAYS)) {
+    return rejected(err('day-out-of-range', 'هذا اليوم أقدم من مدّة حفظ التفاصيل.', 'That day is older than the detail retention window.'))
+  }
+
+  if (date === today) {
+    // الكاتب الواحد لليوم — يحدّث الدفتر والمجاميع والمزامنة معًا.
+    addFoodToDay(food)
+    return { status: 'ok', date: today, id: food.id }
+  }
+
+  const id = food.id || freshEntryId()
+  const entry = entryFromLoggedFood({ ...food, id }, undefined)
+  persistPastDay(date, [...getDayEntries(date), entry])
+  return { status: 'ok', date, id }
 }
 
 // ── نسخ وجبة يوم سابق إلى اليوم ───────────────────────────────────────────────

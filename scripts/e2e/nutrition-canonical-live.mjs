@@ -112,7 +112,7 @@ const shape = (page) => page.evaluate(() => {
     // فالعدّ العام كان يقول ٥ ويُسقط فحصًا صحيحًا على خطأ في القياس لا في الشاشة.
     addButtons: [...(document.querySelector('[data-testid="nutrition-meal-sections"]')?.querySelectorAll('button') ?? [])]
       .filter((b) => (b.textContent || '').trim() === 'أضف').length,
-    readOnlyNote: !!document.querySelector('[data-testid="nutrition-past-readonly"]'),
+    pastLoggingNote: document.querySelector('[data-testid="nutrition-past-logging"]')?.textContent?.trim() ?? '',
     overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
   }
 })
@@ -166,7 +166,7 @@ try {
     const today = await shape(page)
     check('شريط تصفّح الأيام معروض', today.dayNav)
     check('اليوم الافتراضي هو «اليوم»', today.dayLabel === 'اليوم', today.dayLabel)
-    check('لا لافتة «قراءة فقط» على اليوم الحالي', !today.readOnlyNote)
+    check('لا لافتة «تسجّل في يوم ماضٍ» على اليوم الحالي', today.pastLoggingNote === '')
     /**
      * التاريخ يُقرأ باسم شهره لا بثلاثة أرقام موصولة: صيغة `٢٠٢٦-٠٩-١٥` تُقلَب
      * بصريًّا إلى `١٥-٠٩-٢٠٢٦` في السياق العربي (صنف AN في خوارزمية الاتجاه)،
@@ -182,8 +182,8 @@ try {
     await settle(page, 1200)
     const yest = await shape(page)
     check('السهم الخلفي ينتقل إلى «أمس»', yest.dayLabel === 'أمس', yest.dayLabel)
-    check('اليوم الماضي يعلن سبب منع الإضافة', yest.readOnlyNote)
-    check('ولا يعرض أزرار «أضف» (لا زرّ يُرى ولا يعمل)', yest.addButtons === 0, String(yest.addButtons))
+    check('⭐ اليوم الماضي يعلن أنك تسجّل فيه لا في اليوم', /أمس/.test(yest.pastLoggingNote), yest.pastLoggingNote)
+    check('⭐ وأزرار «أضف» متاحة عليه (التسجيل المتأخّر ممكن)', yest.addButtons === 4, String(yest.addButtons))
     check('أقسام الوجبات ما زالت معروضة في الماضي (نفس البنية)', yest.mealSections)
     check('بلا فيض أفقي في يوم ماضٍ عند 390', !yest.overflow)
 
