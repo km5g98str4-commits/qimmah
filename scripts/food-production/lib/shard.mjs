@@ -55,12 +55,14 @@ export const sha256 = (buf) => createHash('sha256').update(buf).digest('hex')
  * فهرس بحث مضغوط: رمز ← مواضع في مصفوفة سجلات الشريحة.
  * المواضع أعداد صغيرة، فهي أرخص كثيرًا من تكرار الـGTIN في كل قائمة.
  */
-export function buildSearchIndex(records, tokenize) {
+export function buildSearchIndex(records, tokenize, searchText) {
   const postings = new Map()
   records.forEach((rec, i) => {
-    const text = [rec.name_ar, rec.name_en, rec.brand_ar, rec.brand_en, rec.category]
-      .filter(Boolean)
-      .join(' ')
+    // ⚠️ النصّ من `productSearchText` القانونية حين تُمرَّر — فالفهرس ووقت التشغيل
+    // يقرآن نفس النصّ حرفيًا. البديل المحلّي يبقى لتوافق المستدعين القدامى فقط.
+    const text = searchText
+      ? searchText(rec)
+      : [rec.name_ar, rec.name_en, rec.brand_ar, rec.brand_en, rec.category].filter(Boolean).join(' ')
     for (const token of tokenize(text)) {
       const list = postings.get(token)
       if (list) list.push(i)
@@ -83,7 +85,7 @@ export function chooseShardCount(records, bytesPerRecordGzipEstimate = 245) {
  * يكتب الشرائح وفهارسها والبيان.
  * كل شريحة ملفّان: `<name>.json` (سجلات مفتاحها GTIN) و`<name>.idx.json` (فهرس البحث).
  */
-export function writeShards({ records, outDir, shardCount, tokenize, normalizationVersion, schemaVersion }) {
+export function writeShards({ records, outDir, shardCount, tokenize, normalizationVersion, schemaVersion, searchText }) {
   mkdirSync(outDir, { recursive: true })
   const buckets = Array.from({ length: shardCount }, () => [])
   for (const rec of records) buckets[assignShard(rec.gtin, shardCount)].push(rec)
@@ -118,7 +120,7 @@ export function writeShards({ records, outDir, shardCount, tokenize, normalizati
       normalization_version: normalizationVersion,
       shard: name,
       order: bucket.map((r) => r.gtin),
-      tokens: buildSearchIndex(bucket, tokenize),
+      tokens: buildSearchIndex(bucket, tokenize, searchText),
     }
     const idxRaw = Buffer.from(stableStringify(idxPayload))
     const idxGz = gzipSync(idxRaw, { level: 9 })

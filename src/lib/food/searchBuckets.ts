@@ -53,7 +53,7 @@ export const DEFAULT_BUCKET_PAGE_BUDGET = 4
 
 /** أعمدة بطاقة البحث — **الحقول التي تحتاجها القائمة، لا السجل كاملًا**. */
 export const CARD_FIELDS = [
-  'gtin', 'name_ar', 'name_en', 'brand_ar', 'brand_en', 'market',
+  'gtin', 'name_ar', 'name_en', 'brand_ar', 'brand_en', 'search_aliases_ar', 'market',
   'energy_kcal', 'protein_g', 'carbs_g', 'fat_g', 'serving_size', 'serving_unit', 'source',
 ] as const
 
@@ -81,6 +81,25 @@ export interface BucketPage {
 /** عدد صفحات حزمة بحجم معلوم — اشتقاق واحد يستعمله البناء ووقت التشغيل. */
 export function pageCount(records: number, pageSize: number = BUCKET_PAGE_SIZE): number {
   return records <= 0 ? 0 : Math.ceil(records / pageSize)
+}
+
+/**
+ * **نصّ البحث القانوني لسجل منتج** — مصدر واحد لا ثلاثة.
+ *
+ * كان هذا التركيب مكتوبًا ثلاث مرّات: في `shard.mjs` وفي `emit-search-buckets.mjs`
+ * وفي `rank.tierForProduct`. ثلاث نسخ تتباعد بعد موجتين، فيصير السجل مفهرسًا بنصّ
+ * ومطابَقًا بنصّ آخر — وهو أسوأ عطل بحث ممكن لأنه صامت. الآن نسخة واحدة.
+ *
+ * المرادفات العربية **جزء من نصّ الاسترجاع** ولا تدخل أي مسار عرض.
+ */
+export function productSearchText(rec: {
+  name_ar?: string | null; name_en?: string | null
+  brand_ar?: string | null; brand_en?: string | null
+  category?: string | null; search_aliases_ar?: string[] | null
+}): string {
+  const aliases = Array.isArray(rec.search_aliases_ar) ? rec.search_aliases_ar : []
+  return [rec.name_ar, rec.name_en, rec.brand_ar, rec.brand_en, rec.category, ...aliases]
+    .filter(Boolean).join(' ')
 }
 
 /** مفتاح الحزمة لرمز مفهرس، أو `null` إن كان أقصر من حدّ الفهرسة. */
@@ -132,6 +151,12 @@ export interface BucketQueryPlan {
   reason: PlanReason
   /** الحزمة المختارة — **أندر كلمات الاستعلام**، أي أقلّ بايتات وأدقّ استدعاء. */
   key: string | null
+  /**
+   * كل الحزم الواجب قراءتها. للكلمة الطويلة حزمة واحدة (= `key`)، أمّا الكلمة
+   * الأقصر من مفتاح الحزمة («ما» من «ماء») فتُفتَح على كل حزم الدليل التي تبدأ بها
+   * — وهو تعريف البادئة نفسه، لا استثناء لكلمة بعينها.
+   */
+  keys: string[]
   /** عدد سجلات الحزمة المختارة كما يعلنه الدليل. */
   records: number
   /** الكلمات المطبَّعة الصالحة للتوجيه. */
@@ -154,22 +179,35 @@ export interface BucketQueryPlan {
  */
 export function planBucketQuery(query: string, directory: BucketDirectory | null): BucketQueryPlan {
   const normalized = normalizeProductKey(query)
-  const words = normalized.split(' ').filter((w) => w.length >= MIN_DEEP_QUERY_LENGTH)
-  if (words.length === 0) return { reason: 'too-short', key: null, records: 0, words }
-  if (!directory) return { reason: 'no-directory', key: null, records: 0, words }
+  // ⚠️ الحدّ هنا هو **حدّ الفهرسة** `MIN_TOKEN_LENGTH` لا حدّ البادئة `PREFIX_MIN`.
+  // كان الحدّ ٣ فكانت «ماء» — وتُطبَّع إلى «ما» بحرفين — تُرفض قبل أي بحث
+  // (`too-short`) رغم أن الفهرس **يحمل** رمزها: `tokenize` تفهرس من حرفين.
+  // فالاستعلام كان يُرفض بحدٍّ أشدّ من الحدّ الذي بُني به الفهرس.
+  const words = normalized.split(' ').filter((w) => w.length >= MIN_TOKEN_LENGTH)
+  if (words.length === 0) return { reason: 'too-short', key: null, keys: [], records: 0, words }
+  if (!directory) return { reason: 'no-directory', key: null, keys: [], records: 0, words }
+
   let key: string | null = null
+  let keys: string[] = []
   let records = 0
+
   for (const word of words) {
     const candidate = word.slice(0, BUCKET_KEY_LENGTH)
-    const count = directory.buckets[candidate]
-    if (count === undefined) return { reason: 'absent', key: null, records: 0, words }
+    // كلمة أقصر من مفتاح الحزمة تُطابَق **تطابقًا تامًّا** (انظر `allTermsPresent`)،
+    // ورمزُها التامّ يسكن حزمةً واحدة مفتاحها هو الكلمة نفسها. ففتح الحزم الأطول
+    // كان يجلب بايتات لا تُطابق شيئًا — «ما» تجلب «مان» ثم تسقط كل سجلاتها.
+    const group = directory.buckets[candidate] === undefined ? [] : [candidate]
+    if (group.length === 0) return { reason: 'absent', key: null, keys: [], records: 0, words }
+    const count = group.reduce((sum, k) => sum + (directory.buckets[k] ?? 0), 0)
     // الأندر يفوز؛ وعند التعادل يفوز الأصغر معجميًّا — فالخطّة **حتمية**.
-    if (key === null || count < records || (count === records && candidate < key)) {
-      key = candidate
+    const head = group[0]
+    if (key === null || count < records || (count === records && head < key)) {
+      key = head
+      keys = group
       records = count
     }
   }
-  return { reason: 'ok', key, records, words }
+  return { reason: 'ok', key, keys, records, words }
 }
 
 /** يفكّ صفحة عمودية إلى صفوف كائنات — عكس ما يكتبه المُصدِر، بلا حقل ثالث بينهما. */

@@ -14,6 +14,11 @@ export interface CatalogProduct {
   name_en: string | null
   brand_ar: string | null
   brand_en: string | null
+  /**
+   * مرادفات بحث عربية — استرجاع فقط. **لا تُعرض اسمًا للمنتج** (انظر
+   * `ProductRecord.search_aliases_ar`). اختيارية: بطاقات قديمة لا تحملها.
+   */
+  search_aliases_ar?: string[] | null
   market: Market
   energy_kcal: number | null
   protein_g: number | null

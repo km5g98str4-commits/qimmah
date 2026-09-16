@@ -1,0 +1,10099 @@
+{
+ "batch": "ARB-001",
+ "purpose": "مرادفات بحث عربية للمنتجات السعودية/الخليجية المفتقرة لاسم عربي — استرجاع لا عرض",
+ "method": "controlled-lexicon composition v1 — بلا ترجمة آلية حرّة",
+ "display_rule": "هذه المرادفات لا تُعرض للمستخدم اسمًا للمنتج، ولا تملأ name_ar إطلاقًا",
+ "generated_at": "2026-09-16",
+ "count": 841,
+ "items": [
+  {
+   "gtin": "03073781093896",
+   "search_aliases_ar": [
+    "كيري سناك",
+    "كيري",
+    "سناك"
+   ],
+   "brand_ar": "كيري",
+   "name_en_at_source": "Kiri snack"
+  },
+  {
+   "gtin": "06084012090444",
+   "search_aliases_ar": [
+    "كرافت جبن شيدر",
+    "كرافت",
+    "جبن",
+    "جبنة",
+    "شيدر"
+   ],
+   "brand_ar": "كرافت",
+   "name_en_at_source": "Kraft cheddar cheese"
+  },
+  {
+   "gtin": "06271002221616",
+   "search_aliases_ar": [
+    "كي دي دي مانجو أبيض عنب رحيق",
+    "كي",
+    "دي",
+    "مانجو",
+    "أبيض",
+    "عنب",
+    "رحيق"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Kdd Mango with White grape Nectar"
+  },
+  {
+   "gtin": "06281007038959",
+   "search_aliases_ar": [
+    "المراعي فانيلا بنكهة حليب",
+    "المراعي",
+    "فانيلا",
+    "بنكهة",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai vanilla flavored milk"
+  },
+  {
+   "gtin": "06281014002851",
+   "search_aliases_ar": [
+    "قودي مسطردة",
+    "قودي",
+    "مسطردة"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Mustard"
+  },
+  {
+   "gtin": "06281016130644",
+   "search_aliases_ar": [
+    "تمر محشو كوكيز لوح",
+    "تمر",
+    "محشو",
+    "كوكيز",
+    "لوح"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Date filled cookie bar"
+  },
+  {
+   "gtin": "06281016248042",
+   "search_aliases_ar": [
+    "البطل بطاطس أصابع بحري ملح",
+    "البطل",
+    "بطاطس",
+    "أصابع",
+    "بحري",
+    "ملح"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal potato sticks sea salt"
+  },
+  {
+   "gtin": "06281022132397",
+   "search_aliases_ar": [
+    "الصافي كامل الدسم يوناني سادة",
+    "الصافي",
+    "كامل",
+    "الدسم",
+    "يوناني",
+    "سادة"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Greek Full Fat Plain"
+  },
+  {
+   "gtin": "06281022183368",
+   "search_aliases_ar": [
+    "صافيو فانيلا حليب",
+    "صافيو",
+    "فانيلا",
+    "حليب"
+   ],
+   "brand_ar": "صافيو",
+   "name_en_at_source": "Safio vanilla milk"
+  },
+  {
+   "gtin": "06281036004321",
+   "search_aliases_ar": [
+    "تسالي كمون ليمون",
+    "تسالي",
+    "كمون",
+    "ليمون"
+   ],
+   "brand_ar": "تسالي",
+   "name_en_at_source": "Tasali cumin and lemon"
+  },
+  {
+   "gtin": "06281039105513",
+   "search_aliases_ar": [
+    "السعودية حليب كامل الدسم",
+    "السعودية",
+    "حليب",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia whole milk"
+  },
+  {
+   "gtin": "06281041270117",
+   "search_aliases_ar": [
+    "معمول"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Maamoul"
+  },
+  {
+   "gtin": "06281063222835",
+   "search_aliases_ar": [
+    "حبّ كامل شرقي حدائق ذرة خالي من سكر",
+    "حبّ",
+    "كامل",
+    "شرقي",
+    "حدائق",
+    "ذرة",
+    "خالي",
+    "من",
+    "سكر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens whole kernel corn no sugar"
+  },
+  {
+   "gtin": "06281063632337",
+   "search_aliases_ar": [
+    "فريشلي فواكه كوكتيل لايت شراب",
+    "فريشلي",
+    "فواكه",
+    "كوكتيل",
+    "لايت",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly fruit cocktail in light syrup"
+  },
+  {
+   "gtin": "06281063881896",
+   "search_aliases_ar": [
+    "فريشلي تفاح فواكه توبينق حشوة",
+    "فريشلي",
+    "تفاح",
+    "فواكه",
+    "توبينق",
+    "حشوة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly apple fruit topping and filling"
+  },
+  {
+   "gtin": "06281168001359",
+   "search_aliases_ar": [
+    "ليبتون مثلج شاي أحمر فواكه",
+    "ليبتون",
+    "مثلج",
+    "شاي",
+    "أحمر",
+    "فواكه"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton Ice Tea Red Fruits -"
+  },
+  {
+   "gtin": "06287031380194",
+   "search_aliases_ar": [
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes"
+  },
+  {
+   "gtin": "06287034101079",
+   "search_aliases_ar": [
+    "كينزا رمان",
+    "كينزا",
+    "رمان"
+   ],
+   "brand_ar": "كينزا",
+   "name_en_at_source": "Kinza pomegranate 360 ml"
+  },
+  {
+   "gtin": "06287034101239",
+   "search_aliases_ar": [
+    "كينزا دايت كولا",
+    "كينزا",
+    "دايت",
+    "كولا"
+   ],
+   "brand_ar": "كينزا",
+   "name_en_at_source": "Kinza diet cola"
+  },
+  {
+   "gtin": "06291031002017",
+   "search_aliases_ar": [
+    "مانجو مشكل",
+    "مانجو",
+    "مشكل"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mango mix"
+  },
+  {
+   "gtin": "06291058164088",
+   "search_aliases_ar": [
+    "كارفور موزاريلا جبن",
+    "كارفور",
+    "موزاريلا",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "كارفور",
+   "name_en_at_source": "Mozzarella Cheese"
+  },
+  {
+   "gtin": "06291107372020",
+   "search_aliases_ar": [
+    "برجر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Burger"
+  },
+  {
+   "gtin": "06291115000588",
+   "search_aliases_ar": [
+    "إبل حليب",
+    "إبل",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Camel milk"
+  },
+  {
+   "gtin": "06294001815266",
+   "search_aliases_ar": [
+    "مارس ناعم داكن",
+    "مارس",
+    "ناعم",
+    "داكن"
+   ],
+   "brand_ar": "مارس",
+   "name_en_at_source": "Galaxy SMOOTH DARK"
+  },
+  {
+   "gtin": "06297001083529",
+   "search_aliases_ar": [
+    "مزارع بلدي جبن شطة",
+    "مزارع",
+    "بلدي",
+    "جبن",
+    "جبنة",
+    "شطة"
+   ],
+   "brand_ar": "مزارع بلدي",
+   "name_en_at_source": "Balade farms cheese chilli"
+  },
+  {
+   "gtin": "00000029621989",
+   "search_aliases_ar": [
+    "سبينيس عسل يوناني ستايل زبادي",
+    "سبينيس",
+    "عسل",
+    "يوناني",
+    "ستايل",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Honey Greek-style Yoghurt"
+  },
+  {
+   "gtin": "00012000061103",
+   "search_aliases_ar": [
+    "ليبتون ليمون مثلج شاي",
+    "ليبتون",
+    "ليمون",
+    "مثلج",
+    "شاي"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton lemon ice tea"
+  },
+  {
+   "gtin": "00012000061288",
+   "search_aliases_ar": [
+    "ليبتون أحمر فواكه مثلج شاي زيرو سكر",
+    "ليبتون",
+    "أحمر",
+    "فواكه",
+    "مثلج",
+    "شاي",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton red fruits ice tea zero sugar"
+  },
+  {
+   "gtin": "05060232812609",
+   "search_aliases_ar": [
+    "جوز الهند ماء",
+    "جوز",
+    "الهند",
+    "ماء",
+    "مياه"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Coconut Water"
+  },
+  {
+   "gtin": "05281128602047",
+   "search_aliases_ar": [
+    "شوكولاتة حلقات",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حلقات"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Choco Rings"
+  },
+  {
+   "gtin": "05711953202940",
+   "search_aliases_ar": [
+    "بوك مبشور شيدر",
+    "بوك",
+    "مبشور",
+    "شيدر"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Puck Shredded Cheddar 180g"
+  },
+  {
+   "gtin": "05740900404700",
+   "search_aliases_ar": [
+    "لورباك بدون ملح زبدة",
+    "لورباك",
+    "بدون",
+    "ملح",
+    "زبدة"
+   ],
+   "brand_ar": "لورباك",
+   "name_en_at_source": "Unsalted Butter"
+  },
+  {
+   "gtin": "06271002100805",
+   "search_aliases_ar": [
+    "كي دي دي شوكولاتة حليب",
+    "كي",
+    "دي",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Chocolate milk"
+  },
+  {
+   "gtin": "06271002108092",
+   "search_aliases_ar": [
+    "كي دي دي فطر صلصة",
+    "كي",
+    "دي",
+    "فطر",
+    "صلصة"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Mushroom Sauce"
+  },
+  {
+   "gtin": "06271002108344",
+   "search_aliases_ar": [
+    "كي دي دي فانيلا بروتين حليب",
+    "كي",
+    "دي",
+    "فانيلا",
+    "بروتين",
+    "حليب"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Vanilla Protein Milk"
+  },
+  {
+   "gtin": "06281007049825",
+   "search_aliases_ar": [
+    "المراعي عصير",
+    "المراعي",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Grenade juice"
+  },
+  {
+   "gtin": "06281018110064",
+   "search_aliases_ar": [
+    "ندى حليب طازج كامل الدسم",
+    "ندى",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada fresh milk full cream"
+  },
+  {
+   "gtin": "06281020173033",
+   "search_aliases_ar": [
+    "لونا مثلج قهوة كابتشينو",
+    "لونا",
+    "مثلج",
+    "قهوة",
+    "كابتشينو"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna iced coffee cappuccino"
+  },
+  {
+   "gtin": "06281020320932",
+   "search_aliases_ar": [
+    "لونا جبن شيدر كامل الدسم",
+    "لونا",
+    "جبن",
+    "جبنة",
+    "شيدر",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna cheddar cheese full fat"
+  },
+  {
+   "gtin": "06281026311552",
+   "search_aliases_ar": [
+    "الربيع ليمون نعناع",
+    "الربيع",
+    "ليمون",
+    "نعناع"
+   ],
+   "brand_ar": "الربيع",
+   "name_en_at_source": "Lemon&mint"
+  },
+  {
+   "gtin": "06281036004178",
+   "search_aliases_ar": [
+    "تسالي كاتشب",
+    "تسالي",
+    "كاتشب"
+   ],
+   "brand_ar": "تسالي",
+   "name_en_at_source": "Tasali ketchup"
+  },
+  {
+   "gtin": "06281057030040",
+   "search_aliases_ar": [
+    "نادك كامل الدسم طازج زبادي",
+    "نادك",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh yogurt full fat"
+  },
+  {
+   "gtin": "06281063460763",
+   "search_aliases_ar": [
+    "حبّ كامل ذرة حلوة شرقي حدائق",
+    "حبّ",
+    "كامل",
+    "ذرة",
+    "حلوة",
+    "شرقي",
+    "حدائق"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens whole kernel sweet corn"
+  },
+  {
+   "gtin": "06281073152603",
+   "search_aliases_ar": [
+    "سنبلة سريع التحضير نودلز خضار نكهة",
+    "سنبلة",
+    "سريع",
+    "التحضير",
+    "نودلز",
+    "خضار",
+    "نكهة"
+   ],
+   "brand_ar": "سنبلة",
+   "name_en_at_source": "Sunbulah instant noodles vegetable flavor"
+  },
+  {
+   "gtin": "06281100510208",
+   "search_aliases_ar": [
+    "تفاح رحيق",
+    "تفاح",
+    "رحيق"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Apple nectar"
+  },
+  {
+   "gtin": "06281102620066",
+   "search_aliases_ar": [
+    "معمول"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Maamoul"
+  },
+  {
+   "gtin": "06285835001352",
+   "search_aliases_ar": [
+    "مارس ميني",
+    "مارس",
+    "ميني"
+   ],
+   "brand_ar": "مارس",
+   "name_en_at_source": "Mars Mini"
+  },
+  {
+   "gtin": "06288005902497",
+   "search_aliases_ar": [
+    "تمر سناك لوح",
+    "تمر",
+    "سناك",
+    "لوح"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dates snack bar"
+  },
+  {
+   "gtin": "06291003007095",
+   "search_aliases_ar": [
+    "تيفاني ويفر بندق",
+    "تيفاني",
+    "ويفر",
+    "بندق"
+   ],
+   "brand_ar": "تيفاني",
+   "name_en_at_source": "Tiffany Wafer Hazelnut"
+  },
+  {
+   "gtin": "06291003014185",
+   "search_aliases_ar": [
+    "كواكر دايجستيف بسكويت",
+    "كواكر",
+    "دايجستيف",
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": "كواكر",
+   "name_en_at_source": "Digestive biscuit"
+  },
+  {
+   "gtin": "06291104286078",
+   "search_aliases_ar": [
+    "أورجانيك لاردر جبن",
+    "أورجانيك",
+    "لاردر",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Cheese"
+  },
+  {
+   "gtin": "06291107420189",
+   "search_aliases_ar": [
+    "ليمون شاي سريع التحضير",
+    "ليمون",
+    "شاي",
+    "سريع",
+    "التحضير"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Lemon Tea instant"
+  },
+  {
+   "gtin": "06292111467580",
+   "search_aliases_ar": [
+    "شوكولاتة تمر لوز",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "لوز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate Dates With Almond"
+  },
+  {
+   "gtin": "00000029604845",
+   "search_aliases_ar": [
+    "سبينيس جزر جوز كيك",
+    "سبينيس",
+    "جزر",
+    "جوز",
+    "كيك"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Carrot And Walnut Cake"
+  },
+  {
+   "gtin": "00012000063060",
+   "search_aliases_ar": [
+    "ميرندا مانجو خوخ",
+    "ميرندا",
+    "مانجو",
+    "خوخ"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda plus mango peach"
+  },
+  {
+   "gtin": "00617950410034",
+   "search_aliases_ar": [
+    "العلالي فراولة مربى",
+    "العلالي",
+    "فراولة",
+    "مربى"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "Strawberry Jam"
+  },
+  {
+   "gtin": "05285009110218",
+   "search_aliases_ar": [
+    "لوح بروتين حمص",
+    "لوح",
+    "بروتين",
+    "حمص"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Hummus protein bar"
+  },
+  {
+   "gtin": "06253808660868",
+   "search_aliases_ar": [
+    "كيو بيك فراولة كرواسون",
+    "كيو",
+    "بيك",
+    "فراولة",
+    "كرواسون"
+   ],
+   "brand_ar": "كيو بيك",
+   "name_en_at_source": "Strawberry Croissant"
+  },
+  {
+   "gtin": "06271002118510",
+   "search_aliases_ar": [
+    "فراولة حليب",
+    "فراولة",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Strawberry milk"
+  },
+  {
+   "gtin": "06281007023115",
+   "search_aliases_ar": [
+    "المراعي حليب طازج كامل الدسم",
+    "المراعي",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "fresh milk full fat"
+  },
+  {
+   "gtin": "06281014801218",
+   "search_aliases_ar": [
+    "أصلي مثلج قهوة",
+    "أصلي",
+    "مثلج",
+    "قهوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Original iced coffee"
+  },
+  {
+   "gtin": "06281018110347",
+   "search_aliases_ar": [
+    "ندى حليب طازج كامل الدسم",
+    "ندى",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada fresh milk full cream"
+  },
+  {
+   "gtin": "06281018305989",
+   "search_aliases_ar": [
+    "ندى بروتين لبن",
+    "ندى",
+    "بروتين",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Protein Laban"
+  },
+  {
+   "gtin": "06281022115727",
+   "search_aliases_ar": [
+    "الصافي بنكهة لبن مانجو",
+    "الصافي",
+    "بنكهة",
+    "لبن",
+    "لبن رائب",
+    "مانجو"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi flavored laban mango"
+  },
+  {
+   "gtin": "06281034007041",
+   "search_aliases_ar": [
+    "باربيكان شعير مشروب",
+    "باربيكان",
+    "شعير",
+    "مشروب",
+    "شراب"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican malt beverage"
+  },
+  {
+   "gtin": "06281036108104",
+   "search_aliases_ar": [
+    "ليز طماطم كاتشب",
+    "ليز",
+    "طماطم",
+    "كاتشب"
+   ],
+   "brand_ar": "ليز",
+   "name_en_at_source": "Lay's tomato ketchup"
+  },
+  {
+   "gtin": "06281100411109",
+   "search_aliases_ar": [
+    "أبو كاس سيلا بسمتي",
+    "أبو",
+    "كاس",
+    "سيلا",
+    "بسمتي"
+   ],
+   "brand_ar": "أبو كاس",
+   "name_en_at_source": "Sella Basmati"
+  },
+  {
+   "gtin": "06290090016133",
+   "search_aliases_ar": [
+    "هاينز لايت مايونيز",
+    "هاينز",
+    "لايت",
+    "مايونيز"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Heinz light mayonnaise"
+  },
+  {
+   "gtin": "06291115000601",
+   "search_aliases_ar": [
+    "كابتشينو"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Cappuccino"
+  },
+  {
+   "gtin": "06294011602498",
+   "search_aliases_ar": [
+    "لولو فشار حار حار",
+    "لولو",
+    "فشار",
+    "حار"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Popcorn - Hot & Spicy"
+  },
+  {
+   "gtin": "06297000185132",
+   "search_aliases_ar": [
+    "بقلاوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Baklava"
+  },
+  {
+   "gtin": "06297000500119",
+   "search_aliases_ar": [
+    "فاخر أخضر شاي",
+    "فاخر",
+    "أخضر",
+    "شاي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Premium Green Tea"
+  },
+  {
+   "gtin": "06297000802015",
+   "search_aliases_ar": [
+    "فول سوداني حلوى",
+    "فول",
+    "سوداني",
+    "حلوى"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Peanut candy"
+  },
+  {
+   "gtin": "06300900360995",
+   "search_aliases_ar": [
+    "مزرعتي بدون ملح زبدة",
+    "مزرعتي",
+    "بدون",
+    "ملح",
+    "زبدة"
+   ],
+   "brand_ar": "مزرعتي",
+   "name_en_at_source": "Unsalted Butter"
+  },
+  {
+   "gtin": "05000396014877",
+   "search_aliases_ar": [
+    "ماكفيتيز دايجستيف داكن شوكولاتة",
+    "ماكفيتيز",
+    "دايجستيف",
+    "داكن",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "ماكفيتيز",
+   "name_en_at_source": "McVities Digestive Dark Chocolate"
+  },
+  {
+   "gtin": "05059883307893",
+   "search_aliases_ar": [
+    "ماي بروتين زبدة فول سوداني بودرة",
+    "ماي",
+    "بروتين",
+    "زبدة",
+    "فول",
+    "سوداني",
+    "بودرة"
+   ],
+   "brand_ar": "ماي بروتين",
+   "name_en_at_source": "Peanut Butter Powder"
+  },
+  {
+   "gtin": "05711953023095",
+   "search_aliases_ar": [
+    "بوك طبيعي جودة جبن شرائح",
+    "بوك",
+    "طبيعي",
+    "جودة",
+    "جبن",
+    "جبنة",
+    "شرائح"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Natural Gouda Cheese Slices"
+  },
+  {
+   "gtin": "06271002221111",
+   "search_aliases_ar": [
+    "كي دي دي تفاح عصير",
+    "كي",
+    "دي",
+    "تفاح",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Kdd Apple Juice 180ml"
+  },
+  {
+   "gtin": "06271002303589",
+   "search_aliases_ar": [
+    "آيس كريم",
+    "آيس",
+    "كريم"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Ice Cream"
+  },
+  {
+   "gtin": "06281007049832",
+   "search_aliases_ar": [
+    "المراعي عنب توت عصير",
+    "المراعي",
+    "عنب",
+    "توت",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Grape and Berries juice"
+  },
+  {
+   "gtin": "06281007201513",
+   "search_aliases_ar": [
+    "المراعي طبيعي عصير",
+    "المراعي",
+    "طبيعي",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "natural juice"
+  },
+  {
+   "gtin": "06281014622134",
+   "search_aliases_ar": [
+    "قودي لايت لحم تونة شطة",
+    "قودي",
+    "لايت",
+    "لحم",
+    "تونة",
+    "شطة"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Goody light meat tuna with chili"
+  },
+  {
+   "gtin": "06281016731711",
+   "search_aliases_ar": [
+    "البطل ملح",
+    "البطل",
+    "ملح"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal salt"
+  },
+  {
+   "gtin": "06281022118087",
+   "search_aliases_ar": [
+    "أكتيفيا قليل الدسم",
+    "أكتيفيا",
+    "قليل",
+    "الدسم"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia low fat"
+  },
+  {
+   "gtin": "06281022120417",
+   "search_aliases_ar": [
+    "الصافي حليب طازج كامل الدسم",
+    "الصافي",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh milk full fat"
+  },
+  {
+   "gtin": "06281022167740",
+   "search_aliases_ar": [
+    "الصافي كريمي نكهة",
+    "الصافي",
+    "كريمي",
+    "نكهة"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi creamy taste"
+  },
+  {
+   "gtin": "06281036004185",
+   "search_aliases_ar": [
+    "تسالي شطة",
+    "تسالي",
+    "شطة"
+   ],
+   "brand_ar": "تسالي",
+   "name_en_at_source": "Tasali chilli"
+  },
+  {
+   "gtin": "06281036110305",
+   "search_aliases_ar": [
+    "ليز ملح خل بطاطس شيبس",
+    "ليز",
+    "ملح",
+    "خل",
+    "بطاطس",
+    "شيبس",
+    "رقائق",
+    "بطاطس مقرمشة"
+   ],
+   "brand_ar": "ليز",
+   "name_en_at_source": "Salt & Vinegar Potato Chips"
+  },
+  {
+   "gtin": "06281100412137",
+   "search_aliases_ar": [
+    "أبو كاس بسمتي أرز",
+    "أبو",
+    "كاس",
+    "بسمتي",
+    "أرز"
+   ],
+   "brand_ar": "أبو كاس",
+   "name_en_at_source": "Basmati Rice"
+  },
+  {
+   "gtin": "06281102620059",
+   "search_aliases_ar": [
+    "معمول"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Maamoul"
+  },
+  {
+   "gtin": "06287016561082",
+   "search_aliases_ar": [
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes"
+  },
+  {
+   "gtin": "06287038220363",
+   "search_aliases_ar": [
+    "ندى شوكولاتة حليب",
+    "ندى",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Chocolate Milk"
+  },
+  {
+   "gtin": "06291001010073",
+   "search_aliases_ar": [
+    "مسافي فواكه مانجو رحيق",
+    "مسافي",
+    "فواكه",
+    "مانجو",
+    "رحيق"
+   ],
+   "brand_ar": "مسافي",
+   "name_en_at_source": "Masafi fruits mango nectar"
+  },
+  {
+   "gtin": "06291011064950",
+   "search_aliases_ar": [
+    "شوكولاتة بقلاوة",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "بقلاوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate baklava"
+  },
+  {
+   "gtin": "06299200044752",
+   "search_aliases_ar": [
+    "فريشلي أناناس شرائح لايت شراب",
+    "فريشلي",
+    "أناناس",
+    "شرائح",
+    "لايت",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Pineapple Slices In Light Syrup"
+  },
+  {
+   "gtin": "07891515560560",
+   "search_aliases_ar": [
+    "ساديا دجاج شاورما",
+    "ساديا",
+    "دجاج",
+    "شاورما"
+   ],
+   "brand_ar": "ساديا",
+   "name_en_at_source": "Chicken Shawarma"
+  },
+  {
+   "gtin": "08445290568069",
+   "search_aliases_ar": [
+    "كيت كات أبيض",
+    "كيت",
+    "كات",
+    "أبيض"
+   ],
+   "brand_ar": "كيت كات",
+   "name_en_at_source": "Kitkat white"
+  },
+  {
+   "gtin": "00012000022777",
+   "search_aliases_ar": [
+    "سفن أب ميني زيرو سكر",
+    "سفن",
+    "أب",
+    "ميني",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "سفن أب",
+   "name_en_at_source": "7up mini zero sugar"
+  },
+  {
+   "gtin": "03073781103397",
+   "search_aliases_ar": [
+    "كيري غموس مقرمش",
+    "كيري",
+    "غموس",
+    "مقرمش"
+   ],
+   "brand_ar": "كيري",
+   "name_en_at_source": "Dip & Crunch"
+  },
+  {
+   "gtin": "05056357910344",
+   "search_aliases_ar": [
+    "مارس كراميل بنكهة حليب شراب",
+    "مارس",
+    "كراميل",
+    "بنكهة",
+    "حليب",
+    "شراب"
+   ],
+   "brand_ar": "مارس",
+   "name_en_at_source": "Mars caramel flavored milk drink"
+  },
+  {
+   "gtin": "06271002103011",
+   "search_aliases_ar": [
+    "كي دي دي كامل الدسم طويل الأجل حليب",
+    "كي",
+    "دي",
+    "كامل",
+    "الدسم",
+    "طويل",
+    "الأجل",
+    "حليب"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "KDD Uht Full Cream Milk 1L"
+  },
+  {
+   "gtin": "06281007031196",
+   "search_aliases_ar": [
+    "المراعي طبخ قشطة",
+    "المراعي",
+    "طبخ",
+    "قشطة"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "cooking cream 250ml"
+  },
+  {
+   "gtin": "06281016900469",
+   "search_aliases_ar": [
+    "البطل كاتشب نكهة",
+    "البطل",
+    "كاتشب",
+    "نكهة"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal ketchup flavor"
+  },
+  {
+   "gtin": "06281039163414",
+   "search_aliases_ar": [
+    "السعودية فراولة حليب",
+    "السعودية",
+    "فراولة",
+    "حليب"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia strawberry milk"
+  },
+  {
+   "gtin": "06281057005505",
+   "search_aliases_ar": [
+    "نادك طبخ قشطة",
+    "نادك",
+    "طبخ",
+    "قشطة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec cooking cream"
+  },
+  {
+   "gtin": "06281063881889",
+   "search_aliases_ar": [
+    "فريشلي فراولة فواكه توبينق حشوة",
+    "فريشلي",
+    "فراولة",
+    "فواكه",
+    "توبينق",
+    "حشوة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly strawberry fruit topping and filling"
+  },
+  {
+   "gtin": "06287014410245",
+   "search_aliases_ar": [
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes"
+  },
+  {
+   "gtin": "06290090033413",
+   "search_aliases_ar": [
+    "هاينز مايونيز لايت",
+    "هاينز",
+    "مايونيز",
+    "لايت"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Heinz Mayonnaise Light"
+  },
+  {
+   "gtin": "06290090036025",
+   "search_aliases_ar": [
+    "هاينز مايونيز كريمي كلاسيك",
+    "هاينز",
+    "مايونيز",
+    "كريمي",
+    "كلاسيك"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Heinz Mayonnaise Creamy Classic"
+  },
+  {
+   "gtin": "06291016024065",
+   "search_aliases_ar": [
+    "شوكولاتة حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolaté milk"
+  },
+  {
+   "gtin": "06291031020202",
+   "search_aliases_ar": [
+    "فراولة زبادي",
+    "فراولة",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Strawberry Yoghurt"
+  },
+  {
+   "gtin": "06291056002276",
+   "search_aliases_ar": [
+    "العين تفاح عصير",
+    "العين",
+    "تفاح",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Apple Juice"
+  },
+  {
+   "gtin": "06291056070008",
+   "search_aliases_ar": [
+    "العين كامل الدسم طازج لبن",
+    "العين",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Fresh Laban full cream"
+  },
+  {
+   "gtin": "06291058156977",
+   "search_aliases_ar": [
+    "سريع التحضير نودلز",
+    "سريع",
+    "التحضير",
+    "نودلز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Instant noodles"
+  },
+  {
+   "gtin": "06291115000212",
+   "search_aliases_ar": [
+    "إبل حليب تمر",
+    "إبل",
+    "حليب",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Camel milk date"
+  },
+  {
+   "gtin": "06292296128795",
+   "search_aliases_ar": [
+    "تمر مربى",
+    "تمر",
+    "مربى"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Date jam"
+  },
+  {
+   "gtin": "06294011615252",
+   "search_aliases_ar": [
+    "لولو مشكل خضار",
+    "لولو",
+    "مشكل",
+    "خضار"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Mixed Vegetables"
+  },
+  {
+   "gtin": "08445290341860",
+   "search_aliases_ar": [
+    "نستله قمح عسل",
+    "نستله",
+    "قمح",
+    "عسل"
+   ],
+   "brand_ar": "نستله",
+   "name_en_at_source": "Cerelac wheat honey"
+  },
+  {
+   "gtin": "00012000061127",
+   "search_aliases_ar": [
+    "ليبتون أحمر فواكه مثلج شاي",
+    "ليبتون",
+    "أحمر",
+    "فواكه",
+    "مثلج",
+    "شاي"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton red fruits ice tea"
+  },
+  {
+   "gtin": "00617950706328",
+   "search_aliases_ar": [
+    "العلالي حبّ كامل ذرة حلوة",
+    "العلالي",
+    "حبّ",
+    "كامل",
+    "ذرة",
+    "حلوة"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "Alalali sweet corn whole kernel"
+  },
+  {
+   "gtin": "03073781058796",
+   "search_aliases_ar": [
+    "كيري سبريد قشطة جبن",
+    "كيري",
+    "سبريد",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "كيري",
+   "name_en_at_source": "Kiri spread cream cheese"
+  },
+  {
+   "gtin": "06223000410455",
+   "search_aliases_ar": [
+    "أمريكانا شيبس خل ملح",
+    "أمريكانا",
+    "شيبس",
+    "رقائق",
+    "بطاطس مقرمشة",
+    "خل",
+    "ملح"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Americana chips vinegar and salt"
+  },
+  {
+   "gtin": "06281020174825",
+   "search_aliases_ar": [
+    "لونا مثلج قهوة أبيض موكا",
+    "لونا",
+    "مثلج",
+    "قهوة",
+    "أبيض",
+    "موكا"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna iced coffee white mocha"
+  },
+  {
+   "gtin": "06281022118483",
+   "search_aliases_ar": [
+    "أكتيفيا قليل الدسم سادة زبادي",
+    "أكتيفيا",
+    "قليل",
+    "الدسم",
+    "سادة",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia plain low fat yogurt"
+  },
+  {
+   "gtin": "06281026120789",
+   "search_aliases_ar": [
+    "الربيع تفاح عصير",
+    "الربيع",
+    "تفاح",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "الربيع",
+   "name_en_at_source": "Al rabie apple juice 185ml"
+  },
+  {
+   "gtin": "06281026165100",
+   "search_aliases_ar": [
+    "الربيع عصير",
+    "الربيع",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "الربيع",
+   "name_en_at_source": "Al Rabie juice 125 ml"
+  },
+  {
+   "gtin": "06281036110008",
+   "search_aliases_ar": [
+    "ليز شيبس مملّح",
+    "ليز",
+    "شيبس",
+    "رقائق",
+    "بطاطس مقرمشة",
+    "مملّح"
+   ],
+   "brand_ar": "ليز",
+   "name_en_at_source": "Lays Chips (salted"
+  },
+  {
+   "gtin": "06281036114600",
+   "search_aliases_ar": [
+    "ليز شيبس",
+    "ليز",
+    "شيبس",
+    "رقائق",
+    "بطاطس مقرمشة"
+   ],
+   "brand_ar": "ليز",
+   "name_en_at_source": "Chips Lays"
+  },
+  {
+   "gtin": "06281039121018",
+   "search_aliases_ar": [
+    "السعودية قليل الدسم حليب",
+    "السعودية",
+    "قليل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia low fat milk"
+  },
+  {
+   "gtin": "06281050829948",
+   "search_aliases_ar": [
+    "أمريكانا مقرمش دجاج برجر فيليه",
+    "أمريكانا",
+    "مقرمش",
+    "دجاج",
+    "برجر",
+    "فيليه"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Crunchy Chicken Burger Fillet"
+  },
+  {
+   "gtin": "06281101733552",
+   "search_aliases_ar": [
+    "تمر عجوة",
+    "تمر",
+    "عجوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes Ajwa"
+  },
+  {
+   "gtin": "06281175002073",
+   "search_aliases_ar": [
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Biscuit"
+  },
+  {
+   "gtin": "06287022200784",
+   "search_aliases_ar": [
+    "أخضر مزارع أحمر حمراء فاصوليا",
+    "أخضر",
+    "مزارع",
+    "أحمر",
+    "حمراء",
+    "فاصوليا"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Green farms red kidney beans"
+  },
+  {
+   "gtin": "06287034100096",
+   "search_aliases_ar": [
+    "كينزا كولا",
+    "كينزا",
+    "كولا"
+   ],
+   "brand_ar": "كينزا",
+   "name_en_at_source": "Kinza cola"
+  },
+  {
+   "gtin": "06291058156939",
+   "search_aliases_ar": [
+    "سريع التحضير نودلز",
+    "سريع",
+    "التحضير",
+    "نودلز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Instant noodles"
+  },
+  {
+   "gtin": "06297000354088",
+   "search_aliases_ar": [
+    "بني سكر",
+    "بني",
+    "سكر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Brown sugar"
+  },
+  {
+   "gtin": "06300900101253",
+   "search_aliases_ar": [
+    "ليمون نعناع",
+    "ليمون",
+    "نعناع"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Lemon mint"
+  },
+  {
+   "gtin": "06300900235668",
+   "search_aliases_ar": [
+    "بلدنا موزاريلا جبن لايت",
+    "بلدنا",
+    "موزاريلا",
+    "جبن",
+    "جبنة",
+    "لايت"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Mozzarella Cheese Light"
+  },
+  {
+   "gtin": "06300900237464",
+   "search_aliases_ar": [
+    "بلدنا طازج عيران",
+    "بلدنا",
+    "طازج",
+    "عيران"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Fresh Ayran"
+  },
+  {
+   "gtin": "07613287436382",
+   "search_aliases_ar": [
+    "ماجي بيتزا صلصة",
+    "ماجي",
+    "بيتزا",
+    "صلصة"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi pizza sauce"
+  },
+  {
+   "gtin": "09556001302755",
+   "search_aliases_ar": [
+    "ماجي دجاج نكهة",
+    "ماجي",
+    "دجاج",
+    "نكهة"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "CHICKEN Flavour"
+  },
+  {
+   "gtin": "00012000060090",
+   "search_aliases_ar": [
+    "سفن أب زيرو سكر",
+    "سفن",
+    "أب",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "سفن أب",
+   "name_en_at_source": "7up zero sugar"
+  },
+  {
+   "gtin": "00012000063459",
+   "search_aliases_ar": [
+    "ميرندا حمضيات زيرو سكر",
+    "ميرندا",
+    "حمضيات",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda citrus zero sugar"
+  },
+  {
+   "gtin": "06270024001022",
+   "search_aliases_ar": [
+    "أمريكانا مرتديلا",
+    "أمريكانا",
+    "مرتديلا"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Mortadella"
+  },
+  {
+   "gtin": "06281007058704",
+   "search_aliases_ar": [
+    "المراعي يوناني ستايل زبادي مانجو",
+    "المراعي",
+    "يوناني",
+    "ستايل",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "مانجو"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai greek style yogurt mango"
+  },
+  {
+   "gtin": "06281020040700",
+   "search_aliases_ar": [
+    "أخضر مزارع لايت لحم تونة",
+    "أخضر",
+    "مزارع",
+    "لايت",
+    "لحم",
+    "تونة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Green farms light meat tuna"
+  },
+  {
+   "gtin": "06281060903331",
+   "search_aliases_ar": [
+    "قيصر فواكه مشكل ليمون نعناع رحيق",
+    "قيصر",
+    "فواكه",
+    "مشكل",
+    "ليمون",
+    "نعناع",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar fruit mix and lemon mint nectar"
+  },
+  {
+   "gtin": "06281063222439",
+   "search_aliases_ar": [
+    "شرقي حدائق داكن أحمر حمراء فاصوليا",
+    "شرقي",
+    "حدائق",
+    "داكن",
+    "أحمر",
+    "حمراء",
+    "فاصوليا"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens dark red kidney beans"
+  },
+  {
+   "gtin": "06281063881070",
+   "search_aliases_ar": [
+    "فريشلي صويا صلصة",
+    "فريشلي",
+    "صويا",
+    "صلصة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Soy Sauce"
+  },
+  {
+   "gtin": "06287009831130",
+   "search_aliases_ar": [
+    "تمر معجون",
+    "تمر",
+    "معجون"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Date Paste"
+  },
+  {
+   "gtin": "06290361200292",
+   "search_aliases_ar": [
+    "جمارة محشو تمر",
+    "جمارة",
+    "محشو",
+    "تمر"
+   ],
+   "brand_ar": "جمارة",
+   "name_en_at_source": "Filled Dates"
+  },
+  {
+   "gtin": "06291030100035",
+   "search_aliases_ar": [
+    "برتقال"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orange"
+  },
+  {
+   "gtin": "06291056068012",
+   "search_aliases_ar": [
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Yoghurt"
+  },
+  {
+   "gtin": "06300900232803",
+   "search_aliases_ar": [
+    "بلدنا مبخّر حليب",
+    "بلدنا",
+    "مبخّر",
+    "حليب"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Baladna Evaporated Milk"
+  },
+  {
+   "gtin": "06300900237280",
+   "search_aliases_ar": [
+    "بلدنا طازج قشطة",
+    "بلدنا",
+    "طازج",
+    "قشطة"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Fresh Cream"
+  },
+  {
+   "gtin": "00032894041173",
+   "search_aliases_ar": [
+    "كاليفورنيا جاردن حبّ كامل ذرة حلوة",
+    "كاليفورنيا",
+    "جاردن",
+    "حبّ",
+    "كامل",
+    "ذرة",
+    "حلوة"
+   ],
+   "brand_ar": "كاليفورنيا جاردن",
+   "name_en_at_source": "California garden sweet corn whole kernel"
+  },
+  {
+   "gtin": "00759992905342",
+   "search_aliases_ar": [
+    "عضوي بطاطس شيبس",
+    "عضوي",
+    "بطاطس",
+    "شيبس",
+    "رقائق",
+    "بطاطس مقرمشة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "organic potato chips"
+  },
+  {
+   "gtin": "05201704064878",
+   "search_aliases_ar": [
+    "يوناني زبادي",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Greek yoghurt"
+  },
+  {
+   "gtin": "05711953040641",
+   "search_aliases_ar": [
+    "بوك لايت طبخ قشطة",
+    "بوك",
+    "لايت",
+    "طبخ",
+    "قشطة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "PUCK LIGHT COOKING CREAM"
+  },
+  {
+   "gtin": "05711953090059",
+   "search_aliases_ar": [
+    "بوك زيتون قشطة جبن",
+    "بوك",
+    "زيتون",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Puck olive cream cheese"
+  },
+  {
+   "gtin": "06253808660356",
+   "search_aliases_ar": [
+    "كيو بيك بني خبز",
+    "كيو",
+    "بيك",
+    "بني",
+    "خبز"
+   ],
+   "brand_ar": "كيو بيك",
+   "name_en_at_source": "Brown Bread"
+  },
+  {
+   "gtin": "06271002311119",
+   "search_aliases_ar": [
+    "كي دي دي آيس كريم فانيلا",
+    "كي",
+    "دي",
+    "آيس",
+    "كريم",
+    "فانيلا"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Vanilla Ice Cream"
+  },
+  {
+   "gtin": "06281007053617",
+   "search_aliases_ar": [
+    "المراعي مانجو عنب",
+    "المراعي",
+    "مانجو",
+    "عنب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Mango and grape"
+  },
+  {
+   "gtin": "06281018302919",
+   "search_aliases_ar": [
+    "ندى حليب طازج كامل الدسم",
+    "ندى",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada fresh milk full cream"
+  },
+  {
+   "gtin": "06281024110096",
+   "search_aliases_ar": [
+    "بريزيدون شيدر",
+    "بريزيدون",
+    "شيدر"
+   ],
+   "brand_ar": "بريزيدون",
+   "name_en_at_source": "Cheddar"
+  },
+  {
+   "gtin": "06281057005932",
+   "search_aliases_ar": [
+    "نادك يوناني زبادي فراولة",
+    "نادك",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "فراولة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec greek yogurt strawberry"
+  },
+  {
+   "gtin": "06281063881407",
+   "search_aliases_ar": [
+    "فريشلي سلطة صلصة",
+    "فريشلي",
+    "سلطة",
+    "صلصة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Salad dressing"
+  },
+  {
+   "gtin": "06281073152597",
+   "search_aliases_ar": [
+    "سنبلة سريع التحضير نودلز خضار نكهة",
+    "سنبلة",
+    "سريع",
+    "التحضير",
+    "نودلز",
+    "خضار",
+    "نكهة"
+   ],
+   "brand_ar": "سنبلة",
+   "name_en_at_source": "Sunbulah instant noodles vegetable flavor"
+  },
+  {
+   "gtin": "06290360332871",
+   "search_aliases_ar": [
+    "رمان"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Pomegranate"
+  },
+  {
+   "gtin": "06290361203590",
+   "search_aliases_ar": [
+    "جمارة عجوة تمر",
+    "جمارة",
+    "عجوة",
+    "تمر"
+   ],
+   "brand_ar": "جمارة",
+   "name_en_at_source": "Ajwa Dates"
+  },
+  {
+   "gtin": "06291002106010",
+   "search_aliases_ar": [
+    "الإسلامي سبرينق رول دجاج",
+    "الإسلامي",
+    "سبرينق",
+    "رول",
+    "دجاج"
+   ],
+   "brand_ar": "الإسلامي",
+   "name_en_at_source": "Chicken Spring Rolls"
+  },
+  {
+   "gtin": "06291011055699",
+   "search_aliases_ar": [
+    "تشوكوديت كاكاو إكسترا داكن",
+    "تشوكوديت",
+    "كاكاو",
+    "إكسترا",
+    "داكن"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "85%. Cocoa Extra Dark"
+  },
+  {
+   "gtin": "06291016008201",
+   "search_aliases_ar": [
+    "برتقال"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orange"
+  },
+  {
+   "gtin": "06291100930388",
+   "search_aliases_ar": [
+    "فراولة سموذي",
+    "فراولة",
+    "سموذي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Strawberry smoothie"
+  },
+  {
+   "gtin": "06300900362081",
+   "search_aliases_ar": [
+    "موزاريلا"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "mozzarella"
+  },
+  {
+   "gtin": "00617950142829",
+   "search_aliases_ar": [
+    "العلالي زيت دوار الشمس تونة شرائح مدخّن",
+    "العلالي",
+    "زيت",
+    "دوار",
+    "الشمس",
+    "تونة",
+    "شرائح",
+    "مدخّن"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "TUNA SLICES Smoked in Sunflower oil"
+  },
+  {
+   "gtin": "00709993305108",
+   "search_aliases_ar": [
+    "نيتشرلاند شيا بذور",
+    "نيتشرلاند",
+    "شيا",
+    "بذور"
+   ],
+   "brand_ar": "نيتشرلاند",
+   "name_en_at_source": "Chia seeds"
+  },
+  {
+   "gtin": "06073000050980",
+   "search_aliases_ar": [
+    "طازج زبادي",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Fresh yoghurt"
+  },
+  {
+   "gtin": "06281007060387",
+   "search_aliases_ar": [
+    "المراعي تمر حليب",
+    "المراعي",
+    "تمر",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Date Milk"
+  },
+  {
+   "gtin": "06281011111457",
+   "search_aliases_ar": [
+    "عافية زيت ذرة نقي",
+    "عافية",
+    "زيت",
+    "ذرة",
+    "نقي"
+   ],
+   "brand_ar": "عافية",
+   "name_en_at_source": "Pure corn oil"
+  },
+  {
+   "gtin": "06281018148081",
+   "search_aliases_ar": [
+    "ندى قليل الدسم يوناني زبادي أحمر فواكه شيا بذور",
+    "ندى",
+    "قليل",
+    "الدسم",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "أحمر",
+    "فواكه",
+    "شيا",
+    "بذور"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Greek Yoghurt Low Fat Red Fruits With Chia Seeds"
+  },
+  {
+   "gtin": "06281018316299",
+   "search_aliases_ar": [
+    "ندى فراولة حليب",
+    "ندى",
+    "فراولة",
+    "حليب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada strawberry milk"
+  },
+  {
+   "gtin": "06281036003454",
+   "search_aliases_ar": [
+    "ليز كاتشب",
+    "ليز",
+    "كاتشب"
+   ],
+   "brand_ar": "ليز",
+   "name_en_at_source": "Lay's ketchup"
+  },
+  {
+   "gtin": "06281039161816",
+   "search_aliases_ar": [
+    "السعودية تمر حليب",
+    "السعودية",
+    "تمر",
+    "حليب"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia date milk"
+  },
+  {
+   "gtin": "06281039174113",
+   "search_aliases_ar": [
+    "المراعي موز",
+    "المراعي",
+    "موز"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Saudia banana 125ml"
+  },
+  {
+   "gtin": "06281063881780",
+   "search_aliases_ar": [
+    "فريشلي أسود فاصوليا",
+    "فريشلي",
+    "أسود",
+    "فاصوليا"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly black beans"
+  },
+  {
+   "gtin": "06281100515418",
+   "search_aliases_ar": [
+    "برتقال جزر عصير شراب",
+    "برتقال",
+    "جزر",
+    "عصير",
+    "جوس",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "orange carrot juice drink"
+  },
+  {
+   "gtin": "06297000747767",
+   "search_aliases_ar": [
+    "باربيكان شعير مشروب رمان نكهة",
+    "باربيكان",
+    "شعير",
+    "مشروب",
+    "شراب",
+    "رمان",
+    "نكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican malt beverage pomegranate flavor"
+  },
+  {
+   "gtin": "06300900237402",
+   "search_aliases_ar": [
+    "بلدنا قليل الدسم تركي لبنة",
+    "بلدنا",
+    "قليل",
+    "الدسم",
+    "تركي",
+    "لبنة"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Turkish Labneh Low Fat"
+  },
+  {
+   "gtin": "07340001805536",
+   "search_aliases_ar": [
+    "بيربلز لوح بروتين كوكيز قشطة",
+    "بيربلز",
+    "لوح",
+    "بروتين",
+    "كوكيز",
+    "قشطة"
+   ],
+   "brand_ar": "بيربلز",
+   "name_en_at_source": "Cookies & Cream Protein Bar"
+  },
+  {
+   "gtin": "00000090453403",
+   "search_aliases_ar": [
+    "ريد بول توت أزرق نكهة طاقة شراب",
+    "ريد",
+    "بول",
+    "توت",
+    "أزرق",
+    "نكهة",
+    "طاقة",
+    "شراب"
+   ],
+   "brand_ar": "ريد بول",
+   "name_en_at_source": "Red bull blueberry flavor energy drink"
+  },
+  {
+   "gtin": "00617950205593",
+   "search_aliases_ar": [
+    "العلالي شوكولاتة شراب",
+    "العلالي",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "شراب"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "Alalali chocolate syrup"
+  },
+  {
+   "gtin": "06271002190219",
+   "search_aliases_ar": [
+    "كي دي دي قليل الدسم شوكولاتة حليب",
+    "كي",
+    "دي",
+    "قليل",
+    "الدسم",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "KddChocolate Milk (Low Fat) 180 ml"
+  },
+  {
+   "gtin": "06271002221517",
+   "search_aliases_ar": [
+    "كي دي دي جوافة عصير",
+    "كي",
+    "دي",
+    "جوافة",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "KDD Guava juice 180ml"
+  },
+  {
+   "gtin": "06281007025799",
+   "search_aliases_ar": [
+    "المراعي جبن شيدر قابل للدهن",
+    "المراعي",
+    "جبن",
+    "جبنة",
+    "شيدر",
+    "قابل",
+    "للدهن"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Spreadable Cheddar Cheese"
+  },
+  {
+   "gtin": "06281014800419",
+   "search_aliases_ar": [
+    "قودي زيت دوار الشمس أصلي لايت لحم تونة",
+    "قودي",
+    "زيت",
+    "دوار",
+    "الشمس",
+    "أصلي",
+    "لايت",
+    "لحم",
+    "تونة"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Goody original light meat tuna in sunflower oil"
+  },
+  {
+   "gtin": "06281022116472",
+   "search_aliases_ar": [
+    "أكتيفيا كامل الدسم زبادي",
+    "أكتيفيا",
+    "كامل",
+    "الدسم",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia Yoghurt (Full fat)"
+  },
+  {
+   "gtin": "06281022183344",
+   "search_aliases_ar": [
+    "صافيو فراولة",
+    "صافيو",
+    "فراولة"
+   ],
+   "brand_ar": "صافيو",
+   "name_en_at_source": "Safio strawberry"
+  },
+  {
+   "gtin": "06281057005956",
+   "search_aliases_ar": [
+    "نادك يوناني زبادي مشكل توت",
+    "نادك",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "مشكل",
+    "توت"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec greek yogurt mixed berries"
+  },
+  {
+   "gtin": "06281057015986",
+   "search_aliases_ar": [
+    "نادك لبنة زعتر",
+    "نادك",
+    "لبنة",
+    "زعتر"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec labneh zaatar"
+  },
+  {
+   "gtin": "06281060903317",
+   "search_aliases_ar": [
+    "قيصر فواكه مشكل ليمون نعناع رحيق",
+    "قيصر",
+    "فواكه",
+    "مشكل",
+    "ليمون",
+    "نعناع",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar fruit mix and lemon mint nectar"
+  },
+  {
+   "gtin": "06290090036018",
+   "search_aliases_ar": [
+    "هاينز كريمي",
+    "هاينز",
+    "كريمي"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Creamy Caesar"
+  },
+  {
+   "gtin": "06291007902181",
+   "search_aliases_ar": [
+    "بريتانيا خالي السكر دايجستيف بسكويت",
+    "بريتانيا",
+    "خالي",
+    "السكر",
+    "دايجستيف",
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": "بريتانيا",
+   "name_en_at_source": "Digestive Sugar Free Biscuits"
+  },
+  {
+   "gtin": "06291034469961",
+   "search_aliases_ar": [
+    "مانجو شراب",
+    "مانجو",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mango Drink"
+  },
+  {
+   "gtin": "06291104286009",
+   "search_aliases_ar": [
+    "أورجانيك لاردر برتقال مربى برتقال",
+    "أورجانيك",
+    "لاردر",
+    "برتقال",
+    "مربى"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Organic Larder Orange Marmalade"
+  },
+  {
+   "gtin": "06291107051956",
+   "search_aliases_ar": [
+    "كامل الدسم حليب",
+    "كامل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Milk Full Fat"
+  },
+  {
+   "gtin": "06291108639252",
+   "search_aliases_ar": [
+    "جمارة عضوي تمر",
+    "جمارة",
+    "عضوي",
+    "تمر"
+   ],
+   "brand_ar": "جمارة",
+   "name_en_at_source": "Organic Dates"
+  },
+  {
+   "gtin": "06294001851530",
+   "search_aliases_ar": [
+    "جالاكسي جوز الهند كنافة حليب شوكولاتة",
+    "جالاكسي",
+    "جوز",
+    "الهند",
+    "كنافة",
+    "حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Coconut Kunafa Milk Chocolate"
+  },
+  {
+   "gtin": "06297000670997",
+   "search_aliases_ar": [
+    "مزارع بلدي فراولة كفير",
+    "مزارع",
+    "بلدي",
+    "فراولة",
+    "كفير"
+   ],
+   "brand_ar": "مزارع بلدي",
+   "name_en_at_source": "Balade farms strawberry kefir"
+  },
+  {
+   "gtin": "06297001083727",
+   "search_aliases_ar": [
+    "مزارع بلدي لبنة",
+    "مزارع",
+    "بلدي",
+    "لبنة"
+   ],
+   "brand_ar": "مزارع بلدي",
+   "name_en_at_source": "Balade farms labneh"
+  },
+  {
+   "gtin": "06300900081548",
+   "search_aliases_ar": [
+    "طماطم كاتشب",
+    "طماطم",
+    "كاتشب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Tomato Ketchup"
+  },
+  {
+   "gtin": "07891515634209",
+   "search_aliases_ar": [
+    "ساديا شطة جبن قطع",
+    "ساديا",
+    "شطة",
+    "جبن",
+    "جبنة",
+    "قطع"
+   ],
+   "brand_ar": "ساديا",
+   "name_en_at_source": "Chilli Cheese Bites"
+  },
+  {
+   "gtin": "07891515644604",
+   "search_aliases_ar": [
+    "ساديا حلوم ستايل لحم بقري برجر",
+    "ساديا",
+    "حلوم",
+    "ستايل",
+    "لحم",
+    "بقري",
+    "برجر"
+   ],
+   "brand_ar": "ساديا",
+   "name_en_at_source": "Halloumi Style Beef Burger"
+  },
+  {
+   "gtin": "08445291537668",
+   "search_aliases_ar": [
+    "سيريلاك حبوب متعددة",
+    "سيريلاك",
+    "حبوب",
+    "متعددة"
+   ],
+   "brand_ar": "سيريلاك",
+   "name_en_at_source": "cerelac Multigrain"
+  },
+  {
+   "gtin": "00012000060236",
+   "search_aliases_ar": [
+    "ليبتون خوخ مثلج شاي زيرو سكر",
+    "ليبتون",
+    "خوخ",
+    "مثلج",
+    "شاي",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton peach ice tea zero sugar"
+  },
+  {
+   "gtin": "06281039525410",
+   "search_aliases_ar": [
+    "السعودية شوكولاتة",
+    "السعودية",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia chocolate"
+  },
+  {
+   "gtin": "06281057009091",
+   "search_aliases_ar": [
+    "نادك كامل الدسم تركي لبنة",
+    "نادك",
+    "كامل",
+    "الدسم",
+    "تركي",
+    "لبنة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec turkish labneh full fat"
+  },
+  {
+   "gtin": "06281057016044",
+   "search_aliases_ar": [
+    "نادك خالي اللاكتوز كامل الدسم طازج زبادي",
+    "نادك",
+    "خالي",
+    "اللاكتوز",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh yogurt lactose free full fat"
+  },
+  {
+   "gtin": "06281073312373",
+   "search_aliases_ar": [
+    "سنبلة دجاج ستربس جبن نكهة",
+    "سنبلة",
+    "دجاج",
+    "ستربس",
+    "جبن",
+    "جبنة",
+    "نكهة"
+   ],
+   "brand_ar": "سنبلة",
+   "name_en_at_source": "Chicken Strips Cheese Flavor"
+  },
+  {
+   "gtin": "06287006530012",
+   "search_aliases_ar": [
+    "سريع التحضير عربي قهوة هيل",
+    "سريع",
+    "التحضير",
+    "عربي",
+    "قهوة",
+    "هيل"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Instant Arabic coffee cardamom"
+  },
+  {
+   "gtin": "06287006940798",
+   "search_aliases_ar": [
+    "كيتكو قطع أصابع طماطم كاتشب نكهة",
+    "كيتكو",
+    "قطع",
+    "أصابع",
+    "طماطم",
+    "كاتشب",
+    "نكهة"
+   ],
+   "brand_ar": "كيتكو",
+   "name_en_at_source": "Kitco bites sticks tomato ketchup flavor"
+  },
+  {
+   "gtin": "06291079225089",
+   "search_aliases_ar": [
+    "فارم فريش أحمر حمراء فاصوليا",
+    "فارم",
+    "فريش",
+    "أحمر",
+    "حمراء",
+    "فاصوليا"
+   ],
+   "brand_ar": "فارم فريش",
+   "name_en_at_source": "Red Kidney Beans"
+  },
+  {
+   "gtin": "06291079363927",
+   "search_aliases_ar": [
+    "فارم فريش دجاج فشار",
+    "فارم",
+    "فريش",
+    "دجاج",
+    "فشار"
+   ],
+   "brand_ar": "فارم فريش",
+   "name_en_at_source": "Chicken Popcorn"
+  },
+  {
+   "gtin": "06291108230251",
+   "search_aliases_ar": [
+    "ديت كراون شوكولاتة تمر",
+    "ديت",
+    "كراون",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر"
+   ],
+   "brand_ar": "ديت كراون",
+   "name_en_at_source": "Chocolate Dates"
+  },
+  {
+   "gtin": "06300900236184",
+   "search_aliases_ar": [
+    "بلدنا فراولة حليب",
+    "بلدنا",
+    "فراولة",
+    "حليب"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Strawberry Milk"
+  },
+  {
+   "gtin": "08992696526013",
+   "search_aliases_ar": [
+    "نسكافيه موكا",
+    "نسكافيه",
+    "موكا"
+   ],
+   "brand_ar": "نسكافيه",
+   "name_en_at_source": "Nescafe mocha"
+  },
+  {
+   "gtin": "00709993309168",
+   "search_aliases_ar": [
+    "نيتشرلاند أسود سمسم زبدة",
+    "نيتشرلاند",
+    "أسود",
+    "سمسم",
+    "زبدة"
+   ],
+   "brand_ar": "نيتشرلاند",
+   "name_en_at_source": "Black Sesame Butter"
+  },
+  {
+   "gtin": "05285000396109",
+   "search_aliases_ar": [
+    "إندومي سريع التحضير نودلز مقلي نودلز حار حار",
+    "إندومي",
+    "سريع",
+    "التحضير",
+    "نودلز",
+    "مقلي",
+    "حار"
+   ],
+   "brand_ar": "إندومي",
+   "name_en_at_source": "Indomie instant noodles fried noodles hot and spicy"
+  },
+  {
+   "gtin": "05740900403550",
+   "search_aliases_ar": [
+    "لورباك بدون ملح",
+    "لورباك",
+    "بدون",
+    "ملح"
+   ],
+   "brand_ar": "لورباك",
+   "name_en_at_source": "Unsalted"
+  },
+  {
+   "gtin": "06281007120500",
+   "search_aliases_ar": [
+    "المراعي حليب طازج",
+    "المراعي",
+    "حليب",
+    "طازج"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Fresh milk"
+  },
+  {
+   "gtin": "06281018127048",
+   "search_aliases_ar": [
+    "ندى بروتين حليب تمر",
+    "ندى",
+    "بروتين",
+    "حليب",
+    "تمر"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Protein Milk with Dates"
+  },
+  {
+   "gtin": "06281018154549",
+   "search_aliases_ar": [
+    "ندى بروتين شوكولاتة بنكهة حليب",
+    "ندى",
+    "بروتين",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "بنكهة",
+    "حليب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Protein Chocolate Flavored Milk"
+  },
+  {
+   "gtin": "06281022113150",
+   "search_aliases_ar": [
+    "الصافي كامل الدسم طازج لبن",
+    "الصافي",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh laban full fat"
+  },
+  {
+   "gtin": "06281022126587",
+   "search_aliases_ar": [
+    "أكتيفيا يوناني فراولة",
+    "أكتيفيا",
+    "يوناني",
+    "فراولة"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia greek strawberry"
+  },
+  {
+   "gtin": "06281022167726",
+   "search_aliases_ar": [
+    "الصافي كريمي نكهة",
+    "الصافي",
+    "كريمي",
+    "نكهة"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi creamy taste"
+  },
+  {
+   "gtin": "06281036177155",
+   "search_aliases_ar": [
+    "تسالي كاتشب",
+    "تسالي",
+    "كاتشب"
+   ],
+   "brand_ar": "تسالي",
+   "name_en_at_source": "Tasali ketchup"
+  },
+  {
+   "gtin": "06291021765502",
+   "search_aliases_ar": [
+    "بوك قشطة جبن",
+    "بوك",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Cream Cheese"
+  },
+  {
+   "gtin": "06291106582567",
+   "search_aliases_ar": [
+    "جوز الهند قشطة",
+    "جوز",
+    "الهند",
+    "قشطة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Coconut cream"
+  },
+  {
+   "gtin": "06294003587925",
+   "search_aliases_ar": [
+    "ماجي كزبرة ثوم مشكل",
+    "ماجي",
+    "كزبرة",
+    "ثوم",
+    "مشكل"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi coriander and garlic mix"
+  },
+  {
+   "gtin": "06294011628474",
+   "search_aliases_ar": [
+    "لولو شيا بذور",
+    "لولو",
+    "شيا",
+    "بذور"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Chia seeds"
+  },
+  {
+   "gtin": "06297000670256",
+   "search_aliases_ar": [
+    "مزارع بلدي لبنة",
+    "مزارع",
+    "بلدي",
+    "لبنة"
+   ],
+   "brand_ar": "مزارع بلدي",
+   "name_en_at_source": "Balade farms labneh"
+  },
+  {
+   "gtin": "06297000999494",
+   "search_aliases_ar": [
+    "فستق معمول",
+    "فستق",
+    "معمول"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Pistachio Maamoul"
+  },
+  {
+   "gtin": "09504000343767",
+   "search_aliases_ar": [
+    "مزرعتي قليل الدسم بنكهة زبادي خوخ",
+    "مزرعتي",
+    "قليل",
+    "الدسم",
+    "بنكهة",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "خوخ"
+   ],
+   "brand_ar": "مزرعتي",
+   "name_en_at_source": "Flavored Yoghurt (Peach) (Low Fat)"
+  },
+  {
+   "gtin": "00012000804083",
+   "search_aliases_ar": [
+    "سفن أب ميني",
+    "سفن",
+    "أب",
+    "ميني"
+   ],
+   "brand_ar": "سفن أب",
+   "name_en_at_source": "7up mini"
+  },
+  {
+   "gtin": "00012000804489",
+   "search_aliases_ar": [
+    "ميرندا ميني حمضيات",
+    "ميرندا",
+    "ميني",
+    "حمضيات"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda mini citrus"
+  },
+  {
+   "gtin": "00344900362418",
+   "search_aliases_ar": [
+    "مزرعتي يوناني ستايل زبادي",
+    "مزرعتي",
+    "يوناني",
+    "ستايل",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "مزرعتي",
+   "name_en_at_source": "Greek Style Yogurt"
+  },
+  {
+   "gtin": "00614347230404",
+   "search_aliases_ar": [
+    "كورن فليكس عضوي",
+    "كورن",
+    "فليكس",
+    "عضوي"
+   ],
+   "brand_ar": "كورن فليكس",
+   "name_en_at_source": "Organic Corn Flakes"
+  },
+  {
+   "gtin": "00617950701552",
+   "search_aliases_ar": [
+    "العلالي ذرة حلوة قشطة ستايل",
+    "العلالي",
+    "ذرة",
+    "حلوة",
+    "قشطة",
+    "ستايل"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "Alalali sweet corn cream style"
+  },
+  {
+   "gtin": "00709993300325",
+   "search_aliases_ar": [
+    "نيتشرلاند سباغيتي معكرونة",
+    "نيتشرلاند",
+    "سباغيتي",
+    "معكرونة"
+   ],
+   "brand_ar": "نيتشرلاند",
+   "name_en_at_source": "Spaghetti Pasta"
+  },
+  {
+   "gtin": "00709993306631",
+   "search_aliases_ar": [
+    "نيتشرلاند شوكولاتة مغطّى ويفر",
+    "نيتشرلاند",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "مغطّى",
+    "ويفر"
+   ],
+   "brand_ar": "نيتشرلاند",
+   "name_en_at_source": "Chocolate Coated Wafer"
+  },
+  {
+   "gtin": "06271002107811",
+   "search_aliases_ar": [
+    "كي دي دي مثلج موكا قهوة شوكولاتة حليب",
+    "كي",
+    "دي",
+    "مثلج",
+    "موكا",
+    "قهوة",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Kdd iced mocha coffee with chocolate milk"
+  },
+  {
+   "gtin": "06281007049658",
+   "search_aliases_ar": [
+    "المراعي يوناني ستايل زبادي توت أزرق",
+    "المراعي",
+    "يوناني",
+    "ستايل",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "توت",
+    "أزرق"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai greek style yogurt blueberry"
+  },
+  {
+   "gtin": "06281007119054",
+   "search_aliases_ar": [
+    "المراعي كامل الدسم طازج لبن",
+    "المراعي",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai fresh laban full fat"
+  },
+  {
+   "gtin": "06281011701894",
+   "search_aliases_ar": [
+    "زيت دوار الشمس",
+    "زيت",
+    "دوار",
+    "الشمس"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Sunflower Oil"
+  },
+  {
+   "gtin": "06281039160918",
+   "search_aliases_ar": [
+    "السعودية شوكولاتة حليب",
+    "السعودية",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia chocolate milk"
+  },
+  {
+   "gtin": "06281050038593",
+   "search_aliases_ar": [
+    "أمريكانا دجاج صدر فشار",
+    "أمريكانا",
+    "دجاج",
+    "صدر",
+    "فشار"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Chicken Breast Popcorn"
+  },
+  {
+   "gtin": "06281060903201",
+   "search_aliases_ar": [
+    "قيصر برتقال جزر عنب رحيق",
+    "قيصر",
+    "برتقال",
+    "جزر",
+    "عنب",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Orange carrot & grape nectar"
+  },
+  {
+   "gtin": "06281063460664",
+   "search_aliases_ar": [
+    "شرقي حدائق شوكولاتة بنكهة شراب",
+    "شرقي",
+    "حدائق",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "بنكهة",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens chocolate flavored syrup"
+  },
+  {
+   "gtin": "06281063881117",
+   "search_aliases_ar": [
+    "فريشلي طماطم صلصة",
+    "فريشلي",
+    "طماطم",
+    "صلصة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly tomato sauce"
+  },
+  {
+   "gtin": "06281102673079",
+   "search_aliases_ar": [
+    "بسمتي أرز",
+    "بسمتي",
+    "أرز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Basmati rice"
+  },
+  {
+   "gtin": "06281105680517",
+   "search_aliases_ar": [
+    "معمول"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Maamoul"
+  },
+  {
+   "gtin": "06291003059261",
+   "search_aliases_ar": [
+    "سباغيتي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Spaghetti"
+  },
+  {
+   "gtin": "06291011053954",
+   "search_aliases_ar": [
+    "تشوكوديت داكن",
+    "تشوكوديت",
+    "داكن"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Chocodate dark"
+  },
+  {
+   "gtin": "06291011054296",
+   "search_aliases_ar": [
+    "جوز الهند",
+    "جوز",
+    "الهند"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Coconut"
+  },
+  {
+   "gtin": "06291011055446",
+   "search_aliases_ar": [
+    "تشوكوديت حليب",
+    "تشوكوديت",
+    "حليب"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Milk chocodate"
+  },
+  {
+   "gtin": "06291053130149",
+   "search_aliases_ar": [
+    "هيرشيز آيس كريم شوكولاتة ساندويتش",
+    "هيرشيز",
+    "آيس",
+    "كريم",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "ساندويتش"
+   ],
+   "brand_ar": "هيرشيز",
+   "name_en_at_source": "Chocolate Sandwich Ice Cream"
+  },
+  {
+   "gtin": "06291108225417",
+   "search_aliases_ar": [
+    "تفاح فراولة",
+    "تفاح",
+    "فراولة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Apple strawberry"
+  },
+  {
+   "gtin": "06294011664144",
+   "search_aliases_ar": [
+    "لولو زبادي",
+    "لولو",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Yoghurt"
+  },
+  {
+   "gtin": "06294017503898",
+   "search_aliases_ar": [
+    "كارفور مقرمش بالبقسماط دجاج ستربس",
+    "كارفور",
+    "مقرمش",
+    "بالبقسماط",
+    "دجاج",
+    "ستربس"
+   ],
+   "brand_ar": "كارفور",
+   "name_en_at_source": "Breaded Chicken Strips"
+  },
+  {
+   "gtin": "07613287248930",
+   "search_aliases_ar": [
+    "نستله كاكاو نفخات حبوب إفطار",
+    "نستله",
+    "كاكاو",
+    "نفخات",
+    "حبوب",
+    "إفطار"
+   ],
+   "brand_ar": "نستله",
+   "name_en_at_source": "Nestle cocoa puffs cereal"
+  },
+  {
+   "gtin": "08445290341259",
+   "search_aliases_ar": [
+    "سيريلاك قمح تمر",
+    "سيريلاك",
+    "قمح",
+    "تمر"
+   ],
+   "brand_ar": "سيريلاك",
+   "name_en_at_source": "Nestle Cerelac wheat dates"
+  },
+  {
+   "gtin": "00000029574377",
+   "search_aliases_ar": [
+    "سبينيس عسل حلقات حبوب إفطار",
+    "سبينيس",
+    "عسل",
+    "حلقات",
+    "حبوب",
+    "إفطار"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Honey Rings Cereal"
+  },
+  {
+   "gtin": "00012000061080",
+   "search_aliases_ar": [
+    "ليبتون خوخ مثلج شاي",
+    "ليبتون",
+    "خوخ",
+    "مثلج",
+    "شاي"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton peach ice tea"
+  },
+  {
+   "gtin": "05711953169120",
+   "search_aliases_ar": [
+    "بوك كامل الدسم حلوم",
+    "بوك",
+    "كامل",
+    "الدسم",
+    "حلوم"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Puck Halloumi Full Fat 200g"
+  },
+  {
+   "gtin": "06077160156728",
+   "search_aliases_ar": [
+    "كيتو جرانولا",
+    "كيتو",
+    "جرانولا"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Keto Granola"
+  },
+  {
+   "gtin": "06281007070737",
+   "search_aliases_ar": [
+    "المراعي برتقال عصير",
+    "المراعي",
+    "برتقال",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Orange Juice"
+  },
+  {
+   "gtin": "06281018310297",
+   "search_aliases_ar": [
+    "ندى كامل الدسم حليب",
+    "ندى",
+    "كامل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada full cream milk"
+  },
+  {
+   "gtin": "06281022180312",
+   "search_aliases_ar": [
+    "الصافي طويل الأجل كامل الدسم حليب",
+    "الصافي",
+    "طويل",
+    "الأجل",
+    "كامل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi long life milk full fat"
+  },
+  {
+   "gtin": "06281022183412",
+   "search_aliases_ar": [
+    "صافيو فانيلا حليب",
+    "صافيو",
+    "فانيلا",
+    "حليب"
+   ],
+   "brand_ar": "صافيو",
+   "name_en_at_source": "Safio vanilla milk"
+  },
+  {
+   "gtin": "06281026165643",
+   "search_aliases_ar": [
+    "الربيع أصلي برتقال شراب",
+    "الربيع",
+    "أصلي",
+    "برتقال",
+    "شراب"
+   ],
+   "brand_ar": "الربيع",
+   "name_en_at_source": "The original orange drink"
+  },
+  {
+   "gtin": "06281034914301",
+   "search_aliases_ar": [
+    "راني مانجو فواكه شراب",
+    "راني",
+    "مانجو",
+    "فواكه",
+    "شراب"
+   ],
+   "brand_ar": "راني",
+   "name_en_at_source": "Rani Mango fruit drink 1.4L"
+  },
+  {
+   "gtin": "06281060056518",
+   "search_aliases_ar": [
+    "قيصر برتقال",
+    "قيصر",
+    "برتقال"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar orange"
+  },
+  {
+   "gtin": "06281063222385",
+   "search_aliases_ar": [
+    "شرقي حدائق أخضر بازلاء",
+    "شرقي",
+    "حدائق",
+    "أخضر",
+    "بازلاء"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens green peas"
+  },
+  {
+   "gtin": "06291011059345",
+   "search_aliases_ar": [
+    "شوكولاتة تمر لوز",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "لوز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate date almond"
+  },
+  {
+   "gtin": "06291103750150",
+   "search_aliases_ar": [
+    "سمك كاري ماسالا",
+    "سمك",
+    "كاري",
+    "ماسالا"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Fish Curry masala"
+  },
+  {
+   "gtin": "06294017120781",
+   "search_aliases_ar": [
+    "نسكافيه خالي السكر",
+    "نسكافيه",
+    "خالي",
+    "السكر"
+   ],
+   "brand_ar": "نسكافيه",
+   "name_en_at_source": "NESCAFE 2 IN 1 SUGAR FREE"
+  },
+  {
+   "gtin": "06297000140612",
+   "search_aliases_ar": [
+    "مشكل محشو تمر",
+    "مشكل",
+    "محشو",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Assorted filled dates"
+  },
+  {
+   "gtin": "00000080001355",
+   "search_aliases_ar": [
+    "لواكر ساندويتش شوكولاتة",
+    "لواكر",
+    "ساندويتش",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "لواكر",
+   "name_en_at_source": "Sandwich Chocolate"
+  },
+  {
+   "gtin": "05449000343468",
+   "search_aliases_ar": [
+    "سبرايت حمضيات نعناع نكهة",
+    "سبرايت",
+    "حمضيات",
+    "نعناع",
+    "نكهة"
+   ],
+   "brand_ar": "سبرايت",
+   "name_en_at_source": "Sprite citrus and mint flavor"
+  },
+  {
+   "gtin": "06281007035187",
+   "search_aliases_ar": [
+    "المراعي مبخّر حليب",
+    "المراعي",
+    "مبخّر",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Evaporated milk"
+  },
+  {
+   "gtin": "06281007037150",
+   "search_aliases_ar": [
+    "المراعي كامل الدسم طازج حامض زبادي",
+    "المراعي",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "حامض",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai fresh sour yogurt full fat"
+  },
+  {
+   "gtin": "06281007039994",
+   "search_aliases_ar": [
+    "المراعي ساندويتش رولز حليب",
+    "المراعي",
+    "ساندويتش",
+    "رولز",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Sandwich rolls milk"
+  },
+  {
+   "gtin": "06281007042772",
+   "search_aliases_ar": [
+    "المراعي كريمي نكهة",
+    "المراعي",
+    "كريمي",
+    "نكهة"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai creamy taste"
+  },
+  {
+   "gtin": "06281007062732",
+   "search_aliases_ar": [
+    "خالي الدسم بروتين حليب فراولة موز",
+    "خالي",
+    "الدسم",
+    "بروتين",
+    "حليب",
+    "فراولة",
+    "موز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Protein Milk 34g Strawberry and Banana Fat Free 400ml"
+  },
+  {
+   "gtin": "06281016900506",
+   "search_aliases_ar": [
+    "البطل جبن نكهة",
+    "البطل",
+    "جبن",
+    "جبنة",
+    "نكهة"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal cheese flavor"
+  },
+  {
+   "gtin": "06281018169413",
+   "search_aliases_ar": [
+    "ندى تركي لبنة",
+    "ندى",
+    "تركي",
+    "لبنة"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada turkish labneh"
+  },
+  {
+   "gtin": "06281022126594",
+   "search_aliases_ar": [
+    "أكتيفيا يوناني",
+    "أكتيفيا",
+    "يوناني"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia greek"
+  },
+  {
+   "gtin": "06281022180411",
+   "search_aliases_ar": [
+    "الصافي طويل الأجل قليل الدسم حليب",
+    "الصافي",
+    "طويل",
+    "الأجل",
+    "قليل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi long life milk low fat"
+  },
+  {
+   "gtin": "06281026164004",
+   "search_aliases_ar": [
+    "الربيع برتقال شراب",
+    "الربيع",
+    "برتقال",
+    "شراب"
+   ],
+   "brand_ar": "الربيع",
+   "name_en_at_source": "Al Rabie Orange drink"
+  },
+  {
+   "gtin": "06281039163216",
+   "search_aliases_ar": [
+    "السعودية شوكولاتة حليب",
+    "السعودية",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia chocolate milk"
+  },
+  {
+   "gtin": "06281048108376",
+   "search_aliases_ar": [
+    "بوك لبنة تركي وصفة",
+    "بوك",
+    "لبنة",
+    "تركي",
+    "وصفة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Puck labneh turkish recipe"
+  },
+  {
+   "gtin": "06281106254403",
+   "search_aliases_ar": [
+    "شوكولاتة تمر",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate dates"
+  },
+  {
+   "gtin": "06285602011805",
+   "search_aliases_ar": [
+    "ديمة أصلي تمر لوح",
+    "ديمة",
+    "أصلي",
+    "تمر",
+    "لوح"
+   ],
+   "brand_ar": "ديمة",
+   "name_en_at_source": "Deemah Original date bar"
+  },
+  {
+   "gtin": "06287027460183",
+   "search_aliases_ar": [
+    "فاخر معمول تمر",
+    "فاخر",
+    "معمول",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Premium maamoul with dates"
+  },
+  {
+   "gtin": "06291011051974",
+   "search_aliases_ar": [
+    "تشوكوديت مشكل",
+    "تشوكوديت",
+    "مشكل"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "CHOCODATE Assorted"
+  },
+  {
+   "gtin": "06291100852222",
+   "search_aliases_ar": [
+    "يوبليه طازج كريمي",
+    "يوبليه",
+    "طازج",
+    "كريمي"
+   ],
+   "brand_ar": "يوبليه",
+   "name_en_at_source": "fresh and creamy"
+  },
+  {
+   "gtin": "06294017116906",
+   "search_aliases_ar": [
+    "ماجي قشطة دجاج شوربة",
+    "ماجي",
+    "قشطة",
+    "دجاج",
+    "شوربة"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi cream of chicken soup"
+  },
+  {
+   "gtin": "06297000999067",
+   "search_aliases_ar": [
+    "مشكل بقلاوة",
+    "مشكل",
+    "بقلاوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mixed Baklava"
+  },
+  {
+   "gtin": "06298044127034",
+   "search_aliases_ar": [
+    "تمر فواكه",
+    "تمر",
+    "فواكه"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dates fruits"
+  },
+  {
+   "gtin": "06300900235347",
+   "search_aliases_ar": [
+    "بلدي بروتين حليب شوكولاتة",
+    "بلدي",
+    "بروتين",
+    "حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "بلدي",
+   "name_en_at_source": "Protein milk chocolate"
+  },
+  {
+   "gtin": "00617950205425",
+   "search_aliases_ar": [
+    "العلالي بان كيك شراب",
+    "العلالي",
+    "بان",
+    "كيك",
+    "شراب"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "Alalali pancake syrup"
+  },
+  {
+   "gtin": "05740900864405",
+   "search_aliases_ar": [
+    "لورباك زبدة بدون ملح",
+    "لورباك",
+    "زبدة",
+    "بدون",
+    "ملح"
+   ],
+   "brand_ar": "لورباك",
+   "name_en_at_source": "Butter (Unsalted)"
+  },
+  {
+   "gtin": "05760466878661",
+   "search_aliases_ar": [
+    "بوك قشطة جبن",
+    "بوك",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Cream Cheese"
+  },
+  {
+   "gtin": "06281006709843",
+   "search_aliases_ar": [
+    "ليبتون أخضر شاي نعناع",
+    "ليبتون",
+    "أخضر",
+    "شاي",
+    "نعناع"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton Green Tea Mint"
+  },
+  {
+   "gtin": "06281018143581",
+   "search_aliases_ar": [
+    "ندى يوناني زبادي",
+    "ندى",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "greek yoghurt"
+  },
+  {
+   "gtin": "06281024117248",
+   "search_aliases_ar": [
+    "بريزيدون جبن شيدر",
+    "بريزيدون",
+    "جبن",
+    "جبنة",
+    "شيدر"
+   ],
+   "brand_ar": "بريزيدون",
+   "name_en_at_source": "President cheddar cheese"
+  },
+  {
+   "gtin": "06281048109458",
+   "search_aliases_ar": [
+    "بوك موزاريلا شيدر",
+    "بوك",
+    "موزاريلا",
+    "شيدر"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Mozzarella cheddar 180 gm"
+  },
+  {
+   "gtin": "06281057002665",
+   "search_aliases_ar": [
+    "نادك حليب طازج كامل الدسم",
+    "نادك",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh milk full fat"
+  },
+  {
+   "gtin": "06281057011964",
+   "search_aliases_ar": [
+    "نادك كامل الدسم حلوم جبن",
+    "نادك",
+    "كامل",
+    "الدسم",
+    "حلوم",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec halloumi cheese full fat"
+  },
+  {
+   "gtin": "06287034101055",
+   "search_aliases_ar": [
+    "كينزا ليمون زيرو سكر",
+    "كينزا",
+    "ليمون",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "كينزا",
+   "name_en_at_source": "Kinza lemon zero sugar"
+  },
+  {
+   "gtin": "06291011055903",
+   "search_aliases_ar": [
+    "تشوكوديت داكن",
+    "تشوكوديت",
+    "داكن"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Chocodate dark"
+  },
+  {
+   "gtin": "06291100212781",
+   "search_aliases_ar": [
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes"
+  },
+  {
+   "gtin": "06291103629739",
+   "search_aliases_ar": [
+    "داكن لوز",
+    "داكن",
+    "لوز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dark Almond"
+  },
+  {
+   "gtin": "06291104282117",
+   "search_aliases_ar": [
+    "أورجانيك لاردر عضوي أبيض كينوا",
+    "أورجانيك",
+    "لاردر",
+    "عضوي",
+    "أبيض",
+    "كينوا"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Organic Larder Organic White Quinoa"
+  },
+  {
+   "gtin": "06291104282377",
+   "search_aliases_ar": [
+    "أورجانيك لاردر طماطم معجون",
+    "أورجانيك",
+    "لاردر",
+    "طماطم",
+    "معجون"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Tomato paste"
+  },
+  {
+   "gtin": "00717273501942",
+   "search_aliases_ar": [
+    "فطر معكرونة صلصة",
+    "فطر",
+    "معكرونة",
+    "صلصة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mushroom Pasta Sauce"
+  },
+  {
+   "gtin": "05711953032929",
+   "search_aliases_ar": [
+    "بوك طبيعي شيدر",
+    "بوك",
+    "طبيعي",
+    "شيدر"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Natural cheddar"
+  },
+  {
+   "gtin": "05740900403574",
+   "search_aliases_ar": [
+    "لورباك طري مملّح",
+    "لورباك",
+    "طري",
+    "مملّح"
+   ],
+   "brand_ar": "لورباك",
+   "name_en_at_source": "Lurpak soft salted"
+  },
+  {
+   "gtin": "06272255306679",
+   "search_aliases_ar": [
+    "ميني براوني",
+    "ميني",
+    "براوني"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mini Brownie"
+  },
+  {
+   "gtin": "06281014110044",
+   "search_aliases_ar": [
+    "قودي زبدة فول سوداني كريمي",
+    "قودي",
+    "زبدة",
+    "فول",
+    "سوداني",
+    "كريمي"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Goody Creamy Peanut Butter"
+  },
+  {
+   "gtin": "06281022115352",
+   "search_aliases_ar": [
+    "الصافي قليل الدسم طازج لبن",
+    "الصافي",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh laban low fat"
+  },
+  {
+   "gtin": "06281063771401",
+   "search_aliases_ar": [
+    "فريشلي مجروش أحمر فلفل",
+    "فريشلي",
+    "مجروش",
+    "أحمر",
+    "فلفل"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Crushed Red Pepper"
+  },
+  {
+   "gtin": "06281100362074",
+   "search_aliases_ar": [
+    "سوبر بذور خبز",
+    "سوبر",
+    "بذور",
+    "خبز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Super seeds bread"
+  },
+  {
+   "gtin": "06281106258784",
+   "search_aliases_ar": [
+    "شوكولاتة تمر",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolat date"
+  },
+  {
+   "gtin": "06291056003440",
+   "search_aliases_ar": [
+    "العين كامل الدسم عضوي لبن",
+    "العين",
+    "كامل",
+    "الدسم",
+    "عضوي",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Organic Laban full cream"
+  },
+  {
+   "gtin": "06291102148187",
+   "search_aliases_ar": [
+    "مقرمش بالبقسماط سمك فيليه",
+    "مقرمش",
+    "بالبقسماط",
+    "سمك",
+    "فيليه"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Breaded Fish Fillet"
+  },
+  {
+   "gtin": "06297000747675",
+   "search_aliases_ar": [
+    "باربيكان شعير مشروب كلاسيك شعير",
+    "باربيكان",
+    "شعير",
+    "مشروب",
+    "شراب",
+    "كلاسيك"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican malt beverage classic malt"
+  },
+  {
+   "gtin": "06300900362494",
+   "search_aliases_ar": [
+    "مزرعتي عالي البروتين قليل الدسم حليب فانيلا نكهة",
+    "مزرعتي",
+    "عالي",
+    "البروتين",
+    "قليل",
+    "الدسم",
+    "حليب",
+    "فانيلا",
+    "نكهة"
+   ],
+   "brand_ar": "مزرعتي",
+   "name_en_at_source": "Milk Vanilla Flavor High Protein Low Fat"
+  },
+  {
+   "gtin": "00000029605477",
+   "search_aliases_ar": [
+    "سبينيس بذور مقرمش",
+    "سبينيس",
+    "بذور",
+    "مقرمش"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Seed Crunch"
+  },
+  {
+   "gtin": "00012000804717",
+   "search_aliases_ar": [
+    "ميرندا حمضيات",
+    "ميرندا",
+    "حمضيات"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda citrus"
+  },
+  {
+   "gtin": "00617950600077",
+   "search_aliases_ar": [
+    "العلالي طماطم كاتشب",
+    "العلالي",
+    "طماطم",
+    "كاتشب"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "TOMATO KETCHUP"
+  },
+  {
+   "gtin": "05033712110052",
+   "search_aliases_ar": [
+    "الكبير لحم بقري برجر",
+    "الكبير",
+    "لحم",
+    "بقري",
+    "برجر"
+   ],
+   "brand_ar": "الكبير",
+   "name_en_at_source": "Beef Burger"
+  },
+  {
+   "gtin": "05449000295040",
+   "search_aliases_ar": [
+    "فانتا حمضيات",
+    "فانتا",
+    "حمضيات"
+   ],
+   "brand_ar": "فانتا",
+   "name_en_at_source": "Fanta citrus"
+  },
+  {
+   "gtin": "06084000206123",
+   "search_aliases_ar": [
+    "أبيض فاصوليا",
+    "أبيض",
+    "فاصوليا"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "White beans"
+  },
+  {
+   "gtin": "06271002212317",
+   "search_aliases_ar": [
+    "كي دي دي مشمش رحيق",
+    "كي",
+    "دي",
+    "مشمش",
+    "رحيق"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Apricot Nectar"
+  },
+  {
+   "gtin": "06271002322313",
+   "search_aliases_ar": [
+    "كي دي دي آيس كريم فانيلا بسكويت ساندويتش",
+    "كي",
+    "دي",
+    "آيس",
+    "كريم",
+    "فانيلا",
+    "بسكويت",
+    "بسكوت",
+    "ساندويتش"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Vanilla Ice Cream in Biscuit Sandwich"
+  },
+  {
+   "gtin": "06281022183399",
+   "search_aliases_ar": [
+    "صافيو فراولة",
+    "صافيو",
+    "فراولة"
+   ],
+   "brand_ar": "صافيو",
+   "name_en_at_source": "Safio strawberry"
+  },
+  {
+   "gtin": "06281039820416",
+   "search_aliases_ar": [
+    "مقرمش جبن حلقات",
+    "مقرمش",
+    "جبن",
+    "جبنة",
+    "حلقات"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Crispy cheese rings"
+  },
+  {
+   "gtin": "06281039829815",
+   "search_aliases_ar": [
+    "مقرمش حلو شطة حلقات",
+    "مقرمش",
+    "حلو",
+    "شطة",
+    "حلقات"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Crispy sweet chili rings"
+  },
+  {
+   "gtin": "06281057002627",
+   "search_aliases_ar": [
+    "نادك قليل الدسم طازج لبن",
+    "نادك",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh laban low fat"
+  },
+  {
+   "gtin": "06281060903249",
+   "search_aliases_ar": [
+    "قيصر فواكه مشكل برتقال جزر رحيق",
+    "قيصر",
+    "فواكه",
+    "مشكل",
+    "برتقال",
+    "جزر",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar fruit mix orange carrot nectar"
+  },
+  {
+   "gtin": "06281063881100",
+   "search_aliases_ar": [
+    "فريشلي حار مسطردة",
+    "فريشلي",
+    "حار",
+    "مسطردة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Spicy Mustard"
+  },
+  {
+   "gtin": "06281073152559",
+   "search_aliases_ar": [
+    "سنبلة سريع التحضير نودلز دجاج نكهة",
+    "سنبلة",
+    "سريع",
+    "التحضير",
+    "نودلز",
+    "دجاج",
+    "نكهة"
+   ],
+   "brand_ar": "سنبلة",
+   "name_en_at_source": "Sunbulah instant noodles chicken flavor"
+  },
+  {
+   "gtin": "06281102100834",
+   "search_aliases_ar": [
+    "فاين داكن كاكاو بودرة",
+    "فاين",
+    "داكن",
+    "كاكاو",
+    "بودرة"
+   ],
+   "brand_ar": "فاين",
+   "name_en_at_source": "Fine dark cocoa powder"
+  },
+  {
+   "gtin": "06281106250382",
+   "search_aliases_ar": [
+    "شوكولاتة تمر",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate Dates"
+  },
+  {
+   "gtin": "06285602013083",
+   "search_aliases_ar": [
+    "ديمة شطة ليمون",
+    "ديمة",
+    "شطة",
+    "ليمون"
+   ],
+   "brand_ar": "ديمة",
+   "name_en_at_source": "Deemah chili lemon"
+  },
+  {
+   "gtin": "06291011052049",
+   "search_aliases_ar": [
+    "شوكولاتة تمر لوز مشكل",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "لوز",
+    "مشكل"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate Date Almond assorted"
+  },
+  {
+   "gtin": "06294003335526",
+   "search_aliases_ar": [
+    "مايونيز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mayonnaise"
+  },
+  {
+   "gtin": "06297000670492",
+   "search_aliases_ar": [
+    "بلدي يوناني زبادي",
+    "بلدي",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "بلدي",
+   "name_en_at_source": "Balade Greek yogurt"
+  },
+  {
+   "gtin": "06298888416110",
+   "search_aliases_ar": [
+    "شوكولاتة تمر",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate date"
+  },
+  {
+   "gtin": "06300900236887",
+   "search_aliases_ar": [
+    "بلدنا يوناني ستايل زبادي",
+    "بلدنا",
+    "يوناني",
+    "ستايل",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Greek Style Yoghurt"
+  },
+  {
+   "gtin": "06307611040031",
+   "search_aliases_ar": [
+    "ساندويتش"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Sandwich"
+  },
+  {
+   "gtin": "08445291537101",
+   "search_aliases_ar": [
+    "نستله قمح",
+    "نستله",
+    "قمح"
+   ],
+   "brand_ar": "نستله",
+   "name_en_at_source": "cerelac wheat"
+  },
+  {
+   "gtin": "00709993323188",
+   "search_aliases_ar": [
+    "نيتشرلاند ذرة حلوة",
+    "نيتشرلاند",
+    "ذرة",
+    "حلوة"
+   ],
+   "brand_ar": "نيتشرلاند",
+   "name_en_at_source": "Nature land sweet corn"
+  },
+  {
+   "gtin": "05711953175992",
+   "search_aliases_ar": [
+    "جالاكسي حليب بندق نكهة",
+    "جالاكسي",
+    "حليب",
+    "بندق",
+    "نكهة"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Galaxy milk hazelnut flavor"
+  },
+  {
+   "gtin": "06281006709812",
+   "search_aliases_ar": [
+    "ليبتون أخضر شاي كلاسيك",
+    "ليبتون",
+    "أخضر",
+    "شاي",
+    "كلاسيك"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton Green Tea Classic"
+  },
+  {
+   "gtin": "06281007026031",
+   "search_aliases_ar": [
+    "المراعي كامل الدسم لبنة",
+    "المراعي",
+    "كامل",
+    "الدسم",
+    "لبنة"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai labneh full fat"
+  },
+  {
+   "gtin": "06281007038898",
+   "search_aliases_ar": [
+    "المراعي شوكولاتة حليب",
+    "المراعي",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai chocolate milk"
+  },
+  {
+   "gtin": "06281014002707",
+   "search_aliases_ar": [
+    "قودي طبيعي كاتشب",
+    "قودي",
+    "طبيعي",
+    "كاتشب"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Goody Natural Ketchup 425ml"
+  },
+  {
+   "gtin": "06281016149240",
+   "search_aliases_ar": [
+    "البطل بطاطس أصابع إكسترا شطة",
+    "البطل",
+    "بطاطس",
+    "أصابع",
+    "إكسترا",
+    "شطة"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal potato sticks extra chili"
+  },
+  {
+   "gtin": "06281020318335",
+   "search_aliases_ar": [
+    "لونا مثلج قهوة موكا",
+    "لونا",
+    "مثلج",
+    "قهوة",
+    "موكا"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Iced coffee mocha"
+  },
+  {
+   "gtin": "06281060043112",
+   "search_aliases_ar": [
+    "قيصر أناناس عصير",
+    "قيصر",
+    "أناناس",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar pineapple juice"
+  },
+  {
+   "gtin": "06281063883111",
+   "search_aliases_ar": [
+    "فريشلي خالي السكر كراميل شراب",
+    "فريشلي",
+    "خالي",
+    "السكر",
+    "كراميل",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly caramel syrup sugar free"
+  },
+  {
+   "gtin": "06285602010747",
+   "search_aliases_ar": [
+    "ديمة قشطة فراولة",
+    "ديمة",
+    "قشطة",
+    "فراولة"
+   ],
+   "brand_ar": "ديمة",
+   "name_en_at_source": "deemah cream strawberry"
+  },
+  {
+   "gtin": "06290090016126",
+   "search_aliases_ar": [
+    "هاينز مايونيز كلاسيك",
+    "هاينز",
+    "مايونيز",
+    "كلاسيك"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Mayonnaise Classic"
+  },
+  {
+   "gtin": "06291056002481",
+   "search_aliases_ar": [
+    "العين زبادي سائل يوناني",
+    "العين",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "سائل",
+    "يوناني"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Greek yoghurt drink"
+  },
+  {
+   "gtin": "06291107379296",
+   "search_aliases_ar": [
+    "سيارا دجاج ناجتس",
+    "سيارا",
+    "دجاج",
+    "ناجتس",
+    "نقرس",
+    "ناجتز"
+   ],
+   "brand_ar": "سيارا",
+   "name_en_at_source": "Chicken Nuggets"
+  },
+  {
+   "gtin": "06294003562083",
+   "search_aliases_ar": [
+    "نسكافيه كلاسيك",
+    "نسكافيه",
+    "كلاسيك"
+   ],
+   "brand_ar": "نسكافيه",
+   "name_en_at_source": "Nescafe classic 3 in 1"
+  },
+  {
+   "gtin": "06294011697739",
+   "search_aliases_ar": [
+    "لولو حمراء فاصوليا",
+    "لولو",
+    "حمراء",
+    "فاصوليا"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Kidney Beans"
+  },
+  {
+   "gtin": "06300900235743",
+   "search_aliases_ar": [
+    "بلدنا حليب",
+    "بلدنا",
+    "حليب"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "baladna milk"
+  },
+  {
+   "gtin": "09501101821217",
+   "search_aliases_ar": [
+    "بلدنا قليل الدسم حليب",
+    "بلدنا",
+    "قليل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Baladna low fat milk"
+  },
+  {
+   "gtin": "00012000800160",
+   "search_aliases_ar": [
+    "ميرندا برتقال",
+    "ميرندا",
+    "برتقال"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda orange"
+  },
+  {
+   "gtin": "00684500704523",
+   "search_aliases_ar": [
+    "كاليفورنيا جاردن فاخر فول فاصوليا",
+    "كاليفورنيا",
+    "جاردن",
+    "فاخر",
+    "فول",
+    "فاصوليا"
+   ],
+   "brand_ar": "كاليفورنيا جاردن",
+   "name_en_at_source": "Premium Fava Beans"
+  },
+  {
+   "gtin": "00882149004978",
+   "search_aliases_ar": [
+    "كاليفورنيا جاردن زيت زيتون تونة علبة",
+    "كاليفورنيا",
+    "جاردن",
+    "زيت",
+    "زيتون",
+    "تونة",
+    "علبة"
+   ],
+   "brand_ar": "كاليفورنيا جاردن",
+   "name_en_at_source": "Tuna Can Olive Oil"
+  },
+  {
+   "gtin": "04792024009171",
+   "search_aliases_ar": [
+    "ماجي حليب جوز الهند بودرة مشكل",
+    "ماجي",
+    "حليب",
+    "جوز",
+    "الهند",
+    "بودرة",
+    "مشكل"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi Coconut Milk Powder Mix"
+  },
+  {
+   "gtin": "05053990137497",
+   "search_aliases_ar": [
+    "برينجلز كاتشب",
+    "برينجلز",
+    "كاتشب"
+   ],
+   "brand_ar": "برينجلز",
+   "name_en_at_source": "Pringles ketchup"
+  },
+  {
+   "gtin": "06084012090475",
+   "search_aliases_ar": [
+    "كرافت جبن شيدر",
+    "كرافت",
+    "جبن",
+    "جبنة",
+    "شيدر"
+   ],
+   "brand_ar": "كرافت",
+   "name_en_at_source": "Cheddar Cheese"
+  },
+  {
+   "gtin": "06280203456710",
+   "search_aliases_ar": [
+    "تمر عجوة",
+    "تمر",
+    "عجوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes Ajwa"
+  },
+  {
+   "gtin": "06281006870161",
+   "search_aliases_ar": [
+    "ليبتون كرك هيل",
+    "ليبتون",
+    "كرك",
+    "هيل"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Karak Cardamom"
+  },
+  {
+   "gtin": "06281007046381",
+   "search_aliases_ar": [
+    "المراعي يوناني ستايل زبادي فراولة",
+    "المراعي",
+    "يوناني",
+    "ستايل",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "فراولة"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai greek style yogurt strawberry"
+  },
+  {
+   "gtin": "06281007070058",
+   "search_aliases_ar": [
+    "المراعي حليب طازج كامل الدسم",
+    "المراعي",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai fresh milk full fat"
+  },
+  {
+   "gtin": "06281012033178",
+   "search_aliases_ar": [
+    "صن توب برتقال",
+    "صن",
+    "توب",
+    "برتقال"
+   ],
+   "brand_ar": "صن توب",
+   "name_en_at_source": "Suntop orange 125ml"
+  },
+  {
+   "gtin": "06281024110690",
+   "search_aliases_ar": [
+    "بريزيدون جبن مطبوخ خالي الدسم مبستر شيدر نكهة",
+    "بريزيدون",
+    "جبن",
+    "جبنة",
+    "مطبوخ",
+    "خالي",
+    "الدسم",
+    "مبستر",
+    "شيدر",
+    "نكهة"
+   ],
+   "brand_ar": "بريزيدون",
+   "name_en_at_source": "Pasteurized Processed Cheese with Cheddar Taste Fat Free"
+  },
+  {
+   "gtin": "06281039105018",
+   "search_aliases_ar": [
+    "السعودية حليب كامل الدسم",
+    "السعودية",
+    "حليب",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia whole milk"
+  },
+  {
+   "gtin": "06281057012855",
+   "search_aliases_ar": [
+    "نادك قليل الدسم يوناني زبادي سادة",
+    "نادك",
+    "قليل",
+    "الدسم",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "سادة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec greek yogurt plain low fat"
+  },
+  {
+   "gtin": "06284588314443",
+   "search_aliases_ar": [
+    "تمر عجوة",
+    "تمر",
+    "عجوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes Ajwa"
+  },
+  {
+   "gtin": "06287001562520",
+   "search_aliases_ar": [
+    "زعتر بروتين مقرمشات",
+    "زعتر",
+    "بروتين",
+    "مقرمشات"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Zaatar Protein Crackers"
+  },
+  {
+   "gtin": "06287022200166",
+   "search_aliases_ar": [
+    "زيت زيتون أخضر مزارع لايت لحم تونة",
+    "زيت",
+    "زيتون",
+    "أخضر",
+    "مزارع",
+    "لايت",
+    "لحم",
+    "تونة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Green farms light meat tuna in olive oil"
+  },
+  {
+   "gtin": "06291016003787",
+   "search_aliases_ar": [
+    "مانجو رحيق",
+    "مانجو",
+    "رحيق"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mango nectar"
+  },
+  {
+   "gtin": "06291104283664",
+   "search_aliases_ar": [
+    "عضوي أبيض أرز نودلز",
+    "عضوي",
+    "أبيض",
+    "أرز",
+    "نودلز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Organic White rice noodles"
+  },
+  {
+   "gtin": "06291107384450",
+   "search_aliases_ar": [
+    "تمر مسطردة",
+    "تمر",
+    "مسطردة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Date Mustard"
+  },
+  {
+   "gtin": "06294003598761",
+   "search_aliases_ar": [
+    "نسكافيه كابتشينو",
+    "نسكافيه",
+    "كابتشينو"
+   ],
+   "brand_ar": "نسكافيه",
+   "name_en_at_source": "Nescafe Cappuccino"
+  },
+  {
+   "gtin": "06294017111055",
+   "search_aliases_ar": [
+    "نيدو حليب بودرة",
+    "نيدو",
+    "حليب",
+    "بودرة"
+   ],
+   "brand_ar": "نيدو",
+   "name_en_at_source": "Nido Milk Powder"
+  },
+  {
+   "gtin": "06294017121603",
+   "search_aliases_ar": [
+    "ماجي فطر شوربة",
+    "ماجي",
+    "فطر",
+    "شوربة"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi mushroom soup"
+  },
+  {
+   "gtin": "06297001083574",
+   "search_aliases_ar": [
+    "مزارع بلدي قشطة جبن أصلي",
+    "مزارع",
+    "بلدي",
+    "قشطة",
+    "جبن",
+    "جبنة",
+    "أصلي"
+   ],
+   "brand_ar": "مزارع بلدي",
+   "name_en_at_source": "Balade farms cream cheese original"
+  },
+  {
+   "gtin": "06300900235866",
+   "search_aliases_ar": [
+    "بلدنا حليب طازج قليل الدسم",
+    "بلدنا",
+    "حليب",
+    "طازج",
+    "قليل",
+    "الدسم"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "100% Fresh Milk Low Fat"
+  },
+  {
+   "gtin": "08445290340993",
+   "search_aliases_ar": [
+    "نستله قمح",
+    "نستله",
+    "قمح"
+   ],
+   "brand_ar": "نستله",
+   "name_en_at_source": "Nestle Cerelac wheat"
+  },
+  {
+   "gtin": "08850228000281",
+   "search_aliases_ar": [
+    "ريد بول إكسترا طاقة شراب",
+    "ريد",
+    "بول",
+    "إكسترا",
+    "طاقة",
+    "شراب"
+   ],
+   "brand_ar": "ريد بول",
+   "name_en_at_source": "Red bull extra energy drink"
+  },
+  {
+   "gtin": "00000090486586",
+   "search_aliases_ar": [
+    "ريد بول مثلج فانيلا توت نكهة طاقة شراب",
+    "ريد",
+    "بول",
+    "مثلج",
+    "فانيلا",
+    "توت",
+    "نكهة",
+    "طاقة",
+    "شراب"
+   ],
+   "brand_ar": "ريد بول",
+   "name_en_at_source": "Red bull iced vanilla berry flavor energy drink"
+  },
+  {
+   "gtin": "00012000063022",
+   "search_aliases_ar": [
+    "بيبسي تفاح كوكتيل",
+    "بيبسي",
+    "تفاح",
+    "كوكتيل"
+   ],
+   "brand_ar": "بيبسي",
+   "name_en_at_source": "Mirinda plus apple cocktail"
+  },
+  {
+   "gtin": "00012000801655",
+   "search_aliases_ar": [
+    "بيبسي ميني",
+    "بيبسي",
+    "ميني"
+   ],
+   "brand_ar": "بيبسي",
+   "name_en_at_source": "Pepsi mini"
+  },
+  {
+   "gtin": "05449000285850",
+   "search_aliases_ar": [
+    "فانتا برتقال",
+    "فانتا",
+    "برتقال"
+   ],
+   "brand_ar": "فانتا",
+   "name_en_at_source": "Fanta orange"
+  },
+  {
+   "gtin": "05449000303356",
+   "search_aliases_ar": [
+    "فانتا حمضيات",
+    "فانتا",
+    "حمضيات"
+   ],
+   "brand_ar": "فانتا",
+   "name_en_at_source": "Fanta citrus"
+  },
+  {
+   "gtin": "06271002322511",
+   "search_aliases_ar": [
+    "كي دي دي آيس كريم",
+    "كي",
+    "دي",
+    "آيس",
+    "كريم"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Ice cream"
+  },
+  {
+   "gtin": "06281007023511",
+   "search_aliases_ar": [
+    "المراعي قليل الدسم طازج لبن",
+    "المراعي",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai fresh laban low fat"
+  },
+  {
+   "gtin": "06281007032285",
+   "search_aliases_ar": [
+    "المراعي خالي الدسم حليب",
+    "المراعي",
+    "خالي",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai milk fat free"
+  },
+  {
+   "gtin": "06281007032582",
+   "search_aliases_ar": [
+    "المراعي فراولة بنكهة حليب",
+    "المراعي",
+    "فراولة",
+    "بنكهة",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai strawberry flavored milk"
+  },
+  {
+   "gtin": "06281007168205",
+   "search_aliases_ar": [
+    "المراعي جبن شيدر كامل الدسم",
+    "المراعي",
+    "جبن",
+    "جبنة",
+    "شيدر",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai cheddar cheese full fat"
+  },
+  {
+   "gtin": "06281018131687",
+   "search_aliases_ar": [
+    "ندى قليل الدسم يوناني زبادي فراولة",
+    "ندى",
+    "قليل",
+    "الدسم",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "فراولة"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "GREEK YOGHURT Low Fat Strawberry"
+  },
+  {
+   "gtin": "06281018172888",
+   "search_aliases_ar": [
+    "ندى يوناني زبادي",
+    "ندى",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "greek yoghurt"
+  },
+  {
+   "gtin": "06281034914486",
+   "search_aliases_ar": [
+    "باربيكان شعير مشروب حمضيات نكهة",
+    "باربيكان",
+    "شعير",
+    "مشروب",
+    "شراب",
+    "حمضيات",
+    "نكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican malt beverage citrus flavor"
+  },
+  {
+   "gtin": "06281036004345",
+   "search_aliases_ar": [
+    "تسالي كمون ليمون",
+    "تسالي",
+    "كمون",
+    "ليمون"
+   ],
+   "brand_ar": "تسالي",
+   "name_en_at_source": "Tasali cumin and lemon"
+  },
+  {
+   "gtin": "06281050707666",
+   "search_aliases_ar": [
+    "أمريكانا دجاج صدر فيليه",
+    "أمريكانا",
+    "دجاج",
+    "صدر",
+    "فيليه"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Chicken Breast Fillet"
+  },
+  {
+   "gtin": "06281057017362",
+   "search_aliases_ar": [
+    "نادك كفير",
+    "نادك",
+    "كفير"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec kefir"
+  },
+  {
+   "gtin": "06281063882299",
+   "search_aliases_ar": [
+    "فريشلي فراولة شراب",
+    "فريشلي",
+    "فراولة",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly strawberry syrup"
+  },
+  {
+   "gtin": "06288005913240",
+   "search_aliases_ar": [
+    "سيافة عجوة تمر",
+    "سيافة",
+    "عجوة",
+    "تمر"
+   ],
+   "brand_ar": "سيافة",
+   "name_en_at_source": "Ajwa Fine Dates"
+  },
+  {
+   "gtin": "06291003005602",
+   "search_aliases_ar": [
+    "تيفاني ويفر شوكولاتة",
+    "تيفاني",
+    "ويفر",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "تيفاني",
+   "name_en_at_source": "Tiffany Wafer Chocolate"
+  },
+  {
+   "gtin": "06291003095641",
+   "search_aliases_ar": [
+    "آيس كريم",
+    "آيس",
+    "كريم"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Ice Cream"
+  },
+  {
+   "gtin": "06291010901096",
+   "search_aliases_ar": [
+    "مانجو فواكه شراب",
+    "مانجو",
+    "فواكه",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mango fruit drink"
+  },
+  {
+   "gtin": "06291014130034",
+   "search_aliases_ar": [
+    "حليب شوكولاتة تمر فول سوداني",
+    "حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "فول",
+    "سوداني"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Milk Chocolate Date & Peanut"
+  },
+  {
+   "gtin": "06291056002320",
+   "search_aliases_ar": [
+    "العين ليمون نعناع عصير",
+    "العين",
+    "ليمون",
+    "نعناع",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Lemon Mint Juice"
+  },
+  {
+   "gtin": "06291056180318",
+   "search_aliases_ar": [
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Yoghurt"
+  },
+  {
+   "gtin": "06291058156960",
+   "search_aliases_ar": [
+    "سريع التحضير نودلز لحم بقري نكهة",
+    "سريع",
+    "التحضير",
+    "نودلز",
+    "لحم",
+    "بقري",
+    "نكهة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Instant noodles beef flavor"
+  },
+  {
+   "gtin": "06291104282421",
+   "search_aliases_ar": [
+    "أورجانيك لاردر أسود شيا بذور",
+    "أورجانيك",
+    "لاردر",
+    "أسود",
+    "شيا",
+    "بذور"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Black Chia Seeds"
+  },
+  {
+   "gtin": "06291115001318",
+   "search_aliases_ar": [
+    "إبل حليب",
+    "إبل",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Camel milk"
+  },
+  {
+   "gtin": "06294017107232",
+   "search_aliases_ar": [
+    "ماجي قشطة فطر شوربة",
+    "ماجي",
+    "قشطة",
+    "فطر",
+    "شوربة"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi cream of mushroom soup"
+  },
+  {
+   "gtin": "07894904255986",
+   "search_aliases_ar": [
+    "سيارا مفروم لحم بقري",
+    "سيارا",
+    "مفروم",
+    "لحم",
+    "بقري"
+   ],
+   "brand_ar": "سيارا",
+   "name_en_at_source": "Minced Beef"
+  },
+  {
+   "gtin": "06271002103219",
+   "search_aliases_ar": [
+    "كي دي دي خالي الدسم حليب",
+    "كي",
+    "دي",
+    "خالي",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "KDD Skimmed Milk"
+  },
+  {
+   "gtin": "06271100082584",
+   "search_aliases_ar": [
+    "سردين"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "sardines"
+  },
+  {
+   "gtin": "06281007027380",
+   "search_aliases_ar": [
+    "المراعي كامل الدسم طازج زبادي",
+    "المراعي",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai fresh yogurt full fat"
+  },
+  {
+   "gtin": "06281018110187",
+   "search_aliases_ar": [
+    "ندى حليب طازج كامل الدسم",
+    "ندى",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada fresh milk full cream"
+  },
+  {
+   "gtin": "06281018127413",
+   "search_aliases_ar": [
+    "مشكل فواكه رحيق",
+    "مشكل",
+    "فواكه",
+    "رحيق"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mixed fruit nectar"
+  },
+  {
+   "gtin": "06281022120363",
+   "search_aliases_ar": [
+    "الصافي حليب طازج كامل الدسم",
+    "الصافي",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh milk full fat"
+  },
+  {
+   "gtin": "06281060051766",
+   "search_aliases_ar": [
+    "قيصر فواكه مشكل كركديه رحيق",
+    "قيصر",
+    "فواكه",
+    "مشكل",
+    "كركديه",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar fruit mix hibiscus nectar"
+  },
+  {
+   "gtin": "06281060101980",
+   "search_aliases_ar": [
+    "قيصر تفاح عصير",
+    "قيصر",
+    "تفاح",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar apple juice"
+  },
+  {
+   "gtin": "06281175001601",
+   "search_aliases_ar": [
+    "تمر معمول",
+    "تمر",
+    "معمول"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Date maamoul"
+  },
+  {
+   "gtin": "06287016881135",
+   "search_aliases_ar": [
+    "سمسم"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Sesame"
+  },
+  {
+   "gtin": "06291029110014",
+   "search_aliases_ar": [
+    "حلوم"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Halloumi"
+  },
+  {
+   "gtin": "06291108340936",
+   "search_aliases_ar": [
+    "كريمي لبنة",
+    "كريمي",
+    "لبنة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Creamy labneh"
+  },
+  {
+   "gtin": "06297000999807",
+   "search_aliases_ar": [
+    "مشكل بقلاوة",
+    "مشكل",
+    "بقلاوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mixed Baklava"
+  },
+  {
+   "gtin": "06300900362517",
+   "search_aliases_ar": [
+    "مزرعتي حليب كامل الدسم",
+    "مزرعتي",
+    "حليب",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "مزرعتي",
+   "name_en_at_source": "Whole milk"
+  },
+  {
+   "gtin": "08692971031569",
+   "search_aliases_ar": [
+    "بريزيدون كريمي تركي لبنة",
+    "بريزيدون",
+    "كريمي",
+    "تركي",
+    "لبنة"
+   ],
+   "brand_ar": "بريزيدون",
+   "name_en_at_source": "President the creamy turkish labneh"
+  },
+  {
+   "gtin": "00000050112142",
+   "search_aliases_ar": [
+    "فانتا فراولة",
+    "فانتا",
+    "فراولة"
+   ],
+   "brand_ar": "فانتا",
+   "name_en_at_source": "Fanta strawberry"
+  },
+  {
+   "gtin": "00012000022869",
+   "search_aliases_ar": [
+    "سفن أب زيرو سكر",
+    "سفن",
+    "أب",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "سفن أب",
+   "name_en_at_source": "7up zero sugar"
+  },
+  {
+   "gtin": "00617950701460",
+   "search_aliases_ar": [
+    "العلالي حبّ كامل ذرة حلوة",
+    "العلالي",
+    "حبّ",
+    "كامل",
+    "ذرة",
+    "حلوة"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "Alalali sweet corn whole kernel"
+  },
+  {
+   "gtin": "00749460633495",
+   "search_aliases_ar": [
+    "باونتي صلصة",
+    "باونتي",
+    "صلصة"
+   ],
+   "brand_ar": "باونتي",
+   "name_en_at_source": "Bounty Sauce"
+  },
+  {
+   "gtin": "06084012090222",
+   "search_aliases_ar": [
+    "كرافت جبن شيدر قابل للدهن أصلي",
+    "كرافت",
+    "جبن",
+    "جبنة",
+    "شيدر",
+    "قابل",
+    "للدهن",
+    "أصلي"
+   ],
+   "brand_ar": "كرافت",
+   "name_en_at_source": "Kraft cheddar cheese spreadable original"
+  },
+  {
+   "gtin": "06253808660219",
+   "search_aliases_ar": [
+    "كيو بيك سادة كوب كيك",
+    "كيو",
+    "بيك",
+    "سادة",
+    "كوب",
+    "كيك"
+   ],
+   "brand_ar": "كيو بيك",
+   "name_en_at_source": "Plain Cup Cake"
+  },
+  {
+   "gtin": "06260418702451",
+   "search_aliases_ar": [
+    "نستله قمح",
+    "نستله",
+    "قمح"
+   ],
+   "brand_ar": "نستله",
+   "name_en_at_source": "Cerelac Wheat"
+  },
+  {
+   "gtin": "06271002210719",
+   "search_aliases_ar": [
+    "كي دي دي أناناس عصير",
+    "كي",
+    "دي",
+    "أناناس",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Kdd pineapple juice 250 ml"
+  },
+  {
+   "gtin": "06281006809901",
+   "search_aliases_ar": [
+    "كنور دجاج زعتر سمسم",
+    "كنور",
+    "دجاج",
+    "زعتر",
+    "سمسم"
+   ],
+   "brand_ar": "كنور",
+   "name_en_at_source": "Knorr Chicken Thyme & Sesame"
+  },
+  {
+   "gtin": "06281007168403",
+   "search_aliases_ar": [
+    "المراعي جبن شيدر كامل الدسم",
+    "المراعي",
+    "جبن",
+    "جبنة",
+    "شيدر",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai cheddar cheese full fat"
+  },
+  {
+   "gtin": "06281016273594",
+   "search_aliases_ar": [
+    "البطل بطاطس أصابع إكسترا شطة",
+    "البطل",
+    "بطاطس",
+    "أصابع",
+    "إكسترا",
+    "شطة"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal potato sticks extra chili"
+  },
+  {
+   "gtin": "06281020318236",
+   "search_aliases_ar": [
+    "لونا مثلج قهوة أصلي",
+    "لونا",
+    "مثلج",
+    "قهوة",
+    "أصلي"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna Iced Coffee Original"
+  },
+  {
+   "gtin": "06281022120431",
+   "search_aliases_ar": [
+    "الصافي حليب طازج كامل الدسم",
+    "الصافي",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh milk full fat"
+  },
+  {
+   "gtin": "06281034904456",
+   "search_aliases_ar": [
+    "باربيكان رمان نكهة",
+    "باربيكان",
+    "رمان",
+    "نكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican pomegranate flavor"
+  },
+  {
+   "gtin": "06281039829112",
+   "search_aliases_ar": [
+    "مقرمش جبن",
+    "مقرمش",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Crispy cheese"
+  },
+  {
+   "gtin": "06281060903140",
+   "search_aliases_ar": [
+    "قيصر جوافة فواكه مشكل رحيق",
+    "قيصر",
+    "جوافة",
+    "فواكه",
+    "مشكل",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar guava and fruit mix nectar"
+  },
+  {
+   "gtin": "06281063450283",
+   "search_aliases_ar": [
+    "فريشلي توفي شراب",
+    "فريشلي",
+    "توفي",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly toffee syrup"
+  },
+  {
+   "gtin": "06291007912104",
+   "search_aliases_ar": [
+    "بريتانيا زبدة كوكيز",
+    "بريتانيا",
+    "زبدة",
+    "كوكيز"
+   ],
+   "brand_ar": "بريتانيا",
+   "name_en_at_source": "Butter cookies"
+  },
+  {
+   "gtin": "06291011050182",
+   "search_aliases_ar": [
+    "تشوكوديت شوكولاتة تمر لوز",
+    "تشوكوديت",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "لوز"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Chocodate Choco-date With Almond (90 G)"
+  },
+  {
+   "gtin": "06291011053831",
+   "search_aliases_ar": [
+    "تشوكوديت مشكل شوكولاتة",
+    "تشوكوديت",
+    "مشكل",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Assorted chocolate"
+  },
+  {
+   "gtin": "06291056003846",
+   "search_aliases_ar": [
+    "العين أصلي كفير",
+    "العين",
+    "أصلي",
+    "كفير"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Original Kefir"
+  },
+  {
+   "gtin": "06291104288041",
+   "search_aliases_ar": [
+    "أورجانيك لاردر شوفان كوكيز",
+    "أورجانيك",
+    "لاردر",
+    "شوفان",
+    "كوكيز"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Oat cookies"
+  },
+  {
+   "gtin": "00000090486975",
+   "search_aliases_ar": [
+    "ريد بول زيرو طاقة شراب",
+    "ريد",
+    "بول",
+    "زيرو",
+    "طاقة",
+    "شراب"
+   ],
+   "brand_ar": "ريد بول",
+   "name_en_at_source": "Red bull zero energy drink"
+  },
+  {
+   "gtin": "04011100815476",
+   "search_aliases_ar": [
+    "جالاكسي آيس كريم",
+    "جالاكسي",
+    "آيس",
+    "كريم"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Ice cream galaxy"
+  },
+  {
+   "gtin": "05011371601104",
+   "search_aliases_ar": [
+    "العلالي أبيض شوفان",
+    "العلالي",
+    "أبيض",
+    "شوفان"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "White Oats"
+  },
+  {
+   "gtin": "05290036003297",
+   "search_aliases_ar": [
+    "بوك حلوم جبن",
+    "بوك",
+    "حلوم",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Puck halloumi cheese"
+  },
+  {
+   "gtin": "06084000092139",
+   "search_aliases_ar": [
+    "لولو أرز دقيق",
+    "لولو",
+    "أرز",
+    "دقيق"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Rice Flour"
+  },
+  {
+   "gtin": "06084012090567",
+   "search_aliases_ar": [
+    "كرافت جبن شيدر",
+    "كرافت",
+    "جبن",
+    "جبنة",
+    "شيدر"
+   ],
+   "brand_ar": "كرافت",
+   "name_en_at_source": "Cheddar cheese"
+  },
+  {
+   "gtin": "06271002311515",
+   "search_aliases_ar": [
+    "كي دي دي آيس كريم شوكولاتة",
+    "كي",
+    "دي",
+    "آيس",
+    "كريم",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Chocolate Ice Cream"
+  },
+  {
+   "gtin": "06281006710009",
+   "search_aliases_ar": [
+    "ليبتون مثلج شاي خوخ",
+    "ليبتون",
+    "مثلج",
+    "شاي",
+    "خوخ"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton Ice Tea Peach"
+  },
+  {
+   "gtin": "06281014800426",
+   "search_aliases_ar": [
+    "قودي زيت دوار الشمس أصلي لايت لحم تونة",
+    "قودي",
+    "زيت",
+    "دوار",
+    "الشمس",
+    "أصلي",
+    "لايت",
+    "لحم",
+    "تونة"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Goody original light meat tuna in sunflower oil"
+  },
+  {
+   "gtin": "06281018143383",
+   "search_aliases_ar": [
+    "ندى تركي لبنة",
+    "ندى",
+    "تركي",
+    "لبنة"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada turkish labneh"
+  },
+  {
+   "gtin": "06281018316770",
+   "search_aliases_ar": [
+    "ندى لبنة",
+    "ندى",
+    "لبنة"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Labneh"
+  },
+  {
+   "gtin": "06281057002689",
+   "search_aliases_ar": [
+    "نادك حليب طازج قليل الدسم",
+    "نادك",
+    "حليب",
+    "طازج",
+    "قليل",
+    "الدسم"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh milk low fat"
+  },
+  {
+   "gtin": "06281063222149",
+   "search_aliases_ar": [
+    "شرقي حدائق طماطم صلصة",
+    "شرقي",
+    "حدائق",
+    "طماطم",
+    "صلصة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens tomato sauce"
+  },
+  {
+   "gtin": "06281063461302",
+   "search_aliases_ar": [
+    "شرقي حدائق أبيض فاصوليا",
+    "شرقي",
+    "حدائق",
+    "أبيض",
+    "فاصوليا"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens White beans"
+  },
+  {
+   "gtin": "06281063882466",
+   "search_aliases_ar": [
+    "فريشلي أصلي بان كيك مشكل",
+    "فريشلي",
+    "أصلي",
+    "بان",
+    "كيك",
+    "مشكل"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Original pancake mix"
+  },
+  {
+   "gtin": "06281063882756",
+   "search_aliases_ar": [
+    "فريشلي حبّ كامل ذرة خالي من سكر خالي من ملح",
+    "فريشلي",
+    "حبّ",
+    "كامل",
+    "ذرة",
+    "خالي",
+    "من",
+    "سكر",
+    "ملح"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly whole kernel corn no sugar no salt"
+  },
+  {
+   "gtin": "06281063883227",
+   "search_aliases_ar": [
+    "فريشلي شوكولاتة شعير شراب",
+    "فريشلي",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "شعير",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly chocolate malt syrup"
+  },
+  {
+   "gtin": "06282351231294",
+   "search_aliases_ar": [
+    "زنجبيل ثوم معجون",
+    "زنجبيل",
+    "ثوم",
+    "معجون"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Ginger Garlic Paste"
+  },
+  {
+   "gtin": "06287007100627",
+   "search_aliases_ar": [
+    "تمر عجوة",
+    "تمر",
+    "عجوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes Ajwa"
+  },
+  {
+   "gtin": "06287034100102",
+   "search_aliases_ar": [
+    "كينزا حمضيات",
+    "كينزا",
+    "حمضيات"
+   ],
+   "brand_ar": "كينزا",
+   "name_en_at_source": "Kinza citrus"
+  },
+  {
+   "gtin": "06287034100119",
+   "search_aliases_ar": [
+    "كينزا برتقال",
+    "كينزا",
+    "برتقال"
+   ],
+   "brand_ar": "كينزا",
+   "name_en_at_source": "Kinza orange"
+  },
+  {
+   "gtin": "06287034101130",
+   "search_aliases_ar": [
+    "كينزا زيرو سكر",
+    "كينزا",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "كينزا",
+   "name_en_at_source": "Kinza zero sugar"
+  },
+  {
+   "gtin": "06287727031027",
+   "search_aliases_ar": [
+    "مطبوخ أبيض روبيان",
+    "مطبوخ",
+    "أبيض",
+    "روبيان"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Cooked White shrimp"
+  },
+  {
+   "gtin": "06291100213320",
+   "search_aliases_ar": [
+    "ديت كراون تمر شراب",
+    "ديت",
+    "كراون",
+    "تمر",
+    "شراب"
+   ],
+   "brand_ar": "ديت كراون",
+   "name_en_at_source": "Date Syrup"
+  },
+  {
+   "gtin": "06291104289284",
+   "search_aliases_ar": [
+    "أورجانيك لاردر عضوي",
+    "أورجانيك",
+    "لاردر",
+    "عضوي"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Organic"
+  },
+  {
+   "gtin": "06291107053790",
+   "search_aliases_ar": [
+    "كريمة حامضة",
+    "كريمة",
+    "حامضة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Sour Cream"
+  },
+  {
+   "gtin": "06294011634574",
+   "search_aliases_ar": [
+    "لولو حليب جوز الهند بودرة",
+    "لولو",
+    "حليب",
+    "جوز",
+    "الهند",
+    "بودرة"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Coconut Milk Powder"
+  },
+  {
+   "gtin": "06300900360568",
+   "search_aliases_ar": [
+    "مزرعتي بنكهة كفير لبن",
+    "مزرعتي",
+    "بنكهة",
+    "كفير",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "مزرعتي",
+   "name_en_at_source": "Flavored kefir Laban"
+  },
+  {
+   "gtin": "08401860146518",
+   "search_aliases_ar": [
+    "لابيرفا زيرو سكر كاتشب",
+    "لابيرفا",
+    "زيرو",
+    "سكر",
+    "كاتشب"
+   ],
+   "brand_ar": "لابيرفا",
+   "name_en_at_source": "Laperva zero sugar ketchup"
+  },
+  {
+   "gtin": "08692971032573",
+   "search_aliases_ar": [
+    "بريزيدون كريمي تركي لبنة",
+    "بريزيدون",
+    "كريمي",
+    "تركي",
+    "لبنة"
+   ],
+   "brand_ar": "بريزيدون",
+   "name_en_at_source": "President the creamy turkish labneh"
+  },
+  {
+   "gtin": "00000029590469",
+   "search_aliases_ar": [
+    "سبينيس كامل الدسم حليب",
+    "سبينيس",
+    "كامل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Full Fat Milk"
+  },
+  {
+   "gtin": "00012000805356",
+   "search_aliases_ar": [
+    "سفن أب زيرو",
+    "سفن",
+    "أب",
+    "زيرو"
+   ],
+   "brand_ar": "سفن أب",
+   "name_en_at_source": "7Up ZERO"
+  },
+  {
+   "gtin": "06271002107521",
+   "search_aliases_ar": [
+    "كي دي دي قهوة لاتيه قهوة حليب",
+    "كي",
+    "دي",
+    "قهوة",
+    "لاتيه",
+    "حليب"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Kdd coffee latte coffee with milk"
+  },
+  {
+   "gtin": "06281007031202",
+   "search_aliases_ar": [
+    "المراعي طبخ قشطة",
+    "المراعي",
+    "طبخ",
+    "قشطة"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "cooking cream"
+  },
+  {
+   "gtin": "06281007032568",
+   "search_aliases_ar": [
+    "المراعي كامل الدسم حليب",
+    "المراعي",
+    "كامل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai milk full fat"
+  },
+  {
+   "gtin": "06281007034012",
+   "search_aliases_ar": [
+    "المراعي كامل الدسم طازج حامض زبادي",
+    "المراعي",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "حامض",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai fresh sour yogurt full fat"
+  },
+  {
+   "gtin": "06281020172395",
+   "search_aliases_ar": [
+    "لونا مثلج قهوة موكا",
+    "لونا",
+    "مثلج",
+    "قهوة",
+    "موكا"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna iced coffee mocha"
+  },
+  {
+   "gtin": "06281020337732",
+   "search_aliases_ar": [
+    "لونا حمص",
+    "لونا",
+    "حمص"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna chickpeas"
+  },
+  {
+   "gtin": "06281034007164",
+   "search_aliases_ar": [
+    "باربيكان توت أحمر نكهة",
+    "باربيكان",
+    "توت",
+    "أحمر",
+    "نكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican raspberry flavor"
+  },
+  {
+   "gtin": "06281063600022",
+   "search_aliases_ar": [
+    "شرقي حدائق توت أزرق فطيرة حشوة",
+    "شرقي",
+    "حدائق",
+    "توت",
+    "أزرق",
+    "فطيرة",
+    "حشوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens blueberry pie filling"
+  },
+  {
+   "gtin": "06285602012253",
+   "search_aliases_ar": [
+    "ديمة مقرمشات ملح",
+    "ديمة",
+    "مقرمشات",
+    "ملح"
+   ],
+   "brand_ar": "ديمة",
+   "name_en_at_source": "Crackers -Salt"
+  },
+  {
+   "gtin": "06287034100126",
+   "search_aliases_ar": [
+    "كينزا ليمون",
+    "كينزا",
+    "ليمون"
+   ],
+   "brand_ar": "كينزا",
+   "name_en_at_source": "Kinza lemon"
+  },
+  {
+   "gtin": "06291003003257",
+   "search_aliases_ar": [
+    "تيفاني مانجو بسكويت",
+    "تيفاني",
+    "مانجو",
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": "تيفاني",
+   "name_en_at_source": "Tiffany Mango Biscuits -"
+  },
+  {
+   "gtin": "06291011051943",
+   "search_aliases_ar": [
+    "تشوكوديت داكن",
+    "تشوكوديت",
+    "داكن"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Chocodate dark"
+  },
+  {
+   "gtin": "06291011055439",
+   "search_aliases_ar": [
+    "تشوكوديت أبيض",
+    "تشوكوديت",
+    "أبيض"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Chocodate White"
+  },
+  {
+   "gtin": "06291014129991",
+   "search_aliases_ar": [
+    "حليب شوكولاتة تمر فول سوداني",
+    "حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "فول",
+    "سوداني"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Milk chocolate date & peanut"
+  },
+  {
+   "gtin": "06291100198764",
+   "search_aliases_ar": [
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes"
+  },
+  {
+   "gtin": "06291105410359",
+   "search_aliases_ar": [
+    "مبخّر محشو حليب",
+    "مبخّر",
+    "محشو",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "EVAPORATED FILLED MILK"
+  },
+  {
+   "gtin": "06291108636961",
+   "search_aliases_ar": [
+    "بتيل داكن شوكولاتة",
+    "بتيل",
+    "داكن",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "بتيل",
+   "name_en_at_source": "Dark Chocolate"
+  },
+  {
+   "gtin": "06294001850793",
+   "search_aliases_ar": [
+    "جالاكسي فستق كنافة حليب",
+    "جالاكسي",
+    "فستق",
+    "كنافة",
+    "حليب"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Pistachio Kunafa Milk"
+  },
+  {
+   "gtin": "06294011602481",
+   "search_aliases_ar": [
+    "لولو فشار لايت زبدة",
+    "لولو",
+    "فشار",
+    "لايت",
+    "زبدة"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Popcorn (Lite Butter)"
+  },
+  {
+   "gtin": "06300900234807",
+   "search_aliases_ar": [
+    "بلدنا كامل الدسم يوناني ستايل مشكل توت زبادي",
+    "بلدنا",
+    "كامل",
+    "الدسم",
+    "يوناني",
+    "ستايل",
+    "مشكل",
+    "توت",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Greek Style Mixed Berry Yoghurt (Full Fat)"
+  },
+  {
+   "gtin": "06300900237754",
+   "search_aliases_ar": [
+    "بلدنا يوناني ستايل سادة بروتين",
+    "بلدنا",
+    "يوناني",
+    "ستايل",
+    "سادة",
+    "بروتين"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "greek style plain protein"
+  },
+  {
+   "gtin": "07340001804225",
+   "search_aliases_ar": [
+    "بيربلز حليب شيك بروتين فانيلا نكهة",
+    "بيربلز",
+    "حليب",
+    "شيك",
+    "بروتين",
+    "فانيلا",
+    "نكهة"
+   ],
+   "brand_ar": "بيربلز",
+   "name_en_at_source": "Barebells milk shake protein vanilla flavor"
+  },
+  {
+   "gtin": "09501101821873",
+   "search_aliases_ar": [
+    "كامل الدسم طازج زبادي",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Fresh full fat yoghurt"
+  },
+  {
+   "gtin": "00617950200628",
+   "search_aliases_ar": [
+    "العلالي خبز بودرة",
+    "العلالي",
+    "خبز",
+    "بودرة"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "Baking Powder"
+  },
+  {
+   "gtin": "06080022105130",
+   "search_aliases_ar": [
+    "كسكس"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Couscous"
+  },
+  {
+   "gtin": "06270024000896",
+   "search_aliases_ar": [
+    "أمريكانا ساندويتش",
+    "أمريكانا",
+    "ساندويتش"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Americana Sandwich"
+  },
+  {
+   "gtin": "06271002118619",
+   "search_aliases_ar": [
+    "موز بنكهة حليب",
+    "موز",
+    "بنكهة",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Banana flavored milk"
+  },
+  {
+   "gtin": "06271002220916",
+   "search_aliases_ar": [
+    "كي دي دي برتقال عصير",
+    "كي",
+    "دي",
+    "برتقال",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "KDD Orange juice 180 ml"
+  },
+  {
+   "gtin": "06280102011492",
+   "search_aliases_ar": [
+    "سنيكرز كيك",
+    "سنيكرز",
+    "كيك"
+   ],
+   "brand_ar": "سنيكرز",
+   "name_en_at_source": "Snickers Cake"
+  },
+  {
+   "gtin": "06281007032438",
+   "search_aliases_ar": [
+    "المراعي قليل الدسم حليب",
+    "المراعي",
+    "قليل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Low Fat Milk"
+  },
+  {
+   "gtin": "06281014002745",
+   "search_aliases_ar": [
+    "قودي زبدة فول سوداني كريمي",
+    "قودي",
+    "زبدة",
+    "فول",
+    "سوداني",
+    "كريمي"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Creamy Peanut Butter"
+  },
+  {
+   "gtin": "06281018297987",
+   "search_aliases_ar": [
+    "ندى زبادي",
+    "ندى",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Yogurt"
+  },
+  {
+   "gtin": "06281022118223",
+   "search_aliases_ar": [
+    "أكتيفيا زبادي لايت فراولة",
+    "أكتيفيا",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "لايت",
+    "فراولة"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia Yogurt Light Strawberry"
+  },
+  {
+   "gtin": "06281024116173",
+   "search_aliases_ar": [
+    "بريزيدون لايت موزاريلا",
+    "بريزيدون",
+    "لايت",
+    "موزاريلا"
+   ],
+   "brand_ar": "بريزيدون",
+   "name_en_at_source": "Light Mozzarella"
+  },
+  {
+   "gtin": "06281060903164",
+   "search_aliases_ar": [
+    "قيصر مانجو فواكه مشكل رحيق",
+    "قيصر",
+    "مانجو",
+    "فواكه",
+    "مشكل",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar mango and fruit mix nectar"
+  },
+  {
+   "gtin": "06281063881278",
+   "search_aliases_ar": [
+    "زبدة فول سوداني كريمي",
+    "زبدة",
+    "فول",
+    "سوداني",
+    "كريمي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Peanut Butter Creamy"
+  },
+  {
+   "gtin": "06291104284128",
+   "search_aliases_ar": [
+    "أورجانيك لاردر عضوي أسود شيا بذور",
+    "أورجانيك",
+    "لاردر",
+    "عضوي",
+    "أسود",
+    "شيا",
+    "بذور"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Organic Black Chia Seeds"
+  },
+  {
+   "gtin": "06294003587956",
+   "search_aliases_ar": [
+    "ماجي حار حار مشكل",
+    "ماجي",
+    "حار",
+    "مشكل"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi Hot & Spicy Mix"
+  },
+  {
+   "gtin": "06294003588014",
+   "search_aliases_ar": [
+    "ماجي شاورما مشكل",
+    "ماجي",
+    "شاورما",
+    "مشكل"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi shawarma mix"
+  },
+  {
+   "gtin": "06297001083482",
+   "search_aliases_ar": [
+    "مزارع بلدي كفير",
+    "مزارع",
+    "بلدي",
+    "كفير"
+   ],
+   "brand_ar": "مزارع بلدي",
+   "name_en_at_source": "Balade farms kefir"
+  },
+  {
+   "gtin": "07894904256419",
+   "search_aliases_ar": [
+    "سيارا مقرمش بالبقسماط دجاج فيليه",
+    "سيارا",
+    "مقرمش",
+    "بالبقسماط",
+    "دجاج",
+    "فيليه"
+   ],
+   "brand_ar": "سيارا",
+   "name_en_at_source": "Breaded Chicken Fillet"
+  },
+  {
+   "gtin": "08410522001133",
+   "search_aliases_ar": [
+    "شرائح أسود زيتون",
+    "شرائح",
+    "أسود",
+    "زيتون"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Sliced black olives"
+  },
+  {
+   "gtin": "08693887003176",
+   "search_aliases_ar": [
+    "سبريد بندق كاكاو",
+    "سبريد",
+    "بندق",
+    "كاكاو"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Cocoa hazelnut spread"
+  },
+  {
+   "gtin": "00012000057557",
+   "search_aliases_ar": [
+    "ميرندا أخضر تفاح",
+    "ميرندا",
+    "أخضر",
+    "تفاح"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda green apple"
+  },
+  {
+   "gtin": "00062810631058",
+   "search_aliases_ar": [
+    "فريشلي حبّ كامل ذرة",
+    "فريشلي",
+    "حبّ",
+    "كامل",
+    "ذرة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly whole kernel corn"
+  },
+  {
+   "gtin": "00617950205531",
+   "search_aliases_ar": [
+    "العلالي فراولة شراب",
+    "العلالي",
+    "فراولة",
+    "شراب"
+   ],
+   "brand_ar": "العلالي",
+   "name_en_at_source": "Alalali strawberry syrup"
+  },
+  {
+   "gtin": "00709993323263",
+   "search_aliases_ar": [
+    "نيتشرلاند أحمر حمراء فاصوليا",
+    "نيتشرلاند",
+    "أحمر",
+    "حمراء",
+    "فاصوليا"
+   ],
+   "brand_ar": "نيتشرلاند",
+   "name_en_at_source": "Nature land red kidney beans"
+  },
+  {
+   "gtin": "06223000410448",
+   "search_aliases_ar": [
+    "أمريكانا شيبس فرنسي جبن",
+    "أمريكانا",
+    "شيبس",
+    "رقائق",
+    "بطاطس مقرمشة",
+    "فرنسي",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Americana chips french cheese"
+  },
+  {
+   "gtin": "06260418702420",
+   "search_aliases_ar": [
+    "نستله قمح",
+    "نستله",
+    "قمح"
+   ],
+   "brand_ar": "نستله",
+   "name_en_at_source": "Cerelac Wheat"
+  },
+  {
+   "gtin": "06271002270713",
+   "search_aliases_ar": [
+    "كي دي دي طماطم معجون",
+    "كي",
+    "دي",
+    "طماطم",
+    "معجون"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Tomato Paste"
+  },
+  {
+   "gtin": "06281006704954",
+   "search_aliases_ar": [
+    "ليبتون كركديه",
+    "ليبتون",
+    "كركديه"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton Hibiscus -"
+  },
+  {
+   "gtin": "06281007038928",
+   "search_aliases_ar": [
+    "المراعي فراولة بنكهة حليب",
+    "المراعي",
+    "فراولة",
+    "بنكهة",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai strawberry flavored milk"
+  },
+  {
+   "gtin": "06281018316190",
+   "search_aliases_ar": [
+    "ندى شوكولاتة حليب",
+    "ندى",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada chocolate milk"
+  },
+  {
+   "gtin": "06281022118414",
+   "search_aliases_ar": [
+    "أكتيفيا كامل الدسم",
+    "أكتيفيا",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia full fat"
+  },
+  {
+   "gtin": "06281022181258",
+   "search_aliases_ar": [
+    "صافيو شوكولاتة حليب",
+    "صافيو",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "صافيو",
+   "name_en_at_source": "Safio Chocolate Milk -"
+  },
+  {
+   "gtin": "06281057011667",
+   "search_aliases_ar": [
+    "نادك قليل الدسم طازج لبن",
+    "نادك",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh laban low fat"
+  },
+  {
+   "gtin": "06285349001039",
+   "search_aliases_ar": [
+    "تمر عجوة",
+    "تمر",
+    "عجوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes ajwa"
+  },
+  {
+   "gtin": "06291047020586",
+   "search_aliases_ar": [
+    "سباغيتي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Spaghetti"
+  },
+  {
+   "gtin": "06297000395876",
+   "search_aliases_ar": [
+    "فاين مدخّن سلمون",
+    "فاين",
+    "مدخّن",
+    "سلمون"
+   ],
+   "brand_ar": "فاين",
+   "name_en_at_source": "Smoked Salmon"
+  },
+  {
+   "gtin": "06300900230663",
+   "search_aliases_ar": [
+    "قليل الدسم مانجو زبادي",
+    "قليل",
+    "الدسم",
+    "مانجو",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "mango low fat yogurt"
+  },
+  {
+   "gtin": "00012000803024",
+   "search_aliases_ar": [
+    "ميرندا فراولة",
+    "ميرندا",
+    "فراولة"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda strawberry"
+  },
+  {
+   "gtin": "00627735268309",
+   "search_aliases_ar": [
+    "جريت فاليو بسمتي أرز",
+    "جريت",
+    "فاليو",
+    "بسمتي",
+    "أرز"
+   ],
+   "brand_ar": "جريت فاليو",
+   "name_en_at_source": "Basmati Rice"
+  },
+  {
+   "gtin": "00717544110125",
+   "search_aliases_ar": [
+    "فريشلي خالي السكر بان كيك شراب",
+    "فريشلي",
+    "خالي",
+    "السكر",
+    "بان",
+    "كيك",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Pancake Syrup Sugar Free"
+  },
+  {
+   "gtin": "05711953198557",
+   "search_aliases_ar": [
+    "جالاكسي حليب جوز الهند نكهة",
+    "جالاكسي",
+    "حليب",
+    "جوز",
+    "الهند",
+    "نكهة"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Galaxy milk coconut flavor"
+  },
+  {
+   "gtin": "06271002103899",
+   "search_aliases_ar": [
+    "فراولة حليب",
+    "فراولة",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "strawberry milk"
+  },
+  {
+   "gtin": "06271002341611",
+   "search_aliases_ar": [
+    "كي دي دي آيس كريم فانيلا طري",
+    "كي",
+    "دي",
+    "آيس",
+    "كريم",
+    "فانيلا",
+    "طري"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Vanilla soft ice cream"
+  },
+  {
+   "gtin": "06281007118132",
+   "search_aliases_ar": [
+    "المراعي قليل الدسم طازج لبن",
+    "المراعي",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai fresh laban low fat"
+  },
+  {
+   "gtin": "06281014146005",
+   "search_aliases_ar": [
+    "قودي بان كيك شراب",
+    "قودي",
+    "بان",
+    "كيك",
+    "شراب"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Goody pancake syrup"
+  },
+  {
+   "gtin": "06281020040908",
+   "search_aliases_ar": [
+    "زيت دوار الشمس أخضر مزارع لايت لحم تونة",
+    "زيت",
+    "دوار",
+    "الشمس",
+    "أخضر",
+    "مزارع",
+    "لايت",
+    "لحم",
+    "تونة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Green farms light meat tuna in sunflower oil"
+  },
+  {
+   "gtin": "06281022132670",
+   "search_aliases_ar": [
+    "الصافي كامل الدسم طازج زبادي",
+    "الصافي",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh yogurt full fat"
+  },
+  {
+   "gtin": "06281036004918",
+   "search_aliases_ar": [
+    "تسالي حار قشطة جبن",
+    "تسالي",
+    "حار",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "تسالي",
+   "name_en_at_source": "Tasali spicy cream cheese"
+  },
+  {
+   "gtin": "06281060903232",
+   "search_aliases_ar": [
+    "قيصر فواكه كوكتيل رحيق",
+    "قيصر",
+    "فواكه",
+    "كوكتيل",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Fruit Cocktail Nectar"
+  },
+  {
+   "gtin": "06281063881056",
+   "search_aliases_ar": [
+    "فريشلي حبّ كامل ذرة",
+    "فريشلي",
+    "حبّ",
+    "كامل",
+    "ذرة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly whole kernel corn"
+  },
+  {
+   "gtin": "06281063882305",
+   "search_aliases_ar": [
+    "فريشلي كراميل شراب",
+    "فريشلي",
+    "كراميل",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly caramel syrup"
+  },
+  {
+   "gtin": "06290361204221",
+   "search_aliases_ar": [
+    "تمر معمول",
+    "تمر",
+    "معمول"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "date Maamoul"
+  },
+  {
+   "gtin": "06291079374336",
+   "search_aliases_ar": [
+    "فارم فريش مدخّن ديك رومي ستربس",
+    "فارم",
+    "فريش",
+    "مدخّن",
+    "ديك",
+    "رومي",
+    "ستربس"
+   ],
+   "brand_ar": "فارم فريش",
+   "name_en_at_source": "Farm Fresh Smoked Turkey Strips"
+  },
+  {
+   "gtin": "06291104283961",
+   "search_aliases_ar": [
+    "أورجانيك لاردر عضوي عسل",
+    "أورجانيك",
+    "لاردر",
+    "عضوي",
+    "عسل"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Organic honey"
+  },
+  {
+   "gtin": "06291106441765",
+   "search_aliases_ar": [
+    "تمر فاخر",
+    "تمر",
+    "فاخر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dates Premium"
+  },
+  {
+   "gtin": "06291108226230",
+   "search_aliases_ar": [
+    "أورجانيك لاردر أحمر حمراء فاصوليا",
+    "أورجانيك",
+    "لاردر",
+    "أحمر",
+    "حمراء",
+    "فاصوليا"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Red Kidney Beans"
+  },
+  {
+   "gtin": "06297000395067",
+   "search_aliases_ar": [
+    "سبينيس حار مدخّن سلمون",
+    "سبينيس",
+    "حار",
+    "مدخّن",
+    "سلمون"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Hot smoked salmon"
+  },
+  {
+   "gtin": "06297001083918",
+   "search_aliases_ar": [
+    "بلدي يوناني زبادي طبيعي",
+    "بلدي",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "طبيعي"
+   ],
+   "brand_ar": "بلدي",
+   "name_en_at_source": "Greek Yogurt Natural"
+  },
+  {
+   "gtin": "08017977009358",
+   "search_aliases_ar": [
+    "كورن فليكس عضوي",
+    "كورن",
+    "فليكس",
+    "عضوي"
+   ],
+   "brand_ar": "كورن فليكس",
+   "name_en_at_source": "Corn flakes bio"
+  },
+  {
+   "gtin": "08410066104635",
+   "search_aliases_ar": [
+    "هاينز كريمي كلاسيك مايونيز",
+    "هاينز",
+    "كريمي",
+    "كلاسيك",
+    "مايونيز"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Creamy Classic mayonnaise"
+  },
+  {
+   "gtin": "06281022183382",
+   "search_aliases_ar": [
+    "صافيو شوكولاتة",
+    "صافيو",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "صافيو",
+   "name_en_at_source": "Safio chocolate"
+  },
+  {
+   "gtin": "06281034910259",
+   "search_aliases_ar": [
+    "راني مانجو",
+    "راني",
+    "مانجو"
+   ],
+   "brand_ar": "راني",
+   "name_en_at_source": "Rani Mango"
+  },
+  {
+   "gtin": "06281048114001",
+   "search_aliases_ar": [
+    "بوك موزاريلا جبن",
+    "بوك",
+    "موزاريلا",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Puck Mozzarella Cheese"
+  },
+  {
+   "gtin": "06281057007592",
+   "search_aliases_ar": [
+    "نادك حليب شوكولاتة",
+    "نادك",
+    "حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec milk chocolate"
+  },
+  {
+   "gtin": "06281060903522",
+   "search_aliases_ar": [
+    "قيصر فواكه مشكل توت رحيق",
+    "قيصر",
+    "فواكه",
+    "مشكل",
+    "توت",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar fruit mix and berries nectar"
+  },
+  {
+   "gtin": "06281063882558",
+   "search_aliases_ar": [
+    "فريشلي لايت مايونيز",
+    "فريشلي",
+    "لايت",
+    "مايونيز"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Lite Mayonnaise"
+  },
+  {
+   "gtin": "06285602012369",
+   "search_aliases_ar": [
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Biscuit"
+  },
+  {
+   "gtin": "06285602012833",
+   "search_aliases_ar": [
+    "ديمة طبيعي ملح",
+    "ديمة",
+    "طبيعي",
+    "ملح"
+   ],
+   "brand_ar": "ديمة",
+   "name_en_at_source": "Deemah natural salt"
+  },
+  {
+   "gtin": "06291003084522",
+   "search_aliases_ar": [
+    "بندق"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Hazelnut"
+  },
+  {
+   "gtin": "09221544013023",
+   "search_aliases_ar": [
+    "سنيكرز لوح",
+    "سنيكرز",
+    "لوح"
+   ],
+   "brand_ar": "سنيكرز",
+   "name_en_at_source": "Snickers bar"
+  },
+  {
+   "gtin": "00684500704875",
+   "search_aliases_ar": [
+    "كاليفورنيا جاردن حبّ كامل ذرة حلوة",
+    "كاليفورنيا",
+    "جاردن",
+    "حبّ",
+    "كامل",
+    "ذرة",
+    "حلوة"
+   ],
+   "brand_ar": "كاليفورنيا جاردن",
+   "name_en_at_source": "California garden whole kernel sweet corn"
+  },
+  {
+   "gtin": "00840370901381",
+   "search_aliases_ar": [
+    "كرافت جبن شيدر",
+    "كرافت",
+    "جبن",
+    "جبنة",
+    "شيدر"
+   ],
+   "brand_ar": "كرافت",
+   "name_en_at_source": "Cheddar cheese"
+  },
+  {
+   "gtin": "03350033518346",
+   "search_aliases_ar": [
+    "مونوبري سردين",
+    "مونوبري",
+    "سردين"
+   ],
+   "brand_ar": "مونوبري",
+   "name_en_at_source": "Sardines"
+  },
+  {
+   "gtin": "06223000410721",
+   "search_aliases_ar": [
+    "أمريكانا شيبس ملح",
+    "أمريكانا",
+    "شيبس",
+    "رقائق",
+    "بطاطس مقرمشة",
+    "ملح"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Americana chips salt"
+  },
+  {
+   "gtin": "06281007067379",
+   "search_aliases_ar": [
+    "المراعي آيس كريم فانيلا",
+    "المراعي",
+    "آيس",
+    "كريم",
+    "فانيلا"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Vanilla Ice Cream"
+  },
+  {
+   "gtin": "06281014131001",
+   "search_aliases_ar": [
+    "قودي أحمر حمراء فاصوليا",
+    "قودي",
+    "أحمر",
+    "حمراء",
+    "فاصوليا"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Goody red kidney beans"
+  },
+  {
+   "gtin": "06281036003713",
+   "search_aliases_ar": [
+    "ليز ملح خل",
+    "ليز",
+    "ملح",
+    "خل"
+   ],
+   "brand_ar": "ليز",
+   "name_en_at_source": "Lay's salt and vinegar"
+  },
+  {
+   "gtin": "06281039102017",
+   "search_aliases_ar": [
+    "السعودية حليب كامل الدسم",
+    "السعودية",
+    "حليب",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia whole milk"
+  },
+  {
+   "gtin": "06281057030026",
+   "search_aliases_ar": [
+    "نادك كامل الدسم طازج زبادي",
+    "نادك",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh yogurt full fat"
+  },
+  {
+   "gtin": "06285602013212",
+   "search_aliases_ar": [
+    "ديمة شطة ليمون",
+    "ديمة",
+    "شطة",
+    "ليمون"
+   ],
+   "brand_ar": "ديمة",
+   "name_en_at_source": "Deemah chili lemon"
+  },
+  {
+   "gtin": "06290090033406",
+   "search_aliases_ar": [
+    "هاينز كلاسيك مايونيز",
+    "هاينز",
+    "كلاسيك",
+    "مايونيز"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Heinz Classic Mayonnaise"
+  },
+  {
+   "gtin": "06291002400002",
+   "search_aliases_ar": [
+    "الإسلامي فاخر فرنسي بطاطس مقلية",
+    "الإسلامي",
+    "فاخر",
+    "فرنسي",
+    "بطاطس",
+    "مقلية"
+   ],
+   "brand_ar": "الإسلامي",
+   "name_en_at_source": "Premium French Fries"
+  },
+  {
+   "gtin": "06291003003394",
+   "search_aliases_ar": [
+    "تيفاني لايت طبيعي دايجستيف",
+    "تيفاني",
+    "لايت",
+    "طبيعي",
+    "دايجستيف"
+   ],
+   "brand_ar": "تيفاني",
+   "name_en_at_source": "Tiffany Light Natural 400 G Digestive"
+  },
+  {
+   "gtin": "06291010910722",
+   "search_aliases_ar": [
+    "رمان"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Pomegranate"
+  },
+  {
+   "gtin": "06291011054302",
+   "search_aliases_ar": [
+    "تشوكوديت شوكولاتة تمر لوز جوز الهند",
+    "تشوكوديت",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "لوز",
+    "جوز",
+    "الهند"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Chocolate Date Almond Coconut"
+  },
+  {
+   "gtin": "06291011064264",
+   "search_aliases_ar": [
+    "تشوكوديت فستق كنافة",
+    "تشوكوديت",
+    "فستق",
+    "كنافة"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Pistachio Kunafa"
+  },
+  {
+   "gtin": "06291115000847",
+   "search_aliases_ar": [
+    "إبل حليب بودرة",
+    "إبل",
+    "حليب",
+    "بودرة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Camel milk powder"
+  },
+  {
+   "gtin": "06294001850823",
+   "search_aliases_ar": [
+    "جالاكسي فستق كنافة داكن",
+    "جالاكسي",
+    "فستق",
+    "كنافة",
+    "داكن"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Galaxy pistachio kunafa dark"
+  },
+  {
+   "gtin": "06294017116999",
+   "search_aliases_ar": [
+    "ماجي خضار شوربة",
+    "ماجي",
+    "خضار",
+    "شوربة"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "11 Vegetable Soup"
+  },
+  {
+   "gtin": "06297000670263",
+   "search_aliases_ar": [
+    "مزارع بلدي قليل الدسم لبنة",
+    "مزارع",
+    "بلدي",
+    "قليل",
+    "الدسم",
+    "لبنة"
+   ],
+   "brand_ar": "مزارع بلدي",
+   "name_en_at_source": "labneh low fat"
+  },
+  {
+   "gtin": "00000029605040",
+   "search_aliases_ar": [
+    "سبينيس زبادي لوز مانجو مشمش سناك لوح",
+    "سبينيس",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "لوز",
+    "مانجو",
+    "مشمش",
+    "سناك",
+    "لوح"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Yoghurt Almond Mango Apricot Snack Bar"
+  },
+  {
+   "gtin": "06191513505138",
+   "search_aliases_ar": [
+    "بريزيدون طازج قشطة حليب",
+    "بريزيدون",
+    "طازج",
+    "قشطة",
+    "حليب"
+   ],
+   "brand_ar": "بريزيدون",
+   "name_en_at_source": "President fresh cream and milk"
+  },
+  {
+   "gtin": "06280558342362",
+   "search_aliases_ar": [
+    "نقي طبيعي عسل",
+    "نقي",
+    "طبيعي",
+    "عسل"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Pure and Natural Honey"
+  },
+  {
+   "gtin": "06281007142366",
+   "search_aliases_ar": [
+    "المراعي مبخّر حليب",
+    "المراعي",
+    "مبخّر",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Evaporated milk"
+  },
+  {
+   "gtin": "06281014603508",
+   "search_aliases_ar": [
+    "قودي لازانيا",
+    "قودي",
+    "لازانيا"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "lasagna"
+  },
+  {
+   "gtin": "06281016900483",
+   "search_aliases_ar": [
+    "البطل ملح خل نكهة",
+    "البطل",
+    "ملح",
+    "خل",
+    "نكهة"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal salt and vinegar flavor"
+  },
+  {
+   "gtin": "06281018321965",
+   "search_aliases_ar": [
+    "ندى تركي لبنة",
+    "ندى",
+    "تركي",
+    "لبنة"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada turkish labneh"
+  },
+  {
+   "gtin": "06281022118209",
+   "search_aliases_ar": [
+    "أكتيفيا قليل الدسم مشكل توت",
+    "أكتيفيا",
+    "قليل",
+    "الدسم",
+    "مشكل",
+    "توت"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia low fat mixed berries"
+  },
+  {
+   "gtin": "06281022129779",
+   "search_aliases_ar": [
+    "دانون ليمون فطيرة يوناني زبادي",
+    "دانون",
+    "ليمون",
+    "فطيرة",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "دانون",
+   "name_en_at_source": "Lemon pie Greek yogurt"
+  },
+  {
+   "gtin": "06281057002924",
+   "search_aliases_ar": [
+    "نادك قليل الدسم طازج زبادي",
+    "نادك",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh yogurt low fat"
+  },
+  {
+   "gtin": "06281063632276",
+   "search_aliases_ar": [
+    "فريشلي حمص",
+    "فريشلي",
+    "حمص"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly chickpeas"
+  },
+  {
+   "gtin": "06287038221056",
+   "search_aliases_ar": [
+    "ندى شوكولاتة حليب",
+    "ندى",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Chocolate Milk"
+  },
+  {
+   "gtin": "06290090033178",
+   "search_aliases_ar": [
+    "هاينز ثوم مايونيز",
+    "هاينز",
+    "ثوم",
+    "مايونيز"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Garlic Mayonnaise"
+  },
+  {
+   "gtin": "06291079363651",
+   "search_aliases_ar": [
+    "فارم فريش مقرمش بالبقسماط دجاج فيليه",
+    "فارم",
+    "فريش",
+    "مقرمش",
+    "بالبقسماط",
+    "دجاج",
+    "فيليه"
+   ],
+   "brand_ar": "فارم فريش",
+   "name_en_at_source": "Breaded Chicken Fillet"
+  },
+  {
+   "gtin": "06291108639092",
+   "search_aliases_ar": [
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Biscuit"
+  },
+  {
+   "gtin": "06291109891246",
+   "search_aliases_ar": [
+    "العين مشكل توت",
+    "العين",
+    "مشكل",
+    "توت"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Mixed Berries"
+  },
+  {
+   "gtin": "05449000295026",
+   "search_aliases_ar": [
+    "فانتا برتقال",
+    "فانتا",
+    "برتقال"
+   ],
+   "brand_ar": "فانتا",
+   "name_en_at_source": "Fanta orange"
+  },
+  {
+   "gtin": "06281007167826",
+   "search_aliases_ar": [
+    "المراعي جبن شيدر كامل الدسم",
+    "المراعي",
+    "جبن",
+    "جبنة",
+    "شيدر",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai cheddar cheese full fat"
+  },
+  {
+   "gtin": "06281016003177",
+   "search_aliases_ar": [
+    "البطل كاتشب نكهة",
+    "البطل",
+    "كاتشب",
+    "نكهة"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal ketchup flavor"
+  },
+  {
+   "gtin": "06281018315988",
+   "search_aliases_ar": [
+    "ندى يوناني زبادي تمر",
+    "ندى",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "تمر"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "greek yoghurt with dates"
+  },
+  {
+   "gtin": "06281020337633",
+   "search_aliases_ar": [
+    "لونا حمص",
+    "لونا",
+    "حمص"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna chickpeas"
+  },
+  {
+   "gtin": "06281022120226",
+   "search_aliases_ar": [
+    "الصافي حليب طازج كامل الدسم",
+    "الصافي",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh milk full fat"
+  },
+  {
+   "gtin": "06281026122820",
+   "search_aliases_ar": [
+    "الربيع عنب عصير",
+    "الربيع",
+    "عنب",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "الربيع",
+   "name_en_at_source": "100% grape juice"
+  },
+  {
+   "gtin": "06281039571219",
+   "search_aliases_ar": [
+    "آيس كريم ساندويتش",
+    "آيس",
+    "كريم",
+    "ساندويتش"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Sandwich ice cream"
+  },
+  {
+   "gtin": "06281050828569",
+   "search_aliases_ar": [
+    "أمريكانا لحم بقري بسطرمة",
+    "أمريكانا",
+    "لحم",
+    "بقري",
+    "بسطرمة"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Beef pastrami"
+  },
+  {
+   "gtin": "06281060067996",
+   "search_aliases_ar": [
+    "قيصر فواكه مشكل كركديه رحيق",
+    "قيصر",
+    "فواكه",
+    "مشكل",
+    "كركديه",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar fruit mix hibiscus nectar"
+  },
+  {
+   "gtin": "06281063461432",
+   "search_aliases_ar": [
+    "شرقي حدائق شرائح أناناس لايت شراب",
+    "شرقي",
+    "حدائق",
+    "شرائح",
+    "أناناس",
+    "لايت",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens sliced pineapple in light syrup"
+  },
+  {
+   "gtin": "06281063881834",
+   "search_aliases_ar": [
+    "فريشلي أخضر بازلاء",
+    "فريشلي",
+    "أخضر",
+    "بازلاء"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly green peas"
+  },
+  {
+   "gtin": "06281106251846",
+   "search_aliases_ar": [
+    "سيافة بني شوكولاتة مغطّى تمر",
+    "سيافة",
+    "بني",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "مغطّى",
+    "تمر"
+   ],
+   "brand_ar": "سيافة",
+   "name_en_at_source": "Siafa Brown Chocolate Coated Dates"
+  },
+  {
+   "gtin": "06291104284449",
+   "search_aliases_ar": [
+    "أورجانيك لاردر شيا بذور أبيض",
+    "أورجانيك",
+    "لاردر",
+    "شيا",
+    "بذور",
+    "أبيض"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Chia seeds (white)"
+  },
+  {
+   "gtin": "06291108638774",
+   "search_aliases_ar": [
+    "تمر لوح",
+    "تمر",
+    "لوح"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "DATE BAR"
+  },
+  {
+   "gtin": "06293370709831",
+   "search_aliases_ar": [
+    "زبادي سائل",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "سائل"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Yoghurt drink"
+  },
+  {
+   "gtin": "06297000747736",
+   "search_aliases_ar": [
+    "باربيكان شعير مشروب فراولة نكهة",
+    "باربيكان",
+    "شعير",
+    "مشروب",
+    "شراب",
+    "فراولة",
+    "نكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican malt beverage strawberry flavor"
+  },
+  {
+   "gtin": "06297001083871",
+   "search_aliases_ar": [
+    "بلدي كفير يوناني زبادي",
+    "بلدي",
+    "كفير",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "بلدي",
+   "name_en_at_source": "Balade Kefir Greek Yogurt"
+  },
+  {
+   "gtin": "00012000802805",
+   "search_aliases_ar": [
+    "ميرندا برتقال",
+    "ميرندا",
+    "برتقال"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda orange"
+  },
+  {
+   "gtin": "00032894075116",
+   "search_aliases_ar": [
+    "كاليفورنيا جاردن فاخر فول فاصوليا",
+    "كاليفورنيا",
+    "جاردن",
+    "فاخر",
+    "فول",
+    "فاصوليا"
+   ],
+   "brand_ar": "كاليفورنيا جاردن",
+   "name_en_at_source": "Premium fava beans"
+  },
+  {
+   "gtin": "06084010992320",
+   "search_aliases_ar": [
+    "نقي دجاج صدر",
+    "نقي",
+    "دجاج",
+    "صدر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Pure chicken breast"
+  },
+  {
+   "gtin": "06271002204114",
+   "search_aliases_ar": [
+    "كي دي دي طماطم عصير",
+    "كي",
+    "دي",
+    "طماطم",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "كي دي دي",
+   "name_en_at_source": "Tomato Juice"
+  },
+  {
+   "gtin": "06281007053662",
+   "search_aliases_ar": [
+    "المراعي ليمون",
+    "المراعي",
+    "ليمون"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "lemon 200ml"
+  },
+  {
+   "gtin": "06281018122746",
+   "search_aliases_ar": [
+    "ندى عيران طازج لبن شراب",
+    "ندى",
+    "عيران",
+    "طازج",
+    "لبن",
+    "لبن رائب",
+    "شراب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada ayran fresh laban drink"
+  },
+  {
+   "gtin": "06281018130246",
+   "search_aliases_ar": [
+    "ندى يوناني زبادي",
+    "ندى",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Greek yogurt"
+  },
+  {
+   "gtin": "06281020010413",
+   "search_aliases_ar": [
+    "لونا حمص",
+    "لونا",
+    "حمص"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna chickpeas"
+  },
+  {
+   "gtin": "06281022160109",
+   "search_aliases_ar": [
+    "الصافي طازج قشطة",
+    "الصافي",
+    "طازج",
+    "قشطة"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh cream"
+  },
+  {
+   "gtin": "06281057015979",
+   "search_aliases_ar": [
+    "نادك لبنة زيتون",
+    "نادك",
+    "لبنة",
+    "زيتون"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec labneh olive"
+  },
+  {
+   "gtin": "06281060103601",
+   "search_aliases_ar": [
+    "قيصر تفاح عصير",
+    "قيصر",
+    "تفاح",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar apple juice"
+  },
+  {
+   "gtin": "06281063461319",
+   "search_aliases_ar": [
+    "شرقي حدائق داكن أحمر حمراء فاصوليا",
+    "شرقي",
+    "حدائق",
+    "داكن",
+    "أحمر",
+    "حمراء",
+    "فاصوليا"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens dark red kidney beans"
+  },
+  {
+   "gtin": "06281063881858",
+   "search_aliases_ar": [
+    "فريشلي توت أزرق فواكه توبينق حشوة",
+    "فريشلي",
+    "توت",
+    "أزرق",
+    "فواكه",
+    "توبينق",
+    "حشوة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly blueberry fruit topping and filling"
+  },
+  {
+   "gtin": "06286788790027",
+   "search_aliases_ar": [
+    "فطر شوربة",
+    "فطر",
+    "شوربة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mushroom soup"
+  },
+  {
+   "gtin": "06291007500370",
+   "search_aliases_ar": [
+    "فراولة بنكهة قشطة ويفر",
+    "فراولة",
+    "بنكهة",
+    "قشطة",
+    "ويفر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Strawberry flavoured cream wafers"
+  },
+  {
+   "gtin": "06291056002474",
+   "search_aliases_ar": [
+    "العين يوناني زبادي",
+    "العين",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Greek yoghurt"
+  },
+  {
+   "gtin": "06291106895643",
+   "search_aliases_ar": [
+    "لحم بقري نقانق",
+    "لحم",
+    "بقري",
+    "نقانق"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Beef Sausage"
+  },
+  {
+   "gtin": "06291107293714",
+   "search_aliases_ar": [
+    "برتقال مربى برتقال",
+    "برتقال",
+    "مربى"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orange Marmalade"
+  },
+  {
+   "gtin": "06294001820017",
+   "search_aliases_ar": [
+    "جالاكسي ناعم كريمي حليب شوكولاتة",
+    "جالاكسي",
+    "ناعم",
+    "كريمي",
+    "حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Galaxy Smooth & Creamy Milk Chocolate"
+  },
+  {
+   "gtin": "06297000361956",
+   "search_aliases_ar": [
+    "فاخر تمر",
+    "فاخر",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Premium Dates"
+  },
+  {
+   "gtin": "06298044091229",
+   "search_aliases_ar": [
+    "مملّح كراميل كاجو سبريد",
+    "مملّح",
+    "كراميل",
+    "كاجو",
+    "سبريد"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Salted caramel cashew spread"
+  },
+  {
+   "gtin": "08445291634176",
+   "search_aliases_ar": [
+    "ماجي زبدة دجاج مشكل",
+    "ماجي",
+    "زبدة",
+    "دجاج",
+    "مشكل"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Butter Chicken Mix 1+1"
+  },
+  {
+   "gtin": "00000029590438",
+   "search_aliases_ar": [
+    "سبينيس يوناني ستايل فانيلا زبادي",
+    "سبينيس",
+    "يوناني",
+    "ستايل",
+    "فانيلا",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Greek-Style Vanilla Yoghurt"
+  },
+  {
+   "gtin": "00000029622450",
+   "search_aliases_ar": [
+    "سبينيس مملّح كراميل فشار",
+    "سبينيس",
+    "مملّح",
+    "كراميل",
+    "فشار"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Salted Caramel Popcorn"
+  },
+  {
+   "gtin": "03073786863111",
+   "search_aliases_ar": [
+    "كيري قابل للدهن قشطة جبن",
+    "كيري",
+    "قابل",
+    "للدهن",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "كيري",
+   "name_en_at_source": "Spreadable Cream Cheese"
+  },
+  {
+   "gtin": "03228022970195",
+   "search_aliases_ar": [
+    "بريزيدون طازج زبدة بدون ملح",
+    "بريزيدون",
+    "طازج",
+    "زبدة",
+    "بدون",
+    "ملح"
+   ],
+   "brand_ar": "بريزيدون",
+   "name_en_at_source": "Fresh Butter Unsalted"
+  },
+  {
+   "gtin": "05060811383803",
+   "search_aliases_ar": [
+    "جرينيد لوح بروتين أبيض شوكولاتة كوكيز",
+    "جرينيد",
+    "لوح",
+    "بروتين",
+    "أبيض",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "كوكيز"
+   ],
+   "brand_ar": "جرينيد",
+   "name_en_at_source": "Grenade White Chocolate Cookie Protein Bar"
+  },
+  {
+   "gtin": "05285000390589",
+   "search_aliases_ar": [
+    "إندومي سريع التحضير نودلز مقلي نودلز",
+    "إندومي",
+    "سريع",
+    "التحضير",
+    "نودلز",
+    "مقلي"
+   ],
+   "brand_ar": "إندومي",
+   "name_en_at_source": "Indomie instant noodles fried noodles"
+  },
+  {
+   "gtin": "05711953022500",
+   "search_aliases_ar": [
+    "بوك موزاريلا جبن شرائح",
+    "بوك",
+    "موزاريلا",
+    "جبن",
+    "جبنة",
+    "شرائح"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Mozzarella cheese slices"
+  },
+  {
+   "gtin": "06281006709829",
+   "search_aliases_ar": [
+    "ليبتون أخضر شاي ليمون",
+    "ليبتون",
+    "أخضر",
+    "شاي",
+    "ليمون"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lipton Green Tea Lemon"
+  },
+  {
+   "gtin": "06281007046237",
+   "search_aliases_ar": [
+    "المراعي حليب",
+    "المراعي",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai milk"
+  },
+  {
+   "gtin": "06281022123135",
+   "search_aliases_ar": [
+    "أكتيفيا كفير مانجو",
+    "أكتيفيا",
+    "كفير",
+    "مانجو"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia kefir mango"
+  },
+  {
+   "gtin": "06281048108352",
+   "search_aliases_ar": [
+    "بوك لبنة تركي وصفة",
+    "بوك",
+    "لبنة",
+    "تركي",
+    "وصفة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Puck labneh turkish recipe"
+  },
+  {
+   "gtin": "06281057002672",
+   "search_aliases_ar": [
+    "حليب طازج",
+    "حليب",
+    "طازج"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Fresh Milk"
+  },
+  {
+   "gtin": "06281060103670",
+   "search_aliases_ar": [
+    "برتقال جزر عصير شراب",
+    "برتقال",
+    "جزر",
+    "عصير",
+    "جوس",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orange & Carrot Juice Drink"
+  },
+  {
+   "gtin": "06281060903225",
+   "search_aliases_ar": [
+    "قيصر جوافة فواكه مشكل رحيق",
+    "قيصر",
+    "جوافة",
+    "فواكه",
+    "مشكل",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar guava and fruit mix nectar"
+  },
+  {
+   "gtin": "06281101691937",
+   "search_aliases_ar": [
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes"
+  },
+  {
+   "gtin": "06291003000157",
+   "search_aliases_ar": [
+    "تيفاني طبيعي قمح بسكويت",
+    "تيفاني",
+    "طبيعي",
+    "قمح",
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": "تيفاني",
+   "name_en_at_source": "Natural wheat biscuit"
+  },
+  {
+   "gtin": "06291115001301",
+   "search_aliases_ar": [
+    "إبل حليب شراب",
+    "إبل",
+    "حليب",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "CAMEL MILK DRINK"
+  },
+  {
+   "gtin": "06294011632693",
+   "search_aliases_ar": [
+    "لولو بني شوكولاتة مغطّى تمر",
+    "لولو",
+    "بني",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "مغطّى",
+    "تمر"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Brown Chocolate Coated Dates"
+  },
+  {
+   "gtin": "06297001059036",
+   "search_aliases_ar": [
+    "مانجو مشكل",
+    "مانجو",
+    "مشكل"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "mango mix"
+  },
+  {
+   "gtin": "07340001804218",
+   "search_aliases_ar": [
+    "بيربلز حليب شيك موز",
+    "بيربلز",
+    "حليب",
+    "شيك",
+    "موز"
+   ],
+   "brand_ar": "بيربلز",
+   "name_en_at_source": "Barebells Milk shake Banana"
+  },
+  {
+   "gtin": "00000090486555",
+   "search_aliases_ar": [
+    "ريد بول جوز الهند توت نكهة طاقة شراب",
+    "ريد",
+    "بول",
+    "جوز",
+    "الهند",
+    "توت",
+    "نكهة",
+    "طاقة",
+    "شراب"
+   ],
+   "brand_ar": "ريد بول",
+   "name_en_at_source": "Red bull coconut and berry flavor energy drink"
+  },
+  {
+   "gtin": "00012000802850",
+   "search_aliases_ar": [
+    "ميرندا برتقال",
+    "ميرندا",
+    "برتقال"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda orange"
+  },
+  {
+   "gtin": "00344900236245",
+   "search_aliases_ar": [
+    "بلدنا خالي اللاكتوز حليب",
+    "بلدنا",
+    "خالي",
+    "اللاكتوز",
+    "حليب"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Lactose Free Milk"
+  },
+  {
+   "gtin": "00709993323225",
+   "search_aliases_ar": [
+    "نيتشرلاند بني فاصوليا",
+    "نيتشرلاند",
+    "بني",
+    "فاصوليا"
+   ],
+   "brand_ar": "نيتشرلاند",
+   "name_en_at_source": "Nature land brown beans"
+  },
+  {
+   "gtin": "05285000390626",
+   "search_aliases_ar": [
+    "إندومي سريع التحضير نودلز خضار نكهة",
+    "إندومي",
+    "سريع",
+    "التحضير",
+    "نودلز",
+    "خضار",
+    "نكهة"
+   ],
+   "brand_ar": "إندومي",
+   "name_en_at_source": "Indomie instant noodles vegetable flavor"
+  },
+  {
+   "gtin": "06251010121108",
+   "search_aliases_ar": [
+    "نبيل دجاج شاورما",
+    "نبيل",
+    "دجاج",
+    "شاورما"
+   ],
+   "brand_ar": "نبيل",
+   "name_en_at_source": "Chicken Shawarma"
+  },
+  {
+   "gtin": "06281007021241",
+   "search_aliases_ar": [
+    "المراعي طازج لبنة",
+    "المراعي",
+    "طازج",
+    "لبنة"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Fresh labneh"
+  },
+  {
+   "gtin": "06281016961163",
+   "search_aliases_ar": [
+    "البطل حلقات",
+    "البطل",
+    "حلقات"
+   ],
+   "brand_ar": "البطل",
+   "name_en_at_source": "Albatal rings"
+  },
+  {
+   "gtin": "06281018140467",
+   "search_aliases_ar": [
+    "ندى طويل الأجل قليل الدسم حليب",
+    "ندى",
+    "طويل",
+    "الأجل",
+    "قليل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada long life milk low fat"
+  },
+  {
+   "gtin": "06281020010314",
+   "search_aliases_ar": [
+    "لونا أخضر بازلاء",
+    "لونا",
+    "أخضر",
+    "بازلاء"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna green peas"
+  },
+  {
+   "gtin": "06281022130409",
+   "search_aliases_ar": [
+    "الصافي قليل الدسم طازج زبادي",
+    "الصافي",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi fresh yogurt low fat"
+  },
+  {
+   "gtin": "06281026083541",
+   "search_aliases_ar": [
+    "شوكولاتة حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate Milk"
+  },
+  {
+   "gtin": "06281034915728",
+   "search_aliases_ar": [
+    "باربيكان برتقال بنكهة",
+    "باربيكان",
+    "برتقال",
+    "بنكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican orange flavoured"
+  },
+  {
+   "gtin": "06281057005512",
+   "search_aliases_ar": [
+    "نادك خفق قشطة",
+    "نادك",
+    "خفق",
+    "قشطة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec whipping cream"
+  },
+  {
+   "gtin": "06281060903287",
+   "search_aliases_ar": [
+    "قيصر مانجو فواكه مشكل رحيق",
+    "قيصر",
+    "مانجو",
+    "فواكه",
+    "مشكل",
+    "رحيق"
+   ],
+   "brand_ar": "قيصر",
+   "name_en_at_source": "Caesar mango and fruit mix nectar"
+  },
+  {
+   "gtin": "06281063222859",
+   "search_aliases_ar": [
+    "حبّ كامل ذرة حلوة شرقي حدائق خالي من سكر خالي من ملح",
+    "حبّ",
+    "كامل",
+    "ذرة",
+    "حلوة",
+    "شرقي",
+    "حدائق",
+    "خالي",
+    "من",
+    "سكر",
+    "ملح"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens whole kernel sweet corn no sugar no salt"
+  },
+  {
+   "gtin": "06281063632245",
+   "search_aliases_ar": [
+    "فريشلي أبيض فاصوليا",
+    "فريشلي",
+    "أبيض",
+    "فاصوليا"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly white beans"
+  },
+  {
+   "gtin": "06281073152566",
+   "search_aliases_ar": [
+    "سنبلة سريع التحضير نودلز دجاج نكهة",
+    "سنبلة",
+    "سريع",
+    "التحضير",
+    "نودلز",
+    "دجاج",
+    "نكهة"
+   ],
+   "brand_ar": "سنبلة",
+   "name_en_at_source": "Sunbulah instant noodles chicken flavor"
+  },
+  {
+   "gtin": "06281101690084",
+   "search_aliases_ar": [
+    "فاخر عضوي تمر",
+    "فاخر",
+    "عضوي",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Premium organic dates"
+  },
+  {
+   "gtin": "06281101691371",
+   "search_aliases_ar": [
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes"
+  },
+  {
+   "gtin": "06285602013038",
+   "search_aliases_ar": [
+    "ديمة طماطم كاتشب",
+    "ديمة",
+    "طماطم",
+    "كاتشب"
+   ],
+   "brand_ar": "ديمة",
+   "name_en_at_source": "Deemah tomato ketchup"
+  },
+  {
+   "gtin": "06286788790058",
+   "search_aliases_ar": [
+    "مخلل شوربة",
+    "مخلل",
+    "شوربة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Pickle soup"
+  },
+  {
+   "gtin": "06290090011039",
+   "search_aliases_ar": [
+    "هاينز طماطم كاتشب",
+    "هاينز",
+    "طماطم",
+    "كاتشب"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Tomato ketchup"
+  },
+  {
+   "gtin": "06291106222111",
+   "search_aliases_ar": [
+    "طاقة شراب",
+    "طاقة",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Energy drink"
+  },
+  {
+   "gtin": "06294017121573",
+   "search_aliases_ar": [
+    "ماجي دجاج شوربة ذرة",
+    "ماجي",
+    "دجاج",
+    "شوربة",
+    "ذرة"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi chicken soup with corn"
+  },
+  {
+   "gtin": "06297000778839",
+   "search_aliases_ar": [
+    "زبادي أناناس جوز الهند",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "أناناس",
+    "جوز",
+    "الهند"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Yogurt Pineapple Coconut"
+  },
+  {
+   "gtin": "08992696526051",
+   "search_aliases_ar": [
+    "نستله كابتشينو",
+    "نستله",
+    "كابتشينو"
+   ],
+   "brand_ar": "نستله",
+   "name_en_at_source": "Nescafe cappuccino"
+  },
+  {
+   "gtin": "00032894011480",
+   "search_aliases_ar": [
+    "كاليفورنيا جاردن تونة ساندويتش",
+    "كاليفورنيا",
+    "جاردن",
+    "تونة",
+    "ساندويتش"
+   ],
+   "brand_ar": "كاليفورنيا جاردن",
+   "name_en_at_source": "Tuna sandwich"
+  },
+  {
+   "gtin": "04000417626011",
+   "search_aliases_ar": [
+    "فاين إكسترا داكن شوكولاتة",
+    "فاين",
+    "إكسترا",
+    "داكن",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "فاين",
+   "name_en_at_source": "Fine Extra Dark Chocolate 70%"
+  },
+  {
+   "gtin": "05449000295033",
+   "search_aliases_ar": [
+    "فانتا فراولة",
+    "فانتا",
+    "فراولة"
+   ],
+   "brand_ar": "فانتا",
+   "name_en_at_source": "Fanta strawberry"
+  },
+  {
+   "gtin": "06281018420811",
+   "search_aliases_ar": [
+    "طبيعي برتقال أناناس عصير",
+    "طبيعي",
+    "برتقال",
+    "أناناس",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Natural Orange Pineapple Juice"
+  },
+  {
+   "gtin": "06281020172388",
+   "search_aliases_ar": [
+    "لونا مثلج قهوة أصلي",
+    "لونا",
+    "مثلج",
+    "قهوة",
+    "أصلي"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna iced coffee original"
+  },
+  {
+   "gtin": "06281022118926",
+   "search_aliases_ar": [
+    "أكتيفيا قليل الدسم سادة",
+    "أكتيفيا",
+    "قليل",
+    "الدسم",
+    "سادة"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia low fat plain"
+  },
+  {
+   "gtin": "06281034902650",
+   "search_aliases_ar": [
+    "باربيكان طري شراب أناناس",
+    "باربيكان",
+    "طري",
+    "شراب",
+    "أناناس"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican Soft Drink Pineapple"
+  },
+  {
+   "gtin": "06281057011001",
+   "search_aliases_ar": [
+    "نادك طويل الأجل قليل الدسم حليب",
+    "نادك",
+    "طويل",
+    "الأجل",
+    "قليل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Low Fat Milk - Long Life"
+  },
+  {
+   "gtin": "06281057012220",
+   "search_aliases_ar": [
+    "نادك قليل الدسم طازج لبن",
+    "نادك",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh laban low fat"
+  },
+  {
+   "gtin": "06281057018352",
+   "search_aliases_ar": [
+    "نادك كفير مانجو",
+    "نادك",
+    "كفير",
+    "مانجو"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec kefir mango"
+  },
+  {
+   "gtin": "06281057090013",
+   "search_aliases_ar": [
+    "نادك قليل الدسم طازج لبنة",
+    "نادك",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "لبنة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh labneh low fat"
+  },
+  {
+   "gtin": "06281063882527",
+   "search_aliases_ar": [
+    "فريشلي حبّ كامل ذرة",
+    "فريشلي",
+    "حبّ",
+    "كامل",
+    "ذرة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly whole kernel corn"
+  },
+  {
+   "gtin": "06281063883128",
+   "search_aliases_ar": [
+    "فريشلي خالي السكر فراولة مركّز",
+    "فريشلي",
+    "خالي",
+    "السكر",
+    "فراولة",
+    "مركّز"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly strawberry concentrate sugar free"
+  },
+  {
+   "gtin": "06281063884040",
+   "search_aliases_ar": [
+    "فريشلي بقدونس رقائق",
+    "فريشلي",
+    "بقدونس",
+    "رقائق"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Parsley Flakes"
+  },
+  {
+   "gtin": "06281106250467",
+   "search_aliases_ar": [
+    "سيافة تمر عجوة",
+    "سيافة",
+    "تمر",
+    "عجوة"
+   ],
+   "brand_ar": "سيافة",
+   "name_en_at_source": "Dattes Ajwa"
+  },
+  {
+   "gtin": "06287003021957",
+   "search_aliases_ar": [
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dattes"
+  },
+  {
+   "gtin": "06291003054334",
+   "search_aliases_ar": [
+    "نقي خضار سمن",
+    "نقي",
+    "خضار",
+    "سمن"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Pure vegetable Ghee"
+  },
+  {
+   "gtin": "06291031003380",
+   "search_aliases_ar": [
+    "كارفور قليل الدسم زبادي",
+    "كارفور",
+    "قليل",
+    "الدسم",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "كارفور",
+   "name_en_at_source": "Low Fat Yogurt"
+  },
+  {
+   "gtin": "06291056068050",
+   "search_aliases_ar": [
+    "فراولة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Strawberry"
+  },
+  {
+   "gtin": "06291056180387",
+   "search_aliases_ar": [
+    "العين أناناس",
+    "العين",
+    "أناناس"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Pineapple"
+  },
+  {
+   "gtin": "06291100852246",
+   "search_aliases_ar": [
+    "يوبليه كامل الدسم طازج كريمي",
+    "يوبليه",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "كريمي"
+   ],
+   "brand_ar": "يوبليه",
+   "name_en_at_source": "Fresh & Creamy full cream"
+  },
+  {
+   "gtin": "06294003598303",
+   "search_aliases_ar": [
+    "نسكافيه كابتشينو",
+    "نسكافيه",
+    "كابتشينو"
+   ],
+   "brand_ar": "نسكافيه",
+   "name_en_at_source": "Cappuccino"
+  },
+  {
+   "gtin": "06299200053471",
+   "search_aliases_ar": [
+    "كامل الدسم طازج لبن",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Full Cream Fresh Laban"
+  },
+  {
+   "gtin": "09310021039028",
+   "search_aliases_ar": [
+    "ليبتون ليمون نكهة مثلج شاي",
+    "ليبتون",
+    "ليمون",
+    "نكهة",
+    "مثلج",
+    "شاي"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Lemon Flavour Ice Tea"
+  },
+  {
+   "gtin": "00000029596614",
+   "search_aliases_ar": [
+    "سبينيس جبن بصل ساندويتش",
+    "سبينيس",
+    "جبن",
+    "جبنة",
+    "بصل",
+    "ساندويتش"
+   ],
+   "brand_ar": "سبينيس",
+   "name_en_at_source": "Cheese and Onion Sandwich"
+  },
+  {
+   "gtin": "05412860335430",
+   "search_aliases_ar": [
+    "لابيرفا بروتين شيبس",
+    "لابيرفا",
+    "بروتين",
+    "شيبس",
+    "رقائق",
+    "بطاطس مقرمشة"
+   ],
+   "brand_ar": "لابيرفا",
+   "name_en_at_source": "Protein chips"
+  },
+  {
+   "gtin": "06270021801212",
+   "search_aliases_ar": [
+    "أمريكانا ميني سادة كرواسون",
+    "أمريكانا",
+    "ميني",
+    "سادة",
+    "كرواسون"
+   ],
+   "brand_ar": "أمريكانا",
+   "name_en_at_source": "Mini Plain Croissant"
+  },
+  {
+   "gtin": "06271005034091",
+   "search_aliases_ar": [
+    "شرائح ديك رومي صدر",
+    "شرائح",
+    "ديك",
+    "رومي",
+    "صدر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Sliced Turkey Breast"
+  },
+  {
+   "gtin": "06281007024020",
+   "search_aliases_ar": [
+    "المراعي قليل الدسم طازج زبادي",
+    "المراعي",
+    "قليل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Fresh Yogurt Low Fat"
+  },
+  {
+   "gtin": "06281018181965",
+   "search_aliases_ar": [
+    "ندى كامل الدسم طازج زبادي",
+    "ندى",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada fresh yogurt full cream"
+  },
+  {
+   "gtin": "06281022183337",
+   "search_aliases_ar": [
+    "صافيو طويل الأجل شوكولاتة بنكهة حليب",
+    "صافيو",
+    "طويل",
+    "الأجل",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "بنكهة",
+    "حليب"
+   ],
+   "brand_ar": "صافيو",
+   "name_en_at_source": "Chocolate Flavoured Long Life Milk"
+  },
+  {
+   "gtin": "06281039597318",
+   "search_aliases_ar": [
+    "السعودية خوخ يوناني مجمّد زبادي",
+    "السعودية",
+    "خوخ",
+    "يوناني",
+    "مجمّد",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Peach Greek Frozen Yogurt"
+  },
+  {
+   "gtin": "06281063883579",
+   "search_aliases_ar": [
+    "فريشلي حبّ كامل ذرة",
+    "فريشلي",
+    "حبّ",
+    "كامل",
+    "ذرة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly whole kernel corn"
+  },
+  {
+   "gtin": "06290019196137",
+   "search_aliases_ar": [
+    "تمر مشكل شوكولاتة لوز",
+    "تمر",
+    "مشكل",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "لوز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Dates with assorted chocolate and almond"
+  },
+  {
+   "gtin": "06291100852178",
+   "search_aliases_ar": [
+    "يوبليه طازج زبادي",
+    "يوبليه",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "يوبليه",
+   "name_en_at_source": "Fresh Yoghurt"
+  },
+  {
+   "gtin": "06299200053426",
+   "search_aliases_ar": [
+    "حليب طازج كامل الدسم",
+    "حليب",
+    "طازج",
+    "كامل",
+    "الدسم"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Full Cream Fresh Milk"
+  },
+  {
+   "gtin": "06300900360292",
+   "search_aliases_ar": [
+    "مزرعتي كامل الدسم طازج لبن",
+    "مزرعتي",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "لبن",
+    "لبن رائب"
+   ],
+   "brand_ar": "مزرعتي",
+   "name_en_at_source": "Fresh Laban (Full Fat)"
+  },
+  {
+   "gtin": "07610100300059",
+   "search_aliases_ar": [
+    "ماجي قشطة فطر شوربة",
+    "ماجي",
+    "قشطة",
+    "فطر",
+    "شوربة"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Cream of mushroom soup"
+  },
+  {
+   "gtin": "00012000005459",
+   "search_aliases_ar": [
+    "ميرندا برتقال",
+    "ميرندا",
+    "برتقال"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda orange"
+  },
+  {
+   "gtin": "06281006870178",
+   "search_aliases_ar": [
+    "ليبتون كرك هيل",
+    "ليبتون",
+    "كرك",
+    "هيل"
+   ],
+   "brand_ar": "ليبتون",
+   "name_en_at_source": "Karak Cardamom"
+  },
+  {
+   "gtin": "06281007066884",
+   "search_aliases_ar": [
+    "المراعي مانجو بنكهة حليب",
+    "المراعي",
+    "مانجو",
+    "بنكهة",
+    "حليب"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai mango flavored milk"
+  },
+  {
+   "gtin": "06281007070881",
+   "search_aliases_ar": [
+    "المراعي مشكل توت",
+    "المراعي",
+    "مشكل",
+    "توت"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Almarai mix berry"
+  },
+  {
+   "gtin": "06281022102055",
+   "search_aliases_ar": [
+    "دانيت شوكولاتة شوكولاتة",
+    "دانيت",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "دانيت",
+   "name_en_at_source": "Danette chocolat 80% Chocolat 90GR"
+  },
+  {
+   "gtin": "06281034007171",
+   "search_aliases_ar": [
+    "باربيكان تفاح نكهة",
+    "باربيكان",
+    "تفاح",
+    "نكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican apple flavor"
+  },
+  {
+   "gtin": "06281041269029",
+   "search_aliases_ar": [
+    "معمول"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Maamoul"
+  },
+  {
+   "gtin": "06281057007035",
+   "search_aliases_ar": [
+    "نادك فانيلا بنكهة حليب",
+    "نادك",
+    "فانيلا",
+    "بنكهة",
+    "حليب"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec vanilla flavored milk"
+  },
+  {
+   "gtin": "06281101692309",
+   "search_aliases_ar": [
+    "جمارة تمر فستق",
+    "جمارة",
+    "تمر",
+    "فستق"
+   ],
+   "brand_ar": "جمارة",
+   "name_en_at_source": "Dates with pistachio"
+  },
+  {
+   "gtin": "06285835001598",
+   "search_aliases_ar": [
+    "جالاكسي ميني ناعم حليب",
+    "جالاكسي",
+    "ميني",
+    "ناعم",
+    "حليب"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Mini Smooth Milk"
+  },
+  {
+   "gtin": "06291003005633",
+   "search_aliases_ar": [
+    "تيفاني مقرمش قشطة",
+    "تيفاني",
+    "مقرمش",
+    "قشطة"
+   ],
+   "brand_ar": "تيفاني",
+   "name_en_at_source": "Tiffany Crunch n Cream"
+  },
+  {
+   "gtin": "06291011051684",
+   "search_aliases_ar": [
+    "تشوكوديت داكن شوكولاتة",
+    "تشوكوديت",
+    "داكن",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Chocodate Dark Chocolate"
+  },
+  {
+   "gtin": "06291011057624",
+   "search_aliases_ar": [
+    "تشوكوديت كراميل",
+    "تشوكوديت",
+    "كراميل"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "caramel"
+  },
+  {
+   "gtin": "06291056003860",
+   "search_aliases_ar": [
+    "العين مزارع كفير شراب مشكل توت نكهة",
+    "العين",
+    "مزارع",
+    "كفير",
+    "شراب",
+    "مشكل",
+    "توت",
+    "نكهة"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Al Ain Farms Kefir Drink with Mix Berries Flavour 300 ml"
+  },
+  {
+   "gtin": "06291100001194",
+   "search_aliases_ar": [
+    "العين طماطم معجون",
+    "العين",
+    "طماطم",
+    "معجون"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Al Ain tomato paste"
+  },
+  {
+   "gtin": "06291100450275",
+   "search_aliases_ar": [
+    "فشار"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Popcorn"
+  },
+  {
+   "gtin": "06291104286115",
+   "search_aliases_ar": [
+    "أورجانيك لاردر عضوي توت أزرق",
+    "أورجانيك",
+    "لاردر",
+    "عضوي",
+    "توت",
+    "أزرق"
+   ],
+   "brand_ar": "أورجانيك لاردر",
+   "name_en_at_source": "Organic blueberry"
+  },
+  {
+   "gtin": "06294007310086",
+   "search_aliases_ar": [
+    "إبل حليب شوكولاتة",
+    "إبل",
+    "حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Camel milk chocolate"
+  },
+  {
+   "gtin": "06294011620867",
+   "search_aliases_ar": [
+    "لولو حليب",
+    "لولو",
+    "حليب"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Lulu milk"
+  },
+  {
+   "gtin": "06297000140919",
+   "search_aliases_ar": [
+    "شوكولاتة تمر لوز",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "لوز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate Dates with Almonds"
+  },
+  {
+   "gtin": "06297000999821",
+   "search_aliases_ar": [
+    "مشكل بقلاوة",
+    "مشكل",
+    "بقلاوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Mixed Baklava"
+  },
+  {
+   "gtin": "00000000180351",
+   "search_aliases_ar": [
+    "لولو شرائح خبز حبوب كاملة",
+    "لولو",
+    "شرائح",
+    "خبز",
+    "حبوب",
+    "كاملة"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Slices Bread Wholemeal"
+  },
+  {
+   "gtin": "00012000063466",
+   "search_aliases_ar": [
+    "ميرندا ميني حمضيات زيرو سكر",
+    "ميرندا",
+    "ميني",
+    "حمضيات",
+    "زيرو",
+    "سكر"
+   ],
+   "brand_ar": "ميرندا",
+   "name_en_at_source": "Mirinda mini citrus zero sugar"
+  },
+  {
+   "gtin": "00709993323218",
+   "search_aliases_ar": [
+    "نيتشرلاند أبيض فاصوليا",
+    "نيتشرلاند",
+    "أبيض",
+    "فاصوليا"
+   ],
+   "brand_ar": "نيتشرلاند",
+   "name_en_at_source": "Nature land white beans"
+  },
+  {
+   "gtin": "06251897001128",
+   "search_aliases_ar": [
+    "حامض سوبر أخضر تفاح",
+    "حامض",
+    "سوبر",
+    "أخضر",
+    "تفاح"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Sour Super Green Apple"
+  },
+  {
+   "gtin": "06281014002752",
+   "search_aliases_ar": [
+    "قودي زبدة فول سوداني",
+    "قودي",
+    "زبدة",
+    "فول",
+    "سوداني"
+   ],
+   "brand_ar": "قودي",
+   "name_en_at_source": "Peanut butter 800gm goody"
+  },
+  {
+   "gtin": "06281018172680",
+   "search_aliases_ar": [
+    "يوناني زبادي",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Greek yoghurt"
+  },
+  {
+   "gtin": "06281022118247",
+   "search_aliases_ar": [
+    "أكتيفيا كامل الدسم خوخ مشمش",
+    "أكتيفيا",
+    "كامل",
+    "الدسم",
+    "خوخ",
+    "مشمش"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia peach and apricot full fat"
+  },
+  {
+   "gtin": "06281057090006",
+   "search_aliases_ar": [
+    "نادك كامل الدسم طازج لبنة",
+    "نادك",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "لبنة"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec fresh labneh full fat"
+  },
+  {
+   "gtin": "06281063223078",
+   "search_aliases_ar": [
+    "حبّ كامل ذرة حلوة شرقي حدائق حلو",
+    "حبّ",
+    "كامل",
+    "ذرة",
+    "حلوة",
+    "شرقي",
+    "حدائق",
+    "حلو"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens whole kernel sweet sweet corn"
+  },
+  {
+   "gtin": "06281063450030",
+   "search_aliases_ar": [
+    "فريشلي طبيعي شرائح فطر",
+    "فريشلي",
+    "طبيعي",
+    "شرائح",
+    "فطر"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly natural sliced mushroom"
+  },
+  {
+   "gtin": "06281063632115",
+   "search_aliases_ar": [
+    "فريشلي شرائح أناناس لايت شراب",
+    "فريشلي",
+    "شرائح",
+    "أناناس",
+    "لايت",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly sliced pineapple in light syrup"
+  },
+  {
+   "gtin": "06281100500575",
+   "search_aliases_ar": [
+    "شيدر مبشور",
+    "شيدر",
+    "مبشور"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Cheddar shredded"
+  },
+  {
+   "gtin": "06281106250368",
+   "search_aliases_ar": [
+    "شوكولاتة تمر",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Chocolate dates"
+  },
+  {
+   "gtin": "06294001800279",
+   "search_aliases_ar": [
+    "جالاكسي مقرمش",
+    "جالاكسي",
+    "مقرمش"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Galaxy crispy"
+  },
+  {
+   "gtin": "06294003557300",
+   "search_aliases_ar": [
+    "سيريلاك قمح عسل",
+    "سيريلاك",
+    "قمح",
+    "عسل"
+   ],
+   "brand_ar": "سيريلاك",
+   "name_en_at_source": "Nestle Cerelac Wheat and Honey"
+  },
+  {
+   "gtin": "00054881017787",
+   "search_aliases_ar": [
+    "هيل شاي",
+    "هيل",
+    "شاي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Cardamom Tea"
+  },
+  {
+   "gtin": "03073781010725",
+   "search_aliases_ar": [
+    "كيري سبريد قشطة جبن",
+    "كيري",
+    "سبريد",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "كيري",
+   "name_en_at_source": "Kiri spread cream cheese"
+  },
+  {
+   "gtin": "03272770014298",
+   "search_aliases_ar": [
+    "ال آند فير قشطة جبن",
+    "ال",
+    "آند",
+    "فير",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "ال آند فير",
+   "name_en_at_source": "Le Cream Cheese"
+  },
+  {
+   "gtin": "06281018143741",
+   "search_aliases_ar": [
+    "ندى يوناني زبادي",
+    "ندى",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "ندى",
+   "name_en_at_source": "Nada greek yoghurt"
+  },
+  {
+   "gtin": "06281022115710",
+   "search_aliases_ar": [
+    "الصافي بنكهة لبن فراولة",
+    "الصافي",
+    "بنكهة",
+    "لبن",
+    "لبن رائب",
+    "فراولة"
+   ],
+   "brand_ar": "الصافي",
+   "name_en_at_source": "Alsafi flavored laban strawberry"
+  },
+  {
+   "gtin": "06281022123128",
+   "search_aliases_ar": [
+    "أكتيفيا كفير توت أزرق",
+    "أكتيفيا",
+    "كفير",
+    "توت",
+    "أزرق"
+   ],
+   "brand_ar": "أكتيفيا",
+   "name_en_at_source": "Activia kefir blueberry"
+  },
+  {
+   "gtin": "06281034016210",
+   "search_aliases_ar": [
+    "راني مانجو عصير",
+    "راني",
+    "مانجو",
+    "عصير",
+    "جوس"
+   ],
+   "brand_ar": "راني",
+   "name_en_at_source": "Rani Mango Juice"
+  },
+  {
+   "gtin": "06281034908577",
+   "search_aliases_ar": [
+    "باربيكان خوخ نكهة",
+    "باربيكان",
+    "خوخ",
+    "نكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican peach flavour"
+  },
+  {
+   "gtin": "06281036560209",
+   "search_aliases_ar": [
+    "دوريتوس حلو شطة فلفل",
+    "دوريتوس",
+    "حلو",
+    "شطة",
+    "فلفل"
+   ],
+   "brand_ar": "دوريتوس",
+   "name_en_at_source": "Doritos sweet chili pepper"
+  },
+  {
+   "gtin": "06281039122015",
+   "search_aliases_ar": [
+    "السعودية قليل الدسم حليب",
+    "السعودية",
+    "قليل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "السعودية",
+   "name_en_at_source": "Saudia low fat milk"
+  },
+  {
+   "gtin": "06281057018369",
+   "search_aliases_ar": [
+    "نادك كفير زبادي",
+    "نادك",
+    "كفير",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "نادك",
+   "name_en_at_source": "Nadec kefir yogurt"
+  },
+  {
+   "gtin": "06281063600046",
+   "search_aliases_ar": [
+    "شرقي حدائق فراولة فطيرة حشوة",
+    "شرقي",
+    "حدائق",
+    "فراولة",
+    "فطيرة",
+    "حشوة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Orient gardens strawberry pie filling"
+  },
+  {
+   "gtin": "06281063632207",
+   "search_aliases_ar": [
+    "فريشلي مانجو شرائح شراب",
+    "فريشلي",
+    "مانجو",
+    "شرائح",
+    "شراب"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly mango slices in syrup"
+  },
+  {
+   "gtin": "06281123035016",
+   "search_aliases_ar": [
+    "معمول تمر كوكيز",
+    "معمول",
+    "تمر",
+    "كوكيز"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Maamoul date cookie"
+  },
+  {
+   "gtin": "06291003000010",
+   "search_aliases_ar": [
+    "تيفاني حليب عسل بسكويت",
+    "تيفاني",
+    "حليب",
+    "عسل",
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": "تيفاني",
+   "name_en_at_source": "Milk & Honey Biscuits"
+  },
+  {
+   "gtin": "06291031000747",
+   "search_aliases_ar": [
+    "يوناني زبادي",
+    "يوناني",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Greek yogurt"
+  },
+  {
+   "gtin": "06291056000784",
+   "search_aliases_ar": [
+    "العين قليل الدسم حليب",
+    "العين",
+    "قليل",
+    "الدسم",
+    "حليب"
+   ],
+   "brand_ar": "العين",
+   "name_en_at_source": "Low Fat Milk"
+  },
+  {
+   "gtin": "06294007302043",
+   "search_aliases_ar": [
+    "حليب شوكولاتة فستق",
+    "حليب",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "فستق"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Milk Chocolate with Pistachio"
+  },
+  {
+   "gtin": "06294011693908",
+   "search_aliases_ar": [
+    "لولو زبدة فول سوداني",
+    "لولو",
+    "زبدة",
+    "فول",
+    "سوداني"
+   ],
+   "brand_ar": "لولو",
+   "name_en_at_source": "Peanut Butter"
+  },
+  {
+   "gtin": "06294017139837",
+   "search_aliases_ar": [
+    "كيت كات فستق كنافة",
+    "كيت",
+    "كات",
+    "فستق",
+    "كنافة"
+   ],
+   "brand_ar": "كيت كات",
+   "name_en_at_source": "Pistachio Kunafa"
+  },
+  {
+   "gtin": "06295151300763",
+   "search_aliases_ar": [
+    "عافية أبيض لحم تونة",
+    "عافية",
+    "أبيض",
+    "لحم",
+    "تونة"
+   ],
+   "brand_ar": "عافية",
+   "name_en_at_source": "White meat tuna"
+  },
+  {
+   "gtin": "06297000670447",
+   "search_aliases_ar": [
+    "مزارع بلدي فيتا جبن زعتر",
+    "مزارع",
+    "بلدي",
+    "فيتا",
+    "جبن",
+    "جبنة",
+    "زعتر"
+   ],
+   "brand_ar": "مزارع بلدي",
+   "name_en_at_source": "Balade farms feta cheese thyme"
+  },
+  {
+   "gtin": "06300900234197",
+   "search_aliases_ar": [
+    "بلدنا كامل الدسم طازج زبادي",
+    "بلدنا",
+    "كامل",
+    "الدسم",
+    "طازج",
+    "زبادي",
+    "روب",
+    "لبن زبادي"
+   ],
+   "brand_ar": "بلدنا",
+   "name_en_at_source": "Fresh Yoghurt (Full Fat)"
+  },
+  {
+   "gtin": "00032894010667",
+   "search_aliases_ar": [
+    "كاليفورنيا جاردن شرائح أناناس لايت شراب",
+    "كاليفورنيا",
+    "جاردن",
+    "شرائح",
+    "أناناس",
+    "لايت",
+    "شراب"
+   ],
+   "brand_ar": "كاليفورنيا جاردن",
+   "name_en_at_source": "Sliced Pineapple (in light syrup)"
+  },
+  {
+   "gtin": "05000159462037",
+   "search_aliases_ar": [
+    "سنيكرز آيس كريم",
+    "سنيكرز",
+    "آيس",
+    "كريم"
+   ],
+   "brand_ar": "سنيكرز",
+   "name_en_at_source": "Snickers Ice Cream"
+  },
+  {
+   "gtin": "05449000304148",
+   "search_aliases_ar": [
+    "فانتا فراولة",
+    "فانتا",
+    "فراولة"
+   ],
+   "brand_ar": "فانتا",
+   "name_en_at_source": "Fanta strawberry"
+  },
+  {
+   "gtin": "05711953001406",
+   "search_aliases_ar": [
+    "بوك طبخ قشطة",
+    "بوك",
+    "طبخ",
+    "قشطة"
+   ],
+   "brand_ar": "بوك",
+   "name_en_at_source": "Cooking Cream 1l"
+  },
+  {
+   "gtin": "05711953175978",
+   "search_aliases_ar": [
+    "جالاكسي شوكولاتة حليب محلّي",
+    "جالاكسي",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "حليب",
+    "محلّي"
+   ],
+   "brand_ar": "جالاكسي",
+   "name_en_at_source": "Chocolate milk with sweetener"
+  },
+  {
+   "gtin": "06084012090253",
+   "search_aliases_ar": [
+    "كرافت جبن شيدر سبريد أصلي",
+    "كرافت",
+    "جبن",
+    "جبنة",
+    "شيدر",
+    "سبريد",
+    "أصلي"
+   ],
+   "brand_ar": "كرافت",
+   "name_en_at_source": "Kraft cheddar cheese spread original"
+  },
+  {
+   "gtin": "06253808661537",
+   "search_aliases_ar": [
+    "كيو بيك توت أزرق مافن",
+    "كيو",
+    "بيك",
+    "توت",
+    "أزرق",
+    "مافن"
+   ],
+   "brand_ar": "كيو بيك",
+   "name_en_at_source": "Blueberry Muffin"
+  },
+  {
+   "gtin": "06281007023955",
+   "search_aliases_ar": [
+    "المراعي قشطة جبن",
+    "المراعي",
+    "قشطة",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "المراعي",
+   "name_en_at_source": "Cream Cheese"
+  },
+  {
+   "gtin": "06281016590318",
+   "search_aliases_ar": [
+    "فشار جبن نكهة",
+    "فشار",
+    "جبن",
+    "جبنة",
+    "نكهة"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Popcorn cheese flavor"
+  },
+  {
+   "gtin": "06281020174900",
+   "search_aliases_ar": [
+    "لونا مثلج قهوة بروتين كراميل",
+    "لونا",
+    "مثلج",
+    "قهوة",
+    "بروتين",
+    "كراميل"
+   ],
+   "brand_ar": "لونا",
+   "name_en_at_source": "Luna iced coffee protein caramel"
+  },
+  {
+   "gtin": "06281063632092",
+   "search_aliases_ar": [
+    "فريشلي كريمي ستايل ذرة",
+    "فريشلي",
+    "كريمي",
+    "ستايل",
+    "ذرة"
+   ],
+   "brand_ar": "فريشلي",
+   "name_en_at_source": "Freshly creamy style corn"
+  },
+  {
+   "gtin": "06281105473065",
+   "search_aliases_ar": [
+    "أولكر سمسم بسكويت",
+    "أولكر",
+    "سمسم",
+    "بسكويت",
+    "بسكوت"
+   ],
+   "brand_ar": "أولكر",
+   "name_en_at_source": "Sesame biscuits"
+  },
+  {
+   "gtin": "06285572001271",
+   "search_aliases_ar": [
+    "ليمون نعناع فوّار شراب",
+    "ليمون",
+    "نعناع",
+    "فوّار",
+    "شراب"
+   ],
+   "brand_ar": null,
+   "name_en_at_source": "Lemon and mint sparkling drink"
+  },
+  {
+   "gtin": "06285602012949",
+   "search_aliases_ar": [
+    "ديمة فرنسي جبن",
+    "ديمة",
+    "فرنسي",
+    "جبن",
+    "جبنة"
+   ],
+   "brand_ar": "ديمة",
+   "name_en_at_source": "Deemah french cheese"
+  },
+  {
+   "gtin": "06290090003003",
+   "search_aliases_ar": [
+    "هاينز سلطة قشطة",
+    "هاينز",
+    "سلطة",
+    "قشطة"
+   ],
+   "brand_ar": "هاينز",
+   "name_en_at_source": "Salad Cream"
+  },
+  {
+   "gtin": "06291011061133",
+   "search_aliases_ar": [
+    "تشوكوديت شوكولاتة تمر لوز",
+    "تشوكوديت",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "تمر",
+    "لوز"
+   ],
+   "brand_ar": "تشوكوديت",
+   "name_en_at_source": "Chocolate Date Almond"
+  },
+  {
+   "gtin": "06297000747705",
+   "search_aliases_ar": [
+    "باربيكان شعير مشروب تفاح نكهة",
+    "باربيكان",
+    "شعير",
+    "مشروب",
+    "شراب",
+    "تفاح",
+    "نكهة"
+   ],
+   "brand_ar": "باربيكان",
+   "name_en_at_source": "Barbican malt beverage apple flavor"
+  },
+  {
+   "gtin": "07340001805642",
+   "search_aliases_ar": [
+    "بيربلز أبيض شوكولاتة لوز",
+    "بيربلز",
+    "أبيض",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة",
+    "لوز"
+   ],
+   "brand_ar": "بيربلز",
+   "name_en_at_source": "WHITE CHOCOLATE ALMOND"
+  },
+  {
+   "gtin": "08445291773080",
+   "search_aliases_ar": [
+    "نستله حبوب إفطار لوز شوكولاتة",
+    "نستله",
+    "حبوب",
+    "إفطار",
+    "لوز",
+    "شوكولاتة",
+    "شوكولاته",
+    "شكولاتة"
+   ],
+   "brand_ar": "نستله",
+   "name_en_at_source": "Cereal almond& choco 350gm Nestle"
+  },
+  {
+   "gtin": "09415007021711",
+   "search_aliases_ar": [
+    "أنكور حليب بودرة",
+    "أنكور",
+    "حليب",
+    "بودرة"
+   ],
+   "brand_ar": "أنكور",
+   "name_en_at_source": "Anchor Milk Powder"
+  },
+  {
+   "gtin": "09504000343804",
+   "search_aliases_ar": [
+    "مزرعتي قليل الدسم بنكهة زبادي فراولة",
+    "مزرعتي",
+    "قليل",
+    "الدسم",
+    "بنكهة",
+    "زبادي",
+    "روب",
+    "لبن زبادي",
+    "فراولة"
+   ],
+   "brand_ar": "مزرعتي",
+   "name_en_at_source": "Flavored Yoghurt (Strawberry) (Low Fat)"
+  },
+  {
+   "gtin": "09556001600806",
+   "search_aliases_ar": [
+    "ماجي كاتشب طماطم",
+    "ماجي",
+    "كاتشب",
+    "طماطم"
+   ],
+   "brand_ar": "ماجي",
+   "name_en_at_source": "Maggi Ketchup tomato 475g"
+  }
+ ]
+}

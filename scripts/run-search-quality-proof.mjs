@@ -230,8 +230,12 @@ ok(`الجسر يعمل على كل المجموعات المقيسة: ${bridged
  */
 {
   const { normalizeProductKey } = await loadTsModule('src/lib/text/foodNormalize.ts')
-  const rawHits = await catalog.searchRanked(normalizeProductKey('اندومي'), { limit: 12, deep: true })
-  const bridgedHits = await catalog.searchRanked('indomie', { limit: 12, deep: true })
+  // ⚠️ الحدّ ١٢ كان **يشبع المقارنة**: بعد موجة المرادفات العربية صار الخام يبلغ
+  // ١٢ والمجسَّر ١٢، فيتساويان عند السقف لا في الواقع. الحدّ هنا مرفوع كي يقيس
+  // الفحص الوصول الفعلي لا سقف العرض.
+  const REACH = 200
+  const rawHits = await catalog.searchRanked(normalizeProductKey('اندومي'), { limit: REACH, deep: true })
+  const bridgedHits = await catalog.searchRanked('indomie', { limit: REACH, deep: true })
   counter(
     'نزعُ الجسر يخسر وصولًا مقيسًا: «اندومي» خامًا أقلّ ممّا يبلغه `indomie`',
     bridgedHits.length > rawHits.length && bridgedHits.length > 0,

@@ -73,6 +73,8 @@ for (const file of discoverPacks()) {
       name_en: N.str(item.name_en),
       brand_ar: N.str(item.brand_ar),
       brand_en: null,
+      // تُملأ من دفعات ARB-* داخل خطّ البناء، لا من هنا.
+      search_aliases_ar: null,
       manufacturer: null,
       // ⚠️ المصدر يصرّح أن المنشأ **مستنتَج من بادئة GS1** — والبادئة تعرّف المنظمة
       //    المرخِّصة لا بلد المنشأ. فلا يُكتب في `country` ادّعاءً؛ يبقى null.

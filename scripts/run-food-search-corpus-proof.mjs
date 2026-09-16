@@ -354,12 +354,28 @@ counter(`حزمة «${bigKey[0]}» (${bigKey[1]} سجلًا) تُقرأ ضمن �
   trace !== null && trace.pagesRead <= DEFAULT_BUCKET_PAGE_BUDGET && trace.pagesRead < trace.pagesAvailable,
   `قُرئت ${trace?.pagesRead} من ${trace?.pagesAvailable} صفحة`)
 
-// ⟲ ٦ — استعلام أقصر من حدّ البادئة لا يلمس الشبكة إطلاقًا.
+// ⟲ ٦ — الكلمة القصيرة: الضمانة **صفر طلبات حين لا حزمة لها**.
+//
+// ═══ تغيّر معلَن في العقد ═══
+// كان الحدّ `PREFIX_MIN` (٣) فكانت كل كلمة بحرفين تُرفض بـ`too-short` قبل أي نظر.
+// وهو أشدّ من حدّ الفهرسة نفسه (`MIN_TOKEN_LENGTH` = ٢): «ماء» تُطبَّع إلى «ما»
+// **ورمزها مفهرس فعلًا**، فكان الاستعلام يُرفض بحدٍّ أقسى من الحدّ الذي بُني به
+// الفهرس. صار الحدّ حدَّ الفهرسة، والكلمة القصيرة تُطابَق **تطابقًا تامًّا** لا
+// بادئةً (وإلا أصابت «ماء» منتجات «مانجو» و«مارس» — ٧٥ نتيجة مقيسة أكثرها خطأ).
+//
+// **والضمانة المقيسة هنا لم تتغيّر:** «رز» لا حزمة لها ⇒ صفر طلبات شبكة.
 const stopShort = meter()
 await catalog.searchRanked('رز', { deep: true, limit: 12 })
-counter('«رز» (محرفان) لا يفتح طلبًا — ما دون حدّ البادئة يخدمه المنسَّق والساخن',
-  stopShort().requests === 0 && catalog.lastCorpusTrace?.plan.reason === 'too-short',
-  `plan=${catalog.lastCorpusTrace?.plan.reason}`)
+const shortReason = catalog.lastCorpusTrace?.plan.reason
+counter('«رز» (محرفان) بلا حزمة لا يفتح طلبًا — الضمانة الأصلية قائمة',
+  stopShort().requests === 0 && (shortReason === 'too-short' || shortReason === 'absent'),
+  `plan=${shortReason} · requests=0`)
+
+// ⟲ ٦ب — والوجه المقابل: كلمة قصيرة **لها** حزمة تفتح حزمة واحدة بالضبط، لا تمدّد.
+const shortPlan = planBucketQuery('ما', { buckets: { 'ما': 3, 'مان': 9, 'ميا': 4 } })
+counter('الكلمة القصيرة ذات الحزمة تفتح حزمة واحدة لا فانوسًا من الحزم',
+  shortPlan.reason === 'ok' && shortPlan.keys.length === 1 && shortPlan.keys[0] === 'ما',
+  `keys=${JSON.stringify(shortPlan.keys)}`)
 
 // ══════════════════════════════════════════════════════════════════════
 server.close()

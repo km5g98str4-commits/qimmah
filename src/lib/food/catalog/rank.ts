@@ -4,7 +4,8 @@
  * العقد يذكرها صراحةً: «الترتيب معلَن في الكود لا مبثوث». ترتيبٌ مبثوث في ثلاثة
  * مواضع يصير ثلاثة ترتيبات بعد موجتين، ولا يمكن اختبار أيّها الصحيح.
  */
-import { normalizeProductKey } from '@/lib/text/foodNormalize'
+import { PREFIX_MIN, normalizeProductKey } from '@/lib/text/foodNormalize'
+import { productSearchText } from '../searchBuckets'
 import type { CatalogProduct } from './types'
 
 /** رتب المطابقة من الأقوى إلى الأضعف — الرقم الأصغر أفضل. */
@@ -15,6 +16,7 @@ export const MATCH_TIERS = [
   'code-prefix',
   'contains',
   'brand',
+  'all-terms',
 ] as const
 export type MatchTier = (typeof MATCH_TIERS)[number]
 
@@ -25,6 +27,11 @@ const TIER_RANK: Record<MatchTier, number> = {
   'code-prefix': 3,
   contains: 4,
   brand: 5,
+  // ═══ أضعف رتبة عمدًا ═══
+  // «كل كلمات الاستعلام موجودة، غير متجاورة». تُضاف **في الذيل** كي لا تزحزح
+  // رتبةً قائمة: ما كان يُطابق يبقى برتبته نفسها وترتيبه نفسه، وهذه تلتقط فقط ما
+  // كان يرجع `null` من قبل.
+  'all-terms': 6,
 }
 
 export interface RankedHit {
@@ -93,15 +100,52 @@ function tierFor(product: CatalogProduct, q: string, f: { name: string; brand: s
   return null
 }
 
+/**
+ * **مطابقة كل الكلمات** — العطل الذي تغلقه مقيس لا مفترض.
+ *
+ * `tierFor` كلّها مبنيّة على `includes`/`startsWith` لنصّ الاستعلام **كاملًا**، أي
+ * أنها تشترط **التجاور والترتيب**. فسجلٌ اسمه «حليب المراعي كامل الدسم» كان يرجع
+ * `null` لاستعلام «حليب كامل الدسم» — وكل كلماته فيه — لأن الكلمات غير متلاصقة.
+ * وينطبق الأمر على الإنجليزية حرفيًا: «almarai milk» لا تطابق «Almarai Fresh Milk».
+ *
+ * الشرط هنا: **كل** كلمة من الاستعلام تظهر بادئةَ كلمةٍ في نصّ البحث. الترتيب
+ * والتجاور لا يلزمان، والاستعلام ذو الكلمة الواحدة لا يمرّ من هنا أصلًا (تكفيه
+ * الرتب الأقوى)، فلا يتّسع الاستدعاء لكلمة مفردة.
+ */
+function allTermsPresent(haystack: string, normalizedQuery: string): boolean {
+  const terms = normalizedQuery.split(' ').filter(Boolean)
+  if (terms.length === 0) return false
+  const words = haystack.split(' ').filter(Boolean)
+  // ⚠️ كلمة أقصر من `PREFIX_MIN` **ليست بادئة صالحة** فتُطابَق تطابقًا تامًّا.
+  // «ماء» تُطبَّع إلى «ما» بحرفين؛ ولو عوملت بادئةً لأصابت «مانجو» و«مارس»
+  // و«ماسالا» — قياسًا: ٧٥ نتيجة أكثرها عصائر وشوكولاتة. والتطابق التامّ يعيدها
+  // إلى منتجات الماء وحدها. الحدّ هو `PREFIX_MIN` المعلَن نفسه لا رقم جديد.
+  return terms.every((t) => (t.length < PREFIX_MIN
+    ? words.some((w) => w === t)
+    : words.some((w) => w === t || w.startsWith(t))))
+}
+
 export function classifyMatch(
   product: CatalogProduct,
   normalizedQuery: string,
-  normalizedFields: { name: string; brand: string },
+  normalizedFields: { name: string; brand: string; search?: () => string },
 ): MatchTier | null {
   const direct = tierFor(product, normalizedQuery, normalizedFields)
   if (direct) return direct
   const bare = withoutAl(normalizedQuery)
-  return bare ? tierFor(product, bare, normalizedFields) : null
+  const viaBare = bare ? tierFor(product, bare, normalizedFields) : null
+  if (viaBare) return viaBare
+  // نصّ الاسترجاع الكامل — ومنه المرادفات العربية. يخدم حالتين:
+  // كلمة واحدة لا يحملها الاسم ولا العلامة (يحملها مرادف)، وكلمات متفرّقة غير متجاورة.
+  // وفي الحالتين الرتبة **الأضعف** حتى لا يزاحم المرادفُ اسمًا حقيقيًا.
+  // ⚠️ **كسولة عمدًا**: نصّ الاسترجاع لا يُحسب إلا بعد فشل كل الرتب القوية.
+  // حسابه لكل سجل في كل استعلام كلّف ٦٫٣ مللي ثانية إضافية على صفحة كاملة (قياس).
+  const haystack = normalizedFields.search
+    ? normalizedFields.search()
+    : `${normalizedFields.name} ${normalizedFields.brand}`
+  if (allTermsPresent(haystack, normalizedQuery)) return 'all-terms'
+  const bareAll = bare && allTermsPresent(haystack, bare)
+  return bareAll ? 'all-terms' : null
 }
 
 /**
@@ -111,9 +155,27 @@ export function classifyMatch(
  * (حزم البحث) كان سيصنع تطبيعين يتباعدان بعد موجة — وهو بالضبط ما يمنعه §٦ من
  * عقد البحث: «الترتيب معلَن في الكود لا مبثوث».
  */
+/**
+ * ذاكرة نصّ الاسترجاع المطبَّع — مفتاحها كائن السجل نفسه.
+ * النصّ **مستقلّ عن الاستعلام**، فحسابه مرّة لكل سجل بدل مرّة لكل (سجل × استعلام)
+ * يعيد الكلفة إلى ما كانت. و`WeakMap` تُحرّر مع الصفحة فلا تسرّب ذاكرة.
+ */
+const searchTextCache = new WeakMap<object, string>()
+function normalizedSearchText(product: CatalogProduct): string {
+  const hit = searchTextCache.get(product)
+  if (hit !== undefined) return hit
+  const value = normalizeProductKey(productSearchText(product))
+  searchTextCache.set(product, value)
+  return value
+}
+
 export function tierForProduct(product: CatalogProduct, normalizedQuery: string): MatchTier | null {
   return classifyMatch(product, normalizedQuery, {
+    // الاسم والعلامة يبقيان كما كانا — رتبهما لا تتغيّر بحرف.
     name: normalizeProductKey(`${product.name_ar ?? ''} ${product.name_en ?? ''}`),
     brand: normalizeProductKey(`${product.brand_ar ?? ''} ${product.brand_en ?? ''}`),
+    // ونصّ الاسترجاع الكامل (ومنه المرادفات العربية) يخدم رتبة `all-terms` وحدها،
+    // فلا تتسرّب المرادفات إلى `name-exact` أو `name-prefix` فتُزوّر قوّة مطابقة.
+    search: () => normalizedSearchText(product),
   })
 }

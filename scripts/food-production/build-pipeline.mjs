@@ -4,9 +4,9 @@
 //
 //   node scripts/food-production/build-pipeline.mjs --in a.jsonl --in b.jsonl [--out-dir DIR]
 
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
+import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { loadShared, ROOT } from './lib/loadTs.mjs'
+import { loadShared, loadTsModule, ROOT } from './lib/loadTs.mjs'
 import { dedupe } from './lib/dedupe.mjs'
 import {
   writeShards, writeHotSet, chooseShardCount, stableStringify, sha256, fitHotSetToBudget,
@@ -30,6 +30,8 @@ const HOT_MAX = Number(argOf('--hot-max', process.env.HOT_SET_MAX ?? 600))
 if (!INPUTS.length) { console.error('no input JSONL found — run the ingest scripts first'); process.exit(1) }
 
 const { norm } = await loadShared()
+// نصّ البحث القانوني — نفسه الذي يقرؤه وقت التشغيل، فلا يتباعد الفهرس عن المطابقة.
+const { productSearchText } = await loadTsModule('src/lib/food/searchBuckets.ts')
 
 // ── تحميل ──
 const records = []
@@ -46,6 +48,41 @@ console.log(`  total raw: ${records.length.toLocaleString()}`)
 // ── إزالة التكرار ──
 const { accepted, conflicts, reviewQueue, stats: dedupeStats } = dedupe(records, norm.normalizeProductKey)
 console.log(`  after dedupe: ${accepted.length.toLocaleString()} (removed ${dedupeStats.duplicates_removed.toLocaleString()}, conflicts ${conflicts.length}, review ${reviewQueue.length})`)
+
+// ── طبقة المرادفات العربية (ARB-*) ──
+// ═══ لماذا طبقة فوق السجلات لا مصدرًا ثالثًا ═══
+// المرادفات **ليست منتجًا** بل حقل استرجاع على منتج قائم، ومفتاحها الـGTIN. فدمجها
+// هنا — بعد إزالة التكرار وقبل كتابة الشرائح — يجعلها تدخل الفهرس والحزم في المسار
+// نفسه، ولا تنشئ سجلًّا ولا تزاحم مصدرًا.
+//
+// ⚠️ **لا تلمس `name_ar` أبدًا.** المرادف مصطلح بحث، والاسم العربي يأتي من مصدر
+// موثوق وحده. خلطهما يجعل التطبيق يعرض نصًّا مولَّدًا بوصفه اسم المنتج.
+const ARB_DIR = resolve(ROOT, 'docs/data-factory/arabic')
+const aliasByGtin = new Map()
+if (existsSync(ARB_DIR)) {
+  for (const f of readdirSync(ARB_DIR).filter((x) => /^ARB-\d+.*\.json$/.test(x)).sort()) {
+    const batch = JSON.parse(readFileSync(resolve(ARB_DIR, f), 'utf8'))
+    for (const it of batch.items ?? []) {
+      const terms = (it.search_aliases_ar ?? []).map((t) => String(t).trim()).filter(Boolean)
+      if (!it.gtin || terms.length === 0) continue
+      const prev = aliasByGtin.get(String(it.gtin)) ?? []
+      aliasByGtin.set(String(it.gtin), [...new Set([...prev, ...terms])])
+    }
+    console.log(`  aliases  ${String(batch.items?.length ?? 0).padStart(9)}  ${f}`)
+  }
+}
+let aliasApplied = 0
+let aliasSkippedHasName = 0
+for (const rec of accepted) {
+  // المفتاح قد يرد بصيغة المصدر أو بصيغة GTIN-14 — نجرّب الشكلين بلا تخمين.
+  const terms = aliasByGtin.get(rec.gtin) ?? aliasByGtin.get(rec.gtin?.replace(/^0+/, ''))
+  if (!terms) { if (rec.search_aliases_ar === undefined) rec.search_aliases_ar = null; continue }
+  rec.search_aliases_ar = terms
+  aliasApplied++
+  if (rec.name_ar) aliasSkippedHasName++
+}
+for (const rec of accepted) if (rec.search_aliases_ar === undefined) rec.search_aliases_ar = null
+console.log(`  aliases applied: ${aliasApplied.toLocaleString()} (records that already had an Arabic name: ${aliasSkippedHasName})`)
 
 // ── الطقم الساخن: المنسَّق كلّه + أعلى السعودي/الخليجي ثقةً ──
 const rank = (a, b) => (b.confidence - a.confidence) || (a.gtin < b.gtin ? -1 : 1)
@@ -89,6 +126,7 @@ const shardResult = writeShards({
   outDir: resolve(OUT_DIR, 'shards'),
   shardCount,
   tokenize: indexTokenizer,
+  searchText: productSearchText,
   normalizationVersion: norm.NORMALIZATION_VERSION,
   schemaVersion: '1.0.0',
 })
@@ -96,6 +134,7 @@ const hotResult = writeHotSet({
   records: hotSet,
   outDir: resolve(OUT_DIR, 'hot'),
   tokenize: indexTokenizer,
+  searchText: productSearchText,
   normalizationVersion: norm.NORMALIZATION_VERSION,
   schemaVersion: '1.0.0',
 })

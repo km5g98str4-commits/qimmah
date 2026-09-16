@@ -106,23 +106,35 @@ export class SearchCorpus {
     const plan = planBucketQuery(query, directory)
     const empty: CorpusQueryTrace = { plan, pagesRead: 0, pagesAvailable: 0, recordsScanned: 0 }
     if (plan.reason !== 'ok' || plan.key === null || !directory) return { hits: [], trace: empty }
+    // الكلمة القصيرة تفتح عدّة حزم (انظر `planBucketQuery`)؛ الطويلة حزمة واحدة.
+    const keys = plan.keys.length > 0 ? plan.keys : [plan.key]
 
     const q = normalizeProductKey(query)
     const budget = Math.max(1, opts.pageBudget ?? DEFAULT_BUCKET_PAGE_BUDGET)
     const limit = opts.limit ?? DEFAULT_LIMIT
-    const available = pageCount(plan.records, directory.page_size)
+    const available = keys.reduce(
+      (sum, k) => sum + pageCount(directory.buckets[k] ?? 0, directory.page_size), 0,
+    )
     const hits: RankedHit[] = []
+    const seen = new Set<string>()
     let pagesRead = 0
     let recordsScanned = 0
 
-    for (let i = 0; i < available && pagesRead < budget; i++) {
-      const rows = await this.page(plan.key, i)
-      if (!rows) break
-      pagesRead += 1
-      recordsScanned += rows.length
-      for (const product of rows) {
-        const tier = tierForProduct(product, q)
-        if (tier) hits.push({ product, tier })
+    // الميزانية تبقى **بالصفحات** كما كانت، وتُقسَّم على الحزم المرشّحة بالترتيب
+    // الحتمي نفسه — فالكلمة القصيرة لا تشتري استدعاءها بتجاوز سقف البايتات.
+    outer: for (const key of keys) {
+      const pages = pageCount(directory.buckets[key] ?? 0, directory.page_size)
+      for (let i = 0; i < pages; i++) {
+        if (pagesRead >= budget) break outer
+        const rows = await this.page(key, i)
+        if (!rows) break
+        pagesRead += 1
+        recordsScanned += rows.length
+        for (const product of rows) {
+          if (seen.has(product.gtin)) continue
+          const tier = tierForProduct(product, q)
+          if (tier) { seen.add(product.gtin); hits.push({ product, tier }) }
+        }
       }
     }
 

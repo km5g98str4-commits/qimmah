@@ -29,7 +29,7 @@ import { stableStringify } from './lib/shard.mjs'
 
 const buckets = await loadTsModule('src/lib/food/searchBuckets.ts')
 const {
-  SEARCH_CORPUS_VERSION, BUCKET_KEY_LENGTH, BUCKET_PAGE_SIZE, CARD_FIELDS,
+  SEARCH_CORPUS_VERSION, BUCKET_KEY_LENGTH, BUCKET_PAGE_SIZE, CARD_FIELDS, productSearchText,
   bucketKeysForText, bucketPagePath, pageCount,
 } = buckets
 const { NORMALIZATION_VERSION } = await loadTsModule('src/lib/text/foodNormalize.ts')
@@ -55,8 +55,8 @@ for (const file of idxFiles) {
   for (const gtin of idx.order) {
     const rec = payload.records[gtin]
     if (!rec) continue
-    // **نفس** تركيب نصّ الفهرسة في `buildSearchIndex` — لا تركيب ثانٍ يتباعد عنه.
-    const text = [rec.name_ar, rec.name_en, rec.brand_ar, rec.brand_en, rec.category].filter(Boolean).join(' ')
+    // **نفس** نصّ الفهرسة القانوني `productSearchText` — لا تركيب ثانٍ يتباعد عنه.
+    const text = productSearchText(rec)
     rows.push(CARD_FIELDS.map((f) => (rec[f] === undefined ? null : rec[f])))
     keysOf.push(bucketKeysForText(text))
   }

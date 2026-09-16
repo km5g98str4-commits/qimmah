@@ -82,7 +82,18 @@ function buildRecord(row) {
   const { serving_size, serving_unit } = N.parseServing(row.serving_size, norm.foldArabicDigits)
   const { energy_kcal, energy_from } = N.resolveEnergyKcal(row)
   const { sodium_mg } = N.resolveSodiumMg(row)
+  // ═══ الاسم العربي: الحقل المخصّص أولًا ═══
+  // كان السطر يقرأ `product_name` وحده ويقسمه بالخطّ. وOFF يملك حقولًا عربية
+  // مخصّصة (`product_name_ar` وبديليها)، فكان كل اسم عربي **مصرَّح به صراحةً في
+  // المصدر** يسقط بصمت ما لم يصادف وجوده داخل `product_name` نفسه.
+  //
+  // ⚠️ هذا اسم **رسمي من المصدر** فمحلّه `name_ar` — وهو غير
+  // `search_aliases_ar` المولَّدة بمعجم. الحقلان لا يختلطان أبدًا.
   const names = N.splitByScript(row.product_name)
+  const declaredAr = N.str(row.product_name_ar)
+    ?? N.str(row.generic_name_ar)
+    ?? N.str(row.abbreviated_product_name_ar)
+  if (declaredAr && N.hasArabic(declaredAr)) names.ar = names.ar ?? declaredAr
   const brands = N.splitByScript(row.brands)
   const basis = N.resolveBasis(serving_unit, row.quantity)
   const market = N.resolveMarket(row.countries_en, cls)
@@ -95,6 +106,9 @@ function buildRecord(row) {
     name_en: names.en,
     brand_ar: brands.ar,
     brand_en: brands.en,
+    // المرادفات طبقة لاحقة (ARB-*) تُدمج في build-pipeline — تُصرَّح هنا `null`
+    // كي يبقى شكل السجل مطابقًا للمخطّط حقلًا بحقل (يحرسه إثبات التطابق).
+    search_aliases_ar: null,
     manufacturer: N.str(row.brand_owner) ?? N.str(row.manufacturing_places),
     country: N.str(row.countries_en),
     market,

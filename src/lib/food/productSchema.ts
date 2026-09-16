@@ -69,6 +69,22 @@ export interface ProductRecord {
   name_en: string | null
   brand_ar: string | null
   brand_en: string | null
+
+  /**
+   * مرادفات بحث عربية — **مصطلحات استرجاع لا اسم عرض**.
+   *
+   * ═══ الفرق عن `name_ar` وهو فرق دلالي لا شكلي ═══
+   * `name_ar` اسم المنتج كما يسمّيه **مصدر موثوق** (المصنّع أو بطاقة العبوة أو
+   * تحرير بشري) — ويُعرض للمستخدم بوصفه اسم المنتج.
+   * `search_aliases_ar` مصطلحات **مولَّدة بمعجم مضبوط** لتجعل السجل قابلًا
+   * للإيجاد بالعربية. قد لا تكون جملة عربية سليمة الترتيب («المراعي فانيلا بنكهة
+   * حليب»)، ولذلك **لا تُعرض للمستخدم اسمًا للمنتج أبدًا**.
+   *
+   * ⚠️ قاعدة لا تُخرَق: امتلاء هذا الحقل **لا يملأ** `name_ar` ولا يغني عنه.
+   * سجلٌ بلا اسم عربي موثوق يبقى `name_ar = null` مهما امتلأت مرادفاته.
+   */
+  search_aliases_ar: string[] | null
+
   manufacturer: string | null
   /** بلد/بلدان التسويق كما صرّح بها المصدر — **لا** يُشتق من بادئة GS1. */
   country: string | null
@@ -126,6 +142,7 @@ export const PRODUCT_FIELDS: readonly string[] = [
   'name_en',
   'brand_ar',
   'brand_en',
+  'search_aliases_ar',
   'manufacturer',
   'country',
   'market',
