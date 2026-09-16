@@ -320,7 +320,8 @@
     "test:e2e:prelaunch-web": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/prelaunch-web-accessibility.mjs",
     "test:e2e:founder-exact": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/founder-exact-workout.mjs",
     "test:nutrition-canonical": "node scripts/run-nutrition-canonical-proof.mjs",
-    "test:e2e:nutrition-canonical": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/nutrition-canonical-live.mjs"
+    "test:e2e:nutrition-canonical": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/nutrition-canonical-live.mjs",
+    "test:e2e:nutrition-ios": "VITE_ENTITLEMENT_MODE=mock npm run build && node scripts/e2e/nutrition-ios-shell.mjs"
   },
   "dependencies": {
     "@capacitor/app": "^8.1.0",
