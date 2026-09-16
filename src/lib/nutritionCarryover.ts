@@ -41,8 +41,8 @@
 
 import { getDayStamp, shiftDayStamp } from '@/lib/today'
 import { getDataOwner } from '@/lib/dataOwnership'
-import { getNutritionLog, saveNutritionLog } from '@/lib/historyStore'
-import { getDayNutritionStat } from '@/lib/nutritionHistory'
+import { getNutritionLog, getNutritionLogs, saveNutritionLog } from '@/lib/historyStore'
+import { getDayNutritionStat, ownerNutritionDays, type DayEntriesMap } from '@/lib/nutritionHistory'
 import { calorieFloor } from '@/lib/calculators'
 import type { Gender } from '@/types/profile'
 import { writeJson, type WriteResult } from '@/lib/safeStorage'
@@ -51,13 +51,27 @@ import { writeJson, type WriteResult } from '@/lib/safeStorage'
 export const NUTRITION_CARRYOVER_KEY = 'qimmah:nutritionCarryover:v1'
 
 /**
- * أقصى عدد أيام تُحسب سلسلة الترحيل عبرها.
+ * ⚠️ **أُزيلت نافذة الأربعة عشر يومًا — ولم يحلّ محلّها رقم آخر.**
  *
- * السلسلة تلزم لأن هدف الأمس المعدَّل يعتمد على أول أمس قبله. والحدّ يجعل
- * الحساب **محدود الكلفة وحتميًّا**: ما قبل النافذة يُعامَل كأنه بلا ترحيل.
- * أثره يتلاشى عمليًّا لأن السلسلة تنكسر عند أوّل يوم لم يُتجاوَز فيه الهدف.
+ * كانت `CARRYOVER_CHAIN_DAYS = 14` تقصّ السلسلة عند حافّة ثابتة، بحجّتين:
+ * «محدود الكلفة» و«أثره يتلاشى عمليًّا». وكلتاهما لا تصمد:
+ *
+ *   • **الكلفة** لم تكن في طول السلسلة بل في **قراءة التخزين داخل الحلقة**:
+ *     `getDayBaseTarget` كانت تُحلّل خريطة `nutritionLogs` كاملةً في كل خطوة،
+ *     و`consumedCalories` تقرأ الدفتر كاملًا في كل خطوة. الحلّ رفع القراءتين
+ *     خارج الحلقة (`readOnce` أدناه) — فصارت الخطوة بحثًا في خريطة محمّلة،
+ *     وسقط مبرّر القصّ من أصله.
+ *   • **«يتلاشى عمليًّا»** وصفٌ للحالة الشائعة لا ضمانٌ لأيّ حالة. مستخدم
+ *     يتجاوز هدفه خمسة عشر يومًا متتاليًا كان خصمه يتغيّر لأنّ عدّادًا بلغ ١٤،
+ *     **بلا أن يُعرض له ذلك في أيّ سطح** — وهو بعينه «قاعدة منتج غير مشروحة
+ *     يختفي فيها الترحيل بمرور الأيام».
+ *
+ * البديل ليس رقمًا أكبر بل **حدّ مشتقّ من البيانات نفسها**: السلسلة تبدأ من
+ * أوّل يوم يُثبَت أن خصمه صفر **مهما كان ما قبله** (`chainAnchor`)، فتعطي
+ * **نفس نتيجة المشي غير المحدود بالضبط** بلا حافّة مخترَعة. والحدّ الأقصى
+ * الطبيعي هو `enabledAt`: الميزة لا تصل إلى ما قبل يوم تشغيلها أصلًا.
  */
-export const CARRYOVER_CHAIN_DAYS = 14
+export const CARRYOVER_CHAIN_WINDOW_REMOVED = true
 
 /**
  * ⚠️ **قرار منتج معزول — العجز لا يُرحَّل في هذه النسخة.**
@@ -191,9 +205,65 @@ interface ChainOptions {
 
 const roundCals = (n: number): number => Math.round(n)
 
-/** سعرات يوم مستهلكة فعلًا — من نفس مصدر إحصاء اليوم الواحد، لا حساب ثانٍ. */
-function consumedCalories(date: string): number {
-  return roundCals(getDayNutritionStat(date).totals.calories)
+/**
+ * قراءة واحدة لكل مصدر، تُعاد استخدامها طوال السلسلة.
+ *
+ * هذا هو **إصلاح الكلفة الحقيقي** الذي كانت نافذة الـ١٤ يومًا تخفيه:
+ * `getNutritionLog` و`getDayNutritionStat` كلٌّ منهما يقرأ تخزينه ويحلّله
+ * **كاملًا**، فالمشي يومًا بيوم كان يعيد التحليل مرّة لكل يوم. برفعهما هنا
+ * صارت كلفة السلسلة قراءتين ثابتتين + بحثًا في خريطة لكل يوم، فلم يبقَ سبب
+ * لقصّ السلسلة برقم.
+ */
+interface ChainReads {
+  baseTargetOf: (date: string) => number | null
+  consumedOf: (date: string) => number
+}
+
+function readOnce(): ChainReads {
+  let logs: Record<string, { baseTargetCalories?: number } | undefined> = {}
+  try {
+    logs = getNutritionLogs() as typeof logs
+  } catch {
+    /* تخزين تالف ⇒ لا أهداف مسجَّلة ⇒ لا ترحيل (صدق لا اختراع) */
+  }
+  let days: DayEntriesMap = {}
+  try {
+    days = ownerNutritionDays()
+  } catch {
+    /* دفتر تالف ⇒ المجاميع القانونية وحدها عبر getDayNutritionStat */
+  }
+  return {
+    baseTargetOf: (date) => {
+      const v = logs[date]?.baseTargetCalories
+      return typeof v === 'number' && Number.isFinite(v) && v > 0 ? Math.round(v) : null
+    },
+    consumedOf: (date) => roundCals(getDayNutritionStat(date, days).totals.calories),
+  }
+}
+
+/**
+ * أوّل يوم في السلسلة الذي **يُثبَت** أن خصمه الخارج صفر مهما كان ما قبله.
+ *
+ * ═══ لماذا هذا صحيح تمامًا (لا تقريبًا) ═══
+ * الخصم الداخل `carry` سالبٌ أو صفر دائمًا، والهدف المعدَّل
+ * `effective = max(floor, base + carry)` لذلك **لا ينزل تحت الأرضية أبدًا**.
+ * فإذا كان مستهلَك يومٍ ≤ الأرضية، فإن
+ * `surplus = consumed − effective ≤ consumed − floor ≤ 0`
+ * ⇒ خصمه الخارج صفر **أيًّا كان الداخل**. وكذلك يومٌ بلا هدف أساسي مسجَّل:
+ * الشيفرة تصفّر عنده صراحةً. فكلا الشرطين **مستقلّ عن الماضي**، ومن ثمّ يصحّ
+ * بدء المشي من بعده بخصم صفر — والنتيجة **مطابقة** لمشيٍ غير محدود من البداية.
+ *
+ * وإن لم يوجد أيّ كاسر حتى `enabledAt`، فالبداية هي `enabledAt` نفسه: الميزة
+ * لا أثر رجعي لها، فما قبلها صفر بحكم القاعدة لا بحكم نافذة.
+ */
+function chainAnchor(date: string, enabledAt: string, floor: number, reads: ChainReads): string {
+  let cursor = shiftDayStamp(date, -1)
+  while (cursor >= enabledAt) {
+    if (reads.baseTargetOf(cursor) === null) return shiftDayStamp(cursor, 1)
+    if (reads.consumedOf(cursor) <= floor) return shiftDayStamp(cursor, 1)
+    cursor = shiftDayStamp(cursor, -1)
+  }
+  return enabledAt
 }
 
 /**
@@ -224,9 +294,11 @@ export function computeDayTargets({ base, date, settings, gender }: ChainOptions
   // يوم قبل سريان الميزة ⇒ خارج نطاقها.
   if (date < s.enabledAt) return off
 
-  // نقطة البداية: الأبعد بين بداية السريان وحافّة النافذة.
-  const windowStart = shiftDayStamp(date, -CARRYOVER_CHAIN_DAYS)
-  let cursor = s.enabledAt > windowStart ? s.enabledAt : windowStart
+  // قراءتان ثابتتان تخدمان السلسلة كلّها (انظر `readOnce`).
+  const reads = readOnce()
+
+  // نقطة البداية **مشتقّة من البيانات لا من رقم**: أوّل يوم خصمه صفر يقينًا.
+  let cursor = chainAnchor(date, s.enabledAt, floor, reads)
 
   // خصم اليوم الجاري في المشي — أوّل يوم في السلسلة يبدأ بلا خصم (لا أثر رجعي).
   let carry = 0
@@ -235,7 +307,7 @@ export function computeDayTargets({ base, date, settings, gender }: ChainOptions
 
   while (cursor < date) {
     // هدف يوم المصدر الأساسي **كما كان وقتها**؛ غيابه يقطع السلسلة بصدق.
-    const sourceBase = getDayBaseTarget(cursor)
+    const sourceBase = reads.baseTargetOf(cursor)
     if (sourceBase === null) {
       carry = 0
       sourceDate = null
@@ -244,7 +316,7 @@ export function computeDayTargets({ base, date, settings, gender }: ChainOptions
       continue
     }
     const sourceEffective = Math.max(floor, sourceBase + carry)
-    const surplus = consumedCalories(cursor) - sourceEffective
+    const surplus = reads.consumedOf(cursor) - sourceEffective
     if (surplus > 0) {
       carry = -surplus
       sourceDate = cursor

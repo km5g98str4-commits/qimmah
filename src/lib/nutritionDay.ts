@@ -10,9 +10,13 @@
 // (سجلّ + مجاميع + ماء + حذف + تعديل كمية) أيًّا كان اليوم. الشاشة لا تعرف —
 // ولا تحتاج أن تعرف — من أين جاء اليوم.
 //
+// ═══ الإضافة للماضي — الضلع الذي اكتمل ═══
+// كانت هذه الطبقة تقرأ الماضي وتعدّله وتحذف منه ولا تضيف إليه، فمن نسي غداء
+// أمس لم يكن أمامه إلا أن يسجّله على اليوم — أي أن يفسد يومين ليصلح واحدًا.
+// الآن `addLog` مؤرَّخة مثل أختيها وتمرّ على **نفس** كاتب `addEntryToDay`
+// (المتجر الحيّ لليوم · `persistPastDay` للماضي)، فالثلاثة على نموذج واحد.
+//
 // ═══ ما لا تفعله هذه الطبقة ═══
-//   • **لا تكتب في الماضي طعامًا جديدًا.** الإضافة تقع على اليوم الحالي وحده،
-//     وهذا معلَن في الشاشة بسبب مكتوب لا بزرّ مطفأ صامت.
 //   • **لا تخترع تفصيلًا ليوم لا تفصيل له.** اليوم الأقدم من الدفتر يعود
 //     بمجاميعه موسومة (`legacyTotals`) وسجلّه فارغ — لا أصناف مُلفَّقة.
 
@@ -21,11 +25,13 @@ import { getDayStamp } from '@/lib/today'
 import { getWaterLogs } from '@/lib/historyStore'
 import {
   logTotals,
+  toCanonical,
   useNutritionToday,
   type LoggedFood,
   type LogTotals,
 } from '@/lib/nutritionTracking'
 import {
+  addEntryToDay,
   editEntry,
   getDayEntries,
   getDayNutritionStat,
@@ -53,8 +59,8 @@ export interface NutritionDay {
   legacyTotals: LegacyDayTotals | null
   /** هل لليوم أي بيانات إطلاقًا (تفصيل أو مجاميع أو ماء)؟ */
   hasData: boolean
-  /** الإضافة متاحة على اليوم الحالي وحده. */
-  canAdd: boolean
+  /** يضيف صنفًا **لليوم المعروض** لا لليوم الحالي. */
+  addLog: (entry: Omit<LoggedFood, 'id'> & { id?: string }) => boolean
   removeLog: (id: string) => boolean
   updateLogQuantity: (id: string, value: number, unit: 'g' | 'serving') => boolean
 }
@@ -125,6 +131,16 @@ export function useNutritionDay(date: string): NutritionDay {
     [bump],
   )
 
+  const addPast = useCallback(
+    (entry: Omit<LoggedFood, 'id'> & { id?: string }) => {
+      // نفس التحويل الذي يستعمله مسار اليوم — فلا تفترق تسمية ولا وجبة افتراضية.
+      const result = addEntryToDay(date, toCanonical({ ...entry, id: entry.id ?? '' }))
+      if (result.status === 'ok') bump()
+      return result.status === 'ok'
+    },
+    [date, bump],
+  )
+
   const updatePast = useCallback(
     (id: string, value: number, unit: 'g' | 'serving') => {
       if (!Number.isFinite(value) || value <= 0) return false
@@ -144,7 +160,7 @@ export function useNutritionDay(date: string): NutritionDay {
       waterMl: today.state.waterMl,
       legacyTotals: null,
       hasData: today.state.log.length > 0 || today.state.waterMl > 0,
-      canAdd: true,
+      addLog: today.addLog,
       removeLog: today.removeLog,
       updateLogQuantity: today.updateLogQuantity,
     }
@@ -158,7 +174,7 @@ export function useNutritionDay(date: string): NutritionDay {
     waterMl: past.waterMl,
     legacyTotals: past.legacyTotals,
     hasData: past.hasData,
-    canAdd: false,
+    addLog: addPast,
     removeLog: removePast,
     updateLogQuantity: updatePast,
   }

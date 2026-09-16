@@ -6,7 +6,7 @@ import { getAppCatalog, isOffDerived } from '@/lib/food/catalog/appCatalog'
 import type { RankedHit } from '@/lib/food/catalog/rank'
 import { mergeUnified, rankCurated, rankPackaged } from '@/lib/food/unifiedSearch'
 import { dataAttributionStrings } from '@/i18n/dict/dataAttribution'
-import { useNutritionToday, type MealSlot } from '@/lib/nutritionTracking'
+import { useNutritionToday, type LoggedFood, type MealSlot } from '@/lib/nutritionTracking'
 import { NUM_LIMITS, parseSafeNumber, sanitizeNumericInput } from '@/lib/validation'
 import { getStrings } from '@/config/strings'
 import { nutritionScreenStrings } from '@/i18n/dict/nutritionScreen'
@@ -60,6 +60,16 @@ interface QuickMealLoggerProps {
   embedded?: boolean
   /** يُستدعى بعد إضافة عنصر للسجل (لإغلاق اللوحة في الوضع المضمّن). */
   onLogged?: () => void
+  /**
+   * كاتب مؤرَّخ يحلّ محلّ كاتب اليوم — تمرّره شاشة التغذية من `useNutritionDay`
+   * حين يكون المعروض يومًا ماضيًا.
+   *
+   * **نقطة الحقن واحدة عمدًا.** مسارات الإضافة الثلاث في هذا المكوّن (المكتبة ·
+   * اليدوي · «أكلاتي») تنادي `addLog` وحدها، فحقن الكاتب هنا يجعلها كلّها
+   * مؤرَّخة دفعةً واحدة. البديل — تمرير `date` وتفريع كل مسار عليه — هو بعينه
+   * «التنفيذ الثاني» الذي تمنعه هذه الموجة.
+   */
+  addLog?: (entry: Omit<LoggedFood, 'id'> & { id?: string }) => boolean
 }
 
 /** [FOOD-UX-001] «أكلاتي» تبويب ثالث: الأطعمة المخصّصة المحفوظة تُسجَّل وتُعدَّل وتُحذف منه. */
@@ -75,10 +85,12 @@ function round(n: number): number {
 }
 
 /** مسجّل وجبات سريع — بحث في قاعدة الأطعمة أو إضافة سعرات/بروتين مخصّصة، مع تقدّم يومي. */
-export function QuickMealLogger({ lang, targetCalories, targetProtein, showTargets = true, defaultMeal, embedded = false, onLogged }: QuickMealLoggerProps) {
+export function QuickMealLogger({ lang, targetCalories, targetProtein, showTargets = true, defaultMeal, embedded = false, onLogged, addLog: addLogProp }: QuickMealLoggerProps) {
   const t = getStrings(lang).nutrition
   const d = nutritionScreenStrings[lang]
-  const { state, totals, addLog, removeLog: rawRemoveLog } = useNutritionToday()
+  const { state, totals, addLog: addToday, removeLog: rawRemoveLog } = useNutritionToday()
+  // الهوك يُستدعى دائمًا (قواعد الهوكس)؛ الاختيار بعده.
+  const addLog = addLogProp ?? addToday
   const { guard } = useAccess()
 
   const [open, setOpen] = useState(embedded)

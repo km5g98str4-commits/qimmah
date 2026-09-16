@@ -87,6 +87,7 @@ export interface HistoryError {
     | 'quantity-unknown'
     | 'invalid-manual-food'
     | 'nothing-to-copy'
+    | 'invalid-day'
   messageAr: string
   messageEn: string
 }
@@ -95,7 +96,7 @@ export type EntryResult =
   | { status: 'ok'; entry: NutritionEntry }
   | { status: 'rejected'; errors: HistoryError[] }
 
-type DayEntriesMap = Record<string, NutritionEntry[]>
+export type DayEntriesMap = Record<string, NutritionEntry[]>
 type LedgerRecord = Record<string, DayEntriesMap>
 
 const MEAL_SLOTS: ReadonlySet<string> = new Set(['breakfast', 'lunch', 'dinner', 'snack'])
@@ -368,6 +369,17 @@ export function getDayEntries(date: string): NutritionEntry[] {
   return ownerDays(readLedger(), currentOwner())[date] ?? []
 }
 
+/**
+ * أيام المالك الحالي — قراءة **واحدة** يعيد المستدعي استخدامها.
+ *
+ * وُجدت لأجل سلسلة الترحيل: `getDayNutritionStat` تقبل الخريطة جاهزةً، فبتمريرها
+ * تصير كلفة اليوم بحثًا لا إعادة تحليل للتخزين كلّه (انظر `nutritionCarryover.readOnce`).
+ */
+export function ownerNutritionDays(): DayEntriesMap {
+  ensureNutritionHistoryInit()
+  return ownerDays(readLedger(), currentOwner())
+}
+
 /** كل أيام مالكٍ (للنقل/التصدير) — تُستخدم من سجلّ portability بمعرّف صريح. */
 export function loadLedgerDays(userId: string | null | undefined): DayEntriesMap {
   return ownerDays(readLedger(), ownerKey(userId))
@@ -624,6 +636,58 @@ export function removeEntry(id: string): { status: 'ok'; date: string } | { stat
   }
   persistPastDay(date, entries.filter((e) => e.id !== id))
   return { status: 'ok', date }
+}
+
+/**
+ * يضيف صنفًا إلى يومٍ **بتاريخه** — اليوم الحالي أو يومًا ماضيًا، بمسار واحد.
+ *
+ * ═══ لماذا هنا، ولماذا ليست تنفيذًا ثانيًا ═══
+ * `editEntry` و`removeEntry` تفرّقان بالفعل بين «قيد اليوم ⇒ المتجر الحيّ» و«قيد
+ * ماضٍ ⇒ `persistPastDay`». الإضافة كانت الضلع الناقص الوحيد: لا لأنّ الكتابة في
+ * الماضي غير آمنة، بل لأنّ `addFoodToDay` تختم بـ`getDayStamp()` داخليًّا فلا
+ * تعرف يومًا غيره. فهذه الدالة **لا تبني كاتبًا ثالثًا**: تختار بين الكاتبين
+ * القائمين بنفس شرط أختيها، فتصير الثلاثة (إضافة · تعديل · حذف) على نموذج
+ * مؤرَّخ واحد.
+ *
+ * والحارس محفوظ في الحالتين: `addFoodToDay` تستدعي `assertPaid('nutrition.addFood')`،
+ * و`persistPastDay` تستدعي **الحارس نفسه بالاسم نفسه**. فلا باب أضعف للماضي.
+ *
+ * ═══ سلامة التاريخ ═══
+ * يوم في المستقبل يُرفض (`invalid-day`) — لا يُسجَّل طعام لم يُؤكل بعد. ويوم أقدم
+ * من حدّ الاحتفاظ يُرفض كذلك: الكتابة فيه ستُقصّ عند أوّل تقليم، فالرفض الصريح
+ * أصدق من قبول يختفي لاحقًا بلا خبر.
+ */
+export function addEntryToDay(
+  date: string,
+  food: Omit<LoggedFood, 'id'> & { id?: string },
+): EntryResult {
+  ensureNutritionHistoryInit()
+  const today = getDayStamp()
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || date > today || date < stampAddDays(today, -HISTORY_RETENTION_DAYS)) {
+    return rejected(
+      err(
+        'invalid-day',
+        'لا يمكن التسجيل في هذا اليوم — إمّا أنه لم يجئ بعد أو أنه خارج مدّة الاحتفاظ.',
+        'Cannot log to that day — it is either in the future or beyond the retention window.',
+      ),
+    )
+  }
+
+  // `||` لا `??` عمدًا: المستدعي قد يمرّر `''` (سلسلة فارغة) لا `undefined`،
+  // و`??` كانت ستمرّرها فيولد قيدٌ بمعرّف فارغ لا يمكن حذفه ولا تعديله لاحقًا.
+  const item: LoggedFood = { ...food, id: food.id || freshEntryId() }
+
+  // اليوم الحالي ⇒ المتجر الحيّ هو الكاتب الواحد (يكتب الدفتر والمجاميع عبر persist).
+  if (date === today) {
+    addFoodToDay(item)
+    const entry = getDayEntries(date).find((e) => e.id === item.id)
+    return entry ? { status: 'ok', entry } : rejected(entryNotFound(item.id))
+  }
+
+  // يوم ماضٍ ⇒ نفس كاتب التعديل/الحذف، فلا مسار ثالث.
+  const entry = entryFromLoggedFood(item, undefined)
+  persistPastDay(date, [...getDayEntries(date), entry])
+  return { status: 'ok', entry }
 }
 
 // ── نسخ وجبة يوم سابق إلى اليوم ───────────────────────────────────────────────
